@@ -3,7 +3,7 @@
   "version": "1.6.0",
   "build": "10",
   "date": "2026-11-02",
-  "baseline": "macOS SwiftUI + AppKit native/; excludes Windows/Avalonia and user data",
+  "baseline": "Space macOS native source and current software documentation",
   "files": [
     {
       "path": "native/Package.swift",
@@ -12,8 +12,8 @@
     },
     {
       "path": "native/README.md",
-      "bytes": 23477,
-      "sha256": "c55820dbb477d79e082657c8056fdc6803f69d18a0ca0904eced8fc00bd43f85"
+      "bytes": 2121,
+      "sha256": "92aa70ec02453eb85e4b319ca4ae268e0e110a57efac6eb475c1915bc3d94a4e"
     },
     {
       "path": "native/Resources/Info.plist",

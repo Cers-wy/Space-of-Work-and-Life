@@ -6,5 +6,6 @@
   "date": "2026-11-02",
   "nativeVersion": "1.6.0",
   "nativeBuild": 10,
-  "sourceFiles": 45
+  "sourceFiles": 45,
+  "documentation": "Current software behavior, UI and effects"
 }

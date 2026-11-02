@@ -23,7 +23,8 @@ def main():
             assert digest((ROOT/item['path']).read_bytes()) == item['sha256'], item['path']
     docs = sorted((ROOT/'docs').glob('*.md'))
     assert len(docs) == 8
-    for doc in docs:
+    assert not (ROOT/'history').exists()
+    for doc in list(ROOT.glob('*.md')) + docs + [ROOT/'native/README.md', ROOT/'fixtures/README.md']:
         for target in re.findall(r'\]\(([^)]+)\)', doc.read_text()):
             if target.startswith(('http:', 'https:', '#')):
                 continue
@@ -62,7 +63,7 @@ def main():
     assert envelope['format'] == 1 and len(base64.b64decode(envelope['sealed'])) > 28
     clean = facts['testSPCode'].replace('-', '')[2:]
     assert digest(clean.encode()) == facts['spReceiptID']
-    print('PASS: 45 original source hashes, 8 linked docs, 190 continuous acceptance cases, JSON V1-V6, synthetic SQLite integrity, portable fingerprint, packet structure.')
+    print('PASS: 45 source/resource/document hashes, 8 linked docs, 190 continuous acceptance cases, JSON V1-V6, synthetic SQLite integrity, portable fingerprint, packet structure.')
     print('Cryptographic decryption/RTFD round-trip additionally checked by GenerateInteropFixtures.swift on macOS; this script does not prove a new platform implementation.')
 
 if __name__ == '__main__':

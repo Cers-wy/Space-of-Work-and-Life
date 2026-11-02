@@ -3,10 +3,10 @@
   "nativeVersion": "1.6.0",
   "nativeBuild": 10,
   "createdDate": "2026-11-02",
-  "sourceCommit": "1b07c70dbfdddbb8fb3393937badce91ed6413aa",
   "nativeFiles": 45,
   "documents": 8,
   "acceptanceCases": 190,
+  "documentationStyle": "current-state",
   "files": [
     {
       "path": ".gitignore",
@@ -15,63 +15,63 @@
     },
     {
       "path": "BACKUP-RECEIPT.json",
-      "bytes": 296,
-      "sha256": "de3eff7f288bd565a376aaa837f34639623b6ca359f7f30fc8b4386cd845c939"
+      "bytes": 360,
+      "sha256": "7ac4a6621440e66b8313e67f028d7b7569365f3a8c3366e830af751a18ccaff0"
     },
     {
       "path": "README.md",
-      "bytes": 2034,
-      "sha256": "d2b2d414e921d7aed2d0c491615a6c969b5ae8064ae5f3ac9be4cbed3fec2590"
+      "bytes": 2951,
+      "sha256": "3adb75fc952aabf7204f354bf30216331bd936720586a8976b89939a43e079af"
     },
     {
       "path": "SOURCE-MANIFEST.json",
-      "bytes": 8148,
-      "sha256": "03b9ddb907d66b37ebccbe008be4c6f138064e6167cd7f180835d30b39af0ba3"
+      "bytes": 8136,
+      "sha256": "4f0d108d53c8c18047af318f5bfbc86834d40261aad8182508e5bcac4a2f8e79"
     },
     {
       "path": "VALIDATION.md",
-      "bytes": 1892,
-      "sha256": "6f277130bc61f8fe00583eddbed4d7abf1030d39eea7a847a1b1a8fb380d9c22"
+      "bytes": 1036,
+      "sha256": "84fce33468a0a8271ae7a08ab16a330aec371e7a9b456437bff8ae500b35a76b"
     },
     {
-      "path": "docs/00-阅读指南与复刻基线.md",
-      "bytes": 4160,
-      "sha256": "010e5d55143342c4481474ead8514c81afe4054da24e907145a73d880b8e95c1"
+      "path": "docs/00-阅读指南.md",
+      "bytes": 2822,
+      "sha256": "9e19c275e7a6f0836cdab753aaf9f464810db93f361e0f7355062d9e9e043ba8"
     },
     {
-      "path": "docs/01-完整功能需求PRD.md",
-      "bytes": 35718,
-      "sha256": "9e6795ac080b809dc4addf52e1e1639abffb4c61746bafc7f4b812e3b1b87549"
+      "path": "docs/01-当前功能说明.md",
+      "bytes": 34646,
+      "sha256": "fdeab236cbaa028bf8052f043091db28907b3d95e828e14973288a89431fbbbc"
     },
     {
-      "path": "docs/02-页面布局与视觉交互规范.md",
-      "bytes": 12629,
-      "sha256": "eca4be5ef987dcbc2e80f59436e72a4901e0727d8754daea5540082020f798f8"
+      "path": "docs/02-界面与特效说明.md",
+      "bytes": 14225,
+      "sha256": "2add4a17405d77034ab5de10686b43eeef71ac1358ece7ea471c8a418e7a566a"
     },
     {
       "path": "docs/03-数据结构与兼容协议.md",
-      "bytes": 12944,
-      "sha256": "1a138b92701cc1c09bfe3ed086a141bdfc52289fdac8f8e4b8c7d9ba9b3cf0ac"
+      "bytes": 12979,
+      "sha256": "7d229a100357bb29d4a55171739072a50638eaf7e5dd4b90479449332847b0d5"
     },
     {
       "path": "docs/04-同步与加密实现要求.md",
-      "bytes": 13948,
-      "sha256": "9c0e1e2c898e785d91d99c0dbd570d9878593a70136243e2d2d3f33dda98bf75"
+      "bytes": 13766,
+      "sha256": "42c1ed1f8c74e4c90297e84b075ae0864bc7326fbf68fd445c1d87403da77ec3"
     },
     {
       "path": "docs/05-验收用例.md",
-      "bytes": 33218,
-      "sha256": "a1305b5456e33e132c90201937851004e68a4f503fcd0cd705d81805b4fedf10"
+      "bytes": 33100,
+      "sha256": "114a9186f57ff2d02be8a208fde83f92037fce948ab61158bbdcd21ff2e1ea48"
     },
     {
-      "path": "docs/06-跨平台开发交接与任务拆分.md",
-      "bytes": 9386,
-      "sha256": "b334cae2ac96215e8ed8d69fde9af2f1c9894ddfcd8d6828412909f5941c8ae7"
+      "path": "docs/06-跨平台开发说明.md",
+      "bytes": 6419,
+      "sha256": "05d6e353048d7dc45165b90484c99d33714b62c71eaf78b976bd6f36085e5da4"
     },
     {
-      "path": "docs/07-源码索引与历史取舍.md",
-      "bytes": 42355,
-      "sha256": "ec257885062c2f21642d24f9c4085a5b2107f289d36844c3083570ebd9755150"
+      "path": "docs/07-源码与测试索引.md",
+      "bytes": 40070,
+      "sha256": "44f103f4e8f42b901eb4be573ac94f405694bdfd7718ceaa5fe515e494f6c857"
     },
     {
       "path": "fixtures/01-json-v1.json",
@@ -134,79 +134,14 @@
       "sha256": "e2cceeedd649d999f3bcea1a6dcdc87079e9ab50aaff29dbb1b779d41f896261"
     },
     {
-      "path": "history/native-validation.md",
-      "bytes": 4227,
-      "sha256": "a01a170291fc713e526dc757727456a2e559036d6a60490a0ea3a97512642606"
-    },
-    {
-      "path": "history/space-attachments-validation.md",
-      "bytes": 2502,
-      "sha256": "800060f19252deaf73b79534c1f24a0c39b3df836442d1e8b548ceb8af368900"
-    },
-    {
-      "path": "history/space-dmg-validation.md",
-      "bytes": 535,
-      "sha256": "fdd5879da7ed38a6d53e402cc24337bcaf4782fd9f7f8e73649fa019d5ca0b37"
-    },
-    {
-      "path": "history/space-fix2-validation.md",
-      "bytes": 1982,
-      "sha256": "20267358d14efd316f5e82f1294953a7b19b3432b1d850d3e6a9547fe390c8db"
-    },
-    {
-      "path": "history/space-fix3-validation.md",
-      "bytes": 3286,
-      "sha256": "0d2d90c22fd461a175ea90ed4ac9825cdc9a68961c545dd77095c85edb345f1d"
-    },
-    {
-      "path": "history/space-github-sync-validation.md",
-      "bytes": 5165,
-      "sha256": "0d26e21b8947925b05398f21305b64f433f9e0306d4d5780059de4c6d7d887da"
-    },
-    {
-      "path": "history/space-navigation-update.md",
-      "bytes": 699,
-      "sha256": "7efcaef279ac4ef4983b66c1a61b4b178fcdc0499e138b1e211bd951f7b17aab"
-    },
-    {
-      "path": "history/space-performance-validation.md",
-      "bytes": 6401,
-      "sha256": "4ee1e4206340bece54e3a060a8f7d9d5020c1ba2dacee5f3ec53bfc8438480a4"
-    },
-    {
-      "path": "history/space-scheduling-validation.md",
-      "bytes": 4058,
-      "sha256": "1b43048bc045c3cabfa703e7d3fcb4d2cfaca9c2657119bd54172a6d4b601e92"
-    },
-    {
-      "path": "history/space-ui-iteration-prd.md",
-      "bytes": 2523,
-      "sha256": "a81964806a9f70a9402a91b25d2bcbce64466e925a9ac9fd96a3e72f54ff6ffa"
-    },
-    {
-      "path": "history/space-ui-iteration-validation.md",
-      "bytes": 3176,
-      "sha256": "679e0376dc3a0d56fdef50455959455623187d6991d0cdf8953837534194faeb"
-    },
-    {
-      "path": "history/space-v1.2-validation.md",
-      "bytes": 5268,
-      "sha256": "68cb7fd7ca7de8392e0b2ea960e6148d0bb79738a9888f6d1d4c0406608ac218"
-    },
-    {
-      "path": "history/space-validation.md",
-      "bytes": 3690,
-      "sha256": "f677ea6f802c0ccaaef13d2ab9aa5187fe94074aa958b9239eb5769da0fb9927"
-    },
-    {
       "path": "native/Package.swift",
       "bytes": 585,
       "sha256": "5bf9d9dbe2ae4e988c66a3b26c14938bfb408f65ebac410eca665c16aa927e8d"
     },
     {
       "path": "native/README.md",
-      "bytes": 23477,
-      "sha256": "c55820dbb477d79e082657c8056fdc6803f69d18a0ca0904eced8fc00bd43f85"
+      "bytes": 2121,
+      "sha256": "92aa70ec02453eb85e4b319ca4ae268e0e110a57efac6eb475c1915bc3d94a4e"
     },
     {
       "path": "native/Resources/Info.plist",
@@ -429,14 +364,9 @@
       "sha256": "d298ecbe43ddde08a891326aa9a53ffa1bf8eb47ff934c931bbf0c12555ce16b"
     },
     {
-      "path": "tools/build_acceptance_document.py",
-      "bytes": 25598,
-      "sha256": "e1a1c9c6c3fec8ce009ded9d2abf0a00b78539d36dce85f7672119786205e077"
-    },
-    {
       "path": "tools/verify_bundle.py",
-      "bytes": 3637,
-      "sha256": "600b1d6f7feb628df33a8b2f8373de37c215084c787c2a85a519b3e8ce8aee37"
+      "bytes": 3768,
+      "sha256": "d0b543bb9e8fdb6a6466e682863775fa1869a557d3da39851a0c66da2e9012f1"
     }
   ]
 }
