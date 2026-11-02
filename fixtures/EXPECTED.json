@@ -1,0 +1,15 @@
+{
+  "fixedNow" : "2026-11-02T00:00:00.000Z",
+  "generatedBy" : "actual OrbitCore 1.6.0 build10 + AppKit",
+  "githubFingerprint" : "df2b22f8084ea928abf31cb8633a42a157639ebfd9993dd9492615e6ad40a383",
+  "jsonV6AttachmentCount" : 2,
+  "jsonV6TaskCount" : 1,
+  "spExpiresAt" : "2026-11-09T00:00:00.000Z",
+  "spReceiptID" : "20aff5a341131d58c07a76e062d895e0968727664b8769b79b5be4c7b80f5ff7",
+  "sqliteBytes" : 57344,
+  "sqliteSHA256" : "a0ee74de6699b319a72a075c50a99f7b1041cbfd501c53e9b2e38df21078dd88",
+  "syntheticOnly" : true,
+  "testRecoveryKeyBase64" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "testSPCode" : "SP-0011-2233-4455-6677-8899-AABB-CCDD-EEFF",
+  "warning" : "Public deterministic test key/code. Never use for real backups. SP vector must be verified at fixedNow because it expires."
+}
