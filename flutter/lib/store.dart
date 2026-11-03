@@ -1,0 +1,480 @@
+import 'dart:async';
+import 'package:flutter/widgets.dart';
+import 'core/models.dart';
+import 'core/repository.dart';
+import 'host.dart';
+
+class SpaceStore extends ChangeNotifier {
+  final SpaceRepository repository;
+  SpaceState state = SpaceState();
+  TaskQuery query = TaskQuery();
+  SpaceState? _undo;
+  List<SpaceTask> visible = const [];
+  Map<String, List<SpaceTask>> grouped = {};
+  bool busy = false, loaded = false, modal = false;
+  String? error, notice;
+  String today = dayString(beijingDay());
+  Timer? _noticeTimer, _dayTimer;
+  final searchRequested = ValueNotifier<int>(0);
+  SpaceStore(this.repository);
+  String get appearance =>
+      ['system', 'light', 'dark'].contains(state.settings['appearance'])
+      ? state.settings['appearance']!
+      : state.settings.containsKey('dark')
+      ? (state.settings['dark'] == 'true' ? 'dark' : 'light')
+      : 'system';
+  bool get dark => appearance == 'system'
+      ? WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+            Brightness.dark
+      : appearance == 'dark';
+  Future<void> updateSystemAppearance() async {
+    if (appearance != 'system') return;
+    notifyListeners();
+    await updateNativeAppearance();
+  }
+
+  Future<void> updateNativeAppearance() =>
+      DesktopHost.appearance(dark, system: appearance == 'system');
+  bool get navCollapsed => state.settings.containsKey('navCollapsed')
+      ? state.settings['navCollapsed'] == 'true'
+      : true;
+  bool get overviewCollapsed => state.settings['overviewCollapsed'] == 'true';
+  String get view =>
+      [
+        'board',
+        'list',
+        'gantt',
+        'calendar',
+      ].contains(state.settings['viewMode'])
+      ? state.settings['viewMode']!
+      : 'board';
+  String get calendarMode =>
+      ['day', 'week', 'month'].contains(state.settings['calendarMode'])
+      ? state.settings['calendarMode']!
+      : 'month';
+  bool get canUndo => _undo != null && !busy && loaded && !modal;
+  Future<void> initialize() async {
+    await reload();
+    _dayTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => refreshDay(),
+    );
+  }
+
+  Future<void> reload() async {
+    if (busy) return;
+    busy = true;
+    try {
+      state = await repository.load();
+      loaded = true;
+      error = null;
+      _undo = null;
+    } catch (e) {
+      error = '无法读取本地任务：${readable(e)}';
+      loaded = false;
+    }
+    busy = false;
+    refreshQuery();
+    await updateNativeAppearance();
+  }
+
+  void refreshDay() {
+    final current = dayString(beijingDay());
+    if (current != today) {
+      today = current;
+      refreshQuery();
+    }
+  }
+
+  void refreshQuery() {
+    visible = query.apply(state, today);
+    grouped = {for (final s in state.displayStatuses) s: <SpaceTask>[]};
+    for (final t in visible) {
+      grouped[t.status]?.add(t);
+    }
+    notifyListeners();
+  }
+
+  void resetQuery() {
+    query = TaskQuery();
+    refreshQuery();
+  }
+
+  void message(String text) {
+    notice = text;
+    _noticeTimer?.cancel();
+    _noticeTimer = Timer(const Duration(seconds: 6), () {
+      notice = null;
+      notifyListeners();
+    });
+    notifyListeners();
+  }
+
+  static String readable(Object e) => e is FormatException
+      ? e.message
+      : e is StateError
+      ? e.message
+      : '操作失败，请检查文件权限或连接后重试';
+  Future<bool> commit(
+    SpaceState candidate,
+    String message, {
+    bool undo = true,
+  }) async {
+    if (busy || !loaded) return false;
+    busy = true;
+    error = null;
+    notifyListeners();
+    try {
+      final old = state;
+      state = await repository.save(candidate);
+      if (undo) _undo = old;
+      busy = false;
+      refreshQuery();
+      this.message(message);
+      return true;
+    } catch (e) {
+      error = readable(e);
+      busy = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> preference(String key, String value) async {
+    await preferences({
+      key: value,
+      if (key == 'dark') 'appearance': value == 'true' ? 'dark' : 'light',
+    });
+  }
+
+  Future<bool> preferences(Map<String, String> values) async {
+    if (busy || !loaded) return false;
+    busy = true;
+    var saved = false;
+    try {
+      state = await repository.save(
+        state.copy(settings: {...state.settings, ...values}),
+        preferencesOnly: true,
+      );
+      error = null;
+      saved = true;
+    } catch (e) {
+      error = '设置保存失败：${readable(e)}';
+    }
+    busy = false;
+    notifyListeners();
+    if (values.containsKey('appearance') || values.containsKey('dark')) {
+      await updateNativeAppearance();
+    }
+    return saved;
+  }
+
+  Future<void> undo() async {
+    if (!canUndo) return;
+    final previous = _undo!;
+    if (await commit(
+      previous.copy(settings: state.settings),
+      '已撤销最近一次更改',
+      undo: false,
+    )) {
+      _undo = null;
+    }
+    notifyListeners();
+  }
+
+  Future<bool> saveTask(
+    SpaceTask draft, {
+    SpaceTask? initial,
+    String? projectName,
+  }) async {
+    if (busy || !loaded) return false;
+    try {
+      final now = timestamp();
+      final projects = [...state.projects];
+      var task = draft.patch({'title': draft.title.trim(), 'updatedAt': now});
+      if (initial != null) {
+        final current = state.tasks
+            .where((x) => x.id == initial.id)
+            .firstOrNull;
+        if (current == null) invalid('任务已被删除，输入内容已保留');
+        if (current.updatedAt != initial.updatedAt) invalid('任务已被修改，请重新打开后再保存');
+        task = task.patch({
+          'createdAt': current.createdAt,
+          'completedAt': task.status == 'done'
+              ? (current.status == 'done' ? current.completedAt : now)
+              : null,
+        });
+      } else {
+        if (state.disabledStatuses.contains(task.status)) {
+          invalid('不能在停用状态中新建任务');
+        }
+        task = task.patch({
+          'createdAt': now,
+          'completedAt': task.status == 'done' ? now : null,
+        });
+      }
+      if (state.disabledStatuses.contains(task.status) &&
+          task.status != initial?.status) {
+        invalid('不能移入停用状态');
+      }
+      if (projectName != null) {
+        final name = normalizedName(projectName);
+        if (name.isEmpty || name.length > 60 || controls(name)) {
+          invalid('项目名称须为1至60字且无控制字符');
+        }
+        var project = projects
+            .where((p) => p.name.toLowerCase() == name.toLowerCase())
+            .firstOrNull;
+        project ??= Project(uid(), name);
+        if (!projects.any((p) => p.id == project!.id)) projects.add(project);
+        if (project.disabled) invalid('同名项目已停用，请先在项目管理中启用');
+        task = task.patch({'projectID': project.id});
+      }
+      final selectedProject = projects
+          .where((p) => p.id == task.projectID)
+          .firstOrNull;
+      if (selectedProject?.disabled == true &&
+          task.projectID != initial?.projectID) {
+        invalid('不能将任务加入停用项目');
+      }
+      task.validate();
+      final tasks = [...state.tasks];
+      final index = tasks.indexWhere((x) => x.id == task.id);
+      if (index < 0) {
+        tasks.add(task);
+      } else {
+        tasks[index] = task;
+      }
+      return await commit(
+        state.copy(tasks: tasks, projects: projects),
+        initial == null ? '任务已创建' : '任务已保存',
+      );
+    } catch (e) {
+      error = readable(e);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> moveTask(String id, String status) async {
+    final task = state.tasks.where((t) => t.id == id).firstOrNull;
+    if (task == null ||
+        task.status == status ||
+        state.disabledStatuses.contains(status)) {
+      return;
+    }
+    await commit(
+      state.copy(
+        tasks: state.tasks
+            .map((t) => t.id == id ? t.moving(status) : t)
+            .toList(),
+      ),
+      '已移至${statusName(status)}',
+    );
+  }
+
+  Future<bool> deleteTask(String id) => commit(
+    state.copy(tasks: state.tasks.where((t) => t.id != id).toList()),
+    '任务已删除，可撤销',
+  );
+  Future<bool> saveProject(String name, {String? id}) async {
+    try {
+      final n = normalizedName(name);
+      if (n.isEmpty || n.length > 60 || controls(n)) {
+        invalid('项目名称须为1至60字且无控制字符');
+      }
+      if (state.projects.any(
+        (p) => p.id != id && p.name.toLowerCase() == n.toLowerCase(),
+      )) {
+        invalid('项目名称不能重复');
+      }
+      if (id != null && !state.projects.any((p) => p.id == id)) {
+        invalid('项目已被删除');
+      }
+      final projects = id == null
+          ? [...state.projects, Project(uid(), n)]
+          : state.projects
+                .map(
+                  (p) => p.id == id ? Project(id, n, disabled: p.disabled) : p,
+                )
+                .toList();
+      return await commit(
+        state.copy(projects: projects),
+        id == null ? '项目已新建' : '项目名称已更新',
+      );
+    } catch (e) {
+      error = readable(e);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> toggleProject(String id) async {
+    await commit(
+      state.copy(
+        projects: state.projects
+            .map(
+              (p) =>
+                  p.id == id ? Project(p.id, p.name, disabled: !p.disabled) : p,
+            )
+            .toList(),
+      ),
+      '项目状态已更新',
+    );
+  }
+
+  Future<void> deleteProject(String id) async {
+    final ok = await commit(
+      state.copy(
+        projects: state.projects.where((p) => p.id != id).toList(),
+        tasks: state.tasks
+            .map(
+              (t) => t.projectID == id
+                  ? t.patch({'projectID': null, 'updatedAt': timestamp()})
+                  : t,
+            )
+            .toList(),
+      ),
+      '项目已删除，任务已保留，可撤销',
+    );
+    if (ok && query.projectID == id) {
+      query.projectID = null;
+      refreshQuery();
+    }
+  }
+
+  Future<void> addStatus(String name) async {
+    final n = normalizedName(name);
+    try {
+      if (n.isEmpty ||
+          n.length > 20 ||
+          controls(n) ||
+          state.statuses.any(
+            (s) => statusName(s).toLowerCase() == n.toLowerCase(),
+          )) {
+        invalid('状态名称须为1至20字且不能重复');
+      }
+      final statuses = [...state.statuses]
+        ..insert(state.statuses.indexOf('done'), 'custom:$n');
+      await commit(state.copy(statuses: statuses), '状态已添加');
+    } catch (e) {
+      error = readable(e);
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleStatus(String status) async {
+    if (builtins.contains(status)) return;
+    final disabled = [...state.disabledStatuses];
+    if (!disabled.remove(status)) disabled.add(status);
+    await commit(
+      state.copy(disabledStatuses: disabled),
+      '状态已${disabled.contains(status) ? '停用' : '启用'}',
+    );
+  }
+
+  Future<void> deleteStatus(String status, String target) async {
+    if (builtins.contains(status) ||
+        status == target ||
+        state.disabledStatuses.contains(target)) {
+      return;
+    }
+    final success = await commit(
+      state.copy(
+        tasks: state.tasks
+            .map((t) => t.status == status ? t.moving(target) : t)
+            .toList(),
+        statuses: state.statuses.where((s) => s != status).toList(),
+        disabledStatuses: state.disabledStatuses
+            .where((s) => s != status)
+            .toList(),
+      ),
+      '状态已删除，任务已迁移',
+    );
+    if (success && query.status == status) {
+      query.status = null;
+      refreshQuery();
+    }
+  }
+
+  Future<void> reorderStatus(String source, String target) async {
+    if (source == target) return;
+    final order = [...state.statuses];
+    final i = order.indexOf(target);
+    if (i < 0 || !order.remove(source)) return;
+    order.insert(i, source);
+    await commit(state.copy(statuses: order), '状态顺序已保存');
+  }
+
+  Future<bool> applyBackup(SpaceState incoming) async {
+    final settings = {
+      ...incoming.settings,
+      for (final e in state.settings.entries)
+        if (e.key.startsWith('sync.') || e.key.startsWith('github.'))
+          e.key: e.value,
+    };
+    final candidate = incoming.copy(
+      settings: settings,
+      workspaceID: state.workspaceID ?? uid(),
+    );
+    if (loaded) return commit(candidate, '备份已恢复');
+    try {
+      state = await repository.recover(candidate);
+      loaded = true;
+      error = null;
+      refreshQuery();
+      return true;
+    } catch (e) {
+      error = readable(e);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<SpaceState> readBackup(String path) => repository.readExternal(path);
+  @override
+  void dispose() {
+    _noticeTimer?.cancel();
+    _dayTimer?.cancel();
+    searchRequested.dispose();
+    super.dispose();
+  }
+}
+
+SpaceState demoState({int count = 9}) {
+  final today = beijingDay();
+  final now = timestamp();
+  final titles = [
+    '梳理本周工作安排',
+    '完善项目需求说明',
+    '整理接口与数据口径',
+    '校对页面与交互细节',
+    '提交本周工作总结',
+    '预约年度健康检查',
+    '整理书桌与阅读清单',
+    '准备周末出行计划',
+    '完成资料归档',
+  ];
+  final tasks = List.generate(count, (i) {
+    final status = builtins[i % 3];
+    return SpaceTask(
+      id: 'demo-${i.toString().padLeft(6, '0')}',
+      title:
+          titles[i % titles.length] + (i >= titles.length ? ' ${i + 1}' : ''),
+      description: '用于独立复刻验收的合成任务，不包含正式工作数据。',
+      category: categories.keys.elementAt(i % 3),
+      status: status,
+      priority: priorities.keys.elementAt(i % 3),
+      due: i % 4 == 0 ? '' : dayString(today.add(Duration(days: i % 7 - 2))),
+      createdAt: now,
+      updatedAt: now,
+      completedAt: status == 'done' ? now : null,
+      projectID: i % 2 == 0 ? 'demo-project' : null,
+    );
+  });
+  return SpaceState(
+    tasks: tasks,
+    projects: [Project('demo-project', 'Space复刻验收')],
+    workspaceID: uid(),
+  );
+}

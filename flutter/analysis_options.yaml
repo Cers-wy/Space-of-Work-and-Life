@@ -1,0 +1,12 @@
+include: package:flutter_lints/flutter.yaml
+analyzer:
+  errors:
+    avoid_print: ignore
+  exclude:
+    - build/**
+    - windows/**
+    - macos/**
+    - linux/**
+linter:
+  rules:
+    public_member_api_docs: false

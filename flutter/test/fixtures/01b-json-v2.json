@@ -1,0 +1,25 @@
+{
+  "app" : "Space",
+  "exportedAt" : "2026-11-02T00:00:00.000Z",
+  "statuses" : [
+    "todo",
+    "custom:等待反馈",
+    "doing",
+    "done"
+  ],
+  "tasks" : [
+    {
+      "category" : "work",
+      "completedAt" : null,
+      "createdAt" : "2026-11-02T00:00:00.000Z",
+      "description" : "不是个人任务。用于复刻互通测试。",
+      "due" : "",
+      "id" : "fixture-task-1",
+      "priority" : "medium",
+      "status" : "custom:等待反馈",
+      "title" : "合成样本：整理资料",
+      "updatedAt" : "2026-11-02T00:00:00.000Z"
+    }
+  ],
+  "version" : 2
+}

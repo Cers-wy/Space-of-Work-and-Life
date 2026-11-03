@@ -1,0 +1,4 @@
+WARNING|STATIC_WARNING|EXPERIMENTAL_MEMBER_USE|/private/tmp/space-icons-nav-analysis/lib/ui/dialogs.dart|235|9|15|'clipboardConfig' is experimental and could be removed or changed at any time.
+WARNING|STATIC_WARNING|EXPERIMENTAL_MEMBER_USE|/private/tmp/space-icons-nav-analysis/lib/ui/dialogs.dart|235|28|20|'QuillClipboardConfig' is experimental and could be removed or changed at any time.
+WARNING|STATIC_WARNING|EXPERIMENTAL_MEMBER_USE|/private/tmp/space-icons-nav-analysis/lib/ui/dialogs.dart|236|11|16|'onClipboardPaste' is experimental and could be removed or changed at any time.
+INFO|LINT|CURLY_BRACES_IN_FLOW_CONTROL_STRUCTURES|/private/tmp/space-icons-nav-analysis/lib/ui/schedule.dart|132|21|256|Statements in an if should be enclosed in a block.

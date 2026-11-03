@@ -1,0 +1,40 @@
+{
+  "app" : "Space",
+  "disabledStatuses" : [
+    "custom:等待反馈"
+  ],
+  "exportedAt" : "2026-11-02T00:00:00.000Z",
+  "projects" : [
+    {
+      "id" : "fixture-project-1",
+      "name" : "合成示例项目"
+    }
+  ],
+  "settings" : {
+    "dark" : "true",
+    "viewMode" : "calendar"
+  },
+  "statuses" : [
+    "todo",
+    "custom:等待反馈",
+    "doing",
+    "done"
+  ],
+  "tasks" : [
+    {
+      "category" : "work",
+      "completedAt" : null,
+      "createdAt" : "2026-11-02T00:00:00.000Z",
+      "description" : "不是个人任务。用于复刻互通测试。",
+      "due" : "",
+      "id" : "fixture-task-1",
+      "priority" : "medium",
+      "projectID" : "fixture-project-1",
+      "status" : "custom:等待反馈",
+      "title" : "合成样本：整理资料",
+      "updatedAt" : "2026-11-02T00:00:00.000Z"
+    }
+  ],
+  "version" : 3,
+  "workspaceID" : "fixture-workspace"
+}
