@@ -24,8 +24,13 @@ class DesktopHost {
         }) ??
         [],
   );
-  static Future<String?> saveFile(String name) async =>
-      channel.invokeMethod<String>('saveFile', {'name': name});
+  static Future<String?> saveFile(
+    String name, {
+    bool sqliteOnly = false,
+  }) async => channel.invokeMethod<String>('saveFile', {
+    'name': name,
+    'sqliteOnly': sqliteOnly,
+  });
   static Future<void> reveal(String path) async =>
       channel.invokeMethod('reveal', {'path': path});
   static Future<void> preview(String path) async =>

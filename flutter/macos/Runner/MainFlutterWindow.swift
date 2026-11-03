@@ -23,7 +23,6 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
     return alert.runModal() == .alertSecondButtonReturn
   }
   override func awakeFromNib() {
-    UserDefaults.standard.set(["zh-Hans"], forKey: "AppleLanguages")
     let controller = FlutterViewController()
     contentViewController = controller
     title = "Space"
@@ -54,15 +53,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         MainFlutterWindow.hasUnsavedEdits = a["dirty"] as? Bool ?? false
         result(nil)
       case "openFiles":
-        let panel = NSOpenPanel(); panel.canChooseDirectories = false; panel.canChooseFiles = true
-        panel.allowsMultipleSelection = a["multiple"] as? Bool ?? false; panel.prompt = "选择"; panel.title = "选择文件"
-        if a["sqliteOnly"] as? Bool == true {
-          panel.title = "导入SQLite备份"
-          panel.allowedContentTypes = ["sqlite", "sqlite3", "db"].compactMap { UTType(filenameExtension: $0) }
-        }
+        let panel = SpaceFilePanels.open(sqliteOnly: a["sqliteOnly"] as? Bool ?? false,
+                                         multiple: a["multiple"] as? Bool ?? false)
         panel.beginSheetModal(for: self) { response in result(response == .OK ? panel.urls.map(\.path) : []) }
       case "saveFile":
-        let panel = NSSavePanel(); panel.nameFieldStringValue = a["name"] as? String ?? "Space备份.sqlite"; panel.prompt = "保存"
+        let panel = SpaceFilePanels.save(name: a["name"] as? String ?? "Space备份.sqlite",
+                                         sqliteOnly: a["sqliteOnly"] as? Bool ?? false)
         panel.beginSheetModal(for: self) { response in result(response == .OK ? panel.url?.path : nil) }
       case "reveal":
         if let path = a["path"] as? String { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)]) }; result(nil)
@@ -134,9 +130,6 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   func addSpaceMenus() {
     guard !menusInstalled, let menu=NSApp.mainMenu else { return }
     menusInstalled = true
-    let names=["Edit":"编辑","View":"显示","Window":"窗口","Help":"帮助","Undo":"撤销","Redo":"重做","Cut":"剪切","Copy":"复制","Paste":"粘贴","Select All":"全选","Minimize":"最小化","Zoom":"缩放","Enter Full Screen":"进入全屏幕","Bring All to Front":"前置全部窗口"]
-    func translate(_ menu:NSMenu) { for item in menu.items { if let name=names[item.title] { item.title=name };if let submenu=item.submenu { if let name=names[submenu.title] {submenu.title=name}; translate(submenu) } } }
-    translate(menu)
     func add(_ title:String,_ entries:[(String,String,String)]) {
       let item=NSMenuItem(title:title,action:nil,keyEquivalent:"");let submenu=NSMenu(title:title)
       for (name,action,key) in entries { let entry=NSMenuItem(title:name,action:#selector(performSpaceAction(_:)),keyEquivalent:key);entry.target=self;entry.representedObject=action;entry.keyEquivalentModifierMask = .command;submenu.addItem(entry) }

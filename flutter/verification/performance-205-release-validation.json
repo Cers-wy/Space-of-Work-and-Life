@@ -1,0 +1,209 @@
+{
+  "release": "2.0.5+6",
+  "finalReleaseScope": [
+    "按显示区域与DPR保持比例解码预览",
+    "图片字节和ImageProvider在重建时复用",
+    "关闭时定向驱逐预览缓存",
+    "图文修改判断使用Delta结构比较并跳过未修改任务的重复JSON序列化"
+  ],
+  "animationExperimentShipped": false,
+  "fullTestsPassed": 78,
+  "staticAnalysisNewIssues": 0,
+  "visualSnapshotsExactMatches": 4,
+  "finalCpuAndPhysicalMemoryComparisonValid": false,
+  "invalidReason": "两次最终版本测量未能持续保持前台，CPU与物理内存比较已排除；未使用动画实验数字作为发布收益",
+  "imageCacheEvidence": {
+    "before": [
+      {
+        "source": "work/performance-205/controlled/before-r2/report.json",
+        "samples": [
+          {
+            "scenario": "image-open-0",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-closed-0",
+            "bytes": 104103936,
+            "count": 3,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-open-1",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-closed-1",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-open-2",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-closed-2",
+            "bytes": 104103936,
+            "count": 3,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          }
+        ]
+      },
+      {
+        "source": "work/performance-205/controlled/before-r3/report.json",
+        "samples": [
+          {
+            "scenario": "image-open-0",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-closed-0",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-open-1",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-closed-1",
+            "bytes": 104103936,
+            "count": 3,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-open-2",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          },
+          {
+            "scenario": "image-closed-2",
+            "bytes": 70926336,
+            "count": 2,
+            "lifecycle": "resumed",
+            "foregroundThroughout": true
+          }
+        ]
+      }
+    ],
+    "after": [
+      {
+        "source": "work/performance-205/release-final/after-r2/report.json",
+        "samples": [
+          {
+            "scenario": "image-open-0",
+            "bytes": 3275520,
+            "count": 2,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-closed-0",
+            "bytes": 0,
+            "count": 0,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-open-1",
+            "bytes": 3275520,
+            "count": 2,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-closed-1",
+            "bytes": 0,
+            "count": 0,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-open-2",
+            "bytes": 3275520,
+            "count": 2,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-closed-2",
+            "bytes": 0,
+            "count": 0,
+            "lifecycle": "hidden",
+            "foregroundThroughout": false
+          }
+        ]
+      },
+      {
+        "source": "work/performance-205/release-final/after-r3/report.json",
+        "samples": [
+          {
+            "scenario": "image-open-0",
+            "bytes": 3275520,
+            "count": 2,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-closed-0",
+            "bytes": 0,
+            "count": 0,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-open-1",
+            "bytes": 3275520,
+            "count": 2,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-closed-1",
+            "bytes": 0,
+            "count": 0,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-open-2",
+            "bytes": 3275520,
+            "count": 2,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          },
+          {
+            "scenario": "image-closed-2",
+            "bytes": 0,
+            "count": 0,
+            "lifecycle": "inactive",
+            "foregroundThroughout": false
+          }
+        ]
+      }
+    ]
+  }
+}

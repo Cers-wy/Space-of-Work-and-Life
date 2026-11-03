@@ -1,0 +1,94 @@
+﻿Resolving dependencies...
+Downloading packages...
+  cross_file 0.3.5+5 (0.4.0 available)
+  flutter_keyboard_visibility_linux 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_macos 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_platform_interface 2.0.0 (3.0.0 available)
+  flutter_keyboard_visibility_windows 1.0.0 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading C:/SpaceFlutter206/source/test/core_test.dart
+00:00 +0: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +1: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +2: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +3: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +4: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +5: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +6: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +7: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +8: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +9: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +10: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +11: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +12: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +13: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +14: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +15: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +16: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +17: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +18: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +19: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +20: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:00 +21: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:01 +22: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:01 +23: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:01 +24: C:/SpaceFlutter206/source/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:01 +25: C:/SpaceFlutter206/source/test/performance_test.dart: 无效预览数据保留错误提示，图片替换后不复用旧内容
+00:09 +26: C:/SpaceFlutter206/source/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:09 +27: C:/SpaceFlutter206/source/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:09 +28: C:/SpaceFlutter206/source/test/store_test.dart: 005/007 偏好独立持久化，偏好写入不替换业务恢复快照
+00:10 +29: C:/SpaceFlutter206/source/test/store_test.dart: 005/007 偏好独立持久化，偏好写入不替换业务恢复快照
+00:10 +30: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +31: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +32: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +33: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +34: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +35: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +36: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +37: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +38: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:10 +39: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:11 +40: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:12 +41: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:12 +42: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:14 +43: C:/SpaceFlutter206/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:17 +44: C:/SpaceFlutter206/source/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+00:18 +45: C:/SpaceFlutter206/source/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+00:18 +46: C:/SpaceFlutter206/source/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+00:18 +47: C:/SpaceFlutter206/source/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+00:18 +48: C:/SpaceFlutter206/source/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+00:18 +49: C:/SpaceFlutter206/source/test/settings_test.dart: 系统跟随、手动覆盖、重开保留及连续过渡中间帧
+00:19 +50: C:/SpaceFlutter206/source/test/settings_test.dart: 系统跟随、手动覆盖、重开保留及连续过渡中间帧
+00:22 +51: C:/SpaceFlutter206/source/test/settings_test.dart: 系统跟随、手动覆盖、重开保留及连续过渡中间帧
+00:24 +52: C:/SpaceFlutter206/source/test/settings_test.dart: 系统跟随、手动覆盖、重开保留及连续过渡中间帧
+00:26 +53: C:/SpaceFlutter206/source/test/workspace_test.dart: 亮主题 1020 四视图与收展无布局异常
+00:28 +54: C:/SpaceFlutter206/source/test/settings_test.dart: 数据库导入导出使用专用文件面板，取消不改数据库；附件另存保持通用
+00:28 +55: C:/SpaceFlutter206/source/test/workspace_test.dart: 亮主题 1180 四视图与收展无布局异常
+00:30 +56: C:/SpaceFlutter206/source/test/settings_test.dart: 连接字段自动落库，关闭重开保留；云端按钮先确认
+00:31 +57: C:/SpaceFlutter206/source/test/workspace_test.dart: 亮主题 1380 四视图与收展无布局异常
+00:33 +58: C:/SpaceFlutter206/source/test/settings_test.dart: 浅色设置精简与紧凑按钮同排
+00:34 +59: C:/SpaceFlutter206/source/test/workspace_test.dart: 亮主题 1600 四视图与收展无布局异常
+00:35 +60: C:/SpaceFlutter206/source/test/settings_test.dart: 深色设置精简与紧凑按钮同排
+00:35 +61: C:/SpaceFlutter206/source/test/workspace_test.dart: 暗主题 1020 四视图与收展无布局异常
+00:37 +62: C:/SpaceFlutter206/source/test/workspace_test.dart: 暗主题 1180 四视图与收展无布局异常
+00:38 +63: C:/SpaceFlutter206/source/test/workspace_test.dart: 暗主题 1380 四视图与收展无布局异常
+00:41 +64: C:/SpaceFlutter206/source/test/workspace_test.dart: 暗主题 1600 四视图与收展无布局异常
+00:43 +65: C:/SpaceFlutter206/source/test/workspace_test.dart: 新建保存与重开；脏草稿取消保护；浮层键盘取消
+00:46 +66: C:/SpaceFlutter206/source/test/workspace_test.dart: 分类快筛与查询共用；完成和单步撤销
+00:46 +67: C:/SpaceFlutter206/source/test/workspace_test.dart: 自定义状态启停与迁移保留任务字段
+00:47 +68: C:/SpaceFlutter206/source/test/workspace_test.dart: 看板跨列拖放保存并可撤销
+00:48 +69: C:/SpaceFlutter206/source/test/workspace_test.dart: 甘特整条拖动按自然日落库与撤销
+00:50 +70: C:/SpaceFlutter206/source/test/workspace_test.dart: 搜索输入N不会新建；日历查看日期不能清除
+00:51 +71: C:/SpaceFlutter206/source/test/workspace_test.dart: 日历日周月子模式和持久化无溢出
+00:53 +72: C:/SpaceFlutter206/source/test/workspace_test.dart: 图文格式与上传附件保存重开，日期清除不生成伪排期
+00:55 +73: C:/SpaceFlutter206/source/test/workspace_test.dart: 卡片等高、单行省略、分类日期同排；流光无需悬停
+00:56 +74: C:/SpaceFlutter206/source/test/workspace_test.dart: 项目管理入口、改名及停用；菜单使用独立浮层
+00:58 +75: C:/SpaceFlutter206/source/test/workspace_test.dart: 粘贴图像保存重开不生成附件
+01:01 +76: C:/SpaceFlutter206/source/test/workspace_test.dart: 亮主题紧凑表单与下拉浮层层次
+01:02 +77: C:/SpaceFlutter206/source/test/workspace_test.dart: 暗主题紧凑表单与下拉浮层层次
+01:04 +78: C:/SpaceFlutter206/source/test/workspace_test.dart: 空标题错误显示在标题下并保留草稿
+01:05 +79: All tests passed!

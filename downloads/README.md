@@ -1,14 +1,13 @@
-# 下载文件
+# 下载
 
-本目录提供可直接下载的完整复刻资料和macOS安装包。
+最新版本：**Space Flutter 2.0.6（7）**。
 
-| 文件 | 内容 |
-|---|---|
-| [完整源码与复刻资料 ZIP](Space-当前功能与复刻资料-20261102.zip) | 源码、8份当前功能/UI/特效/数据/同步说明、190条验收用例、合成互通样本和工具 |
-| [ZIP SHA-256](Space-当前功能与复刻资料-20261102.zip.sha256) | 资料包下载校验 |
-| [Space macOS DMG](Space-1.6.0-build10-macOS-arm64.dmg) | Apple Silicon，macOS 14或更新；打开后将Space.app拖到Applications |
-| [DMG SHA-256](Space-1.6.0-build10-macOS-arm64.dmg.sha256) | 安装包下载校验 |
+请在[GitHub Release](https://github.com/18390208101/Space-macOS-native/releases/tag/v2.0.6)下载：
 
-仓库的[docs](../docs/)可以直接在线阅读；源码位于[native](../native/)，样本位于[fixtures](../fixtures/)。ZIP解压后从docs/00-阅读指南.md开始。
+- Apple Silicon macOS：`Space-Flutter-2.0.6-macOS-arm64.zip`
+- Windows 11 x64：`Space-Flutter-2.0.6-Win11-x64-Portable.zip`
+- 校验文件：`SHA256SUMS.txt`
 
-DMG中的应用采用本机临时代码签名，未做Apple公证。替换应用时请先退出Space；用户数据保存在应用程序目录之外。安装包和资料包不包含用户真实任务数据库或访问凭据。
+两平台均为完整解压即可运行的免安装分发。macOS打开`Space Flutter.app`；Windows运行`Space.exe`，保留DLL和`data`目录。
+
+当前目录不再存储旧版安装包，历史文件可在旧提交查看。当前源码位于[`flutter/`](../flutter/README.md)，发布标签`v2.0.6`也提供GitHub自动生成的源码下载。

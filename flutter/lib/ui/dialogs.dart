@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
+import 'package:flutter_quill/quill_delta.dart' show Delta;
 import '../core/models.dart';
 import '../core/richtext.dart';
 import '../host.dart';
@@ -11,6 +12,7 @@ import '../store.dart';
 import 'theme.dart';
 import 'controls.dart';
 import 'sync_settings.dart';
+import 'image_preview.dart';
 
 Future<T?> sheet<T>(
   BuildContext context,
@@ -190,7 +192,7 @@ class _TaskEditorState extends State<_TaskEditor> {
       titleFocus = FocusNode();
   String? titleError;
   late q.QuillController rich;
-  late String initialDelta;
+  late Delta initialDelta;
   bool creatingProject = false, saving = false, richFailed = false;
   String? error;
   SpaceStore get s => widget.store;
@@ -239,7 +241,7 @@ class _TaskEditorState extends State<_TaskEditor> {
       ),
     );
     rich.readOnly = richFailed;
-    initialDelta = jsonEncode(rich.document.toDelta().toJson());
+    initialDelta = rich.document.toDelta();
     rich.addListener(changed);
     title.addListener(changed);
   }
@@ -251,11 +253,11 @@ class _TaskEditorState extends State<_TaskEditor> {
         .catchError((_) => null);
   }
 
-  bool get richDirty =>
-      initialDelta != jsonEncode(rich.document.toDelta().toJson());
+  bool get richDirty => initialDelta != rich.document.toDelta();
   bool get dirty =>
       title.text != widget.task.title ||
-      jsonEncode(draft.toJson()) != jsonEncode(widget.task.toJson()) ||
+      (!identical(draft, widget.task) &&
+          jsonEncode(draft.toJson()) != jsonEncode(widget.task.toJson())) ||
       richDirty ||
       creatingProject && project.text.isNotEmpty;
   Future<void> close() async {
@@ -882,15 +884,7 @@ class _ImageBuilder extends q.EmbedBuilder {
   String get key => 'image';
   @override
   Widget build(BuildContext context, q.EmbedContext embedContext) {
-    final bytes = base64Decode(embedContext.node.value.data as String);
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 480, maxHeight: 240),
-      child: Image.memory(
-        bytes,
-        fit: BoxFit.scaleDown,
-        errorBuilder: (c, e, s) => const Text('图片无法预览，原字节已保留'),
-      ),
-    );
+    return RichImagePreview(source: embedContext.node.value.data as String);
   }
 }
 
@@ -1653,6 +1647,7 @@ class _SettingsState extends State<_Settings> {
                         ? () => action(() async {
                             final path = await DesktopHost.saveFile(
                               'Space备份.sqlite',
+                              sqliteOnly: true,
                             );
                             if (path != null) {
                               await s.repository.exportSQLite(path);

@@ -35,7 +35,8 @@ class MemoryGitHub extends GitHubAPI {
   ) async => cloud!;
   @override
   Future<String> upload(Uint8List bytes, String? expected) async {
-    if (race || expected != (cloud == null ? null : SyncCodec.gitBlob(cloud!))) {
+    if (race ||
+        expected != (cloud == null ? null : SyncCodec.gitBlob(cloud!))) {
       throw APIError('云端备份已变化，已停止覆盖');
     }
     uploads++;
@@ -310,6 +311,54 @@ void main() {
     await t.runAsync(() => store.preference('appearance', 'system'));
     await t.pumpAndSettle();
     expect(Palette.of(context).darkness, 1);
+  });
+
+  testWidgets('数据库导入导出使用专用文件面板，取消不改数据库；附件另存保持通用', (t) async {
+    final calls = <MethodCall>[];
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      DesktopHost.channel,
+      (call) async {
+        calls.add(call);
+        if (call.method == 'openFiles') return <String>[];
+        return null;
+      },
+    );
+    addTearDown(
+      () => binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        DesktopHost.channel,
+        null,
+      ),
+    );
+    await launch(t);
+    showSettings(t.element(find.byType(Workspace)), store);
+    await t.pumpAndSettle();
+    final original = await t.runAsync(
+      () => File(store.repository.path).readAsBytes(),
+    );
+    await t.tap(find.widgetWithText(SpaceButton, '导出SQLite'));
+    await t.pumpAndSettle();
+    expect(calls.singleWhere((c) => c.method == 'saveFile').arguments, {
+      'name': 'Space备份.sqlite',
+      'sqliteOnly': true,
+    });
+    await t.tap(find.widgetWithText(SpaceButton, '导入SQLite'));
+    await t.pumpAndSettle();
+    expect(calls.singleWhere((c) => c.method == 'openFiles').arguments, {
+      'multiple': false,
+      'sqliteOnly': true,
+    });
+    expect(
+      await t.runAsync(() => File(store.repository.path).readAsBytes()),
+      original,
+    );
+    expect(find.text('导入备份'), findsNothing);
+    await t.runAsync(() => DesktopHost.saveFile('附件.txt'));
+    expect(calls.lastWhere((c) => c.method == 'saveFile').arguments, {
+      'name': '附件.txt',
+      'sqliteOnly': false,
+    });
+    await t.tap(find.text('完成'));
+    await t.pumpAndSettle();
   });
 
   testWidgets('连接字段自动落库，关闭重开保留；云端按钮先确认', (t) async {

@@ -1,0 +1,81 @@
+00:00 +0: loading /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart
+00:00 +0: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +1: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 005/007 偏好独立持久化，偏好写入不替换业务恢复快照
+00:00 +2: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 030/031/032 UTF16标题边界、trim与原子拒绝
+00:00 +3: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 033/039 说明长度与日期矛盾不覆盖原任务
+00:00 +4: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 041/042 旧草稿与已删除任务不能覆盖或复活
+00:00 +5: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 047/048/050 完成、重开与同状态无重复修订
+00:00 +6: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 055/057/060/063/064 停用保留历史与原状态编辑，禁新移入
+00:00 +7: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 059/066/068 内置保护；迁移到完成；列序重开
+00:00 +8: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 069/070/071/072 项目同事务创建、等价复用和失败无孤立项目
+00:00 +9: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 项目改名、停用持久化与导出，禁止新加入；删除保留任务可撤销
+00:00 +10: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 011–027 查询AND、项目搜索、真实逾期和默认日期独立
+00:00 +11: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 082/083/088 附件路径与10MiB/20个/20MiB边界
+00:00 +12: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 快照导出拒绝活动库与别名，恢复保持业务且可撤销
+00:00 +13: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 甘特左右端不能倒置；移动按完整原始区间计算；完成无due按完成日
+00:01 +14: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 原生样本 01-json-v1.json 无损往返
+00:01 +15: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 原生样本 01b-json-v2.json 无损往返
+00:01 +16: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 原生样本 02-json-v3.json 无损往返
+00:01 +17: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 原生样本 03-json-v4.json 无损往返
+00:01 +18: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 原生样本 04-json-v5.json 无损往返
+00:01 +19: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 原生样本 05-json-v6.json 无损往返
+00:01 +20: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 非法时间戳、NFC重复名称与V1状态字段拒绝
+00:01 +21: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 严格公历与北京时间跨日
+00:01 +22: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 默认排期只展示，拖动才写真实日期
+00:01 +23: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 完成与重开时间一致
+00:01 +24: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 未来格式与矛盾版本拒绝
+00:01 +25: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 引用与重复任务拒绝
+00:01 +26: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 排序日期/创建/ID稳定，清除保留排序
+00:01 +27: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: RTFD真实样本粗体、下划线、图片及中文往返
+00:01 +28: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: GitHub portable 字节与原生指纹完全一致
+00:01 +29: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 原生GitHub加密包解密，错误密钥与篡改拒绝
+00:01 +30: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: GitHub加密nonce随机且内容等价
+00:01 +31: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 原生SP包2001 epoch，七天过期与哈希匹配
+00:01 +32: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: GitHub双边变化停止；单边变化方向正确
+00:01 +33: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: GitHub配置路径和身份校验
+00:01 +34: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 合并相同更新时间不同内容停止
+00:01 +35: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: SQLite原生样本读写、上次快照与并发保护
+00:01 +36: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 损坏数据库不被初始化覆盖
+00:01 +37: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 本地SP快照独占创建，防止覆盖已有包
+00:01 +38: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 甘特图黑白主题颜色可读，状态独立且不依赖全局主题改色
+00:01 +39: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:01 +40: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:01 +41: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/performance_test.dart: 4K预览按物理像素解码、重建复用，关闭后移除专属缓存
+00:01 +42: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+00:01 +43: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+00:02 +44: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +45: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +46: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +47: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +48: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +49: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:04 +50: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:04 +51: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:04 +52: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:04 +53: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:04 +54: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 暗主题 1380 四视图与收展无布局异常
+00:04 +55: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 暗主题 1380 四视图与收展无布局异常
+00:04 +56: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 暗主题 1380 四视图与收展无布局异常
+00:04 +57: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 暗主题 1380 四视图与收展无布局异常
+00:04 +58: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 暗主题 1380 四视图与收展无布局异常
+00:05 +59: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 系统跟随、手动覆盖、重开保留及连续过渡中间帧
+00:05 +60: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 系统跟随、手动覆盖、重开保留及连续过渡中间帧
+00:05 +61: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 新建保存与重开；脏草稿取消保护；浮层键盘取消
+00:05 +62: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 新建保存与重开；脏草稿取消保护；浮层键盘取消
+00:05 +63: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 连接字段自动落库，关闭重开保留；云端按钮先确认
+00:06 +64: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 连接字段自动落库，关闭重开保留；云端按钮先确认
+00:06 +65: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 连接字段自动落库，关闭重开保留；云端按钮先确认
+00:06 +66: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 看板跨列拖放保存并可撤销
+00:06 +67: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 浅色设置精简与紧凑按钮同排
+00:06 +68: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 浅色设置精简与紧凑按钮同排
+00:06 +69: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 搜索输入N不会新建；日历查看日期不能清除
+00:06 +70: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 深色设置精简与紧凑按钮同排
+00:06 +71: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 日历日周月子模式和持久化无溢出
+00:07 +72: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 图文格式与上传附件保存重开，日期清除不生成伪排期
+00:07 +73: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 卡片等高、单行省略、分类日期同排；流光无需悬停
+00:07 +74: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 项目管理入口、改名及停用；菜单使用独立浮层
+00:08 +75: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 粘贴图像保存重开不生成附件
+00:08 +76: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 亮主题紧凑表单与下拉浮层层次
+00:08 +77: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 暗主题紧凑表单与下拉浮层层次
+00:09 +78: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 空标题错误显示在标题下并保留草稿
+00:09 +79: All tests passed!

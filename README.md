@@ -1,52 +1,42 @@
 # Space 个人工作台
 
-Space 用于统一管理工作、个人事务与生活事项，提供看板、列表、甘特图、日历四种视图，以及项目、状态、图文说明、附件、本地备份和加密同步。
+当前发布：**Space Flutter 2.0.6（7）**，适用于Apple Silicon macOS与Windows 11 x64。
 
-## 源码入口
+[下载最新免安装版](https://github.com/18390208101/Space-macOS-native/releases/latest) · [本版发布说明](https://github.com/18390208101/Space-macOS-native/releases/tag/v2.0.6) · [Flutter源码与构建说明](flutter/README.md)
 
-- [Flutter 桌面版 2.0.3（4）](flutter/README.md)：macOS 与 Windows 共用界面及业务源码，包含构建说明、合成测试样本和本版验收记录。macOS 安装说明见 [安装说明](flutter/INSTALL-macOS.md)。
-- [macOS 原生实现](native/)：SwiftUI + AppKit 源码及对应产品说明、互通样本和工具。
+## 免安装运行
 
-下方内容及 docs 目录描述 macOS 原生实现；Flutter 当前功能、主题与验证范围以 flutter 目录说明为准。
+| 平台 | 下载文件 | 运行方式 |
+|---|---|---|
+| macOS Apple Silicon（arm64） | `Space-Flutter-2.0.6-macOS-arm64.zip` | 完整解压后打开`Space Flutter.app`，也可移入“应用程序” |
+| Windows 11 x64 | `Space-Flutter-2.0.6-Win11-x64-Portable.zip` | 完整解压后运行`Space.exe`，保留全部DLL和`data`目录 |
 
-## 界面与特效
+发布附件提供`SHA256SUMS.txt`用于下载校验。GitHub也会按发布标签提供源码ZIP和tar.gz。
 
-工作台采用紧凑的岛式毛玻璃布局。侧栏、顶部概览和任务区域各自分层，导航与概览可以独立收起。明亮主题为蓝色奶白，暗色主题为黑灰叠加紫色环境光；任务卡拥有内部柔光和四周流光。悬停时单张卡片缓慢发光运动，空闲、拖动、失焦或减少动态效果时保持静态。
+macOS包为本机临时签名，未做Apple公证。首次打开若被系统拦截，请在“系统设置→隐私与安全性”确认来源后允许。详细步骤见[macOS使用说明](flutter/INSTALL-macOS.md)与[Windows使用说明](flutter/INSTALL-Windows.md)。
 
-统一的8逻辑点矩形圆角、中文字体、细致图标和明确焦点反馈贯穿四视图、筛选、下拉与任务表单。任务/设置弹窗固定头尾，正文独立滚动，操作始终可见。
+## 功能与本版改进
 
-## 功能说明
+看板、列表、甘特图、日历共用项目、状态、分类、优先级、日期与搜索筛选；支持任务与项目管理、撤销、图文说明、附件，以及SQLite备份和GitHub加密同步。保持现有明暗主题、毛玻璃和卡片流光。
 
-- 任务新建、编辑、删除、完成、重开和单步撤销。
-- 分类快筛、关键词、状态、项目、优先级、日期筛选及稳定排序。
-- 自定义状态、启停、任务迁移删除、看板列排序；项目创建和复用。
-- 加粗/下划线、光标位置粘图、文件上传、预览、另存及附件保护。
-- 项目甘特图、14天日期范围、整条平移与两端改期；日历日/周/月及当日完整清单。
-- SQLite/JSON导入导出、上一份快照恢复、并发写入与损坏保护。
-- GitHub私有仓库加密同步、自动检查；HTTPS/WebDAV/共享目录SP码手动同步。
+本版整合2.0.3以来的菜单及文件面板中文修复、按预览尺寸解码图片、关闭预览释放缓存和图文修改判断优化。macOS与Windows源码位于`flutter/`，当前版本与依赖锁定在`pubspec.yaml`和`pubspec.lock`。
 
-## 阅读文档
+数据保存在用户目录：macOS为`~/Library/Application Support/com.cers.space.flutter`，Windows为`%APPDATA%\SpaceFlutter`。替换程序文件不会清空现有数据；更新前建议先在设置中导出SQLite备份。SQLite备份可能含用户自行填写的Token和恢复密钥，请妥善保管。新恢复口令使用V2加密包，旧版2.0.0客户端无法读取V2。
 
-| 文档 | 内容 |
-|---|---|
-| [阅读指南](docs/00-阅读指南.md) | 文档顺序与完整产品概览 |
-| [当前功能说明](docs/01-当前功能说明.md) | 入口、字段、操作、业务及异常规则 |
-| [界面与特效说明](docs/02-界面与特效说明.md) | 布局尺寸、颜色、材质、流光、动画和控件反馈 |
-| [数据结构与兼容协议](docs/03-数据结构与兼容协议.md) | JSON、SQLite、日期、事务与文件读写 |
-| [同步与加密](docs/04-同步与加密实现要求.md) | 两套同步的流程、冲突、报文及密钥 |
-| [验收用例](docs/05-验收用例.md) | 190条可执行检查 |
-| [跨平台开发说明](docs/06-跨平台开发说明.md) | 模块、实现任务、系统能力适配与交付 |
-| [源码与测试索引](docs/07-源码与测试索引.md) | 功能定位、源码符号和74项测试 |
+## 构建与验证
 
-## 构建与资料
-
-macOS 14+、Apple Silicon，SwiftUI + AppKit。仓库根目录运行：
+需要Flutter 3.47.9 / Dart 3.13.7以及目标平台开发工具链。在`flutter/`目录运行：
 
 ```sh
-zsh native/scripts/test.sh
-zsh native/scripts/build-app.sh
+flutter pub get
+flutter test --reporter expanded
+flutter build macos --release
+# Windows开发机
+flutter build windows --release
 ```
 
-应用输出到`output/Space.app`。`native/`提供源码、测试与资源，`fixtures/`提供合成互通样本，`tools/`提供校验工具。运行`python3 tools/verify_bundle.py`检查资料完整性。
+macOS与Windows均有79项回归通过记录；Windows最终ZIP的26个文件哈希与解压启动通过，独立SQLite校验为`ok`。本轮未完成真实GitHub双端联调、完整190项组合实机验收或Windows性能复测。详见[Windows交付验收](flutter/verification/Windows免安装包验收-20261103.md)、[macOS文件面板验收](flutter/verification/导入导出文件面板中文验收-20261103.md)与[图片性能验收](flutter/verification/图片性能优化验收-20261103.md)。
 
-macOS用户数据位于`~/Library/Application Support/com.cers.orbit/`。仓库不包含个人任务、真实附件、Token或恢复密钥。其他平台按文档实现，并分别执行功能、界面与互通验收。
+`native/`与根目录`docs/`、`fixtures/`、`tools/`保留早期SwiftUI/AppKit实现和复刻基线，当前Flutter行为以`flutter/README.md`为准。旧分发二进制从当前分支移除，历史提交仍可追溯。
+
+仓库和发布包不包含个人任务、真实附件或预设云端凭据。
