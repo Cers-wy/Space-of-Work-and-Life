@@ -1597,7 +1597,7 @@ class _SettingsState extends State<_Settings> {
       close: () => Navigator.pop(c),
       footer: [
         Text(
-          'Space · Flutter 2.0.2 (3) · 基准 1.6.0 (10)',
+          'Space · Flutter 2.0.7 (8)',
           style: textStyle(p, size: 11, color: p.muted),
         ),
         const Spacer(),
@@ -1635,6 +1635,23 @@ class _SettingsState extends State<_Settings> {
               Text(
                 '选择跟随系统后，外观会随系统的浅色或深色设置自动切换。',
                 style: textStyle(p, size: 12, color: p.secondary),
+              ),
+            ]),
+            section('滚动条', [
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('隐藏滚动条', style: textStyle(p)),
+                  subtitle: Text(
+                    '隐藏后仍可使用滚轮、触控板和键盘滚动。',
+                    style: textStyle(p, size: 12, color: p.secondary),
+                  ),
+                  value: s.hideScrollbars,
+                  onChanged: s.busy
+                      ? null
+                      : (value) => s.preference('hideScrollbars', '$value'),
+                ),
               ),
             ]),
             section('备份与恢复', [

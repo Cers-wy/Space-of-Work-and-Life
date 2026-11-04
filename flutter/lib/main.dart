@@ -138,6 +138,7 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
       });
       return MaterialApp(
         title: 'Space',
+        scrollBehavior: SpaceScrollBehavior(hidden: s.hideScrollbars),
         navigatorKey: navigatorKey,
         builder: (c, child) => SpaceAccessibility(
           reduceTransparency: reducedTransparency,

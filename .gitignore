@@ -1,9 +1,4 @@
 .DS_Store
-native/.build/
-native/.swiftpm/
 work/
 output/
-*.sqlite
-*.sqlite-wal
-*.sqlite-shm
-.env
+local-data-backups/

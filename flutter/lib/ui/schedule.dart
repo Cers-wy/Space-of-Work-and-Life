@@ -72,16 +72,22 @@ class _GanttViewState extends State<GanttView> {
                 ),
                 const Spacer(),
                 IconButtonS(
-                  'list',
+                  'expand-all',
                   '展开全部项目',
-                  onPressed: collapsed.isEmpty
+                  size: 40,
+                  iconSize: 20,
+                  onPressed:
+                      groups.isEmpty ||
+                          groups.every((g) => !collapsed.contains(g.id))
                       ? null
                       : () => setState(collapsed.clear),
                 ),
                 const SizedBox(width: 12),
                 IconButtonS(
-                  'list',
+                  'collapse-all',
                   '收起全部项目',
+                  size: 40,
+                  iconSize: 20,
                   onPressed:
                       groups.isEmpty ||
                           groups.every((g) => collapsed.contains(g.id))
@@ -128,7 +134,7 @@ class _GanttViewState extends State<GanttView> {
                     task: null,
                     tasks: group.tasks,
                   ));
-                  if (!collapsed.contains(group.id))
+                  if (!collapsed.contains(group.id)) {
                     for (final t in group.tasks) {
                       rows.add((
                         group: null,
@@ -137,6 +143,7 @@ class _GanttViewState extends State<GanttView> {
                         tasks: const [],
                       ));
                     }
+                  }
                 }
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,

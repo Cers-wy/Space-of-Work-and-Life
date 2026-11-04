@@ -1,0 +1,20 @@
+{
+  "version": "2.0.7+8",
+  "platform": "Windows 11 x64 UTM",
+  "tests_passed": 100,
+  "portable_files_sha256_verified": 27,
+  "zip_sha256": "bfc2d5f01b27ce525b6b23c0e381b8e942a1edc335c976e4da69d3a817d770c0",
+  "runtime_process": [
+    {
+      "ProcessId": 8728,
+      "ExecutablePath": "C:\\SpaceFlutter207\\smoke-extracted\\Space-Flutter-2.0.7-Win11-x64-Portable\\Space.exe",
+      "SessionId": 1,
+      "CommandLine": "\"C:\\SpaceFlutter207\\smoke-extracted\\Space-Flutter-2.0.7-Win11-x64-Portable\\Space.exe\""
+    }
+  ],
+  "sqlite_quick_check": "ok",
+  "tasks": 0,
+  "projects": 0,
+  "native_ui": "最终ZIP解压启动，真实窗口确认空首页、顶栏及三列正常显示；UTM显示刷新后验证",
+  "limits": "真实窗口仅启动抽查，组件回归不等同于全部实机交互矩阵。"
+}

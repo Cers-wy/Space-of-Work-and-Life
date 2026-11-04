@@ -1,0 +1,115 @@
+﻿Resolving dependencies...
+Downloading packages...
+  cross_file 0.3.5+5 (0.4.0 available)
+  flutter_keyboard_visibility_linux 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_macos 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_platform_interface 2.0.0 (3.0.0 available)
+  flutter_keyboard_visibility_windows 1.0.0 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading C:/SpaceFlutter207/source/test/core_test.dart
+00:00 +0: C:/SpaceFlutter207/source/test/core_test.dart: 原生样本 01-json-v1.json 无损往返
+00:00 +1: C:/SpaceFlutter207/source/test/core_test.dart: 原生样本 01b-json-v2.json 无损往返
+00:00 +2: C:/SpaceFlutter207/source/test/core_test.dart: 原生样本 02-json-v3.json 无损往返
+00:00 +3: C:/SpaceFlutter207/source/test/core_test.dart: 原生样本 03-json-v4.json 无损往返
+00:00 +4: C:/SpaceFlutter207/source/test/core_test.dart: 原生样本 04-json-v5.json 无损往返
+00:00 +5: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +6: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +7: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +8: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +9: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +10: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +11: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +12: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +13: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +14: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:00 +15: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:01 +16: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:01 +17: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:01 +18: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:01 +19: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:01 +20: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:01 +21: C:/SpaceFlutter207/source/test/iteration_test.dart: 列宽四档、上下限、旧设置与重启恢复
+00:01 +22: C:/SpaceFlutter207/source/test/core_test.dart: SQLite原生样本读写、上次快照与并发保护
+00:02 +23: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:02 +24: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:02 +25: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:13 +26: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:13 +27: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:17 +28: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:18 +29: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:26 +30: C:/SpaceFlutter207/source/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:30 +31: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 四档独立列宽与等高卡片无溢出
+00:31 +32: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 四档独立列宽与等高卡片无溢出
+00:31 +33: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 四档独立列宽与等高卡片无溢出
+00:31 +34: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 四档独立列宽与等高卡片无溢出
+00:31 +35: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 四档独立列宽与等高卡片无溢出
+00:36 +36: C:/SpaceFlutter207/source/test/settings_test.dart: 系统跟随、手动覆盖、重开保留及连续过渡中间帧
+00:40 +37: C:/SpaceFlutter207/source/test/settings_test.dart: 系统跟随、手动覆盖、重开保留及连续过渡中间帧
+00:44 +38: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1180.0 四档独立列宽与等高卡片无溢出
+00:44 +39: C:/SpaceFlutter207/source/test/settings_test.dart: 数据库导入导出使用专用文件面板，取消不改数据库；附件另存保持通用
+00:47 +40: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1380.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:49 +41: C:/SpaceFlutter207/source/test/settings_test.dart: 连接字段自动落库，关闭重开保留；云端按钮先确认
+00:51 +42: C:/SpaceFlutter207/source/test/settings_test.dart: 连接字段自动落库，关闭重开保留；云端按钮先确认
+00:53 +43: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1600.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:53 +44: C:/SpaceFlutter207/source/test/settings_test.dart: 浅色设置精简与紧凑按钮同排
+00:56 +45: C:/SpaceFlutter207/source/test/settings_test.dart: 浅色设置精简与紧凑按钮同排
+00:56 +46: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+00:59 +47: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 顶栏双方向过渡按钮无裁切，概览独立收展
+01:01 +48: C:/SpaceFlutter207/source/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+01:01 +49: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:02 +50: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:02 +51: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:02 +52: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:02 +53: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:02 +54: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:02 +55: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:03 +56: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:03 +57: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:03 +58: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:03 +59: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:04 +60: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:04 +61: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:04 +62: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 四档独立列宽与等高卡片无溢出
+01:05 +63: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1180.0 顶栏双方向过渡按钮无裁切，概览独立收展
+01:08 +64: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1180.0 顶栏双方向过渡按钮无裁切，概览独立收展
+01:10 +65: C:/SpaceFlutter207/source/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+01:13 +66: C:/SpaceFlutter207/source/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+01:16 +67: C:/SpaceFlutter207/source/test/workspace_test.dart: light 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+01:19 +68: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1380.0 四档独立列宽与等高卡片无溢出
+01:19 +69: C:/SpaceFlutter207/source/test/workspace_test.dart: light 甘特图默认排期和自定义状态使用可读填色
+01:21 +70: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 顶栏双方向过渡按钮无裁切，概览独立收展
+01:22 +71: C:/SpaceFlutter207/source/test/workspace_test.dart: dark 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+01:24 +72: C:/SpaceFlutter207/source/test/workspace_test.dart: dark 顶栏导航可点击收展并持久化，面板无凸凹轮廓
+01:26 +73: C:/SpaceFlutter207/source/test/iteration_test.dart: 全局隐藏在现有弹窗中立即生效，关闭恢复滚动条
+01:28 +74: C:/SpaceFlutter207/source/test/iteration_test.dart: 全局隐藏在现有弹窗中立即生效，关闭恢复滚动条
+01:28 +75: C:/SpaceFlutter207/source/test/workspace_test.dart: 亮主题 1020 四视图与收展无布局异常
+01:32 +76: C:/SpaceFlutter207/source/test/workspace_test.dart: 亮主题 1020 四视图与收展无布局异常
+01:34 +77: C:/SpaceFlutter207/source/test/workspace_test.dart: 亮主题 1020 四视图与收展无布局异常
+01:38 +78: C:/SpaceFlutter207/source/test/iteration_test.dart: 隐藏开关覆盖四视图和任务编辑的嵌套滚动区域
+01:49 +79: C:/SpaceFlutter207/source/test/workspace_test.dart: 亮主题 1180 四视图与收展无布局异常
+01:51 +80: C:/SpaceFlutter207/source/test/workspace_test.dart: 亮主题 1380 四视图与收展无布局异常
+02:02 +81: C:/SpaceFlutter207/source/test/workspace_test.dart: 亮主题 1600 四视图与收展无布局异常
+02:17 +82: C:/SpaceFlutter207/source/test/workspace_test.dart: 暗主题 1020 四视图与收展无布局异常
+02:21 +83: C:/SpaceFlutter207/source/test/workspace_test.dart: 暗主题 1180 四视图与收展无布局异常
+02:24 +84: C:/SpaceFlutter207/source/test/workspace_test.dart: 暗主题 1380 四视图与收展无布局异常
+02:28 +85: C:/SpaceFlutter207/source/test/workspace_test.dart: 暗主题 1600 四视图与收展无布局异常
+02:30 +86: C:/SpaceFlutter207/source/test/workspace_test.dart: 新建保存与重开；脏草稿取消保护；浮层键盘取消
+02:35 +87: C:/SpaceFlutter207/source/test/workspace_test.dart: 分类快筛与查询共用；完成和单步撤销
+02:38 +88: C:/SpaceFlutter207/source/test/workspace_test.dart: 自定义状态启停与迁移保留任务字段
+02:39 +89: C:/SpaceFlutter207/source/test/workspace_test.dart: 看板跨列拖放保存并可撤销
+02:41 +90: C:/SpaceFlutter207/source/test/workspace_test.dart: 甘特整条拖动按自然日落库与撤销
+02:43 +91: C:/SpaceFlutter207/source/test/workspace_test.dart: 搜索输入N不会新建；日历查看日期不能清除
+02:45 +92: C:/SpaceFlutter207/source/test/workspace_test.dart: 日历日周月子模式和持久化无溢出
+02:47 +93: C:/SpaceFlutter207/source/test/workspace_test.dart: 图文格式与上传附件保存重开，日期清除不生成伪排期
+02:52 +94: C:/SpaceFlutter207/source/test/workspace_test.dart: 卡片等高、单行省略、分类日期同排；流光无需悬停
+02:54 +95: C:/SpaceFlutter207/source/test/workspace_test.dart: 项目管理入口、改名及停用；菜单使用独立浮层
+02:59 +96: C:/SpaceFlutter207/source/test/workspace_test.dart: 粘贴图像保存重开不生成附件
+03:05 +97: C:/SpaceFlutter207/source/test/workspace_test.dart: 亮主题紧凑表单与下拉浮层层次
+03:08 +98: C:/SpaceFlutter207/source/test/workspace_test.dart: 暗主题紧凑表单与下拉浮层层次
+03:12 +99: C:/SpaceFlutter207/source/test/workspace_test.dart: 空标题错误显示在标题下并保留草稿
+03:17 +100: All tests passed!

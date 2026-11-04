@@ -38,6 +38,12 @@ class SpaceStore extends ChangeNotifier {
   bool get navCollapsed => state.settings.containsKey('navCollapsed')
       ? state.settings['navCollapsed'] == 'true'
       : true;
+  bool get hideScrollbars => state.settings['hideScrollbars'] == 'true';
+  double boardWidthRatio(String status) {
+    final value = double.tryParse(state.settings['boardWidth.$status'] ?? '');
+    return value != null && value.isFinite ? snapBoardRatio(value) : 1.0;
+  }
+
   bool get overviewCollapsed => state.settings['overviewCollapsed'] == 'true';
   String get view =>
       [
@@ -478,3 +484,8 @@ SpaceState demoState({int count = 9}) {
     workspaceID: uid(),
   );
 }
+
+const boardWidthRatios = [0.5, 2 / 3, 0.75, 1.0];
+double snapBoardRatio(double value) => boardWidthRatios.reduce(
+  (a, b) => (value - a).abs() <= (value - b).abs() ? a : b,
+);

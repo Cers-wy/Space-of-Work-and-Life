@@ -111,6 +111,28 @@ ThemeData spaceTheme(bool dark) {
       cursorColor: p.accent,
       selectionColor: p.accent.withValues(alpha: .25),
     ),
+    scrollbarTheme: ScrollbarThemeData(
+      thickness: WidgetStateProperty.resolveWith(
+        (states) =>
+            states.contains(WidgetState.hovered) ||
+                states.contains(WidgetState.dragged)
+            ? 6.0
+            : 4.0,
+      ),
+      radius: const Radius.circular(4),
+      thumbColor: WidgetStateProperty.resolveWith(
+        (states) => p.secondary.withValues(
+          alpha: states.contains(WidgetState.dragged)
+              ? .7
+              : states.contains(WidgetState.hovered)
+              ? .55
+              : .35,
+        ),
+      ),
+      crossAxisMargin: 2,
+      mainAxisMargin: 2,
+      interactive: true,
+    ),
     dividerColor: p.border,
     inputDecorationTheme: const InputDecorationTheme(
       isDense: true,
@@ -445,4 +467,23 @@ class _FlowPainter extends CustomPainter {
       o.p.darkness != p.darkness ||
       o.time != time ||
       o.emphasized != emphasized;
+}
+
+/// Applied above the Navigator so existing routes, popups and editors update too.
+class SpaceScrollBehavior extends MaterialScrollBehavior {
+  final bool hidden;
+  const SpaceScrollBehavior({required this.hidden});
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    if (hidden) return child;
+    return Scrollbar(controller: details.controller, child: child);
+  }
+
+  @override
+  bool shouldNotify(covariant SpaceScrollBehavior oldDelegate) =>
+      hidden != oldDelegate.hidden;
 }

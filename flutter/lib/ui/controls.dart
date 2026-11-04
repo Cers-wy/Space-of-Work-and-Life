@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import '../core/models.dart';
 import 'theme.dart';
 
@@ -64,6 +65,14 @@ class _IconPainter extends CustomPainter {
         path(const [Offset(4, 7), Offset(10, 13), Offset(16, 7)]);
       case 'up':
         path(const [Offset(4, 13), Offset(10, 7), Offset(16, 13)]);
+      case 'expand-all':
+        p.strokeWidth = 1.5;
+        path(const [Offset(5, 5), Offset(10, 10), Offset(15, 5)]);
+        path(const [Offset(5, 11), Offset(10, 16), Offset(15, 11)]);
+      case 'collapse-all':
+        p.strokeWidth = 1.5;
+        path(const [Offset(5, 9), Offset(10, 4), Offset(15, 9)]);
+        path(const [Offset(5, 15), Offset(10, 10), Offset(15, 15)]);
       case 'check':
         path(const [Offset(4, 10), Offset(8, 14), Offset(16, 5)]);
       case 'circle':
@@ -98,10 +107,10 @@ class _IconPainter extends CustomPainter {
           line(6, y, 18, y);
         }
       case 'gantt':
-        path(const [Offset(3, 3), Offset(3, 17), Offset(18, 17)]);
-        line(7, 5, 13, 5);
-        line(10, 10, 17, 10);
-        line(13, 14, 19, 14);
+        p.strokeWidth = 2.1;
+        line(3, 4.5, 11, 4.5);
+        line(8, 10, 17, 10);
+        line(5, 15.5, 12, 15.5);
       case 'calendar':
         rect(2, 4, 16, 14, 2);
         line(2, 8, 18, 8);
@@ -467,7 +476,9 @@ class IconButtonS extends StatelessWidget {
         child: SpaceIcon(
           icon,
           size: iconSize,
-          color: primary
+          color: onPressed == null
+              ? p.muted.withValues(alpha: .35)
+              : primary
               ? Colors.white
               : selected
               ? p.accent
@@ -1131,6 +1142,92 @@ Future<T?> anchoredPopup<T>(
           child: Material(type: MaterialType.transparency, child: child),
         ),
       ],
+    ),
+  );
+}
+
+class BoardResizeHandle extends StatefulWidget {
+  final double ratio;
+  final VoidCallback onStart, onEnd, onReset, onCancel;
+  final ValueChanged<double> onUpdate;
+  const BoardResizeHandle({
+    super.key,
+    required this.ratio,
+    required this.onStart,
+    required this.onUpdate,
+    required this.onEnd,
+    required this.onReset,
+    required this.onCancel,
+  });
+  @override
+  State<BoardResizeHandle> createState() => _BoardResizeHandleState();
+}
+
+class _BoardResizeHandleState extends State<BoardResizeHandle> {
+  bool hover = false, dragging = false;
+  String get label => widget.ratio == .5
+      ? '1/2'
+      : widget.ratio == 2 / 3
+      ? '2/3'
+      : widget.ratio == .75
+      ? '3/4'
+      : widget.ratio == 1
+      ? '1/1'
+      : '${(widget.ratio * 100).round()}%';
+  @override
+  Widget build(BuildContext c) => MouseRegion(
+    cursor: SystemMouseCursors.resizeLeftRight,
+    onEnter: (_) => setState(() => hover = true),
+    onExit: (_) => setState(() => hover = false),
+    child: Tooltip(
+      message: '拖动调整列宽 · $label · 双击恢复1/1',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        dragStartBehavior: DragStartBehavior.down,
+        onDoubleTap: widget.onReset,
+        onHorizontalDragStart: (_) {
+          setState(() => dragging = true);
+          widget.onStart();
+        },
+        onHorizontalDragUpdate: (d) => widget.onUpdate(d.delta.dx),
+        onHorizontalDragEnd: (_) {
+          setState(() => dragging = false);
+          widget.onEnd();
+        },
+        onHorizontalDragCancel: () {
+          setState(() => dragging = false);
+          widget.onCancel();
+        },
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Center(
+              child: Container(
+                width: 2,
+                color: hover || dragging
+                    ? Palette.of(c).accent
+                    : Colors.transparent,
+              ),
+            ),
+            if (dragging)
+              Positioned(
+                right: 8,
+                top: 48,
+                child: Material(
+                  color: Palette.of(c).canvas,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Text(
+                      label,
+                      style: textStyle(Palette.of(c), size: 12),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     ),
   );
 }

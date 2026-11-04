@@ -1,9 +1,0 @@
-{
-  "repository": "https://github.com/18390208101/Space-macOS-native",
-  "commit": "2e0797405aab8e3ff685e74cafd652b3395a3748",
-  "verifiedFiles": 72,
-  "failures": [],
-  "nativeVersion": "1.6.0+10",
-  "fixturePolicy": "synthetic only",
-  "flutterTarget": "macOS / Windows / Linux"
-}
