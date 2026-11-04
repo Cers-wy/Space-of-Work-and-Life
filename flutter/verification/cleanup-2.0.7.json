@@ -1,0 +1,48 @@
+{
+  "local_old_items": 307,
+  "local_old_bytes": 10992782654,
+  "status": "completed",
+  "old_source_and_packages": "moved to user Trash, recoverable",
+  "user_data_recovery_backups": "preserved locally, excluded from Git",
+  "windows": {
+    "formal_appdata": "unchanged",
+    "status": "completed",
+    "toolchain": "C:\\SpaceFlutterQA\\flutter, pub-cache, git; C:\\SpaceBuildTools",
+    "removed": [
+      "C:\\SpaceFlutter206",
+      "C:\\SpaceFlutterQA\\data",
+      "C:\\SpaceFlutterQA\\perf-1000",
+      "C:\\SpaceFlutterQA\\production-check",
+      "C:\\SpaceFlutterQA\\source",
+      "C:\\SpaceFlutter207\\smoke-data",
+      "C:\\SpaceFlutter207\\smoke-extracted",
+      "C:\\SpaceFlutter207\\Space-Flutter-2.0.7-Win11-x64-Portable",
+      "C:\\SpaceFlutter207\\build-manifest.json",
+      "C:\\SpaceFlutter207\\build-processes.json",
+      "C:\\SpaceFlutter207\\build.log",
+      "C:\\SpaceFlutter207\\build.ps1",
+      "C:\\SpaceFlutter207\\check-runtime.ps1",
+      "C:\\SpaceFlutter207\\clean-source.zip",
+      "C:\\SpaceFlutter207\\final-source.zip",
+      "C:\\SpaceFlutter207\\inventory.json",
+      "C:\\SpaceFlutter207\\progress.txt",
+      "C:\\SpaceFlutter207\\rebuild.ps1",
+      "C:\\SpaceFlutter207\\runtime-check.json",
+      "C:\\SpaceFlutter207\\runtime-source-sha256.json",
+      "C:\\SpaceFlutter207\\sdk-folders.json",
+      "C:\\SpaceFlutter207\\smoke-exit.txt",
+      "C:\\SpaceFlutter207\\smoke-launch.json",
+      "C:\\SpaceFlutter207\\smoke-stderr.txt",
+      "C:\\SpaceFlutter207\\smoke-stdout.txt",
+      "C:\\SpaceFlutter207\\smoke.ps1",
+      "C:\\SpaceFlutter207\\source.zip",
+      "C:\\SpaceFlutter207\\status.txt",
+      "C:\\SpaceFlutter207\\tests.log",
+      "C:\\SpaceFlutter207\\validate-smoke.ps1"
+    ],
+    "kept": [
+      "C:\\SpaceFlutter207\\source",
+      "C:\\SpaceFlutter207\\Space-Flutter-2.0.7-Win11-x64-Portable.zip"
+    ]
+  }
+}
