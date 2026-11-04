@@ -1,4 +1,4 @@
-# Space Flutter 2.0.7（8）Windows 免安装版
+# Space Flutter 2.0.8（9）Windows 免安装版
 
 适用于 Windows 11 x64。无需安装 Flutter、Visual Studio 或其他运行环境。
 
@@ -8,7 +8,7 @@
 
 请保留同目录的全部 DLL、`data` 文件夹及其内容；不要只复制 EXE，也不要在压缩包内直接运行。可以为 `Space.exe` 创建桌面快捷方式。
 
-本版包含截至 2.0.7 的共用界面、项目管理、设置与主题、图片预览缓存优化。macOS 专用菜单及文件面板语言修复仅适用于 macOS；Windows 系统文件窗口使用 Windows 自身的界面语言。
+本版包含截至 2.0.8 的共用界面、项目管理、设置与主题、图片预览缓存优化。macOS 专用菜单及文件面板语言修复仅适用于 macOS；Windows 系统文件窗口使用 Windows 自身的界面语言。
 
 默认任务和设置继续保存在 `%APPDATA%\SpaceFlutter`，替换程序目录不会清空现有数据。首次使用建议先在设置中导出 SQLite 备份。ZIP 不包含个人数据、Token 或恢复密钥；用户导出的 SQLite 备份可能包含自行填写的连接和凭据，请自行保管。
 

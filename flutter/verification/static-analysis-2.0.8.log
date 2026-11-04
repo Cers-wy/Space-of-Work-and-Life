@@ -1,0 +1,8 @@
+Analyzing space208-analysis...
+
+warning - lib/ui/dialogs.dart:237:9 - 'clipboardConfig' is experimental and could be removed or changed at any time. - experimental_member_use
+warning - lib/ui/dialogs.dart:237:28 - 'QuillClipboardConfig' is experimental and could be removed or changed at any time. - experimental_member_use
+warning - lib/ui/dialogs.dart:238:11 - 'onClipboardPaste' is experimental and could be removed or changed at any time. - experimental_member_use
+   info - lib/ui/workspace.dart:897:21 - The 'child' argument should be last in widget constructor invocations. Try moving the argument to the end of the argument list. - sort_child_properties_last
+
+4 issues found.

@@ -1,0 +1,17 @@
+{
+  "version": "2.0.8+9",
+  "platform": "macOS arm64",
+  "bundle_id": "com.cers.space.flutter",
+  "bundle_version": "9",
+  "tests_passed": 102,
+  "signature": "codesign --verify --deep --strict passed on final ZIP extraction before QA bundle identity isolation",
+  "dmg": "hdiutil verify passed",
+  "native_ui": "final ZIP normal entry: empty board and native navigation expand/collapse verified using an isolated QA bundle identity",
+  "sqlite_quick_check": "ok",
+  "tasks": 0,
+  "projects": 0,
+  "checksums": {
+    "Space-Flutter-2.0.8-macOS-arm64.dmg": "0da128ab3c4417043f30c93a1111876b5cc312542b8c9621455bde17058c3105",
+    "Space-Flutter-2.0.8-macOS-arm64.zip": "6176b4ddbabb71a3f0ae8cf34d4ff0ec53ebb09e40ccf207b2069ff4fd4d0c7c"
+  }
+}
