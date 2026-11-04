@@ -1,0 +1,55 @@
+Resolving dependencies...
+Downloading packages...
+  cross_file 0.3.5+5 (0.4.0 available)
+  flutter_keyboard_visibility_linux 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_macos 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_platform_interface 2.0.0 (3.0.0 available)
+  flutter_keyboard_visibility_windows 1.0.0 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading C:/SpaceFlutter207/source/test/core_test.dart
+00:00 +0: C:/SpaceFlutter207/source/test/core_test.dart: 鍘熺敓鏍锋湰 01-json-v1.json 鏃犳崯寰€杩?00:00 +1: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +2: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +3: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +4: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +5: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +6: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +7: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +8: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +9: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +10: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +11: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +12: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +13: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +14: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:00 +15: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:01 +16: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:01 +17: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍒楀鍥涙。銆佷笂涓嬮檺銆佹棫璁剧疆涓庨噸鍚仮澶?00:01 +18: C:/SpaceFlutter207/source/test/core_test.dart: 鍘熺敓SP鍖?001 epoch锛屼竷澶╄繃鏈熶笌鍝堝笇鍖归厤
+00:01 +19: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:01 +20: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:01 +21: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:01 +22: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:01 +23: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:01 +24: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:01 +25: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:05 +26: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:05 +27: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:06 +28: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:06 +29: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:08 +30: C:/SpaceFlutter207/source/test/settings_test.dart: 鑷鎭㈠鍙ｄ护闅忔満鐩愬姞瀵嗐€佹纭仮澶嶃€侀敊璇瘑閽ュ強绡℃敼鎷掔粷
+00:10 +31: C:/SpaceFlutter207/source/test/settings_test.dart: 鑷鎭㈠鍙ｄ护闅忔満鐩愬姞瀵嗐€佹纭仮澶嶃€侀敊璇瘑閽ュ強绡℃敼鎷掔粷
+00:12 +32: C:/SpaceFlutter207/source/test/settings_test.dart: 鑷鎭㈠鍙ｄ护闅忔満鐩愬姞瀵嗐€佹纭仮澶嶃€侀敊璇瘑閽ュ強绡℃敼鎷掔粷
+00:14 +33: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1180.0 鍥涙。鐙珛鍒楀涓庣瓑楂樺崱鐗囨棤婧㈠嚭
+00:14 +34: C:/SpaceFlutter207/source/test/settings_test.dart: 鍙屽悜浼犺緭銆佹仮澶嶅墠蹇収銆侀厤缃繚鐣欙紱閿欒瀵嗛挜鍙婁簯绔珵浜夐樆姝㈣鐩?00:14 +35: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1380.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:14 +36: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1380.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:14 +37: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1380.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:14 +38: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1380.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:15 +39: C:/SpaceFlutter207/source/test/settings_test.dart: 绯荤粺璺熼殢銆佹墜鍔ㄨ鐩栥€侀噸寮€淇濈暀鍙婅繛缁繃娓′腑闂村抚
+00:17 +40: C:/SpaceFlutter207/source/test/settings_test.dart: 绯荤粺璺熼殢銆佹墜鍔ㄨ鐩栥€侀噸寮€淇濈暀鍙婅繛缁繃娓′腑闂村抚
+00:19 +41: C:/SpaceFlutter207/source/test/settings_test.dart: 绯荤粺璺熼殢銆佹墜鍔ㄨ鐩栥€侀噸寮€淇濈暀鍙婅繛缁繃娓′腑闂村抚
+00:21 +42: C:/SpaceFlutter207/source/test/iteration_test.dart: false/1600.0 鍥涙。鐙珛鍒楀涓庣瓑楂樺崱鐗囨棤婧㈠嚭
+00:21 +43: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:23 +44: C:/SpaceFlutter207/source/test/settings_test.dart: 鏁版嵁搴撳鍏ュ鍑轰娇鐢ㄤ笓鐢ㄦ枃浠堕潰鏉匡紝鍙栨秷涓嶆敼鏁版嵁搴擄紱闄勪欢鍙﹀瓨淇濇寔閫氱敤
+00:23 +45: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1020.0 鍥涙。鐙珛鍒楀涓庣瓑楂樺崱鐗囨棤婧㈠嚭
+00:24 +46: C:/SpaceFlutter207/source/test/settings_test.dart: 杩炴帴瀛楁鑷姩钀藉簱锛屽叧闂噸寮€淇濈暀锛涗簯绔寜閽厛纭
+00:26 +47: C:/SpaceFlutter207/source/test/settings_test.dart: 杩炴帴瀛楁鑷姩钀藉簱锛屽叧闂噸寮€淇濈暀锛涗簯绔寜閽厛纭
+00:26 +48: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1180.0 鍥涙。鐙珛鍒楀涓庣瓑楂樺崱鐗囨棤婧㈠嚭
+00:27 +49: C:/SpaceFlutter207/source/test/settings_test.dart: 娴呰壊璁剧疆绮剧畝涓庣揣鍑戞寜閽悓鎺?00:28 +50: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1380.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:28 +51: C:/SpaceFlutter207/source/test/settings_test.dart: 娣辫壊璁剧疆绮剧畝涓庣揣鍑戞寜閽悓鎺?00:29 +52: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1380.0 鍥涙。鐙珛鍒楀涓庣瓑楂樺崱鐗囨棤婧㈠嚭
+00:30 +53: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:30 +54: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:30 +55: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +56: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +57: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +58: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +59: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +60: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +61: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +62: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +63: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:31 +64: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 椤舵爮鍙屾柟鍚戣繃娓℃寜閽棤瑁佸垏锛屾瑙堢嫭绔嬫敹灞?00:32 +65: C:/SpaceFlutter207/source/test/store_test.dart: 082/083/088 闄勪欢璺緞涓?0MiB/20涓?20MiB杈圭晫
+00:32 +66: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 鍥涙。鐙珛鍒楀涓庣瓑楂樺崱鐗囨棤婧㈠嚭
+00:32 +67: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 鍥涙。鐙珛鍒楀涓庣瓑楂樺崱鐗囨棤婧㈠嚭
+00:32 +68: C:/SpaceFlutter207/source/test/iteration_test.dart: true/1600.0 鍥涙。鐙珛鍒楀涓庣瓑楂樺崱鐗囨棤婧㈠嚭
+00:33 +69: C:/SpaceFlutter207/source/test/iteration_test.dart: 1020.0 鐪嬫澘缂╃獎宸﹀榻愶紝瀵艰埅鍜屽垪瀹界粡杩囦腑闂村抚涓斿彲鍙嶅悜
+00:33 +70: C:/SpaceFlutter207/source/test/iteration_test.dart: 1020.0 鐪嬫澘缂╃獎宸﹀榻愶紝瀵艰埅鍜屽垪瀹界粡杩囦腑闂村抚涓斿彲鍙嶅悜
+00:34 +71: C:/SpaceFlutter207/source/test/workspace_test.dart: light 椤舵爮瀵艰埅鍙偣鍑绘敹灞曞苟鎸佷箙鍖栵紝闈㈡澘鏃犲嚫鍑硅疆寤?00:36 +72: C:/SpaceFlutter207/source/test/workspace_test.dart: light 椤舵爮瀵艰埅鍙偣鍑绘敹灞曞苟鎸佷箙鍖栵紝闈㈡澘鏃犲嚫鍑硅疆寤?00:38 +73: C:/SpaceFlutter207/source/test/iteration_test.dart: 鍏ㄥ眬闅愯棌鍦ㄧ幇鏈夊脊绐椾腑绔嬪嵆鐢熸晥锛屽叧闂仮澶嶆粴鍔ㄦ潯
+00:38 +74: C:/SpaceFlutter207/source/test/workspace_test.dart: light 鐢樼壒鍥鹃粯璁ゆ帓鏈熷拰鑷畾涔夌姸鎬佷娇鐢ㄥ彲璇诲～鑹?00:39 +75: C:/SpaceFlutter207/source/test/iteration_test.dart: 鏈€绐勫仠鐢ㄥ垪鏍囬涓庢柊寤哄叆鍙ｆ棤婧㈠嚭锛涘弻鍑绘仮澶嶉粯璁ゅ搴?00:40 +76: C:/SpaceFlutter207/source/test/workspace_test.dart: dark 椤舵爮瀵艰埅鍙偣鍑绘敹灞曞苟鎸佷箙鍖栵紝闈㈡澘鏃犲嚫鍑硅疆寤?00:41 +77: C:/SpaceFlutter207/source/test/workspace_test.dart: dark 椤舵爮瀵艰埅鍙偣鍑绘敹灞曞苟鎸佷箙鍖栵紝闈㈡澘鏃犲嚫鍑硅疆寤?00:42 +78: C:/SpaceFlutter207/source/test/iteration_test.dart: 闅愯棌寮€鍏宠鐩栧洓瑙嗗浘鍜屼换鍔＄紪杈戠殑宓屽婊氬姩鍖哄煙
+00:43 +79: C:/SpaceFlutter207/source/test/iteration_test.dart: 闅愯棌寮€鍏宠鐩栧洓瑙嗗浘鍜屼换鍔＄紪杈戠殑宓屽婊氬姩鍖哄煙
+00:43 +80: C:/SpaceFlutter207/source/test/workspace_test.dart: 浜富棰?1020 鍥涜鍥句笌鏀跺睍鏃犲竷灞€寮傚父
+00:46 +81: C:/SpaceFlutter207/source/test/workspace_test.dart: 浜富棰?1180 鍥涜鍥句笌鏀跺睍鏃犲竷灞€寮傚父
+00:47 +82: C:/SpaceFlutter207/source/test/workspace_test.dart: 浜富棰?1380 鍥涜鍥句笌鏀跺睍鏃犲竷灞€寮傚父
+00:51 +83: C:/SpaceFlutter207/source/test/workspace_test.dart: 浜富棰?1600 鍥涜鍥句笌鏀跺睍鏃犲竷灞€寮傚父
+00:52 +84: C:/SpaceFlutter207/source/test/workspace_test.dart: 鏆椾富棰?1020 鍥涜鍥句笌鏀跺睍鏃犲竷灞€寮傚父
+00:53 +85: C:/SpaceFlutter207/source/test/workspace_test.dart: 鏆椾富棰?1180 鍥涜鍥句笌鏀跺睍鏃犲竷灞€寮傚父
+00:55 +86: C:/SpaceFlutter207/source/test/workspace_test.dart: 鏆椾富棰?1380 鍥涜鍥句笌鏀跺睍鏃犲竷灞€寮傚父
+00:57 +87: C:/SpaceFlutter207/source/test/workspace_test.dart: 鏆椾富棰?1600 鍥涜鍥句笌鏀跺睍鏃犲竷灞€寮傚父
+00:58 +88: C:/SpaceFlutter207/source/test/workspace_test.dart: 鏂板缓淇濆瓨涓庨噸寮€锛涜剰鑽夌鍙栨秷淇濇姢锛涙诞灞傞敭鐩樺彇娑?01:01 +89: C:/SpaceFlutter207/source/test/workspace_test.dart: 鍒嗙被蹇瓫涓庢煡璇㈠叡鐢紱瀹屾垚鍜屽崟姝ユ挙閿€
+01:02 +90: C:/SpaceFlutter207/source/test/workspace_test.dart: 鑷畾涔夌姸鎬佸惎鍋滀笌杩佺Щ淇濈暀浠诲姟瀛楁
+01:03 +91: C:/SpaceFlutter207/source/test/workspace_test.dart: 鐪嬫澘璺ㄥ垪鎷栨斁淇濆瓨骞跺彲鎾ら攢
+01:04 +92: C:/SpaceFlutter207/source/test/workspace_test.dart: 鐢樼壒鏁存潯鎷栧姩鎸夎嚜鐒舵棩钀藉簱涓庢挙閿€
+01:06 +93: C:/SpaceFlutter207/source/test/workspace_test.dart: 鎼滅储杈撳叆N涓嶄細鏂板缓锛涙棩鍘嗘煡鐪嬫棩鏈熶笉鑳芥竻闄?01:08 +94: C:/SpaceFlutter207/source/test/workspace_test.dart: 鏃ュ巻鏃ュ懆鏈堝瓙妯″紡鍜屾寔涔呭寲鏃犳孩鍑?01:09 +95: C:/SpaceFlutter207/source/test/workspace_test.dart: 鍥炬枃鏍煎紡涓庝笂浼犻檮浠朵繚瀛橀噸寮€锛屾棩鏈熸竻闄や笉鐢熸垚浼帓鏈?01:11 +96: C:/SpaceFlutter207/source/test/workspace_test.dart: 鍗＄墖绛夐珮銆佸崟琛岀渷鐣ャ€佸垎绫绘棩鏈熷悓鎺掞紱娴佸厜鏃犻渶鎮仠
+01:12 +97: C:/SpaceFlutter207/source/test/workspace_test.dart: 椤圭洰绠＄悊鍏ュ彛銆佹敼鍚嶅強鍋滅敤锛涜彍鍗曚娇鐢ㄧ嫭绔嬫诞灞?01:15 +98: C:/SpaceFlutter207/source/test/workspace_test.dart: 绮樿创鍥惧儚淇濆瓨閲嶅紑涓嶇敓鎴愰檮浠?01:18 +99: C:/SpaceFlutter207/source/test/workspace_test.dart: 浜富棰樼揣鍑戣〃鍗曚笌涓嬫媺娴眰灞傛
+01:19 +100: C:/SpaceFlutter207/source/test/workspace_test.dart: 鏆椾富棰樼揣鍑戣〃鍗曚笌涓嬫媺娴眰灞傛
+01:21 +101: C:/SpaceFlutter207/source/test/workspace_test.dart: 绌烘爣棰橀敊璇樉绀哄湪鏍囬涓嬪苟淇濈暀鑽夌
+01:23 +102: All tests passed!

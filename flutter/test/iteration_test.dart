@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' show min, max;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:space_flutter/main.dart';
@@ -146,6 +147,48 @@ void main() {
         expect(t.takeException(), isNull);
       });
     }
+  }
+  for (final width in [1020.0, 1600.0]) {
+    testWidgets('$width 看板缩窄左对齐，导航和列宽经过中间帧且可反向', (t) async {
+      await t.runAsync(() => s.preference('navCollapsed', 'false'));
+      await launch(t, width);
+      t.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: false);
+      await t.pump(const Duration(milliseconds: 600));
+      final first = find.byKey(const ValueKey('board-column-todo'));
+      final second = find.byKey(const ValueKey('board-column-doing'));
+      final initial = t.getRect(first);
+      await t.runAsync(() => s.preference('boardWidth.todo', '.5'));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 80));
+      expect(t.getSize(first).width, lessThan(initial.width));
+      expect(t.getSize(first).width, greaterThan(initial.width * .5));
+      await t.pump(const Duration(milliseconds: 600));
+      expect(t.getRect(first).left, closeTo(initial.left, .1));
+      expect(
+        t.getRect(second).left,
+        closeTo(initial.left + initial.width * .5 + 12, .1),
+      );
+      for (final collapsed in [true, false]) {
+        final start = t.getRect(first).left;
+        await t.runAsync(() => s.preference('navCollapsed', '$collapsed'));
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 80));
+        final middle = t.getRect(first).left;
+        await t.pump(const Duration(milliseconds: 600));
+        final end = t.getRect(first).left;
+        expect(middle, inExclusiveRange(min(start, end), max(start, end)));
+        expect(t.takeException(), isNull);
+      }
+      await t.runAsync(() => s.preference('navCollapsed', 'true'));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 64));
+      await t.runAsync(() => s.preference('navCollapsed', 'false'));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 600));
+      expect(t.getRect(first).left, closeTo(initial.left, .1));
+      expect(t.takeException(), isNull);
+    });
   }
   testWidgets('全局隐藏在现有弹窗中立即生效，关闭恢复滚动条', (t) async {
     await launch(t, 1380);

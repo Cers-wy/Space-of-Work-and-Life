@@ -1,0 +1,194 @@
+{
+  "source": [
+    {
+      "sha256": "abb153d0ae57238b8af9cce4bea4650c5964fa870b5afe4da8d607a9cdd2aa6f",
+      "path": "lib/host.dart"
+    },
+    {
+      "sha256": "30d1a22bf9019143a2e174796122c29a8183bff7125ad74bf1dc811dd7c42dc5",
+      "path": "lib/main.dart"
+    },
+    {
+      "sha256": "da5060ed2f6ab1e4d3dd74e7f239526439b89249ac122b377922688ea57d75ae",
+      "path": "lib/store.dart"
+    },
+    {
+      "sha256": "e6ea75cf7fa1e161d6c5418c1451c4cc4847df184d475459458786f628f53a94",
+      "path": "lib/core/files.dart"
+    },
+    {
+      "sha256": "6913e0fbff0593b703f6f03ad7bb69ddf5f8ca2e47d0dd904cc6a444c2231429",
+      "path": "lib/core/models.dart"
+    },
+    {
+      "sha256": "22ea28be57ea01ef2f80eb8ee85f8de2d3393ed6093fb1f4eadc12ceef19618c",
+      "path": "lib/core/repository.dart"
+    },
+    {
+      "sha256": "207b7be0ac63b963cfa35d026e0a578463bf332f5ce9d351773dbc358c16e8dc",
+      "path": "lib/core/richtext.dart"
+    },
+    {
+      "sha256": "5bc6443fc5ea3a998d8c686eda8ddc8b5d98818495e21a54afadb74eb119ad26",
+      "path": "lib/core/sync.dart"
+    },
+    {
+      "sha256": "dc519ea37e309bc319011813a1e259e668b23a757100023469712176f0f041f1",
+      "path": "lib/core/sync_service.dart"
+    },
+    {
+      "sha256": "ba8fe68e633486aa61cbc7aa035d948b5ee06ecbc2021ac2c108ce6209050f23",
+      "path": "lib/ui/benchmark.dart"
+    },
+    {
+      "sha256": "887bec233619cc1df4bb1034a302383e9d73d15f7fd7cd490c98cd6f61a723e3",
+      "path": "lib/ui/controls.dart"
+    },
+    {
+      "sha256": "afd471d6913fd8c3c5939cc64fa990aa2cf702f59b42a0f202d66a9dbab335ee",
+      "path": "lib/ui/dialogs.dart"
+    },
+    {
+      "sha256": "cb5eb94748b59d90e4f77dd8da213f98c860ba974910a62f9be0c70c65312dca",
+      "path": "lib/ui/gantt_colors.dart"
+    },
+    {
+      "sha256": "a955dd601bcb319290652ab9b9c1ad1697e39b22db8a92df71b18a446d395ab6",
+      "path": "lib/ui/image_preview.dart"
+    },
+    {
+      "sha256": "449c359ac02939076e1b375162c07e33229af12381cf5f033c9f9bdbbd77a176",
+      "path": "lib/ui/schedule.dart"
+    },
+    {
+      "sha256": "976700629fae685169a5fdb506127591ab1b30ee58b612275aa38399f5be4281",
+      "path": "lib/ui/sync_settings.dart"
+    },
+    {
+      "sha256": "a39a3468cee133c1e5738d2ec873bbab6cf2e72cad0ef48685464f7395d83874",
+      "path": "lib/ui/theme.dart"
+    },
+    {
+      "sha256": "e96285347f634ae048c99f0da86aceee50b94f5470a70923426ea6cfb137937c",
+      "path": "lib/ui/workspace.dart"
+    }
+  ],
+  "fileVersion": "2.0.8+9",
+  "files": [
+    {
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+      "path": "concrt140.dll"
+    },
+    {
+      "sha256": "b6bd144a6343905988facd06143d73444a78ecafdc1059c8daa2c4bba391c725",
+      "path": "file_selector_windows_plugin.dll"
+    },
+    {
+      "sha256": "30494fb08f9f101a8fbe42568110aaa160efbd7341f3cfe877dc14214be3a233",
+      "path": "flutter_windows.dll"
+    },
+    {
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+      "path": "msvcp140.dll"
+    },
+    {
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+      "path": "msvcp140_1.dll"
+    },
+    {
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+      "path": "msvcp140_2.dll"
+    },
+    {
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+      "path": "msvcp140_atomic_wait.dll"
+    },
+    {
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+      "path": "msvcp140_codecvt_ids.dll"
+    },
+    {
+      "sha256": "3f831799350495283b9a008fd5b6629007495fafdd4cbf2378ba2d510a30ab93",
+      "path": "native_assets.json"
+    },
+    {
+      "sha256": "33126a9d60f7e1b6e14946587f893f03c0b226fbff94924241aa6b90d8c55e69",
+      "path": "Space.exe"
+    },
+    {
+      "sha256": "3a29878d0936510af0f563dfc7668c561c92f7ebe1d9fef95975f721dc01b590",
+      "path": "sqlite3.dll"
+    },
+    {
+      "sha256": "7d7d4ab8e923fb4851506f02a12ccfa7915904284b001de5fdecb696d4c01158",
+      "path": "THIRD_PARTY_NOTICES.txt"
+    },
+    {
+      "sha256": "746af26d6fdd3624627491de40b801dd8b9d1116f1b755fc14c6eb64aee0ffbb",
+      "path": "url_launcher_windows_plugin.dll"
+    },
+    {
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+      "path": "vccorlib140.dll"
+    },
+    {
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+      "path": "vcruntime140.dll"
+    },
+    {
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+      "path": "vcruntime140_1.dll"
+    },
+    {
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+      "path": "vcruntime140_threads.dll"
+    },
+    {
+      "sha256": "873e0f2aa3875470a75a43d5387e6d44caed51884b8423a0459d2da23069ea53",
+      "path": "浣跨敤璇存槑.md"
+    },
+    {
+      "sha256": "dfc692b64c081116168ef1e70bb281175d9e71be3afb632ee224bd04440ae8bf",
+      "path": "data\\app.so"
+    },
+    {
+      "sha256": "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7",
+      "path": "data\\icudtl.dat"
+    },
+    {
+      "sha256": "f566cc6fccc657365c0197accf3a7d6f80f85209ff666ff774f4dcbc524aa842",
+      "path": "data\\flutter_assets\\AssetManifest.bin"
+    },
+    {
+      "sha256": "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d",
+      "path": "data\\flutter_assets\\FontManifest.json"
+    },
+    {
+      "sha256": "4ac70f7d67abb2ffc105d2cabfdee68c9aa138d132107e5be4949c539f7ce379",
+      "path": "data\\flutter_assets\\NativeAssetsManifest.json"
+    },
+    {
+      "sha256": "a77b7467864ed04c192e16bca621e71406a32cf77e0e275a6aca910dbf0021d8",
+      "path": "data\\flutter_assets\\NOTICES.Z"
+    },
+    {
+      "sha256": "6c76c04538aa399114ad74fbba42f6487ae7851037f53a49d4f78dc1da629bf8",
+      "path": "data\\flutter_assets\\fonts\\MaterialIcons-Regular.otf"
+    },
+    {
+      "sha256": "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af",
+      "path": "data\\flutter_assets\\shaders\\ink_sparkle.frag"
+    },
+    {
+      "sha256": "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f",
+      "path": "data\\flutter_assets\\shaders\\stretch_effect.frag"
+    }
+  ],
+  "version": "2.0.8+9",
+  "zip_sha256": "f120a66951e5af3b504b4dbff670b689da917ba7116df7f22bf95e9fcc543dc1",
+  "tests_passed": 102,
+  "native_ui": "final ZIP extraction normal entry: empty three-column home visually verified in UTM after graphics environment restart",
+  "sqlite_quick_check": "ok",
+  "tasks": 0,
+  "projects": 0
+}

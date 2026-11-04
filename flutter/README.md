@@ -1,4 +1,4 @@
-# Space Flutter 2.0.7（8）
+# Space Flutter 2.0.8（9）
 
 Space 是使用 Flutter/Dart 共用业务与界面的本地桌面工作台，支持 macOS Apple Silicon、Windows 11 x64。包含任务、项目、自定义状态、看板、列表、甘特图、日历、图文附件、SQLite 备份及 GitHub 加密同步。
 
@@ -39,7 +39,7 @@ flutter build windows --release
 
 macOS打包脚本生成ZIP、DMG、SHA256，已有同名目录时停止。Windows免安装包须完整保留Release目录及C++运行库、SQLite和Flutter资源。详见[macOS安装说明](INSTALL-macOS.md)、[Windows使用说明](INSTALL-Windows.md)。macOS为临时签名，未做Apple公证。
 
-当前验证范围与限制见[本版验收](verification/验收记录-2.0.7.md)。100项自动回归包含核心协议、本地保存、业务交互、四宽度明暗主题、顶栏过渡裁切、列宽及隐藏滚动条。性能与真实GitHub双设备同步未在本轮重新测试。
+当前验证范围与限制见[本版验收](verification/验收记录-2.0.8.md)。102项自动回归包含核心协议、本地保存、业务交互、四宽度明暗主题、顶栏过渡裁切、列宽、左对齐、导航动画中间帧与反向切换及隐藏滚动条。Release性能覆盖看板静置、导航切换、列宽调整、滚动、四视图切换及两张4K图反复开关；真实GitHub双设备同步未在本轮重新测试。
 
 ## 目录
 

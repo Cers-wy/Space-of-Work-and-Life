@@ -123,130 +123,160 @@ class _WorkspaceState extends State<Workspace> {
               : box.maxWidth >= 1600
               ? 240.0
               : 224.0;
-          return Stack(
+          final workspaceContent = Column(
             children: [
-              Positioned.fill(child: Ambient()),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      left: nav + 8,
-                      top: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: Column(
-                        children: [
-                          overview(box.maxWidth),
-                          if (s.error != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Glass(
-                                padding: const EdgeInsets.all(12),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        s.error!,
-                                        style: textStyle(
-                                          p,
-                                          size: 12,
-                                          color: p.red,
-                                        ),
-                                      ),
-                                    ),
-                                    SpaceButton(
-                                      height: 32,
-                                      onPressed: s.reload,
-                                      child: const Text('重新载入'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: !s.loaded
-                                ? unavailable()
-                                : AnimatedSwitcher(
-                                    duration:
-                                        MediaQuery.of(context).disableAnimations
-                                        ? const Duration(milliseconds: 200)
-                                        : spaceDuration,
-                                    switchInCurve: spaceCurve,
-                                    transitionBuilder: (child, a) =>
-                                        FadeTransition(
-                                          opacity: a,
-                                          child: ScaleTransition(
-                                            scale: Tween<double>(
-                                              begin: .985,
-                                              end: 1,
-                                            ).animate(a),
-                                            child: child,
-                                          ),
-                                        ),
-                                    child: KeyedSubtree(
-                                      key: ValueKey(s.view),
-                                      child: BackdropGroup(
-                                        child: RepaintBoundary(
-                                          child: s.view == 'board'
-                                              ? board()
-                                              : s.view == 'list'
-                                              ? taskList()
-                                              : s.view == 'gantt'
-                                              ? GanttView(store: s)
-                                              : CalendarView(store: s),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+              overview(box.maxWidth),
+              if (s.error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Glass(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            s.error!,
+                            style: textStyle(p, size: 12, color: p.red),
                           ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: nav,
-                      child: sidebar(nav),
-                    ),
-                  ],
-                ),
-              ),
-              if (s.notice != null)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 24,
-                  child: Center(
-                    child: Glass(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(s.notice!, style: textStyle(p, size: 12)),
-                          if (s.canUndo) ...[
-                            const SizedBox(width: 12),
-                            SpaceButton(
-                              height: 32,
-                              onPressed: s.undo,
-                              child: Text(
-                                '撤销',
-                                style: textStyle(p, size: 12, color: p.accent),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                        ),
+                        SpaceButton(
+                          height: 32,
+                          onPressed: s.reload,
+                          child: const Text('重新载入'),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: !s.loaded
+                    ? unavailable()
+                    : AnimatedSwitcher(
+                        duration: MediaQuery.of(context).disableAnimations
+                            ? const Duration(milliseconds: 200)
+                            : spaceDuration,
+                        switchInCurve: spaceCurve,
+                        transitionBuilder: (child, a) => FadeTransition(
+                          opacity: a,
+                          child: ScaleTransition(
+                            scale: Tween<double>(
+                              begin: .985,
+                              end: 1,
+                            ).animate(a),
+                            child: child,
+                          ),
+                        ),
+                        child: KeyedSubtree(
+                          key: ValueKey(s.view),
+                          child: BackdropGroup(
+                            child: RepaintBoundary(
+                              child: s.view == 'board'
+                                  ? board()
+                                  : s.view == 'list'
+                                  ? taskList()
+                                  : s.view == 'gantt'
+                                  ? GanttView(store: s)
+                                  : CalendarView(store: s),
+                            ),
+                          ),
+                        ),
+                      ),
+              ),
             ],
+          );
+          final navigation = ClipRect(
+            child: AnimatedSwitcher(
+              duration: MediaQuery.of(context).disableAnimations
+                  ? Duration.zero
+                  : spaceDuration,
+              switchInCurve: spaceCurve,
+              switchOutCurve: spaceCurve,
+              layoutBuilder: (current, previous) => Stack(
+                alignment: Alignment.topLeft,
+                children: [...previous, ?current],
+              ),
+              child: SizedBox(
+                key: ValueKey(s.navCollapsed),
+                height: box.maxHeight - 16,
+                child: OverflowBox(
+                  alignment: Alignment.topLeft,
+                  minWidth: nav,
+                  maxWidth: nav,
+                  child: sidebar(nav, s.navCollapsed),
+                ),
+              ),
+            ),
+          );
+          final ambient = Ambient();
+          return TweenAnimationBuilder<double>(
+            tween: Tween(end: nav),
+            duration: MediaQuery.of(context).disableAnimations
+                ? Duration.zero
+                : spaceDuration,
+            curve: spaceCurve,
+            builder: (context, animatedNav, _) => Stack(
+              children: [
+                Positioned.fill(child: ambient),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        left: animatedNav + 8,
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: workspaceContent,
+                      ),
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: animatedNav,
+                        child: navigation,
+                      ),
+                    ],
+                  ),
+                ),
+                if (s.notice != null)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 24,
+                    child: Center(
+                      child: Glass(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(s.notice!, style: textStyle(p, size: 12)),
+                            if (s.canUndo) ...[
+                              const SizedBox(width: 12),
+                              SpaceButton(
+                                height: 32,
+                                onPressed: s.undo,
+                                child: Text(
+                                  '撤销',
+                                  style: textStyle(
+                                    p,
+                                    size: 12,
+                                    color: p.accent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           );
         },
       ),
@@ -277,17 +307,17 @@ class _WorkspaceState extends State<Workspace> {
     );
   }
 
-  Widget sidebar(double width) {
+  Widget sidebar(double width, bool collapsed) {
     final p = Palette.of(context);
     return Glass(
       padding: EdgeInsets.symmetric(
-        horizontal: s.navCollapsed ? 8 : 16,
+        horizontal: collapsed ? 8 : 16,
         vertical: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (s.navCollapsed)
+          if (collapsed)
             const Center(child: Mark())
           else
             Row(
@@ -309,7 +339,7 @@ class _WorkspaceState extends State<Workspace> {
               ],
             ),
           const SizedBox(height: 16),
-          if (!s.navCollapsed)
+          if (!collapsed)
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
               child: Text(
@@ -320,7 +350,7 @@ class _WorkspaceState extends State<Workspace> {
           SpaceButton(
             height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            selected: !s.navCollapsed,
+            selected: !collapsed,
             onPressed: s.resetQuery,
             tooltip: '任务，${s.state.tasks.length}项任务',
             child: Row(
@@ -335,7 +365,7 @@ class _WorkspaceState extends State<Workspace> {
                   alignment: Alignment.center,
                   child: const SpaceIcon('grid', size: 16, color: Colors.white),
                 ),
-                if (!s.navCollapsed) ...[
+                if (!collapsed) ...[
                   const SizedBox(width: 12),
                   const Text('任务'),
                   const Spacer(),
@@ -349,7 +379,7 @@ class _WorkspaceState extends State<Workspace> {
           ),
           const Spacer(),
           Align(
-            alignment: s.navCollapsed ? Alignment.center : Alignment.centerLeft,
+            alignment: collapsed ? Alignment.center : Alignment.centerLeft,
             child: IconButtonS(
               'gear',
               '数据与设置（⌘,）',
@@ -835,93 +865,120 @@ class _WorkspaceState extends State<Workspace> {
       ],
     ],
   );
-  Widget board() => LayoutBuilder(
-    builder: (c, b) {
-      final statuses = s.state.displayStatuses;
-      final width = math.max(
-        280.0,
-        (b.maxWidth - 12 * (statuses.length - 1)) / statuses.length,
-      );
-      final widths = {
-        for (final status in statuses)
-          status: width * (previewWidths[status] ?? s.boardWidthRatio(status)),
-      };
-      final total =
-          widths.values.fold(0.0, (a, b) => a + b) + 12 * (statuses.length - 1);
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var i = 0; i < statuses.length; i++) ...[
-              if (i > 0) const SizedBox(width: 12),
-              SizedBox(
-                key: ValueKey('board-column-${statuses[i]}'),
-                width: widths[statuses[i]],
-                height: b.maxHeight - (total > b.maxWidth ? 16 : 0),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: column(statuses[i], widths[statuses[i]]!),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: 8,
-                      child: BoardResizeHandle(
-                        key: ValueKey('board-resize-${statuses[i]}'),
-                        ratio:
-                            previewWidths[statuses[i]] ??
-                            s.boardWidthRatio(statuses[i]),
-                        onStart: () => dragActive.value = true,
-                        onUpdate: (delta) => setState(() {
-                          final current =
-                              previewWidths[statuses[i]] ??
-                              s.boardWidthRatio(statuses[i]);
-                          previewWidths[statuses[i]] = (current + delta / width)
-                              .clamp(.5, 1.0);
-                        }),
-                        onEnd: () async {
-                          dragActive.value = false;
-                          final ratio = snapBoardRatio(
-                            previewWidths[statuses[i]] ??
-                                s.boardWidthRatio(statuses[i]),
-                          );
-                          setState(() => previewWidths[statuses[i]] = ratio);
-                          await s.preference(
-                            'boardWidth.${statuses[i]}',
-                            '$ratio',
-                          );
-                          if (mounted) {
-                            setState(() => previewWidths.remove(statuses[i]));
-                          }
-                        },
-                        onReset: () async {
-                          await s.preference(
-                            'boardWidth.${statuses[i]}',
-                            '1.0',
-                          );
-                          if (mounted) {
-                            setState(() => previewWidths.remove(statuses[i]));
-                          }
-                        },
-                        onCancel: () {
-                          dragActive.value = false;
-                          setState(() => previewWidths.remove(statuses[i]));
-                        },
+  Widget board() {
+    final columns = {
+      for (final status in s.state.displayStatuses) status: column(status),
+    };
+    return LayoutBuilder(
+      builder: (c, b) {
+        final statuses = s.state.displayStatuses;
+        final width = math.max(
+          280.0,
+          (b.maxWidth - 12 * (statuses.length - 1)) / statuses.length,
+        );
+        final widths = {
+          for (final status in statuses)
+            status:
+                width * (previewWidths[status] ?? s.boardWidthRatio(status)),
+        };
+        final total =
+            widths.values.fold(0.0, (a, b) => a + b) +
+            12 * (statuses.length - 1);
+        return Align(
+          alignment: Alignment.topLeft,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < statuses.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 12),
+                  TweenAnimationBuilder<double>(
+                    child: columns[statuses[i]],
+                    tween: Tween(end: widths[statuses[i]]!),
+                    duration:
+                        MediaQuery.of(context).disableAnimations ||
+                            dragActive.value
+                        ? Duration.zero
+                        : spaceDuration,
+                    curve: spaceCurve,
+                    builder: (context, animatedWidth, content) => SizedBox(
+                      key: ValueKey('board-column-${statuses[i]}'),
+                      width: animatedWidth,
+                      height: b.maxHeight - (total > b.maxWidth ? 16 : 0),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(child: content!),
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: 8,
+                            child: BoardResizeHandle(
+                              key: ValueKey('board-resize-${statuses[i]}'),
+                              ratio:
+                                  previewWidths[statuses[i]] ??
+                                  s.boardWidthRatio(statuses[i]),
+                              onStart: () => dragActive.value = true,
+                              onUpdate: (delta) => setState(() {
+                                final current =
+                                    previewWidths[statuses[i]] ??
+                                    s.boardWidthRatio(statuses[i]);
+                                previewWidths[statuses[i]] =
+                                    (current + delta / width).clamp(.5, 1.0);
+                              }),
+                              onEnd: () async {
+                                dragActive.value = false;
+                                final ratio = snapBoardRatio(
+                                  previewWidths[statuses[i]] ??
+                                      s.boardWidthRatio(statuses[i]),
+                                );
+                                setState(
+                                  () => previewWidths[statuses[i]] = ratio,
+                                );
+                                await s.preference(
+                                  'boardWidth.${statuses[i]}',
+                                  '$ratio',
+                                );
+                                if (mounted) {
+                                  setState(
+                                    () => previewWidths.remove(statuses[i]),
+                                  );
+                                }
+                              },
+                              onReset: () async {
+                                await s.preference(
+                                  'boardWidth.${statuses[i]}',
+                                  '1.0',
+                                );
+                                if (mounted) {
+                                  setState(
+                                    () => previewWidths.remove(statuses[i]),
+                                  );
+                                }
+                              },
+                              onCancel: () {
+                                dragActive.value = false;
+                                setState(
+                                  () => previewWidths.remove(statuses[i]),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      );
-    },
-  );
-  Widget column(String status, double width) {
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget column(String status) {
     final p = Palette.of(context);
     final tasks = s.grouped[status] ?? [];
     final disabled = s.state.disabledStatuses.contains(status);
@@ -1080,26 +1137,34 @@ class _WorkspaceState extends State<Workspace> {
                       store: s,
                       onEdit: () => editTask(context, s, task, existing: true),
                     );
-                    return Draggable<_TaskDrag>(
-                      data: _TaskDrag(task),
-                      dragAnchorStrategy: pointerDragAnchorStrategy,
-                      onDragStarted: () => dragActive.value = true,
-                      onDragEnd: (_) => dragActive.value = false,
-                      onDraggableCanceled: (_, pt) => dragActive.value = false,
-                      feedback: Material(
-                        type: MaterialType.transparency,
-                        child: SizedBox(
-                          width: width - 16,
-                          child: TaskCard(
-                            task: task,
-                            store: s,
-                            onEdit: () {},
-                            preview: true,
+                    return Builder(
+                      builder: (cardContext) => Draggable<_TaskDrag>(
+                        data: _TaskDrag(task),
+                        dragAnchorStrategy: pointerDragAnchorStrategy,
+                        onDragStarted: () => dragActive.value = true,
+                        onDragEnd: (_) => dragActive.value = false,
+                        onDraggableCanceled: (_, pt) =>
+                            dragActive.value = false,
+                        feedback: Material(
+                          type: MaterialType.transparency,
+                          child: Builder(
+                            builder: (_) => SizedBox(
+                              width:
+                                  (cardContext.findRenderObject()! as RenderBox)
+                                      .size
+                                      .width,
+                              child: TaskCard(
+                                task: task,
+                                store: s,
+                                onEdit: () {},
+                                preview: true,
+                              ),
+                            ),
                           ),
                         ),
+                        childWhenDragging: Opacity(opacity: .45, child: card),
+                        child: card,
                       ),
-                      childWhenDragging: Opacity(opacity: .45, child: card),
-                      child: card,
                     );
                   },
                 ),

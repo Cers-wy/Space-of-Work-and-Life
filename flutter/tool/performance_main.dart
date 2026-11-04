@@ -3,6 +3,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ffi' hide Size;
+import 'package:ffi/ffi.dart';
 import 'dart:developer' show Timeline;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -18,6 +20,29 @@ import 'package:space_flutter/ui/workspace.dart';
 final root = GlobalKey();
 final timings = <FrameTiming>[];
 late Directory directory;
+
+final _user32 = DynamicLibrary.open('user32.dll');
+final _getForegroundWindow = _user32
+    .lookupFunction<Pointer<Void> Function(), Pointer<Void> Function()>(
+      'GetForegroundWindow',
+    );
+final _getWindowProcess = _user32
+    .lookupFunction<
+      Uint32 Function(Pointer<Void>, Pointer<Uint32>),
+      int Function(Pointer<Void>, Pointer<Uint32>)
+    >('GetWindowThreadProcessId');
+bool nativeForeground() {
+  if (!Platform.isWindows) {
+    return WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+  }
+  final value = calloc<Uint32>();
+  try {
+    _getWindowProcess(_getForegroundWindow(), value);
+    return value.value == pid;
+  } finally {
+    calloc.free(value);
+  }
+}
 
 class ForegroundProbe extends WidgetsBindingObserver {
   bool uninterrupted =
@@ -53,6 +78,20 @@ BuildContext workspaceContext() {
 }
 
 Future<Map<String, num>> processSample() async {
+  if (Platform.isWindows) {
+    final result = await Process.run('powershell.exe', [
+      '-NoProfile',
+      '-Command',
+      '(Get-Process -Id $pid | Select-Object CPU,WorkingSet64 | ConvertTo-Json -Compress)',
+    ]);
+    if (result.exitCode != 0) throw StateError('Process sample failed');
+    final values = jsonDecode(result.stdout as String) as Map<String, dynamic>;
+    return {
+      'cpuSeconds': (values['CPU'] as num).toDouble(),
+      'psRssMiB': (values['WorkingSet64'] as num) / 1048576,
+      'rssMiB': ProcessInfo.currentRss / 1048576,
+    };
+  }
   final result = await Process.run('/bin/ps', [
     '-p',
     '$pid',
@@ -197,6 +236,13 @@ Future<void> main() async {
 
   SchedulerBinding.instance.addTimingsCallback(collect);
   try {
+    final deadline = DateTime.now().add(const Duration(seconds: 90));
+    while (!nativeForeground()) {
+      if (DateTime.now().isAfter(deadline)) {
+        throw StateError('Benchmark did not receive foreground focus');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
     await Future<void>.delayed(const Duration(seconds: 4));
     final results = <Map<String, Object?>>[];
     results.add(
@@ -204,6 +250,58 @@ Future<void> main() async {
         'board-idle',
         () => Future<void>.delayed(const Duration(seconds: 10)),
       ),
+    );
+    results.add(
+      await measure('navigation-toggle', () async {
+        for (var i = 0; i < 10; i++) {
+          await store.preference('navCollapsed', '${i.isOdd}');
+          await Future<void>.delayed(const Duration(milliseconds: 650));
+        }
+      }),
+    );
+    results.add(
+      await measure('board-resize', () async {
+        for (var i = 0; i < 12; i++) {
+          await store.preference(
+            'boardWidth.todo',
+            '${[.5, 2 / 3, .75, 1.0][i % 4]}',
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 650));
+        }
+      }),
+    );
+    results.add(
+      await measure('board-scroll', () async {
+        ScrollableState? scroll;
+        void visit(Element e) {
+          if (e is StatefulElement && e.state is ScrollableState) {
+            final candidate = e.state as ScrollableState;
+            if (candidate.position.axis == Axis.vertical &&
+                candidate.position.maxScrollExtent > 0) {
+              scroll ??= candidate;
+            }
+          }
+          e.visitChildren(visit);
+        }
+
+        (root.currentContext! as Element).visitChildren(visit);
+        if (scroll == null) throw StateError('Scrollable board required');
+        for (var i = 0; i < 6; i++) {
+          await scroll!.position.animateTo(
+            i.isEven ? scroll!.position.maxScrollExtent : 0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      }),
+    );
+    results.add(
+      await measure('view-switch', () async {
+        for (final view in ['list', 'gantt', 'calendar', 'board']) {
+          await store.preference('viewMode', view);
+          await Future<void>.delayed(const Duration(milliseconds: 700));
+        }
+      }),
     );
     for (var i = 0; i < 3; i++) {
       final dialog = editTask(
@@ -247,7 +345,7 @@ Future<void> main() async {
     }
     final report = {
       'mode':
-          'macOS arm64 Release / 120 synthetic tasks / two 4K images / original visual effects',
+          '${Platform.operatingSystem} Release / 120 synthetic tasks / two 4K images',
       'formalDataAccessed': false,
       'frameCount': frames.length,
       'results': results,

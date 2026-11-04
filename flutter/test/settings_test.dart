@@ -269,6 +269,7 @@ void main() {
 
   Future<void> capture(WidgetTester t, String name) async {
     await t.runAsync(() async {
+      await Directory('verification/screenshots').create(recursive: true);
       final boundary =
           screenshotKey.currentContext!.findRenderObject()
               as RenderRepaintBoundary;

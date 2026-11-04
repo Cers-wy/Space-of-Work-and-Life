@@ -1,0 +1,5959 @@
+[
+  {
+    "unixMs": 1793776023289,
+    "appPid": 4248,
+    "workingSetMiB": 11.359375,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.015625
+  },
+  {
+    "unixMs": 1793776023427,
+    "appPid": 4248,
+    "workingSetMiB": 11.79296875,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.046875
+  },
+  {
+    "unixMs": 1793776023570,
+    "appPid": 4248,
+    "workingSetMiB": 29.0859375,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.1875
+  },
+  {
+    "unixMs": 1793776023682,
+    "appPid": 4248,
+    "workingSetMiB": 29.3046875,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.1875
+  },
+  {
+    "unixMs": 1793776023795,
+    "appPid": 4248,
+    "workingSetMiB": 29.31640625,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.1875
+  },
+  {
+    "unixMs": 1793776023905,
+    "appPid": 4248,
+    "workingSetMiB": 29.31640625,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.203125
+  },
+  {
+    "unixMs": 1793776024016,
+    "appPid": 4248,
+    "workingSetMiB": 29.31640625,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.203125
+  },
+  {
+    "unixMs": 1793776024130,
+    "appPid": 4248,
+    "workingSetMiB": 29.31640625,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.203125
+  },
+  {
+    "unixMs": 1793776024257,
+    "appPid": 4248,
+    "workingSetMiB": 29.31640625,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.21875
+  },
+  {
+    "unixMs": 1793776024382,
+    "appPid": 4248,
+    "workingSetMiB": 29.31640625,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.21875
+  },
+  {
+    "unixMs": 1793776024494,
+    "appPid": 4248,
+    "workingSetMiB": 29.7578125,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.21875
+  },
+  {
+    "unixMs": 1793776024609,
+    "appPid": 4248,
+    "workingSetMiB": 50.64453125,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.3125
+  },
+  {
+    "unixMs": 1793776024715,
+    "appPid": 4248,
+    "workingSetMiB": 62.76953125,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.4375
+  },
+  {
+    "unixMs": 1793776024827,
+    "appPid": 4248,
+    "workingSetMiB": 73.0625,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.5625
+  },
+  {
+    "unixMs": 1793776024936,
+    "appPid": 4248,
+    "workingSetMiB": 72.83984375,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.6875
+  },
+  {
+    "unixMs": 1793776025046,
+    "appPid": 4248,
+    "workingSetMiB": 69.359375,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.8125
+  },
+  {
+    "unixMs": 1793776025158,
+    "appPid": 4248,
+    "workingSetMiB": 72.64453125,
+    "foregroundPid": 11260,
+    "cpuSeconds": 0.9375
+  },
+  {
+    "unixMs": 1793776025267,
+    "appPid": 4248,
+    "workingSetMiB": 71.27734375,
+    "foregroundPid": 11260,
+    "cpuSeconds": 1.078125
+  },
+  {
+    "unixMs": 1793776025377,
+    "appPid": 4248,
+    "workingSetMiB": 75.25,
+    "foregroundPid": 11260,
+    "cpuSeconds": 1.203125
+  },
+  {
+    "unixMs": 1793776025487,
+    "appPid": 4248,
+    "workingSetMiB": 73.21875,
+    "foregroundPid": 11260,
+    "cpuSeconds": 1.359375
+  },
+  {
+    "unixMs": 1793776025596,
+    "appPid": 4248,
+    "workingSetMiB": 74.58203125,
+    "foregroundPid": 11260,
+    "cpuSeconds": 1.484375
+  },
+  {
+    "unixMs": 1793776025705,
+    "appPid": 4248,
+    "workingSetMiB": 76.96875,
+    "foregroundPid": 11260,
+    "cpuSeconds": 1.625
+  },
+  {
+    "unixMs": 1793776025823,
+    "appPid": 4248,
+    "workingSetMiB": 91.08984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 1.703125
+  },
+  {
+    "unixMs": 1793776025941,
+    "appPid": 4248,
+    "workingSetMiB": 96.6640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 1.796875
+  },
+  {
+    "unixMs": 1793776026056,
+    "appPid": 4248,
+    "workingSetMiB": 96.6640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 1.796875
+  },
+  {
+    "unixMs": 1793776026163,
+    "appPid": 4248,
+    "workingSetMiB": 133.19140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 1.859375
+  },
+  {
+    "unixMs": 1793776026276,
+    "appPid": 4248,
+    "workingSetMiB": 133.24609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 1.953125
+  },
+  {
+    "unixMs": 1793776026387,
+    "appPid": 4248,
+    "workingSetMiB": 133.25390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.0625
+  },
+  {
+    "unixMs": 1793776026495,
+    "appPid": 4248,
+    "workingSetMiB": 133.25390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.171875
+  },
+  {
+    "unixMs": 1793776026609,
+    "appPid": 4248,
+    "workingSetMiB": 97.43359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.234375
+  },
+  {
+    "unixMs": 1793776026735,
+    "appPid": 4248,
+    "workingSetMiB": 129.15625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.28125
+  },
+  {
+    "unixMs": 1793776026843,
+    "appPid": 4248,
+    "workingSetMiB": 129.1875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.390625
+  },
+  {
+    "unixMs": 1793776026953,
+    "appPid": 4248,
+    "workingSetMiB": 129.1875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.5
+  },
+  {
+    "unixMs": 1793776027063,
+    "appPid": 4248,
+    "workingSetMiB": 98.38671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.59375
+  },
+  {
+    "unixMs": 1793776027174,
+    "appPid": 4248,
+    "workingSetMiB": 103.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.6875
+  },
+  {
+    "unixMs": 1793776027286,
+    "appPid": 4248,
+    "workingSetMiB": 115.671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.796875
+  },
+  {
+    "unixMs": 1793776027396,
+    "appPid": 4248,
+    "workingSetMiB": 127.046875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 2.921875
+  },
+  {
+    "unixMs": 1793776027513,
+    "appPid": 4248,
+    "workingSetMiB": 133.31640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.046875
+  },
+  {
+    "unixMs": 1793776027681,
+    "appPid": 4248,
+    "workingSetMiB": 148.30078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.203125
+  },
+  {
+    "unixMs": 1793776027893,
+    "appPid": 4248,
+    "workingSetMiB": 151.953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.390625
+  },
+  {
+    "unixMs": 1793776028012,
+    "appPid": 4248,
+    "workingSetMiB": 154.24609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.46875
+  },
+  {
+    "unixMs": 1793776028121,
+    "appPid": 4248,
+    "workingSetMiB": 154.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.484375
+  },
+  {
+    "unixMs": 1793776028238,
+    "appPid": 4248,
+    "workingSetMiB": 154.94921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.546875
+  },
+  {
+    "unixMs": 1793776028363,
+    "appPid": 4248,
+    "workingSetMiB": 145.58203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.59375
+  },
+  {
+    "unixMs": 1793776028489,
+    "appPid": 4248,
+    "workingSetMiB": 145.859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.640625
+  },
+  {
+    "unixMs": 1793776028609,
+    "appPid": 4248,
+    "workingSetMiB": 146.14453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.6875
+  },
+  {
+    "unixMs": 1793776028725,
+    "appPid": 4248,
+    "workingSetMiB": 146.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.75
+  },
+  {
+    "unixMs": 1793776028838,
+    "appPid": 4248,
+    "workingSetMiB": 146.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.8125
+  },
+  {
+    "unixMs": 1793776028953,
+    "appPid": 4248,
+    "workingSetMiB": 147.23828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.890625
+  },
+  {
+    "unixMs": 1793776029061,
+    "appPid": 4248,
+    "workingSetMiB": 146.41015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.953125
+  },
+  {
+    "unixMs": 1793776029173,
+    "appPid": 4248,
+    "workingSetMiB": 146.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 3.984375
+  },
+  {
+    "unixMs": 1793776029285,
+    "appPid": 4248,
+    "workingSetMiB": 146.97265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.046875
+  },
+  {
+    "unixMs": 1793776029395,
+    "appPid": 4248,
+    "workingSetMiB": 147.1953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.109375
+  },
+  {
+    "unixMs": 1793776029506,
+    "appPid": 4248,
+    "workingSetMiB": 147.41015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.15625
+  },
+  {
+    "unixMs": 1793776029619,
+    "appPid": 4248,
+    "workingSetMiB": 147.66015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.21875
+  },
+  {
+    "unixMs": 1793776029729,
+    "appPid": 4248,
+    "workingSetMiB": 148,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.25
+  },
+  {
+    "unixMs": 1793776029841,
+    "appPid": 4248,
+    "workingSetMiB": 148.25390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.3125
+  },
+  {
+    "unixMs": 1793776029950,
+    "appPid": 4248,
+    "workingSetMiB": 148.53125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.34375
+  },
+  {
+    "unixMs": 1793776030060,
+    "appPid": 4248,
+    "workingSetMiB": 148.72265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.375
+  },
+  {
+    "unixMs": 1793776030182,
+    "appPid": 4248,
+    "workingSetMiB": 149.09375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.46875
+  },
+  {
+    "unixMs": 1793776030296,
+    "appPid": 4248,
+    "workingSetMiB": 149.34375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.5
+  },
+  {
+    "unixMs": 1793776030407,
+    "appPid": 4248,
+    "workingSetMiB": 149.734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.546875
+  },
+  {
+    "unixMs": 1793776030518,
+    "appPid": 4248,
+    "workingSetMiB": 149.921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.578125
+  },
+  {
+    "unixMs": 1793776030630,
+    "appPid": 4248,
+    "workingSetMiB": 150.109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.59375
+  },
+  {
+    "unixMs": 1793776030743,
+    "appPid": 4248,
+    "workingSetMiB": 150.46875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.65625
+  },
+  {
+    "unixMs": 1793776030851,
+    "appPid": 4248,
+    "workingSetMiB": 150.71875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.6875
+  },
+  {
+    "unixMs": 1793776030963,
+    "appPid": 4248,
+    "workingSetMiB": 151.03125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.71875
+  },
+  {
+    "unixMs": 1793776031070,
+    "appPid": 4248,
+    "workingSetMiB": 151.28125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.734375
+  },
+  {
+    "unixMs": 1793776031180,
+    "appPid": 4248,
+    "workingSetMiB": 151.48046875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.75
+  },
+  {
+    "unixMs": 1793776031291,
+    "appPid": 4248,
+    "workingSetMiB": 151.984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.84375
+  },
+  {
+    "unixMs": 1793776031403,
+    "appPid": 4248,
+    "workingSetMiB": 152.34375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.875
+  },
+  {
+    "unixMs": 1793776031513,
+    "appPid": 4248,
+    "workingSetMiB": 152.65625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.9375
+  },
+  {
+    "unixMs": 1793776031626,
+    "appPid": 4248,
+    "workingSetMiB": 152.90625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 4.953125
+  },
+  {
+    "unixMs": 1793776031733,
+    "appPid": 4248,
+    "workingSetMiB": 153.09765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.015625
+  },
+  {
+    "unixMs": 1793776031855,
+    "appPid": 4248,
+    "workingSetMiB": 153.38671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.046875
+  },
+  {
+    "unixMs": 1793776031983,
+    "appPid": 4248,
+    "workingSetMiB": 153.8671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.109375
+  },
+  {
+    "unixMs": 1793776032093,
+    "appPid": 4248,
+    "workingSetMiB": 153.88671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.234375
+  },
+  {
+    "unixMs": 1793776032202,
+    "appPid": 4248,
+    "workingSetMiB": 154.15234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.3125
+  },
+  {
+    "unixMs": 1793776032314,
+    "appPid": 4248,
+    "workingSetMiB": 154.1015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.359375
+  },
+  {
+    "unixMs": 1793776032424,
+    "appPid": 4248,
+    "workingSetMiB": 154.49609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.40625
+  },
+  {
+    "unixMs": 1793776032533,
+    "appPid": 4248,
+    "workingSetMiB": 154.68359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.46875
+  },
+  {
+    "unixMs": 1793776032643,
+    "appPid": 4248,
+    "workingSetMiB": 142.9296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.5625
+  },
+  {
+    "unixMs": 1793776032752,
+    "appPid": 4248,
+    "workingSetMiB": 143.21484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.609375
+  },
+  {
+    "unixMs": 1793776032862,
+    "appPid": 4248,
+    "workingSetMiB": 143.4140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.6875
+  },
+  {
+    "unixMs": 1793776032971,
+    "appPid": 4248,
+    "workingSetMiB": 144.078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.75
+  },
+  {
+    "unixMs": 1793776033081,
+    "appPid": 4248,
+    "workingSetMiB": 144.328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.78125
+  },
+  {
+    "unixMs": 1793776033192,
+    "appPid": 4248,
+    "workingSetMiB": 144.578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.84375
+  },
+  {
+    "unixMs": 1793776033318,
+    "appPid": 4248,
+    "workingSetMiB": 148.640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 5.90625
+  },
+  {
+    "unixMs": 1793776033442,
+    "appPid": 4248,
+    "workingSetMiB": 153.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6
+  },
+  {
+    "unixMs": 1793776033552,
+    "appPid": 4248,
+    "workingSetMiB": 156.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.0625
+  },
+  {
+    "unixMs": 1793776033664,
+    "appPid": 4248,
+    "workingSetMiB": 160.39453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.109375
+  },
+  {
+    "unixMs": 1793776033774,
+    "appPid": 4248,
+    "workingSetMiB": 148.94921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.140625
+  },
+  {
+    "unixMs": 1793776033884,
+    "appPid": 4248,
+    "workingSetMiB": 149.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.203125
+  },
+  {
+    "unixMs": 1793776033996,
+    "appPid": 4248,
+    "workingSetMiB": 149.41015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.265625
+  },
+  {
+    "unixMs": 1793776034108,
+    "appPid": 4248,
+    "workingSetMiB": 149.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.296875
+  },
+  {
+    "unixMs": 1793776034221,
+    "appPid": 4248,
+    "workingSetMiB": 149.95703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.359375
+  },
+  {
+    "unixMs": 1793776034327,
+    "appPid": 4248,
+    "workingSetMiB": 150.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.40625
+  },
+  {
+    "unixMs": 1793776034440,
+    "appPid": 4248,
+    "workingSetMiB": 150.51953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.421875
+  },
+  {
+    "unixMs": 1793776034550,
+    "appPid": 4248,
+    "workingSetMiB": 150.70703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.46875
+  },
+  {
+    "unixMs": 1793776034664,
+    "appPid": 4248,
+    "workingSetMiB": 150.9296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.515625
+  },
+  {
+    "unixMs": 1793776034810,
+    "appPid": 4248,
+    "workingSetMiB": 151.26953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.59375
+  },
+  {
+    "unixMs": 1793776034919,
+    "appPid": 4248,
+    "workingSetMiB": 151.51953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.640625
+  },
+  {
+    "unixMs": 1793776035032,
+    "appPid": 4248,
+    "workingSetMiB": 151.76953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.671875
+  },
+  {
+    "unixMs": 1793776035142,
+    "appPid": 4248,
+    "workingSetMiB": 151.921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.703125
+  },
+  {
+    "unixMs": 1793776035252,
+    "appPid": 4248,
+    "workingSetMiB": 152.14453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.734375
+  },
+  {
+    "unixMs": 1793776035363,
+    "appPid": 4248,
+    "workingSetMiB": 152.42578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.765625
+  },
+  {
+    "unixMs": 1793776035475,
+    "appPid": 4248,
+    "workingSetMiB": 152.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.796875
+  },
+  {
+    "unixMs": 1793776035585,
+    "appPid": 4248,
+    "workingSetMiB": 153.01953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.859375
+  },
+  {
+    "unixMs": 1793776035695,
+    "appPid": 4248,
+    "workingSetMiB": 153.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.875
+  },
+  {
+    "unixMs": 1793776035806,
+    "appPid": 4248,
+    "workingSetMiB": 153.4375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.90625
+  },
+  {
+    "unixMs": 1793776035917,
+    "appPid": 4248,
+    "workingSetMiB": 153.70703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 6.953125
+  },
+  {
+    "unixMs": 1793776036030,
+    "appPid": 4248,
+    "workingSetMiB": 153.90234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.03125
+  },
+  {
+    "unixMs": 1793776036140,
+    "appPid": 4248,
+    "workingSetMiB": 154.1484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.078125
+  },
+  {
+    "unixMs": 1793776036251,
+    "appPid": 4248,
+    "workingSetMiB": 154.3984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.125
+  },
+  {
+    "unixMs": 1793776036361,
+    "appPid": 4248,
+    "workingSetMiB": 154.6484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.15625
+  },
+  {
+    "unixMs": 1793776036471,
+    "appPid": 4248,
+    "workingSetMiB": 154.8359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.203125
+  },
+  {
+    "unixMs": 1793776036582,
+    "appPid": 4248,
+    "workingSetMiB": 155.0234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.296875
+  },
+  {
+    "unixMs": 1793776036704,
+    "appPid": 4248,
+    "workingSetMiB": 155.2734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.328125
+  },
+  {
+    "unixMs": 1793776036815,
+    "appPid": 4248,
+    "workingSetMiB": 155.5234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.375
+  },
+  {
+    "unixMs": 1793776036926,
+    "appPid": 4248,
+    "workingSetMiB": 155.8359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.375
+  },
+  {
+    "unixMs": 1793776037037,
+    "appPid": 4248,
+    "workingSetMiB": 156.0859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.40625
+  },
+  {
+    "unixMs": 1793776037148,
+    "appPid": 4248,
+    "workingSetMiB": 156.2734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.4375
+  },
+  {
+    "unixMs": 1793776037260,
+    "appPid": 4248,
+    "workingSetMiB": 156.6953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.5
+  },
+  {
+    "unixMs": 1793776037371,
+    "appPid": 4248,
+    "workingSetMiB": 156.89453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.546875
+  },
+  {
+    "unixMs": 1793776037483,
+    "appPid": 4248,
+    "workingSetMiB": 157.08203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.59375
+  },
+  {
+    "unixMs": 1793776037593,
+    "appPid": 4248,
+    "workingSetMiB": 145.3671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.671875
+  },
+  {
+    "unixMs": 1793776037703,
+    "appPid": 4248,
+    "workingSetMiB": 145.6796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.71875
+  },
+  {
+    "unixMs": 1793776037812,
+    "appPid": 4248,
+    "workingSetMiB": 145.9296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.765625
+  },
+  {
+    "unixMs": 1793776037924,
+    "appPid": 4248,
+    "workingSetMiB": 146.1171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.8125
+  },
+  {
+    "unixMs": 1793776038033,
+    "appPid": 4248,
+    "workingSetMiB": 146.3046875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.875
+  },
+  {
+    "unixMs": 1793776038144,
+    "appPid": 4248,
+    "workingSetMiB": 146.6171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.921875
+  },
+  {
+    "unixMs": 1793776038256,
+    "appPid": 4248,
+    "workingSetMiB": 146.8046875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.953125
+  },
+  {
+    "unixMs": 1793776038367,
+    "appPid": 4248,
+    "workingSetMiB": 147.1796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 7.984375
+  },
+  {
+    "unixMs": 1793776038479,
+    "appPid": 4248,
+    "workingSetMiB": 147.4296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.03125
+  },
+  {
+    "unixMs": 1793776038592,
+    "appPid": 4248,
+    "workingSetMiB": 147.6171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.0625
+  },
+  {
+    "unixMs": 1793776038703,
+    "appPid": 4248,
+    "workingSetMiB": 147.58984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.09375
+  },
+  {
+    "unixMs": 1793776038811,
+    "appPid": 4248,
+    "workingSetMiB": 147.90234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.15625
+  },
+  {
+    "unixMs": 1793776038920,
+    "appPid": 4248,
+    "workingSetMiB": 148.08984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.203125
+  },
+  {
+    "unixMs": 1793776039032,
+    "appPid": 4248,
+    "workingSetMiB": 148.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.234375
+  },
+  {
+    "unixMs": 1793776039147,
+    "appPid": 4248,
+    "workingSetMiB": 148.52734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.296875
+  },
+  {
+    "unixMs": 1793776039256,
+    "appPid": 4248,
+    "workingSetMiB": 148.83984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.34375
+  },
+  {
+    "unixMs": 1793776039366,
+    "appPid": 4248,
+    "workingSetMiB": 149.02734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.390625
+  },
+  {
+    "unixMs": 1793776039478,
+    "appPid": 4248,
+    "workingSetMiB": 149.27734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.40625
+  },
+  {
+    "unixMs": 1793776039588,
+    "appPid": 4248,
+    "workingSetMiB": 149.58984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.484375
+  },
+  {
+    "unixMs": 1793776039699,
+    "appPid": 4248,
+    "workingSetMiB": 149.84375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.53125
+  },
+  {
+    "unixMs": 1793776039811,
+    "appPid": 4248,
+    "workingSetMiB": 150.09375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.578125
+  },
+  {
+    "unixMs": 1793776039923,
+    "appPid": 4248,
+    "workingSetMiB": 150.40625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.625
+  },
+  {
+    "unixMs": 1793776040031,
+    "appPid": 4248,
+    "workingSetMiB": 150.65625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.65625
+  },
+  {
+    "unixMs": 1793776040144,
+    "appPid": 4248,
+    "workingSetMiB": 150.84375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.6875
+  },
+  {
+    "unixMs": 1793776040258,
+    "appPid": 4248,
+    "workingSetMiB": 151.16015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.734375
+  },
+  {
+    "unixMs": 1793776040368,
+    "appPid": 4248,
+    "workingSetMiB": 151.40625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.796875
+  },
+  {
+    "unixMs": 1793776040477,
+    "appPid": 4248,
+    "workingSetMiB": 151.65625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.8125
+  },
+  {
+    "unixMs": 1793776040586,
+    "appPid": 4248,
+    "workingSetMiB": 151.84375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.84375
+  },
+  {
+    "unixMs": 1793776040698,
+    "appPid": 4248,
+    "workingSetMiB": 152.09375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.890625
+  },
+  {
+    "unixMs": 1793776040808,
+    "appPid": 4248,
+    "workingSetMiB": 152.34375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 8.953125
+  },
+  {
+    "unixMs": 1793776040918,
+    "appPid": 4248,
+    "workingSetMiB": 152.609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9
+  },
+  {
+    "unixMs": 1793776041029,
+    "appPid": 4248,
+    "workingSetMiB": 152.859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.03125
+  },
+  {
+    "unixMs": 1793776041140,
+    "appPid": 4248,
+    "workingSetMiB": 153.171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.078125
+  },
+  {
+    "unixMs": 1793776041251,
+    "appPid": 4248,
+    "workingSetMiB": 153.421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.140625
+  },
+  {
+    "unixMs": 1793776041365,
+    "appPid": 4248,
+    "workingSetMiB": 153.609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.15625
+  },
+  {
+    "unixMs": 1793776041477,
+    "appPid": 4248,
+    "workingSetMiB": 153.859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.1875
+  },
+  {
+    "unixMs": 1793776041589,
+    "appPid": 4248,
+    "workingSetMiB": 154.25,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.234375
+  },
+  {
+    "unixMs": 1793776041701,
+    "appPid": 4248,
+    "workingSetMiB": 154.4375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.3125
+  },
+  {
+    "unixMs": 1793776041813,
+    "appPid": 4248,
+    "workingSetMiB": 154.6875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.390625
+  },
+  {
+    "unixMs": 1793776041939,
+    "appPid": 4248,
+    "workingSetMiB": 154.8125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.4375
+  },
+  {
+    "unixMs": 1793776042056,
+    "appPid": 4248,
+    "workingSetMiB": 155.13671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.515625
+  },
+  {
+    "unixMs": 1793776042167,
+    "appPid": 4248,
+    "workingSetMiB": 155.3828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.578125
+  },
+  {
+    "unixMs": 1793776042275,
+    "appPid": 4248,
+    "workingSetMiB": 155.7578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.640625
+  },
+  {
+    "unixMs": 1793776042386,
+    "appPid": 4248,
+    "workingSetMiB": 155.97265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.671875
+  },
+  {
+    "unixMs": 1793776042495,
+    "appPid": 4248,
+    "workingSetMiB": 156.25,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.734375
+  },
+  {
+    "unixMs": 1793776042606,
+    "appPid": 4248,
+    "workingSetMiB": 156.1953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.75
+  },
+  {
+    "unixMs": 1793776042717,
+    "appPid": 4248,
+    "workingSetMiB": 156.3828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.796875
+  },
+  {
+    "unixMs": 1793776042826,
+    "appPid": 4248,
+    "workingSetMiB": 156.796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.84375
+  },
+  {
+    "unixMs": 1793776042934,
+    "appPid": 4248,
+    "workingSetMiB": 157.19921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.90625
+  },
+  {
+    "unixMs": 1793776043044,
+    "appPid": 4248,
+    "workingSetMiB": 145.1796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 9.984375
+  },
+  {
+    "unixMs": 1793776043152,
+    "appPid": 4248,
+    "workingSetMiB": 145.4296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.015625
+  },
+  {
+    "unixMs": 1793776043265,
+    "appPid": 4248,
+    "workingSetMiB": 145.61328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.0625
+  },
+  {
+    "unixMs": 1793776043391,
+    "appPid": 4248,
+    "workingSetMiB": 145.86328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.140625
+  },
+  {
+    "unixMs": 1793776043507,
+    "appPid": 4248,
+    "workingSetMiB": 146.11328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.25
+  },
+  {
+    "unixMs": 1793776043620,
+    "appPid": 4248,
+    "workingSetMiB": 146.30078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.296875
+  },
+  {
+    "unixMs": 1793776043730,
+    "appPid": 4248,
+    "workingSetMiB": 146.49609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.34375
+  },
+  {
+    "unixMs": 1793776043841,
+    "appPid": 4248,
+    "workingSetMiB": 146.73828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.359375
+  },
+  {
+    "unixMs": 1793776043953,
+    "appPid": 4248,
+    "workingSetMiB": 147.0234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.453125
+  },
+  {
+    "unixMs": 1793776044059,
+    "appPid": 4248,
+    "workingSetMiB": 147.30078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.515625
+  },
+  {
+    "unixMs": 1793776044171,
+    "appPid": 4248,
+    "workingSetMiB": 147.48828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.578125
+  },
+  {
+    "unixMs": 1793776044279,
+    "appPid": 4248,
+    "workingSetMiB": 147.73828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.625
+  },
+  {
+    "unixMs": 1793776044389,
+    "appPid": 4248,
+    "workingSetMiB": 147.92578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.65625
+  },
+  {
+    "unixMs": 1793776044499,
+    "appPid": 4248,
+    "workingSetMiB": 148.17578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.734375
+  },
+  {
+    "unixMs": 1793776044609,
+    "appPid": 4248,
+    "workingSetMiB": 148.83203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.828125
+  },
+  {
+    "unixMs": 1793776044717,
+    "appPid": 4248,
+    "workingSetMiB": 149.08203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.890625
+  },
+  {
+    "unixMs": 1793776044827,
+    "appPid": 4248,
+    "workingSetMiB": 149.26953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 10.953125
+  },
+  {
+    "unixMs": 1793776044936,
+    "appPid": 4248,
+    "workingSetMiB": 149.51953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.03125
+  },
+  {
+    "unixMs": 1793776045047,
+    "appPid": 4248,
+    "workingSetMiB": 149.76953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.078125
+  },
+  {
+    "unixMs": 1793776045157,
+    "appPid": 4248,
+    "workingSetMiB": 149.95703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.125
+  },
+  {
+    "unixMs": 1793776045267,
+    "appPid": 4248,
+    "workingSetMiB": 150.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.15625
+  },
+  {
+    "unixMs": 1793776045376,
+    "appPid": 4248,
+    "workingSetMiB": 150.51953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.203125
+  },
+  {
+    "unixMs": 1793776045485,
+    "appPid": 4248,
+    "workingSetMiB": 150.76953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.265625
+  },
+  {
+    "unixMs": 1793776045595,
+    "appPid": 4248,
+    "workingSetMiB": 151.01953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.3125
+  },
+  {
+    "unixMs": 1793776045703,
+    "appPid": 4248,
+    "workingSetMiB": 151.2734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.34375
+  },
+  {
+    "unixMs": 1793776045813,
+    "appPid": 4248,
+    "workingSetMiB": 151.4609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.390625
+  },
+  {
+    "unixMs": 1793776045923,
+    "appPid": 4248,
+    "workingSetMiB": 155.265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.453125
+  },
+  {
+    "unixMs": 1793776046049,
+    "appPid": 4248,
+    "workingSetMiB": 162.484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.546875
+  },
+  {
+    "unixMs": 1793776046160,
+    "appPid": 4248,
+    "workingSetMiB": 152.79296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.59375
+  },
+  {
+    "unixMs": 1793776046271,
+    "appPid": 4248,
+    "workingSetMiB": 155.421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.625
+  },
+  {
+    "unixMs": 1793776046381,
+    "appPid": 4248,
+    "workingSetMiB": 158.484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.71875
+  },
+  {
+    "unixMs": 1793776046495,
+    "appPid": 4248,
+    "workingSetMiB": 161.546875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.765625
+  },
+  {
+    "unixMs": 1793776046606,
+    "appPid": 4248,
+    "workingSetMiB": 153.1875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.84375
+  },
+  {
+    "unixMs": 1793776046716,
+    "appPid": 4248,
+    "workingSetMiB": 158.96875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.921875
+  },
+  {
+    "unixMs": 1793776046827,
+    "appPid": 4248,
+    "workingSetMiB": 162.45703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 11.96875
+  },
+  {
+    "unixMs": 1793776046938,
+    "appPid": 4248,
+    "workingSetMiB": 165.46484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.03125
+  },
+  {
+    "unixMs": 1793776047048,
+    "appPid": 4248,
+    "workingSetMiB": 153.65625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.140625
+  },
+  {
+    "unixMs": 1793776047157,
+    "appPid": 4248,
+    "workingSetMiB": 158.15625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.21875
+  },
+  {
+    "unixMs": 1793776047267,
+    "appPid": 4248,
+    "workingSetMiB": 160.28515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.25
+  },
+  {
+    "unixMs": 1793776047377,
+    "appPid": 4248,
+    "workingSetMiB": 151.87109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.34375
+  },
+  {
+    "unixMs": 1793776047489,
+    "appPid": 4248,
+    "workingSetMiB": 156.30078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.40625
+  },
+  {
+    "unixMs": 1793776047599,
+    "appPid": 4248,
+    "workingSetMiB": 159.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.484375
+  },
+  {
+    "unixMs": 1793776047712,
+    "appPid": 4248,
+    "workingSetMiB": 161.16796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.546875
+  },
+  {
+    "unixMs": 1793776047823,
+    "appPid": 4248,
+    "workingSetMiB": 151.91796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.578125
+  },
+  {
+    "unixMs": 1793776047934,
+    "appPid": 4248,
+    "workingSetMiB": 153.703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.625
+  },
+  {
+    "unixMs": 1793776048043,
+    "appPid": 4248,
+    "workingSetMiB": 162.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.71875
+  },
+  {
+    "unixMs": 1793776048154,
+    "appPid": 4248,
+    "workingSetMiB": 152.01171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.796875
+  },
+  {
+    "unixMs": 1793776048265,
+    "appPid": 4248,
+    "workingSetMiB": 155.1484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.84375
+  },
+  {
+    "unixMs": 1793776048375,
+    "appPid": 4248,
+    "workingSetMiB": 159.84765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.90625
+  },
+  {
+    "unixMs": 1793776048486,
+    "appPid": 4248,
+    "workingSetMiB": 162.8515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.9375
+  },
+  {
+    "unixMs": 1793776048595,
+    "appPid": 4248,
+    "workingSetMiB": 152.1640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 12.984375
+  },
+  {
+    "unixMs": 1793776048718,
+    "appPid": 4248,
+    "workingSetMiB": 158.390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.078125
+  },
+  {
+    "unixMs": 1793776048832,
+    "appPid": 4248,
+    "workingSetMiB": 161.77734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.109375
+  },
+  {
+    "unixMs": 1793776048943,
+    "appPid": 4248,
+    "workingSetMiB": 152.5546875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.140625
+  },
+  {
+    "unixMs": 1793776049066,
+    "appPid": 4248,
+    "workingSetMiB": 155.5703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.25
+  },
+  {
+    "unixMs": 1793776049191,
+    "appPid": 4248,
+    "workingSetMiB": 160.1328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.328125
+  },
+  {
+    "unixMs": 1793776049303,
+    "appPid": 4248,
+    "workingSetMiB": 164.0078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.375
+  },
+  {
+    "unixMs": 1793776049414,
+    "appPid": 4248,
+    "workingSetMiB": 154.4453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.4375
+  },
+  {
+    "unixMs": 1793776049525,
+    "appPid": 4248,
+    "workingSetMiB": 158.2734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.484375
+  },
+  {
+    "unixMs": 1793776049635,
+    "appPid": 4248,
+    "workingSetMiB": 162.1640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.5625
+  },
+  {
+    "unixMs": 1793776049746,
+    "appPid": 4248,
+    "workingSetMiB": 152.7265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.625
+  },
+  {
+    "unixMs": 1793776049858,
+    "appPid": 4248,
+    "workingSetMiB": 157.1015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.65625
+  },
+  {
+    "unixMs": 1793776049969,
+    "appPid": 4248,
+    "workingSetMiB": 158.9140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.71875
+  },
+  {
+    "unixMs": 1793776050090,
+    "appPid": 4248,
+    "workingSetMiB": 164.90625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.765625
+  },
+  {
+    "unixMs": 1793776050193,
+    "appPid": 4248,
+    "workingSetMiB": 154.34375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.90625
+  },
+  {
+    "unixMs": 1793776050303,
+    "appPid": 4248,
+    "workingSetMiB": 157.53515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 13.984375
+  },
+  {
+    "unixMs": 1793776050414,
+    "appPid": 4248,
+    "workingSetMiB": 162.22265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.078125
+  },
+  {
+    "unixMs": 1793776050526,
+    "appPid": 4248,
+    "workingSetMiB": 165.22265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.125
+  },
+  {
+    "unixMs": 1793776050637,
+    "appPid": 4248,
+    "workingSetMiB": 155.14453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.15625
+  },
+  {
+    "unixMs": 1793776050747,
+    "appPid": 4248,
+    "workingSetMiB": 160.09765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.203125
+  },
+  {
+    "unixMs": 1793776050857,
+    "appPid": 4248,
+    "workingSetMiB": 163.28515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.265625
+  },
+  {
+    "unixMs": 1793776050965,
+    "appPid": 4248,
+    "workingSetMiB": 154.61328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.375
+  },
+  {
+    "unixMs": 1793776051074,
+    "appPid": 4248,
+    "workingSetMiB": 158.48828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.453125
+  },
+  {
+    "unixMs": 1793776051187,
+    "appPid": 4248,
+    "workingSetMiB": 161.48828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.546875
+  },
+  {
+    "unixMs": 1793776051298,
+    "appPid": 4248,
+    "workingSetMiB": 163.18359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.609375
+  },
+  {
+    "unixMs": 1793776051407,
+    "appPid": 4248,
+    "workingSetMiB": 156.04296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.6875
+  },
+  {
+    "unixMs": 1793776051517,
+    "appPid": 4248,
+    "workingSetMiB": 159.11328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.765625
+  },
+  {
+    "unixMs": 1793776051627,
+    "appPid": 4248,
+    "workingSetMiB": 161.8125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.84375
+  },
+  {
+    "unixMs": 1793776051735,
+    "appPid": 4248,
+    "workingSetMiB": 152.8125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.9375
+  },
+  {
+    "unixMs": 1793776051846,
+    "appPid": 4248,
+    "workingSetMiB": 157.0625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 14.984375
+  },
+  {
+    "unixMs": 1793776051957,
+    "appPid": 4248,
+    "workingSetMiB": 158.75,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.0625
+  },
+  {
+    "unixMs": 1793776052083,
+    "appPid": 4248,
+    "workingSetMiB": 153.87890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.140625
+  },
+  {
+    "unixMs": 1793776052193,
+    "appPid": 4248,
+    "workingSetMiB": 157.0234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.21875
+  },
+  {
+    "unixMs": 1793776052302,
+    "appPid": 4248,
+    "workingSetMiB": 160.0234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.265625
+  },
+  {
+    "unixMs": 1793776052412,
+    "appPid": 4248,
+    "workingSetMiB": 163.09375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.3125
+  },
+  {
+    "unixMs": 1793776052524,
+    "appPid": 4248,
+    "workingSetMiB": 155.46875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.4375
+  },
+  {
+    "unixMs": 1793776052634,
+    "appPid": 4248,
+    "workingSetMiB": 157.09375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.46875
+  },
+  {
+    "unixMs": 1793776052743,
+    "appPid": 4248,
+    "workingSetMiB": 157.28515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.53125
+  },
+  {
+    "unixMs": 1793776052851,
+    "appPid": 4248,
+    "workingSetMiB": 157.59765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.546875
+  },
+  {
+    "unixMs": 1793776052962,
+    "appPid": 4248,
+    "workingSetMiB": 157.78515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.5625
+  },
+  {
+    "unixMs": 1793776053071,
+    "appPid": 4248,
+    "workingSetMiB": 158.0390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.640625
+  },
+  {
+    "unixMs": 1793776053180,
+    "appPid": 4248,
+    "workingSetMiB": 158.2265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.6875
+  },
+  {
+    "unixMs": 1793776053290,
+    "appPid": 4248,
+    "workingSetMiB": 158.4765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.71875
+  },
+  {
+    "unixMs": 1793776053401,
+    "appPid": 4248,
+    "workingSetMiB": 158.7265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.765625
+  },
+  {
+    "unixMs": 1793776053510,
+    "appPid": 4248,
+    "workingSetMiB": 159.0390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.828125
+  },
+  {
+    "unixMs": 1793776053620,
+    "appPid": 4248,
+    "workingSetMiB": 159.53125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.890625
+  },
+  {
+    "unixMs": 1793776053727,
+    "appPid": 4248,
+    "workingSetMiB": 159.7109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.921875
+  },
+  {
+    "unixMs": 1793776053837,
+    "appPid": 4248,
+    "workingSetMiB": 159.96875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 15.96875
+  },
+  {
+    "unixMs": 1793776053948,
+    "appPid": 4248,
+    "workingSetMiB": 160.1953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.046875
+  },
+  {
+    "unixMs": 1793776054060,
+    "appPid": 4248,
+    "workingSetMiB": 160.59375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.109375
+  },
+  {
+    "unixMs": 1793776054167,
+    "appPid": 4248,
+    "workingSetMiB": 160.78125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.15625
+  },
+  {
+    "unixMs": 1793776054276,
+    "appPid": 4248,
+    "workingSetMiB": 160.96875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.1875
+  },
+  {
+    "unixMs": 1793776054385,
+    "appPid": 4248,
+    "workingSetMiB": 161.15625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.21875
+  },
+  {
+    "unixMs": 1793776054495,
+    "appPid": 4248,
+    "workingSetMiB": 161.40625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.265625
+  },
+  {
+    "unixMs": 1793776054604,
+    "appPid": 4248,
+    "workingSetMiB": 161.59375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.296875
+  },
+  {
+    "unixMs": 1793776054714,
+    "appPid": 4248,
+    "workingSetMiB": 161.84375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.359375
+  },
+  {
+    "unixMs": 1793776054826,
+    "appPid": 4248,
+    "workingSetMiB": 162.1640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.421875
+  },
+  {
+    "unixMs": 1793776054935,
+    "appPid": 4248,
+    "workingSetMiB": 162.40625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.46875
+  },
+  {
+    "unixMs": 1793776055045,
+    "appPid": 4248,
+    "workingSetMiB": 162.65625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.53125
+  },
+  {
+    "unixMs": 1793776055156,
+    "appPid": 4248,
+    "workingSetMiB": 162.6015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.578125
+  },
+  {
+    "unixMs": 1793776055265,
+    "appPid": 4248,
+    "workingSetMiB": 152.66015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.734375
+  },
+  {
+    "unixMs": 1793776055374,
+    "appPid": 4248,
+    "workingSetMiB": 158.31640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.8125
+  },
+  {
+    "unixMs": 1793776055483,
+    "appPid": 4248,
+    "workingSetMiB": 162.8828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.90625
+  },
+  {
+    "unixMs": 1793776055594,
+    "appPid": 4248,
+    "workingSetMiB": 166.0078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 16.9375
+  },
+  {
+    "unixMs": 1793776055703,
+    "appPid": 4248,
+    "workingSetMiB": 155.8203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17
+  },
+  {
+    "unixMs": 1793776055815,
+    "appPid": 4248,
+    "workingSetMiB": 158.8203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.0625
+  },
+  {
+    "unixMs": 1793776055925,
+    "appPid": 4248,
+    "workingSetMiB": 153.71875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.140625
+  },
+  {
+    "unixMs": 1793776056033,
+    "appPid": 4248,
+    "workingSetMiB": 156.7578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.203125
+  },
+  {
+    "unixMs": 1793776056145,
+    "appPid": 4248,
+    "workingSetMiB": 159.91015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.28125
+  },
+  {
+    "unixMs": 1793776056254,
+    "appPid": 4248,
+    "workingSetMiB": 163.2109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.34375
+  },
+  {
+    "unixMs": 1793776056379,
+    "appPid": 4248,
+    "workingSetMiB": 153.85546875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.4375
+  },
+  {
+    "unixMs": 1793776056490,
+    "appPid": 4248,
+    "workingSetMiB": 155.41796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.484375
+  },
+  {
+    "unixMs": 1793776056603,
+    "appPid": 4248,
+    "workingSetMiB": 159.3515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.5625
+  },
+  {
+    "unixMs": 1793776056713,
+    "appPid": 4248,
+    "workingSetMiB": 163.91796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.625
+  },
+  {
+    "unixMs": 1793776056825,
+    "appPid": 4248,
+    "workingSetMiB": 155.0078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.671875
+  },
+  {
+    "unixMs": 1793776056936,
+    "appPid": 4248,
+    "workingSetMiB": 159.6484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.765625
+  },
+  {
+    "unixMs": 1793776057047,
+    "appPid": 4248,
+    "workingSetMiB": 162.6484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.84375
+  },
+  {
+    "unixMs": 1793776057156,
+    "appPid": 4248,
+    "workingSetMiB": 165.6484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.921875
+  },
+  {
+    "unixMs": 1793776057265,
+    "appPid": 4248,
+    "workingSetMiB": 156.4765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 17.984375
+  },
+  {
+    "unixMs": 1793776057377,
+    "appPid": 4248,
+    "workingSetMiB": 160.92578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.078125
+  },
+  {
+    "unixMs": 1793776057489,
+    "appPid": 4248,
+    "workingSetMiB": 165.15234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.140625
+  },
+  {
+    "unixMs": 1793776057599,
+    "appPid": 4248,
+    "workingSetMiB": 156.23828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.21875
+  },
+  {
+    "unixMs": 1793776057711,
+    "appPid": 4248,
+    "workingSetMiB": 159.86328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.265625
+  },
+  {
+    "unixMs": 1793776057821,
+    "appPid": 4248,
+    "workingSetMiB": 163.80078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.3125
+  },
+  {
+    "unixMs": 1793776057932,
+    "appPid": 4248,
+    "workingSetMiB": 156.58203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.359375
+  },
+  {
+    "unixMs": 1793776058043,
+    "appPid": 4248,
+    "workingSetMiB": 161.45703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.40625
+  },
+  {
+    "unixMs": 1793776058154,
+    "appPid": 4248,
+    "workingSetMiB": 165.70703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.46875
+  },
+  {
+    "unixMs": 1793776058267,
+    "appPid": 4248,
+    "workingSetMiB": 156.89453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.546875
+  },
+  {
+    "unixMs": 1793776058379,
+    "appPid": 4248,
+    "workingSetMiB": 159.89453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.59375
+  },
+  {
+    "unixMs": 1793776058503,
+    "appPid": 4248,
+    "workingSetMiB": 164.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.6875
+  },
+  {
+    "unixMs": 1793776058614,
+    "appPid": 4248,
+    "workingSetMiB": 171.39453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.75
+  },
+  {
+    "unixMs": 1793776058726,
+    "appPid": 4248,
+    "workingSetMiB": 158.45703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.84375
+  },
+  {
+    "unixMs": 1793776058835,
+    "appPid": 4248,
+    "workingSetMiB": 161.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.890625
+  },
+  {
+    "unixMs": 1793776058946,
+    "appPid": 4248,
+    "workingSetMiB": 166.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 18.953125
+  },
+  {
+    "unixMs": 1793776059056,
+    "appPid": 4248,
+    "workingSetMiB": 154.83203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.03125
+  },
+  {
+    "unixMs": 1793776059169,
+    "appPid": 4248,
+    "workingSetMiB": 157.76953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.078125
+  },
+  {
+    "unixMs": 1793776059278,
+    "appPid": 4248,
+    "workingSetMiB": 161.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.109375
+  },
+  {
+    "unixMs": 1793776059389,
+    "appPid": 4248,
+    "workingSetMiB": 165.95703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.171875
+  },
+  {
+    "unixMs": 1793776059500,
+    "appPid": 4248,
+    "workingSetMiB": 158.45703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.25
+  },
+  {
+    "unixMs": 1793776059613,
+    "appPid": 4248,
+    "workingSetMiB": 161.51953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.28125
+  },
+  {
+    "unixMs": 1793776059726,
+    "appPid": 4248,
+    "workingSetMiB": 165.76953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.328125
+  },
+  {
+    "unixMs": 1793776059835,
+    "appPid": 4248,
+    "workingSetMiB": 156.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.390625
+  },
+  {
+    "unixMs": 1793776059945,
+    "appPid": 4248,
+    "workingSetMiB": 162.26953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.453125
+  },
+  {
+    "unixMs": 1793776060055,
+    "appPid": 4248,
+    "workingSetMiB": 165.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.515625
+  },
+  {
+    "unixMs": 1793776060165,
+    "appPid": 4248,
+    "workingSetMiB": 156.39453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.5625
+  },
+  {
+    "unixMs": 1793776060278,
+    "appPid": 4248,
+    "workingSetMiB": 161.0234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.625
+  },
+  {
+    "unixMs": 1793776060386,
+    "appPid": 4248,
+    "workingSetMiB": 164.0234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.65625
+  },
+  {
+    "unixMs": 1793776060499,
+    "appPid": 4248,
+    "workingSetMiB": 166.9609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.734375
+  },
+  {
+    "unixMs": 1793776060608,
+    "appPid": 4248,
+    "workingSetMiB": 159.5859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.828125
+  },
+  {
+    "unixMs": 1793776060718,
+    "appPid": 4248,
+    "workingSetMiB": 164.0859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.875
+  },
+  {
+    "unixMs": 1793776060827,
+    "appPid": 4248,
+    "workingSetMiB": 155.29296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 19.953125
+  },
+  {
+    "unixMs": 1793776060937,
+    "appPid": 4248,
+    "workingSetMiB": 158.30078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20
+  },
+  {
+    "unixMs": 1793776061048,
+    "appPid": 4248,
+    "workingSetMiB": 162.78125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.078125
+  },
+  {
+    "unixMs": 1793776061161,
+    "appPid": 4248,
+    "workingSetMiB": 165.7734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.109375
+  },
+  {
+    "unixMs": 1793776061271,
+    "appPid": 4248,
+    "workingSetMiB": 171.6171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.203125
+  },
+  {
+    "unixMs": 1793776061383,
+    "appPid": 4248,
+    "workingSetMiB": 160.15625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.265625
+  },
+  {
+    "unixMs": 1793776061493,
+    "appPid": 4248,
+    "workingSetMiB": 164.7421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.34375
+  },
+  {
+    "unixMs": 1793776061604,
+    "appPid": 4248,
+    "workingSetMiB": 155.00390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.390625
+  },
+  {
+    "unixMs": 1793776061715,
+    "appPid": 4248,
+    "workingSetMiB": 158.0703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.4375
+  },
+  {
+    "unixMs": 1793776061824,
+    "appPid": 4248,
+    "workingSetMiB": 161.1953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.5
+  },
+  {
+    "unixMs": 1793776061932,
+    "appPid": 4248,
+    "workingSetMiB": 167.99609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.53125
+  },
+  {
+    "unixMs": 1793776062043,
+    "appPid": 4248,
+    "workingSetMiB": 157.30859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.59375
+  },
+  {
+    "unixMs": 1793776062152,
+    "appPid": 4248,
+    "workingSetMiB": 160.43359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.625
+  },
+  {
+    "unixMs": 1793776062262,
+    "appPid": 4248,
+    "workingSetMiB": 164.87109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.65625
+  },
+  {
+    "unixMs": 1793776062372,
+    "appPid": 4248,
+    "workingSetMiB": 155.24609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.734375
+  },
+  {
+    "unixMs": 1793776062484,
+    "appPid": 4248,
+    "workingSetMiB": 158.24609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.796875
+  },
+  {
+    "unixMs": 1793776062596,
+    "appPid": 4248,
+    "workingSetMiB": 161.75,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.875
+  },
+  {
+    "unixMs": 1793776062707,
+    "appPid": 4248,
+    "workingSetMiB": 155.18359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 20.953125
+  },
+  {
+    "unixMs": 1793776062816,
+    "appPid": 4248,
+    "workingSetMiB": 158.24609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21
+  },
+  {
+    "unixMs": 1793776062928,
+    "appPid": 4248,
+    "workingSetMiB": 161.24609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.03125
+  },
+  {
+    "unixMs": 1793776063039,
+    "appPid": 4248,
+    "workingSetMiB": 165.80859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.109375
+  },
+  {
+    "unixMs": 1793776063149,
+    "appPid": 4248,
+    "workingSetMiB": 156.80859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.265625
+  },
+  {
+    "unixMs": 1793776063261,
+    "appPid": 4248,
+    "workingSetMiB": 157.05859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.328125
+  },
+  {
+    "unixMs": 1793776063371,
+    "appPid": 4248,
+    "workingSetMiB": 157.30859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.359375
+  },
+  {
+    "unixMs": 1793776063481,
+    "appPid": 4248,
+    "workingSetMiB": 157.49609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.4375
+  },
+  {
+    "unixMs": 1793776063592,
+    "appPid": 4248,
+    "workingSetMiB": 157.87109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.484375
+  },
+  {
+    "unixMs": 1793776063699,
+    "appPid": 4248,
+    "workingSetMiB": 158.05859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.53125
+  },
+  {
+    "unixMs": 1793776063808,
+    "appPid": 4248,
+    "workingSetMiB": 158.234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.578125
+  },
+  {
+    "unixMs": 1793776063922,
+    "appPid": 4248,
+    "workingSetMiB": 158.49609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.59375
+  },
+  {
+    "unixMs": 1793776064025,
+    "appPid": 4248,
+    "workingSetMiB": 158.69140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.640625
+  },
+  {
+    "unixMs": 1793776064137,
+    "appPid": 4248,
+    "workingSetMiB": 158.93359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.671875
+  },
+  {
+    "unixMs": 1793776064246,
+    "appPid": 4248,
+    "workingSetMiB": 159.18359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.75
+  },
+  {
+    "unixMs": 1793776064356,
+    "appPid": 4248,
+    "workingSetMiB": 159.43359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.78125
+  },
+  {
+    "unixMs": 1793776064463,
+    "appPid": 4248,
+    "workingSetMiB": 159.62109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.84375
+  },
+  {
+    "unixMs": 1793776064573,
+    "appPid": 4248,
+    "workingSetMiB": 159.99609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.890625
+  },
+  {
+    "unixMs": 1793776064682,
+    "appPid": 4248,
+    "workingSetMiB": 160.30859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 21.984375
+  },
+  {
+    "unixMs": 1793776064798,
+    "appPid": 4248,
+    "workingSetMiB": 160.49609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.046875
+  },
+  {
+    "unixMs": 1793776064901,
+    "appPid": 4248,
+    "workingSetMiB": 160.7265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.078125
+  },
+  {
+    "unixMs": 1793776065009,
+    "appPid": 4248,
+    "workingSetMiB": 160.99609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.125
+  },
+  {
+    "unixMs": 1793776065117,
+    "appPid": 4248,
+    "workingSetMiB": 161.1875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.171875
+  },
+  {
+    "unixMs": 1793776065234,
+    "appPid": 4248,
+    "workingSetMiB": 161.55859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.234375
+  },
+  {
+    "unixMs": 1793776065352,
+    "appPid": 4248,
+    "workingSetMiB": 161.80859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.28125
+  },
+  {
+    "unixMs": 1793776065461,
+    "appPid": 4248,
+    "workingSetMiB": 161.99609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.34375
+  },
+  {
+    "unixMs": 1793776065572,
+    "appPid": 4248,
+    "workingSetMiB": 162.21875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.390625
+  },
+  {
+    "unixMs": 1793776065684,
+    "appPid": 4248,
+    "workingSetMiB": 162.49609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.453125
+  },
+  {
+    "unixMs": 1793776065793,
+    "appPid": 4248,
+    "workingSetMiB": 162.6875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.484375
+  },
+  {
+    "unixMs": 1793776065902,
+    "appPid": 4248,
+    "workingSetMiB": 162.93359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.5
+  },
+  {
+    "unixMs": 1793776066012,
+    "appPid": 4248,
+    "workingSetMiB": 165.8828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.546875
+  },
+  {
+    "unixMs": 1793776066124,
+    "appPid": 4248,
+    "workingSetMiB": 176.515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.625
+  },
+  {
+    "unixMs": 1793776066234,
+    "appPid": 4248,
+    "workingSetMiB": 164.9765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.703125
+  },
+  {
+    "unixMs": 1793776066346,
+    "appPid": 4248,
+    "workingSetMiB": 168.91796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.75
+  },
+  {
+    "unixMs": 1793776066458,
+    "appPid": 4248,
+    "workingSetMiB": 163.3125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.828125
+  },
+  {
+    "unixMs": 1793776066583,
+    "appPid": 4248,
+    "workingSetMiB": 165.87890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.875
+  },
+  {
+    "unixMs": 1793776066695,
+    "appPid": 4248,
+    "workingSetMiB": 166.98046875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.890625
+  },
+  {
+    "unixMs": 1793776066804,
+    "appPid": 4248,
+    "workingSetMiB": 167.81640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 22.9375
+  },
+  {
+    "unixMs": 1793776066916,
+    "appPid": 4248,
+    "workingSetMiB": 173.87109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23
+  },
+  {
+    "unixMs": 1793776067029,
+    "appPid": 4248,
+    "workingSetMiB": 164.48828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.046875
+  },
+  {
+    "unixMs": 1793776067139,
+    "appPid": 4248,
+    "workingSetMiB": 165.26171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.078125
+  },
+  {
+    "unixMs": 1793776067250,
+    "appPid": 4248,
+    "workingSetMiB": 172.41015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.15625
+  },
+  {
+    "unixMs": 1793776067365,
+    "appPid": 4248,
+    "workingSetMiB": 165.09765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.203125
+  },
+  {
+    "unixMs": 1793776067475,
+    "appPid": 4248,
+    "workingSetMiB": 166.84375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.265625
+  },
+  {
+    "unixMs": 1793776067587,
+    "appPid": 4248,
+    "workingSetMiB": 167.44140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.296875
+  },
+  {
+    "unixMs": 1793776067697,
+    "appPid": 4248,
+    "workingSetMiB": 167.6953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.3125
+  },
+  {
+    "unixMs": 1793776067807,
+    "appPid": 4248,
+    "workingSetMiB": 176.484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.359375
+  },
+  {
+    "unixMs": 1793776067918,
+    "appPid": 4248,
+    "workingSetMiB": 168.890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.453125
+  },
+  {
+    "unixMs": 1793776068030,
+    "appPid": 4248,
+    "workingSetMiB": 172.703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.484375
+  },
+  {
+    "unixMs": 1793776068141,
+    "appPid": 4248,
+    "workingSetMiB": 166.99609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.546875
+  },
+  {
+    "unixMs": 1793776068254,
+    "appPid": 4248,
+    "workingSetMiB": 169.5,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.578125
+  },
+  {
+    "unixMs": 1793776068367,
+    "appPid": 4248,
+    "workingSetMiB": 170.6875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.65625
+  },
+  {
+    "unixMs": 1793776068479,
+    "appPid": 4248,
+    "workingSetMiB": 171.125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.671875
+  },
+  {
+    "unixMs": 1793776068589,
+    "appPid": 4248,
+    "workingSetMiB": 171.3828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.734375
+  },
+  {
+    "unixMs": 1793776068698,
+    "appPid": 4248,
+    "workingSetMiB": 171.5703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.796875
+  },
+  {
+    "unixMs": 1793776068807,
+    "appPid": 4248,
+    "workingSetMiB": 171.8203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.84375
+  },
+  {
+    "unixMs": 1793776068918,
+    "appPid": 4248,
+    "workingSetMiB": 172.1328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.875
+  },
+  {
+    "unixMs": 1793776069029,
+    "appPid": 4248,
+    "workingSetMiB": 172.3828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.921875
+  },
+  {
+    "unixMs": 1793776069137,
+    "appPid": 4248,
+    "workingSetMiB": 172.5703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 23.96875
+  },
+  {
+    "unixMs": 1793776069247,
+    "appPid": 4248,
+    "workingSetMiB": 172.8828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.015625
+  },
+  {
+    "unixMs": 1793776069357,
+    "appPid": 4248,
+    "workingSetMiB": 173.0703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.0625
+  },
+  {
+    "unixMs": 1793776069468,
+    "appPid": 4248,
+    "workingSetMiB": 173.3203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.09375
+  },
+  {
+    "unixMs": 1793776069578,
+    "appPid": 4248,
+    "workingSetMiB": 173.5703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.171875
+  },
+  {
+    "unixMs": 1793776069687,
+    "appPid": 4248,
+    "workingSetMiB": 173.44921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.21875
+  },
+  {
+    "unixMs": 1793776069796,
+    "appPid": 4248,
+    "workingSetMiB": 174.1328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.28125
+  },
+  {
+    "unixMs": 1793776069905,
+    "appPid": 4248,
+    "workingSetMiB": 174.3828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.328125
+  },
+  {
+    "unixMs": 1793776070015,
+    "appPid": 4248,
+    "workingSetMiB": 174.5703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.375
+  },
+  {
+    "unixMs": 1793776070126,
+    "appPid": 4248,
+    "workingSetMiB": 174.8203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.421875
+  },
+  {
+    "unixMs": 1793776070236,
+    "appPid": 4248,
+    "workingSetMiB": 175.0703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.453125
+  },
+  {
+    "unixMs": 1793776070347,
+    "appPid": 4248,
+    "workingSetMiB": 175.203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.5
+  },
+  {
+    "unixMs": 1793776070456,
+    "appPid": 4248,
+    "workingSetMiB": 175.5703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.5625
+  },
+  {
+    "unixMs": 1793776070567,
+    "appPid": 4248,
+    "workingSetMiB": 175.796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.625
+  },
+  {
+    "unixMs": 1793776070691,
+    "appPid": 4248,
+    "workingSetMiB": 176.0703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.65625
+  },
+  {
+    "unixMs": 1793776070803,
+    "appPid": 4248,
+    "workingSetMiB": 176.3828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.703125
+  },
+  {
+    "unixMs": 1793776070926,
+    "appPid": 4248,
+    "workingSetMiB": 176.6328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.796875
+  },
+  {
+    "unixMs": 1793776071037,
+    "appPid": 4248,
+    "workingSetMiB": 184.7265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.890625
+  },
+  {
+    "unixMs": 1793776071147,
+    "appPid": 4248,
+    "workingSetMiB": 177.3515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 24.9375
+  },
+  {
+    "unixMs": 1793776071259,
+    "appPid": 4248,
+    "workingSetMiB": 186.0859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.03125
+  },
+  {
+    "unixMs": 1793776071369,
+    "appPid": 4248,
+    "workingSetMiB": 194.71875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.125
+  },
+  {
+    "unixMs": 1793776071480,
+    "appPid": 4248,
+    "workingSetMiB": 184.3671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.1875
+  },
+  {
+    "unixMs": 1793776071593,
+    "appPid": 4248,
+    "workingSetMiB": 189.96484375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.265625
+  },
+  {
+    "unixMs": 1793776071707,
+    "appPid": 4248,
+    "workingSetMiB": 190.1328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.296875
+  },
+  {
+    "unixMs": 1793776071817,
+    "appPid": 4248,
+    "workingSetMiB": 185.77734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.375
+  },
+  {
+    "unixMs": 1793776071927,
+    "appPid": 4248,
+    "workingSetMiB": 189.4140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.46875
+  },
+  {
+    "unixMs": 1793776072039,
+    "appPid": 4248,
+    "workingSetMiB": 192.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.53125
+  },
+  {
+    "unixMs": 1793776072154,
+    "appPid": 4248,
+    "workingSetMiB": 182.859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.59375
+  },
+  {
+    "unixMs": 1793776072266,
+    "appPid": 4248,
+    "workingSetMiB": 185.9921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.640625
+  },
+  {
+    "unixMs": 1793776072380,
+    "appPid": 4248,
+    "workingSetMiB": 183.9609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.65625
+  },
+  {
+    "unixMs": 1793776072492,
+    "appPid": 4248,
+    "workingSetMiB": 197.8828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.703125
+  },
+  {
+    "unixMs": 1793776072607,
+    "appPid": 4248,
+    "workingSetMiB": 198.06640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.78125
+  },
+  {
+    "unixMs": 1793776072715,
+    "appPid": 4248,
+    "workingSetMiB": 198.13671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.875
+  },
+  {
+    "unixMs": 1793776072837,
+    "appPid": 4248,
+    "workingSetMiB": 198.20703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 25.9375
+  },
+  {
+    "unixMs": 1793776072954,
+    "appPid": 4248,
+    "workingSetMiB": 196.78125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.078125
+  },
+  {
+    "unixMs": 1793776073102,
+    "appPid": 4248,
+    "workingSetMiB": 196.78125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.21875
+  },
+  {
+    "unixMs": 1793776073214,
+    "appPid": 4248,
+    "workingSetMiB": 186.92578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.265625
+  },
+  {
+    "unixMs": 1793776073324,
+    "appPid": 4248,
+    "workingSetMiB": 195.30859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.34375
+  },
+  {
+    "unixMs": 1793776073435,
+    "appPid": 4248,
+    "workingSetMiB": 185.953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.421875
+  },
+  {
+    "unixMs": 1793776073544,
+    "appPid": 4248,
+    "workingSetMiB": 189.125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.46875
+  },
+  {
+    "unixMs": 1793776073654,
+    "appPid": 4248,
+    "workingSetMiB": 194.8046875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.546875
+  },
+  {
+    "unixMs": 1793776073765,
+    "appPid": 4248,
+    "workingSetMiB": 200.1015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.609375
+  },
+  {
+    "unixMs": 1793776073875,
+    "appPid": 4248,
+    "workingSetMiB": 200.11328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.640625
+  },
+  {
+    "unixMs": 1793776073987,
+    "appPid": 4248,
+    "workingSetMiB": 185.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.703125
+  },
+  {
+    "unixMs": 1793776074113,
+    "appPid": 4248,
+    "workingSetMiB": 185.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.734375
+  },
+  {
+    "unixMs": 1793776074222,
+    "appPid": 4248,
+    "workingSetMiB": 185.89453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.8125
+  },
+  {
+    "unixMs": 1793776074347,
+    "appPid": 4248,
+    "workingSetMiB": 186.14453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.875
+  },
+  {
+    "unixMs": 1793776074456,
+    "appPid": 4248,
+    "workingSetMiB": 186.39453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.921875
+  },
+  {
+    "unixMs": 1793776074567,
+    "appPid": 4248,
+    "workingSetMiB": 186.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 26.96875
+  },
+  {
+    "unixMs": 1793776074692,
+    "appPid": 4248,
+    "workingSetMiB": 186.83203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.03125
+  },
+  {
+    "unixMs": 1793776074817,
+    "appPid": 4248,
+    "workingSetMiB": 187.08203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.078125
+  },
+  {
+    "unixMs": 1793776074943,
+    "appPid": 4248,
+    "workingSetMiB": 187.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.140625
+  },
+  {
+    "unixMs": 1793776075058,
+    "appPid": 4248,
+    "workingSetMiB": 187.64453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.1875
+  },
+  {
+    "unixMs": 1793776075165,
+    "appPid": 4248,
+    "workingSetMiB": 187.89453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.234375
+  },
+  {
+    "unixMs": 1793776075287,
+    "appPid": 4248,
+    "workingSetMiB": 188.08203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.296875
+  },
+  {
+    "unixMs": 1793776075396,
+    "appPid": 4248,
+    "workingSetMiB": 188.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.34375
+  },
+  {
+    "unixMs": 1793776075507,
+    "appPid": 4248,
+    "workingSetMiB": 188.78125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.40625
+  },
+  {
+    "unixMs": 1793776075627,
+    "appPid": 4248,
+    "workingSetMiB": 219.296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.609375
+  },
+  {
+    "unixMs": 1793776075740,
+    "appPid": 4248,
+    "workingSetMiB": 270.6171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.78125
+  },
+  {
+    "unixMs": 1793776075850,
+    "appPid": 4248,
+    "workingSetMiB": 203.9609375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.859375
+  },
+  {
+    "unixMs": 1793776075964,
+    "appPid": 4248,
+    "workingSetMiB": 203.9765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 27.953125
+  },
+  {
+    "unixMs": 1793776076074,
+    "appPid": 4248,
+    "workingSetMiB": 203.68359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.078125
+  },
+  {
+    "unixMs": 1793776076183,
+    "appPid": 4248,
+    "workingSetMiB": 203.68359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.109375
+  },
+  {
+    "unixMs": 1793776076298,
+    "appPid": 4248,
+    "workingSetMiB": 203.68359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.203125
+  },
+  {
+    "unixMs": 1793776076420,
+    "appPid": 4248,
+    "workingSetMiB": 194.68359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.296875
+  },
+  {
+    "unixMs": 1793776076540,
+    "appPid": 4248,
+    "workingSetMiB": 194.68359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.375
+  },
+  {
+    "unixMs": 1793776076651,
+    "appPid": 4248,
+    "workingSetMiB": 194.68359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.4375
+  },
+  {
+    "unixMs": 1793776076764,
+    "appPid": 4248,
+    "workingSetMiB": 194.82421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.515625
+  },
+  {
+    "unixMs": 1793776076870,
+    "appPid": 4248,
+    "workingSetMiB": 195.01171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.546875
+  },
+  {
+    "unixMs": 1793776076982,
+    "appPid": 4248,
+    "workingSetMiB": 195.13671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.59375
+  },
+  {
+    "unixMs": 1793776077090,
+    "appPid": 4248,
+    "workingSetMiB": 195.38671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.671875
+  },
+  {
+    "unixMs": 1793776077209,
+    "appPid": 4248,
+    "workingSetMiB": 195.69921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.734375
+  },
+  {
+    "unixMs": 1793776077328,
+    "appPid": 4248,
+    "workingSetMiB": 195.88671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.796875
+  },
+  {
+    "unixMs": 1793776077436,
+    "appPid": 4248,
+    "workingSetMiB": 196.13671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.828125
+  },
+  {
+    "unixMs": 1793776077560,
+    "appPid": 4248,
+    "workingSetMiB": 196.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.90625
+  },
+  {
+    "unixMs": 1793776077672,
+    "appPid": 4248,
+    "workingSetMiB": 196.57421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 28.953125
+  },
+  {
+    "unixMs": 1793776077780,
+    "appPid": 4248,
+    "workingSetMiB": 196.69921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29
+  },
+  {
+    "unixMs": 1793776077890,
+    "appPid": 4248,
+    "workingSetMiB": 196.88671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.046875
+  },
+  {
+    "unixMs": 1793776078000,
+    "appPid": 4248,
+    "workingSetMiB": 197.13671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.09375
+  },
+  {
+    "unixMs": 1793776078108,
+    "appPid": 4248,
+    "workingSetMiB": 197.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.140625
+  },
+  {
+    "unixMs": 1793776078219,
+    "appPid": 4248,
+    "workingSetMiB": 199.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.234375
+  },
+  {
+    "unixMs": 1793776078331,
+    "appPid": 4248,
+    "workingSetMiB": 186.47265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.359375
+  },
+  {
+    "unixMs": 1793776078440,
+    "appPid": 4248,
+    "workingSetMiB": 187.0390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.421875
+  },
+  {
+    "unixMs": 1793776078554,
+    "appPid": 4248,
+    "workingSetMiB": 187.8515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.46875
+  },
+  {
+    "unixMs": 1793776078663,
+    "appPid": 4248,
+    "workingSetMiB": 188.7890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.515625
+  },
+  {
+    "unixMs": 1793776078773,
+    "appPid": 4248,
+    "workingSetMiB": 189.7265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.578125
+  },
+  {
+    "unixMs": 1793776078885,
+    "appPid": 4248,
+    "workingSetMiB": 190.6640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.609375
+  },
+  {
+    "unixMs": 1793776078994,
+    "appPid": 4248,
+    "workingSetMiB": 191.2890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.6875
+  },
+  {
+    "unixMs": 1793776079105,
+    "appPid": 4248,
+    "workingSetMiB": 192.2265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.734375
+  },
+  {
+    "unixMs": 1793776079216,
+    "appPid": 4248,
+    "workingSetMiB": 193.1640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.765625
+  },
+  {
+    "unixMs": 1793776079328,
+    "appPid": 4248,
+    "workingSetMiB": 194.078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.859375
+  },
+  {
+    "unixMs": 1793776079435,
+    "appPid": 4248,
+    "workingSetMiB": 194.359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.921875
+  },
+  {
+    "unixMs": 1793776079544,
+    "appPid": 4248,
+    "workingSetMiB": 194.546875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 29.96875
+  },
+  {
+    "unixMs": 1793776079655,
+    "appPid": 4248,
+    "workingSetMiB": 194.796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.015625
+  },
+  {
+    "unixMs": 1793776079764,
+    "appPid": 4248,
+    "workingSetMiB": 194.984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.0625
+  },
+  {
+    "unixMs": 1793776079873,
+    "appPid": 4248,
+    "workingSetMiB": 195.234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.109375
+  },
+  {
+    "unixMs": 1793776079989,
+    "appPid": 4248,
+    "workingSetMiB": 195.671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.203125
+  },
+  {
+    "unixMs": 1793776080107,
+    "appPid": 4248,
+    "workingSetMiB": 195.796875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.265625
+  },
+  {
+    "unixMs": 1793776080216,
+    "appPid": 4248,
+    "workingSetMiB": 183.3515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.359375
+  },
+  {
+    "unixMs": 1793776080326,
+    "appPid": 4248,
+    "workingSetMiB": 183.3515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.40625
+  },
+  {
+    "unixMs": 1793776080438,
+    "appPid": 4248,
+    "workingSetMiB": 183.3515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.46875
+  },
+  {
+    "unixMs": 1793776080560,
+    "appPid": 4248,
+    "workingSetMiB": 183.0546875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.546875
+  },
+  {
+    "unixMs": 1793776080668,
+    "appPid": 4248,
+    "workingSetMiB": 183.296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.59375
+  },
+  {
+    "unixMs": 1793776080784,
+    "appPid": 4248,
+    "workingSetMiB": 183.546875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.671875
+  },
+  {
+    "unixMs": 1793776080893,
+    "appPid": 4248,
+    "workingSetMiB": 183.734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.75
+  },
+  {
+    "unixMs": 1793776080997,
+    "appPid": 4248,
+    "workingSetMiB": 183.859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.8125
+  },
+  {
+    "unixMs": 1793776081106,
+    "appPid": 4248,
+    "workingSetMiB": 187.10546875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.90625
+  },
+  {
+    "unixMs": 1793776081215,
+    "appPid": 4248,
+    "workingSetMiB": 190.98046875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 30.984375
+  },
+  {
+    "unixMs": 1793776081324,
+    "appPid": 4248,
+    "workingSetMiB": 194.4140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.078125
+  },
+  {
+    "unixMs": 1793776081435,
+    "appPid": 4248,
+    "workingSetMiB": 197.62890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.171875
+  },
+  {
+    "unixMs": 1793776081544,
+    "appPid": 4248,
+    "workingSetMiB": 198.56640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.296875
+  },
+  {
+    "unixMs": 1793776081652,
+    "appPid": 4248,
+    "workingSetMiB": 198.56640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.359375
+  },
+  {
+    "unixMs": 1793776081765,
+    "appPid": 4248,
+    "workingSetMiB": 198.56640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.390625
+  },
+  {
+    "unixMs": 1793776081871,
+    "appPid": 4248,
+    "workingSetMiB": 187,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.453125
+  },
+  {
+    "unixMs": 1793776081980,
+    "appPid": 4248,
+    "workingSetMiB": 187,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.515625
+  },
+  {
+    "unixMs": 1793776082089,
+    "appPid": 4248,
+    "workingSetMiB": 187.1875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.546875
+  },
+  {
+    "unixMs": 1793776082201,
+    "appPid": 4248,
+    "workingSetMiB": 187.5,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.578125
+  },
+  {
+    "unixMs": 1793776082310,
+    "appPid": 4248,
+    "workingSetMiB": 187.75,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.59375
+  },
+  {
+    "unixMs": 1793776082420,
+    "appPid": 4248,
+    "workingSetMiB": 187.9375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.640625
+  },
+  {
+    "unixMs": 1793776082528,
+    "appPid": 4248,
+    "workingSetMiB": 188.1875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.671875
+  },
+  {
+    "unixMs": 1793776082639,
+    "appPid": 4248,
+    "workingSetMiB": 188.4375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.71875
+  },
+  {
+    "unixMs": 1793776082751,
+    "appPid": 4248,
+    "workingSetMiB": 188.75,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.734375
+  },
+  {
+    "unixMs": 1793776082863,
+    "appPid": 4248,
+    "workingSetMiB": 189,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.78125
+  },
+  {
+    "unixMs": 1793776082975,
+    "appPid": 4248,
+    "workingSetMiB": 189.25,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.84375
+  },
+  {
+    "unixMs": 1793776083087,
+    "appPid": 4248,
+    "workingSetMiB": 183.53515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.921875
+  },
+  {
+    "unixMs": 1793776083200,
+    "appPid": 4248,
+    "workingSetMiB": 183.75,
+    "foregroundPid": 4248,
+    "cpuSeconds": 31.96875
+  },
+  {
+    "unixMs": 1793776083311,
+    "appPid": 4248,
+    "workingSetMiB": 182.9453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32
+  },
+  {
+    "unixMs": 1793776083424,
+    "appPid": 4248,
+    "workingSetMiB": 183.3203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.046875
+  },
+  {
+    "unixMs": 1793776083537,
+    "appPid": 4248,
+    "workingSetMiB": 183.5078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.0625
+  },
+  {
+    "unixMs": 1793776083649,
+    "appPid": 4248,
+    "workingSetMiB": 183.7578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.140625
+  },
+  {
+    "unixMs": 1793776083762,
+    "appPid": 4248,
+    "workingSetMiB": 184.0703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.203125
+  },
+  {
+    "unixMs": 1793776083873,
+    "appPid": 4248,
+    "workingSetMiB": 184.3203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.265625
+  },
+  {
+    "unixMs": 1793776083985,
+    "appPid": 4248,
+    "workingSetMiB": 184.5703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.296875
+  },
+  {
+    "unixMs": 1793776084097,
+    "appPid": 4248,
+    "workingSetMiB": 184.8828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.375
+  },
+  {
+    "unixMs": 1793776084207,
+    "appPid": 4248,
+    "workingSetMiB": 185.09765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.40625
+  },
+  {
+    "unixMs": 1793776084318,
+    "appPid": 4248,
+    "workingSetMiB": 185.3828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.453125
+  },
+  {
+    "unixMs": 1793776084428,
+    "appPid": 4248,
+    "workingSetMiB": 185.5703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.5
+  },
+  {
+    "unixMs": 1793776084539,
+    "appPid": 4248,
+    "workingSetMiB": 185.9453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.546875
+  },
+  {
+    "unixMs": 1793776084650,
+    "appPid": 4248,
+    "workingSetMiB": 186.125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.578125
+  },
+  {
+    "unixMs": 1793776084758,
+    "appPid": 4248,
+    "workingSetMiB": 186.3828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.625
+  },
+  {
+    "unixMs": 1793776084866,
+    "appPid": 4248,
+    "workingSetMiB": 186.58203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.671875
+  },
+  {
+    "unixMs": 1793776084978,
+    "appPid": 4248,
+    "workingSetMiB": 186.8203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.734375
+  },
+  {
+    "unixMs": 1793776085089,
+    "appPid": 4248,
+    "workingSetMiB": 187.0703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.765625
+  },
+  {
+    "unixMs": 1793776085197,
+    "appPid": 4248,
+    "workingSetMiB": 187.3203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.796875
+  },
+  {
+    "unixMs": 1793776085308,
+    "appPid": 4248,
+    "workingSetMiB": 187.5078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.84375
+  },
+  {
+    "unixMs": 1793776085418,
+    "appPid": 4248,
+    "workingSetMiB": 187.8828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.875
+  },
+  {
+    "unixMs": 1793776085529,
+    "appPid": 4248,
+    "workingSetMiB": 181.61328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.921875
+  },
+  {
+    "unixMs": 1793776085638,
+    "appPid": 4248,
+    "workingSetMiB": 181.88671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 32.96875
+  },
+  {
+    "unixMs": 1793776085747,
+    "appPid": 4248,
+    "workingSetMiB": 192.03515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33
+  },
+  {
+    "unixMs": 1793776085856,
+    "appPid": 4248,
+    "workingSetMiB": 226.53125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.171875
+  },
+  {
+    "unixMs": 1793776085966,
+    "appPid": 4248,
+    "workingSetMiB": 190.53515625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.234375
+  },
+  {
+    "unixMs": 1793776086079,
+    "appPid": 4248,
+    "workingSetMiB": 196.31640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.328125
+  },
+  {
+    "unixMs": 1793776086189,
+    "appPid": 4248,
+    "workingSetMiB": 187.12890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.4375
+  },
+  {
+    "unixMs": 1793776086301,
+    "appPid": 4248,
+    "workingSetMiB": 188.6640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.46875
+  },
+  {
+    "unixMs": 1793776086416,
+    "appPid": 4248,
+    "workingSetMiB": 188.87890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.546875
+  },
+  {
+    "unixMs": 1793776086525,
+    "appPid": 4248,
+    "workingSetMiB": 189.06640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.59375
+  },
+  {
+    "unixMs": 1793776086636,
+    "appPid": 4248,
+    "workingSetMiB": 189.31640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.65625
+  },
+  {
+    "unixMs": 1793776086752,
+    "appPid": 4248,
+    "workingSetMiB": 189.56640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.71875
+  },
+  {
+    "unixMs": 1793776086866,
+    "appPid": 4248,
+    "workingSetMiB": 189.453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.78125
+  },
+  {
+    "unixMs": 1793776086978,
+    "appPid": 4248,
+    "workingSetMiB": 189.703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.828125
+  },
+  {
+    "unixMs": 1793776087085,
+    "appPid": 4248,
+    "workingSetMiB": 189.953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.90625
+  },
+  {
+    "unixMs": 1793776087196,
+    "appPid": 4248,
+    "workingSetMiB": 190.140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.921875
+  },
+  {
+    "unixMs": 1793776087305,
+    "appPid": 4248,
+    "workingSetMiB": 190.34375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 33.984375
+  },
+  {
+    "unixMs": 1793776087415,
+    "appPid": 4248,
+    "workingSetMiB": 190.578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.03125
+  },
+  {
+    "unixMs": 1793776087528,
+    "appPid": 4248,
+    "workingSetMiB": 190.828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.078125
+  },
+  {
+    "unixMs": 1793776087636,
+    "appPid": 4248,
+    "workingSetMiB": 191.015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.140625
+  },
+  {
+    "unixMs": 1793776087746,
+    "appPid": 4248,
+    "workingSetMiB": 191.265625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.1875
+  },
+  {
+    "unixMs": 1793776087856,
+    "appPid": 4248,
+    "workingSetMiB": 191.453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.203125
+  },
+  {
+    "unixMs": 1793776087974,
+    "appPid": 4248,
+    "workingSetMiB": 191.703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.265625
+  },
+  {
+    "unixMs": 1793776088084,
+    "appPid": 4248,
+    "workingSetMiB": 191.8671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.3125
+  },
+  {
+    "unixMs": 1793776088193,
+    "appPid": 4248,
+    "workingSetMiB": 192.828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.34375
+  },
+  {
+    "unixMs": 1793776088306,
+    "appPid": 4248,
+    "workingSetMiB": 193.828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.40625
+  },
+  {
+    "unixMs": 1793776088433,
+    "appPid": 4248,
+    "workingSetMiB": 183.42578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.5
+  },
+  {
+    "unixMs": 1793776088546,
+    "appPid": 4248,
+    "workingSetMiB": 184.38671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.578125
+  },
+  {
+    "unixMs": 1793776088656,
+    "appPid": 4248,
+    "workingSetMiB": 185.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.625
+  },
+  {
+    "unixMs": 1793776088768,
+    "appPid": 4248,
+    "workingSetMiB": 186.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.671875
+  },
+  {
+    "unixMs": 1793776088876,
+    "appPid": 4248,
+    "workingSetMiB": 187.26171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.703125
+  },
+  {
+    "unixMs": 1793776088985,
+    "appPid": 4248,
+    "workingSetMiB": 188.19921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.75
+  },
+  {
+    "unixMs": 1793776089097,
+    "appPid": 4248,
+    "workingSetMiB": 189.57421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.8125
+  },
+  {
+    "unixMs": 1793776089206,
+    "appPid": 4248,
+    "workingSetMiB": 189.82421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.859375
+  },
+  {
+    "unixMs": 1793776089315,
+    "appPid": 4248,
+    "workingSetMiB": 190.07421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.921875
+  },
+  {
+    "unixMs": 1793776089427,
+    "appPid": 4248,
+    "workingSetMiB": 190.26171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 34.96875
+  },
+  {
+    "unixMs": 1793776089552,
+    "appPid": 4248,
+    "workingSetMiB": 190.51171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.046875
+  },
+  {
+    "unixMs": 1793776089676,
+    "appPid": 4248,
+    "workingSetMiB": 190.69921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.09375
+  },
+  {
+    "unixMs": 1793776089802,
+    "appPid": 4248,
+    "workingSetMiB": 191.01171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.125
+  },
+  {
+    "unixMs": 1793776089925,
+    "appPid": 4248,
+    "workingSetMiB": 191.26171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.203125
+  },
+  {
+    "unixMs": 1793776090037,
+    "appPid": 4248,
+    "workingSetMiB": 191.51171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.25
+  },
+  {
+    "unixMs": 1793776090162,
+    "appPid": 4248,
+    "workingSetMiB": 191.69921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.28125
+  },
+  {
+    "unixMs": 1793776090273,
+    "appPid": 4248,
+    "workingSetMiB": 191.89453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.328125
+  },
+  {
+    "unixMs": 1793776090385,
+    "appPid": 4248,
+    "workingSetMiB": 192.38671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.40625
+  },
+  {
+    "unixMs": 1793776090497,
+    "appPid": 4248,
+    "workingSetMiB": 197.07421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.46875
+  },
+  {
+    "unixMs": 1793776090605,
+    "appPid": 4248,
+    "workingSetMiB": 186.38671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.546875
+  },
+  {
+    "unixMs": 1793776090718,
+    "appPid": 4248,
+    "workingSetMiB": 189.07421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.625
+  },
+  {
+    "unixMs": 1793776090824,
+    "appPid": 4248,
+    "workingSetMiB": 193.57421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.6875
+  },
+  {
+    "unixMs": 1793776090934,
+    "appPid": 4248,
+    "workingSetMiB": 184.07421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.75
+  },
+  {
+    "unixMs": 1793776091041,
+    "appPid": 4248,
+    "workingSetMiB": 184.26171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.8125
+  },
+  {
+    "unixMs": 1793776091151,
+    "appPid": 4248,
+    "workingSetMiB": 184.51171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.84375
+  },
+  {
+    "unixMs": 1793776091261,
+    "appPid": 4248,
+    "workingSetMiB": 184.76171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.890625
+  },
+  {
+    "unixMs": 1793776091372,
+    "appPid": 4248,
+    "workingSetMiB": 184.89453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.921875
+  },
+  {
+    "unixMs": 1793776091482,
+    "appPid": 4248,
+    "workingSetMiB": 185.13671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 35.96875
+  },
+  {
+    "unixMs": 1793776091592,
+    "appPid": 4248,
+    "workingSetMiB": 185.43359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.015625
+  },
+  {
+    "unixMs": 1793776091702,
+    "appPid": 4248,
+    "workingSetMiB": 185.69921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.0625
+  },
+  {
+    "unixMs": 1793776091814,
+    "appPid": 4248,
+    "workingSetMiB": 186.01171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.109375
+  },
+  {
+    "unixMs": 1793776091923,
+    "appPid": 4248,
+    "workingSetMiB": 186.26171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.125
+  },
+  {
+    "unixMs": 1793776092034,
+    "appPid": 4248,
+    "workingSetMiB": 186.4453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.171875
+  },
+  {
+    "unixMs": 1793776092145,
+    "appPid": 4248,
+    "workingSetMiB": 186.82421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.21875
+  },
+  {
+    "unixMs": 1793776092255,
+    "appPid": 4248,
+    "workingSetMiB": 187.01171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.265625
+  },
+  {
+    "unixMs": 1793776092370,
+    "appPid": 4248,
+    "workingSetMiB": 187.26171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.28125
+  },
+  {
+    "unixMs": 1793776092479,
+    "appPid": 4248,
+    "workingSetMiB": 187.51171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.3125
+  },
+  {
+    "unixMs": 1793776092589,
+    "appPid": 4248,
+    "workingSetMiB": 187.69921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.328125
+  },
+  {
+    "unixMs": 1793776092699,
+    "appPid": 4248,
+    "workingSetMiB": 187.9296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.34375
+  },
+  {
+    "unixMs": 1793776092813,
+    "appPid": 4248,
+    "workingSetMiB": 188.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.421875
+  },
+  {
+    "unixMs": 1793776092921,
+    "appPid": 4248,
+    "workingSetMiB": 188.51171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.453125
+  },
+  {
+    "unixMs": 1793776093033,
+    "appPid": 4248,
+    "workingSetMiB": 188.73828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.5
+  },
+  {
+    "unixMs": 1793776093144,
+    "appPid": 4248,
+    "workingSetMiB": 189.05078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.546875
+  },
+  {
+    "unixMs": 1793776093255,
+    "appPid": 4248,
+    "workingSetMiB": 189.30078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.546875
+  },
+  {
+    "unixMs": 1793776093366,
+    "appPid": 4248,
+    "workingSetMiB": 189.18359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.578125
+  },
+  {
+    "unixMs": 1793776093477,
+    "appPid": 4248,
+    "workingSetMiB": 189.43359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.640625
+  },
+  {
+    "unixMs": 1793776093592,
+    "appPid": 4248,
+    "workingSetMiB": 189.68359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.703125
+  },
+  {
+    "unixMs": 1793776093699,
+    "appPid": 4248,
+    "workingSetMiB": 189.93359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.75
+  },
+  {
+    "unixMs": 1793776093808,
+    "appPid": 4248,
+    "workingSetMiB": 190.09375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.78125
+  },
+  {
+    "unixMs": 1793776093917,
+    "appPid": 4248,
+    "workingSetMiB": 190.37109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.828125
+  },
+  {
+    "unixMs": 1793776094028,
+    "appPid": 4248,
+    "workingSetMiB": 190.55859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.890625
+  },
+  {
+    "unixMs": 1793776094138,
+    "appPid": 4248,
+    "workingSetMiB": 190.93359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.921875
+  },
+  {
+    "unixMs": 1793776094246,
+    "appPid": 4248,
+    "workingSetMiB": 191.11328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 36.96875
+  },
+  {
+    "unixMs": 1793776094355,
+    "appPid": 4248,
+    "workingSetMiB": 191.37109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.015625
+  },
+  {
+    "unixMs": 1793776094463,
+    "appPid": 4248,
+    "workingSetMiB": 191.56640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.0625
+  },
+  {
+    "unixMs": 1793776094573,
+    "appPid": 4248,
+    "workingSetMiB": 191.80859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.125
+  },
+  {
+    "unixMs": 1793776094685,
+    "appPid": 4248,
+    "workingSetMiB": 192.11328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.15625
+  },
+  {
+    "unixMs": 1793776094792,
+    "appPid": 4248,
+    "workingSetMiB": 192.37109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.203125
+  },
+  {
+    "unixMs": 1793776094902,
+    "appPid": 4248,
+    "workingSetMiB": 257.42578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.375
+  },
+  {
+    "unixMs": 1793776095013,
+    "appPid": 4248,
+    "workingSetMiB": 223.5625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.4375
+  },
+  {
+    "unixMs": 1793776095122,
+    "appPid": 4248,
+    "workingSetMiB": 189.18359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.5
+  },
+  {
+    "unixMs": 1793776095233,
+    "appPid": 4248,
+    "workingSetMiB": 193.0078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.5625
+  },
+  {
+    "unixMs": 1793776095343,
+    "appPid": 4248,
+    "workingSetMiB": 196.8828125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.609375
+  },
+  {
+    "unixMs": 1793776095456,
+    "appPid": 4248,
+    "workingSetMiB": 184.56640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.671875
+  },
+  {
+    "unixMs": 1793776095568,
+    "appPid": 4248,
+    "workingSetMiB": 184.82421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.71875
+  },
+  {
+    "unixMs": 1793776095693,
+    "appPid": 4248,
+    "workingSetMiB": 185.01171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.765625
+  },
+  {
+    "unixMs": 1793776095806,
+    "appPid": 4248,
+    "workingSetMiB": 185.26171875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.796875
+  },
+  {
+    "unixMs": 1793776095914,
+    "appPid": 4248,
+    "workingSetMiB": 185.78125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.875
+  },
+  {
+    "unixMs": 1793776096026,
+    "appPid": 4248,
+    "workingSetMiB": 186.0625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 37.921875
+  },
+  {
+    "unixMs": 1793776096135,
+    "appPid": 4248,
+    "workingSetMiB": 186.25,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38
+  },
+  {
+    "unixMs": 1793776096244,
+    "appPid": 4248,
+    "workingSetMiB": 186.5,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.078125
+  },
+  {
+    "unixMs": 1793776096352,
+    "appPid": 4248,
+    "workingSetMiB": 186.6875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.140625
+  },
+  {
+    "unixMs": 1793776096463,
+    "appPid": 4248,
+    "workingSetMiB": 186.9375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.203125
+  },
+  {
+    "unixMs": 1793776096574,
+    "appPid": 4248,
+    "workingSetMiB": 187.125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.234375
+  },
+  {
+    "unixMs": 1793776096682,
+    "appPid": 4248,
+    "workingSetMiB": 187.375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.265625
+  },
+  {
+    "unixMs": 1793776096791,
+    "appPid": 4248,
+    "workingSetMiB": 187.5625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.328125
+  },
+  {
+    "unixMs": 1793776096902,
+    "appPid": 4248,
+    "workingSetMiB": 187.7578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.359375
+  },
+  {
+    "unixMs": 1793776097010,
+    "appPid": 4248,
+    "workingSetMiB": 188,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.390625
+  },
+  {
+    "unixMs": 1793776097119,
+    "appPid": 4248,
+    "workingSetMiB": 188.1875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.4375
+  },
+  {
+    "unixMs": 1793776097229,
+    "appPid": 4248,
+    "workingSetMiB": 188.4375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.515625
+  },
+  {
+    "unixMs": 1793776097339,
+    "appPid": 4248,
+    "workingSetMiB": 189.375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.5625
+  },
+  {
+    "unixMs": 1793776097449,
+    "appPid": 4248,
+    "workingSetMiB": 190.375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.609375
+  },
+  {
+    "unixMs": 1793776097560,
+    "appPid": 4248,
+    "workingSetMiB": 191.27734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.703125
+  },
+  {
+    "unixMs": 1793776097670,
+    "appPid": 4248,
+    "workingSetMiB": 192.25,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.765625
+  },
+  {
+    "unixMs": 1793776097779,
+    "appPid": 4248,
+    "workingSetMiB": 193.1875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.84375
+  },
+  {
+    "unixMs": 1793776097889,
+    "appPid": 4248,
+    "workingSetMiB": 194.12890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.890625
+  },
+  {
+    "unixMs": 1793776098000,
+    "appPid": 4248,
+    "workingSetMiB": 195.12890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.921875
+  },
+  {
+    "unixMs": 1793776098110,
+    "appPid": 4248,
+    "workingSetMiB": 183.25390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 38.984375
+  },
+  {
+    "unixMs": 1793776098221,
+    "appPid": 4248,
+    "workingSetMiB": 184.19140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39
+  },
+  {
+    "unixMs": 1793776098332,
+    "appPid": 4248,
+    "workingSetMiB": 184.44140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.03125
+  },
+  {
+    "unixMs": 1793776098441,
+    "appPid": 4248,
+    "workingSetMiB": 184.69140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.0625
+  },
+  {
+    "unixMs": 1793776098552,
+    "appPid": 4248,
+    "workingSetMiB": 184.87890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.125
+  },
+  {
+    "unixMs": 1793776098676,
+    "appPid": 4248,
+    "workingSetMiB": 185.12890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.171875
+  },
+  {
+    "unixMs": 1793776098786,
+    "appPid": 4248,
+    "workingSetMiB": 185.44140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.21875
+  },
+  {
+    "unixMs": 1793776098909,
+    "appPid": 4248,
+    "workingSetMiB": 185.62890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.28125
+  },
+  {
+    "unixMs": 1793776099017,
+    "appPid": 4248,
+    "workingSetMiB": 185.87890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.34375
+  },
+  {
+    "unixMs": 1793776099127,
+    "appPid": 4248,
+    "workingSetMiB": 186.06640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.421875
+  },
+  {
+    "unixMs": 1793776099239,
+    "appPid": 4248,
+    "workingSetMiB": 186.27734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.453125
+  },
+  {
+    "unixMs": 1793776099362,
+    "appPid": 4248,
+    "workingSetMiB": 186.50390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.515625
+  },
+  {
+    "unixMs": 1793776099472,
+    "appPid": 4248,
+    "workingSetMiB": 189.44140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.59375
+  },
+  {
+    "unixMs": 1793776099583,
+    "appPid": 4248,
+    "workingSetMiB": 193.25390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.671875
+  },
+  {
+    "unixMs": 1793776099693,
+    "appPid": 4248,
+    "workingSetMiB": 196.87890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.734375
+  },
+  {
+    "unixMs": 1793776099805,
+    "appPid": 4248,
+    "workingSetMiB": 185.25390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.8125
+  },
+  {
+    "unixMs": 1793776099943,
+    "appPid": 4248,
+    "workingSetMiB": 189.69140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.921875
+  },
+  {
+    "unixMs": 1793776100053,
+    "appPid": 4248,
+    "workingSetMiB": 191.25390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 39.984375
+  },
+  {
+    "unixMs": 1793776100176,
+    "appPid": 4248,
+    "workingSetMiB": 191.56640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.0625
+  },
+  {
+    "unixMs": 1793776100302,
+    "appPid": 4248,
+    "workingSetMiB": 191.7578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.109375
+  },
+  {
+    "unixMs": 1793776100412,
+    "appPid": 4248,
+    "workingSetMiB": 192.00390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.15625
+  },
+  {
+    "unixMs": 1793776100521,
+    "appPid": 4248,
+    "workingSetMiB": 192.19140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.21875
+  },
+  {
+    "unixMs": 1793776100632,
+    "appPid": 4248,
+    "workingSetMiB": 192.44140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.28125
+  },
+  {
+    "unixMs": 1793776100739,
+    "appPid": 4248,
+    "workingSetMiB": 192.77734375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.34375
+  },
+  {
+    "unixMs": 1793776100853,
+    "appPid": 4248,
+    "workingSetMiB": 192.703125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.375
+  },
+  {
+    "unixMs": 1793776100965,
+    "appPid": 4248,
+    "workingSetMiB": 192.890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.421875
+  },
+  {
+    "unixMs": 1793776101074,
+    "appPid": 4248,
+    "workingSetMiB": 193.203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.46875
+  },
+  {
+    "unixMs": 1793776101190,
+    "appPid": 4248,
+    "workingSetMiB": 193.390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.53125
+  },
+  {
+    "unixMs": 1793776101302,
+    "appPid": 4248,
+    "workingSetMiB": 193.640625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.578125
+  },
+  {
+    "unixMs": 1793776101413,
+    "appPid": 4248,
+    "workingSetMiB": 193.890625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.625
+  },
+  {
+    "unixMs": 1793776101522,
+    "appPid": 4248,
+    "workingSetMiB": 194.203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.6875
+  },
+  {
+    "unixMs": 1793776101631,
+    "appPid": 4248,
+    "workingSetMiB": 182.5078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.75
+  },
+  {
+    "unixMs": 1793776101743,
+    "appPid": 4248,
+    "workingSetMiB": 182.765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.765625
+  },
+  {
+    "unixMs": 1793776101857,
+    "appPid": 4248,
+    "workingSetMiB": 183.05859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.8125
+  },
+  {
+    "unixMs": 1793776101967,
+    "appPid": 4248,
+    "workingSetMiB": 183.328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.859375
+  },
+  {
+    "unixMs": 1793776102077,
+    "appPid": 4248,
+    "workingSetMiB": 183.5234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.9375
+  },
+  {
+    "unixMs": 1793776102191,
+    "appPid": 4248,
+    "workingSetMiB": 183.765625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 40.96875
+  },
+  {
+    "unixMs": 1793776102305,
+    "appPid": 4248,
+    "workingSetMiB": 184.140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.015625
+  },
+  {
+    "unixMs": 1793776102415,
+    "appPid": 4248,
+    "workingSetMiB": 184.328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.0625
+  },
+  {
+    "unixMs": 1793776102526,
+    "appPid": 4248,
+    "workingSetMiB": 184.55078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.078125
+  },
+  {
+    "unixMs": 1793776102640,
+    "appPid": 4248,
+    "workingSetMiB": 184.953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.140625
+  },
+  {
+    "unixMs": 1793776102764,
+    "appPid": 4248,
+    "workingSetMiB": 185.17578125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.1875
+  },
+  {
+    "unixMs": 1793776102873,
+    "appPid": 4248,
+    "workingSetMiB": 185.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.234375
+  },
+  {
+    "unixMs": 1793776102983,
+    "appPid": 4248,
+    "workingSetMiB": 185.61328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.28125
+  },
+  {
+    "unixMs": 1793776103092,
+    "appPid": 4248,
+    "workingSetMiB": 185.86328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.34375
+  },
+  {
+    "unixMs": 1793776103200,
+    "appPid": 4248,
+    "workingSetMiB": 186.0390625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.359375
+  },
+  {
+    "unixMs": 1793776103310,
+    "appPid": 4248,
+    "workingSetMiB": 186.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.40625
+  },
+  {
+    "unixMs": 1793776103419,
+    "appPid": 4248,
+    "workingSetMiB": 186.61328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.46875
+  },
+  {
+    "unixMs": 1793776103529,
+    "appPid": 4248,
+    "workingSetMiB": 186.86328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.515625
+  },
+  {
+    "unixMs": 1793776103640,
+    "appPid": 4248,
+    "workingSetMiB": 187.046875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.59375
+  },
+  {
+    "unixMs": 1793776103749,
+    "appPid": 4248,
+    "workingSetMiB": 187.30078125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.625
+  },
+  {
+    "unixMs": 1793776103862,
+    "appPid": 4248,
+    "workingSetMiB": 191.19140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.6875
+  },
+  {
+    "unixMs": 1793776103972,
+    "appPid": 4248,
+    "workingSetMiB": 202.015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.78125
+  },
+  {
+    "unixMs": 1793776104083,
+    "appPid": 4248,
+    "workingSetMiB": 191.53125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.84375
+  },
+  {
+    "unixMs": 1793776104197,
+    "appPid": 4248,
+    "workingSetMiB": 193.44140625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 41.921875
+  },
+  {
+    "unixMs": 1793776104306,
+    "appPid": 4248,
+    "workingSetMiB": 200.55859375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42
+  },
+  {
+    "unixMs": 1793776104417,
+    "appPid": 4248,
+    "workingSetMiB": 203.75,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.109375
+  },
+  {
+    "unixMs": 1793776104546,
+    "appPid": 4248,
+    "workingSetMiB": 191.62109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.140625
+  },
+  {
+    "unixMs": 1793776104662,
+    "appPid": 4248,
+    "workingSetMiB": 191.62109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.140625
+  },
+  {
+    "unixMs": 1793776104779,
+    "appPid": 4248,
+    "workingSetMiB": 191.62109375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.140625
+  },
+  {
+    "unixMs": 1793776104890,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105001,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105109,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105219,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105328,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105437,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105546,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105657,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105766,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105879,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776105983,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776106100,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776106212,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.15625
+  },
+  {
+    "unixMs": 1793776106330,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776106448,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776106559,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776106676,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776106791,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776106904,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776107021,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776107139,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776107254,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776107371,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.171875
+  },
+  {
+    "unixMs": 1793776107486,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.1875
+  },
+  {
+    "unixMs": 1793776107604,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.1875
+  },
+  {
+    "unixMs": 1793776107720,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.1875
+  },
+  {
+    "unixMs": 1793776107863,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776107988,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776108101,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776108224,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776108334,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776108458,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776108583,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776108694,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776108802,
+    "appPid": 4248,
+    "workingSetMiB": 191.63671875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.21875
+  },
+  {
+    "unixMs": 1793776108913,
+    "appPid": 4248,
+    "workingSetMiB": 189.6015625,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.265625
+  },
+  {
+    "unixMs": 1793776109029,
+    "appPid": 4248,
+    "workingSetMiB": 193.26953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.34375
+  },
+  {
+    "unixMs": 1793776109135,
+    "appPid": 4248,
+    "workingSetMiB": 196.43359375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.390625
+  },
+  {
+    "unixMs": 1793776109247,
+    "appPid": 4248,
+    "workingSetMiB": 188.44921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.5
+  },
+  {
+    "unixMs": 1793776109358,
+    "appPid": 4248,
+    "workingSetMiB": 192.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.5625
+  },
+  {
+    "unixMs": 1793776109475,
+    "appPid": 4248,
+    "workingSetMiB": 192.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776109588,
+    "appPid": 4248,
+    "workingSetMiB": 192.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776109703,
+    "appPid": 4248,
+    "workingSetMiB": 192.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776109813,
+    "appPid": 4248,
+    "workingSetMiB": 192.32421875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776109922,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110034,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110144,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110254,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110367,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110489,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110599,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110722,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110831,
+    "appPid": 4248,
+    "workingSetMiB": 192.33203125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776110943,
+    "appPid": 4248,
+    "workingSetMiB": 192.34375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111060,
+    "appPid": 4248,
+    "workingSetMiB": 192.34375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111173,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111292,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111405,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111532,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111650,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111767,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111883,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776111998,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776112110,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776112224,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776112342,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776112464,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776112573,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776112687,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776112806,
+    "appPid": 4248,
+    "workingSetMiB": 192.33984375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776112916,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113025,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113135,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113244,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113354,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113464,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113575,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113685,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113796,
+    "appPid": 4248,
+    "workingSetMiB": 192.36328125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.578125
+  },
+  {
+    "unixMs": 1793776113908,
+    "appPid": 4248,
+    "workingSetMiB": 201.25,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.609375
+  },
+  {
+    "unixMs": 1793776114020,
+    "appPid": 4248,
+    "workingSetMiB": 204.29296875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.65625
+  },
+  {
+    "unixMs": 1793776114131,
+    "appPid": 4248,
+    "workingSetMiB": 204.44921875,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.734375
+  },
+  {
+    "unixMs": 1793776114241,
+    "appPid": 4248,
+    "workingSetMiB": 198.51953125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.84375
+  },
+  {
+    "unixMs": 1793776114352,
+    "appPid": 4248,
+    "workingSetMiB": 201.453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.90625
+  },
+  {
+    "unixMs": 1793776114461,
+    "appPid": 4248,
+    "workingSetMiB": 192.15234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.953125
+  },
+  {
+    "unixMs": 1793776114574,
+    "appPid": 4248,
+    "workingSetMiB": 192.453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.953125
+  },
+  {
+    "unixMs": 1793776114692,
+    "appPid": 4248,
+    "workingSetMiB": 192.453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.953125
+  },
+  {
+    "unixMs": 1793776114809,
+    "appPid": 4248,
+    "workingSetMiB": 192.453125,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.953125
+  },
+  {
+    "unixMs": 1793776114923,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115030,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115139,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115252,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115359,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115469,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115578,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115689,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115798,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.96875
+  },
+  {
+    "unixMs": 1793776115908,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.984375
+  },
+  {
+    "unixMs": 1793776116022,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.984375
+  },
+  {
+    "unixMs": 1793776116139,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 42.984375
+  },
+  {
+    "unixMs": 1793776116253,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43
+  },
+  {
+    "unixMs": 1793776116368,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43
+  },
+  {
+    "unixMs": 1793776116485,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43
+  },
+  {
+    "unixMs": 1793776116601,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43
+  },
+  {
+    "unixMs": 1793776116717,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43
+  },
+  {
+    "unixMs": 1793776116829,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.015625
+  },
+  {
+    "unixMs": 1793776116947,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.015625
+  },
+  {
+    "unixMs": 1793776117061,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.015625
+  },
+  {
+    "unixMs": 1793776117174,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.015625
+  },
+  {
+    "unixMs": 1793776117289,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.015625
+  },
+  {
+    "unixMs": 1793776117401,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.015625
+  },
+  {
+    "unixMs": 1793776117515,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.03125
+  },
+  {
+    "unixMs": 1793776117627,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.046875
+  },
+  {
+    "unixMs": 1793776117746,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.046875
+  },
+  {
+    "unixMs": 1793776117860,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.046875
+  },
+  {
+    "unixMs": 1793776117972,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.0625
+  },
+  {
+    "unixMs": 1793776118081,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.0625
+  },
+  {
+    "unixMs": 1793776118191,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.0625
+  },
+  {
+    "unixMs": 1793776118301,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.0625
+  },
+  {
+    "unixMs": 1793776118415,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.0625
+  },
+  {
+    "unixMs": 1793776118535,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.0625
+  },
+  {
+    "unixMs": 1793776118646,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.0625
+  },
+  {
+    "unixMs": 1793776118762,
+    "appPid": 4248,
+    "workingSetMiB": 192.65234375,
+    "foregroundPid": 4248,
+    "cpuSeconds": 43.0625
+  }
+]
