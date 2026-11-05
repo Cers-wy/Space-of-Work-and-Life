@@ -401,55 +401,153 @@ void main() {
     await t.pumpAndSettle();
   });
 
-  for (final dark in [false, true]) {
-    testWidgets('${dark ? '深' : '浅'}色设置精简与紧凑按钮同排', (t) async {
-      final font = File('../work/flutter-qa/test-fonts/Chinese-glyphs.ttf');
-      await t.runAsync(() async {
-        if (font.existsSync()) {
-          await (FontLoader(
-            'PingFang SC',
-          )..addFont(font.readAsBytes().then(ByteData.sublistView))).load();
+  for (final width in [700.0, 1020.0, 1440.0]) {
+    for (final dark in [false, true]) {
+      testWidgets('$width ${dark ? '深' : '浅'}色设置分栏、滚动、按钮和分类自适应', (t) async {
+        final font = File('/System/Library/Fonts/STHeiti Medium.ttc');
+        await t.runAsync(() async {
+          if (font.existsSync()) {
+            await (FontLoader(
+              'PingFang SC',
+            )..addFont(font.readAsBytes().then(ByteData.sublistView))).load();
+          }
+          await store.preference('appearance', dark ? 'dark' : 'light');
+        });
+        await launch(t);
+        t.view.physicalSize = Size(width, width >= 1400 ? 1000 : 860);
+        await t.pumpAndSettle();
+        showSettings(t.element(find.byType(Workspace)), store);
+        await t.pumpAndSettle();
+        expect(find.text('跟随系统'), findsOneWidget);
+        final appearance = t.getRect(find.text('界面主题'));
+        final cloud = t.getRect(find.text('GitHub 私有仓库同步'));
+        if (width >= 1000) {
+          expect(cloud.left, greaterThan(appearance.right));
+          expect(
+            (cloud.top - t.getRect(find.text('外观与交互').last).top).abs(),
+            lessThan(1),
+          );
+        } else {
+          expect(cloud.top, greaterThan(appearance.bottom));
         }
+        final export = t.getRect(find.widgetWithText(SpaceButton, '导出SQLite'));
+        final import = t.getRect(find.widgetWithText(SpaceButton, '导入SQLite'));
+        final restore = t.getRect(find.widgetWithText(SpaceButton, '恢复上次备份'));
+        final reveal = t.getRect(find.widgetWithText(SpaceButton, '打开数据库文件夹'));
+        expect(export.top, import.top);
+        expect(restore.top, reveal.top);
+        expect(restore.top, greaterThan(export.bottom));
+        expect(export.right, lessThan(import.left));
+        expect(export.width, lessThan(280));
+        expect(find.text('同步数据到云端'), findsOneWidget);
+        expect(find.text('恢复云端数据'), findsOneWidget);
+        for (final removed in [
+          '本地数据库',
+          '其他位置的手动快照同步',
+          '导出JSON',
+          '保存GitHub配置',
+          '创建访问令牌…',
+          '下载云端预览',
+        ]) {
+          expect(find.text(removed), findsNothing);
+        }
+        if (width >= 1400) {
+          await capture(t, 'settings-2.0.9-${dark ? 'dark' : 'light'}');
+        }
+        await t.tap(find.byKey(const ValueKey('settings-category-4')));
+        await t.pumpAndSettle();
+        expect(find.text('界面主题'), findsNothing);
+        expect(find.text('仓库地址'), findsNothing);
+        expect(find.text('载入演示任务'), findsOneWidget);
+        final demo = t.getRect(find.widgetWithText(SpaceButton, '载入演示任务'));
+        final clear = t.getRect(find.widgetWithText(SpaceButton, '清空所有任务'));
+        expect(clear.top, greaterThan(demo.bottom));
+        await t.tap(find.byKey(const ValueKey('settings-category-0')));
+        await t.pumpAndSettle();
+        expect(find.text('界面主题'), findsOneWidget);
+        expect(t.takeException(), isNull);
+        await t.tap(find.text('完成'));
+        await t.pumpAndSettle();
       });
-      await t.runAsync(() => store.preference('dark', '$dark'));
-      await launch(t);
-      showSettings(t.element(find.byType(Workspace)), store);
-      await t.pumpAndSettle();
-      expect(find.text('跟随系统'), findsOneWidget);
-      for (final removed in [
-        '本地数据库',
-        '其他位置的手动快照同步',
-        '导出JSON',
-        '保存GitHub配置',
-        '创建访问令牌…',
-        '下载云端预览',
-      ]) {
-        expect(find.text(removed), findsNothing);
-      }
-      final export = t.getRect(find.widgetWithText(SpaceButton, '导出SQLite'));
-      final import = t.getRect(find.widgetWithText(SpaceButton, '导入SQLite'));
-      final reveal = t.getRect(find.widgetWithText(SpaceButton, '打开数据库文件夹'));
-      expect(export.top, import.top);
-      expect(export.top, reveal.top);
-      expect(export.width, lessThan(140));
-      expect(reveal.width, lessThan(180));
-      expect(find.text('同步数据到云端'), findsOneWidget);
-      expect(find.text('恢复云端数据'), findsOneWidget);
-      await capture(t, '${dark ? 'dark' : 'light'}-settings-top');
-      await t.scrollUntilVisible(
-        find.text('清空所有任务'),
-        240,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await t.pumpAndSettle();
-      final demo = t.getRect(find.widgetWithText(SpaceButton, '载入演示任务'));
-      final clear = t.getRect(find.widgetWithText(SpaceButton, '清空所有任务'));
-      expect(demo.top, clear.top);
-      expect(demo.width, lessThan(160));
-      await capture(t, '${dark ? 'dark' : 'light'}-settings-bottom');
-      expect(t.takeException(), isNull);
-      await t.tap(find.text('完成'));
-      await t.pumpAndSettle();
-    });
+    }
   }
+
+  testWidgets('分类切换和窗口调整保留未提交配置、键盘可切换并Esc关闭', (t) async {
+    await launch(t, animations: true);
+    showSettings(t.element(find.byType(Workspace)), store);
+    await t.pumpAndSettle();
+    Finder tokenInput() => find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.hintText == '填写此仓库的访问令牌',
+    );
+    await t.enterText(tokenInput(), 'test-only-draft');
+    final originalController = t.widget<TextField>(tokenInput()).controller;
+    await t.tap(find.byKey(const ValueKey('settings-category-1')));
+    await t.pump(const Duration(milliseconds: 60));
+    await t.tap(find.byKey(const ValueKey('settings-category-3')));
+    await t.pump(const Duration(milliseconds: 60));
+    t.view.physicalSize = const Size(700, 860);
+    await t.pumpAndSettle();
+    expect(
+      t.widget<TextField>(tokenInput()).controller,
+      same(originalController),
+    );
+    expect(originalController!.text, 'test-only-draft');
+    expect(t.widget<TextField>(tokenInput()).obscureText, isTrue);
+    await t.tap(find.byTooltip('显示Token令牌'));
+    await t.pumpAndSettle();
+    expect(t.widget<TextField>(tokenInput()).obscureText, isFalse);
+    final nav = find.byKey(const ValueKey('settings-category-2'));
+    Focus.of(
+      t.element(
+        find.descendant(of: nav, matching: find.byType(GestureDetector)).first,
+      ),
+    ).requestFocus();
+    await t.pump();
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    await t.pumpAndSettle();
+    expect(find.text('本地备份与恢复'), findsOneWidget);
+    expect(find.text('仓库地址'), findsNothing);
+    expect(t.takeException(), isNull);
+    await t.sendKeyEvent(LogicalKeyboardKey.escape);
+    await t.pumpAndSettle();
+    expect(find.text('数据与设置'), findsNothing);
+    expect(store.modal, isFalse);
+    expect(store.state.settings['github.token'], isNull);
+  });
+
+  testWidgets('数据管理确认取消不改任务，主题与滚动条立即生效并持久化', (t) async {
+    await t.runAsync(() => store.commit(demoState(), '合成数据'));
+    await launch(t);
+    showSettings(t.element(find.byType(Workspace)), store);
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const ValueKey('settings-category-4')));
+    await t.pumpAndSettle();
+    final count = store.state.tasks.length;
+    await t.tap(find.widgetWithText(SpaceButton, '清空所有任务'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('取消'));
+    await t.pumpAndSettle();
+    expect(store.state.tasks.length, count);
+    await t.tap(find.byKey(const ValueKey('settings-category-1')));
+    await t.pumpAndSettle();
+    await t.tap(find.text('深色'));
+    await t.runAsync(
+      () async => Future<void>.delayed(const Duration(milliseconds: 30)),
+    );
+    await t.pumpAndSettle();
+    expect(store.appearance, 'dark');
+    final previous = store.hideScrollbars;
+    await t.tap(find.byType(Switch));
+    await t.runAsync(
+      () async => Future<void>.delayed(const Duration(milliseconds: 30)),
+    );
+    await t.pumpAndSettle();
+    expect(store.hideScrollbars, !previous);
+    await t.runAsync(store.reload);
+    await t.pumpAndSettle();
+    expect(store.appearance, 'dark');
+    expect(store.hideScrollbars, !previous);
+    await t.tap(find.text('完成'));
+    await t.pumpAndSettle();
+  });
 }

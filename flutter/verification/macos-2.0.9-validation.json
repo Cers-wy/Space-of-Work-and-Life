@@ -1,0 +1,18 @@
+{
+  "version": "2.0.9+10",
+  "signature": "ZIP and mounted DMG strict deep verification passed",
+  "zipAndDmgAppIdentical": true,
+  "fileCount": 32,
+  "qaSource": "Installed copy from read-only mounted DMG; identical to ZIP app",
+  "formalDataAccessed": false,
+  "nativeUi": "Final installed DMG copy: empty home, navigation expand/collapse, settings categories, theme and Escape verified",
+  "isolatedSqlite": {
+    "quickCheck": "ok",
+    "tasks": 0,
+    "projects": 0
+  },
+  "testsPassed": 112,
+  "resourceLifecycleFollowupTestsPassed": 2,
+  "performance": "Mac navigation measured; see performance-2.0.9",
+  "settingsPerformance": "not measured; skipped per user 2026-11-05 scope change"
+}

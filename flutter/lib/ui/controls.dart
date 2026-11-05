@@ -596,6 +596,7 @@ class SpaceInput extends StatelessWidget {
   final int lines;
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
+  final Color? borderColor;
   const SpaceInput({
     super.key,
     required this.controller,
@@ -609,6 +610,7 @@ class SpaceInput extends StatelessWidget {
     this.lines = 1,
     this.onChanged,
     this.focusNode,
+    this.borderColor,
   });
   @override
   Widget build(BuildContext c) {
@@ -658,7 +660,7 @@ class SpaceInput extends StatelessWidget {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(
-              color: invalid ? p.red : p.border,
+              color: invalid ? p.red : borderColor ?? p.border,
               width: invalid ? 2 : 1,
             ),
           ),

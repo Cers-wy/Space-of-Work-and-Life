@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:math' show min, max;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:space_flutter/main.dart';
 import 'package:space_flutter/core/repository.dart';
@@ -8,6 +10,7 @@ import 'package:space_flutter/store.dart';
 import 'package:space_flutter/ui/controls.dart';
 import 'package:space_flutter/ui/dialogs.dart';
 import 'package:space_flutter/ui/workspace.dart';
+import 'package:space_flutter/ui/theme.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -187,6 +190,131 @@ void main() {
       await t.pump();
       await t.pump(const Duration(milliseconds: 600));
       expect(t.getRect(first).left, closeTo(initial.left, .1));
+      expect(t.takeException(), isNull);
+    });
+  }
+  for (final width in [1020.0, 1600.0]) {
+    testWidgets('$width 导航图标保持同一实例，逐帧连续且快速反向无跳位', (t) async {
+      await t.runAsync(() => s.preference('navCollapsed', 'false'));
+      await launch(t, width);
+      t.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: false);
+      await t.pump(const Duration(milliseconds: 600));
+      final icons = [
+        find.byKey(const ValueKey('navigation-mark')),
+        find.byKey(const ValueKey('navigation-task-icon')),
+        find.byKey(const ValueKey('navigation-settings')),
+      ];
+      final elements = icons.map(t.element).toList();
+      final target = find.descendant(
+        of: icons.last,
+        matching: find.byType(GestureDetector),
+      );
+      final focus = Focus.of(t.element(target));
+      focus.requestFocus();
+      await t.pump();
+      final initial = icons.map(t.getCenter).toList();
+      for (final collapsed in [true, false, true, false]) {
+        final before = icons.map(t.getCenter).toList();
+        await t.runAsync(() => s.preference('navCollapsed', '$collapsed'));
+        await t.pump();
+        final filters = t.widgetList<BackdropFilter>(
+          find.descendant(
+            of: find.byType(Workspace),
+            matching: find.byType(BackdropFilter),
+          ),
+        );
+        expect(CardFlow.debugSnapshotImages, greaterThan(0));
+        expect(filters, isNotEmpty);
+        expect(filters.every((f) => !f.enabled), isTrue);
+        for (var i = 0; i < icons.length; i++) {
+          expect(icons[i], findsOneWidget);
+          expect(t.element(icons[i]), same(elements[i]));
+          expect(focus.hasFocus, isTrue);
+          expect((t.getCenter(icons[i]) - before[i]).distance, lessThan(.1));
+        }
+        final glowTime = t.widget<CardFlow>(find.byType(CardFlow).first).time;
+        var previous = before;
+        // Reverse every movement while still in flight.
+        for (var frame = 0; frame < 5; frame++) {
+          await t.pump(const Duration(milliseconds: 16));
+          final now = icons.map(t.getCenter).toList();
+          for (var i = 0; i < icons.length; i++) {
+            expect(icons[i], findsOneWidget);
+            expect(t.element(icons[i]), same(elements[i]));
+            expect((now[i] - previous[i]).distance, lessThan(12));
+          }
+          previous = now;
+          expect(
+            t.widget<CardFlow>(find.byType(CardFlow).first).time,
+            glowTime,
+          );
+        }
+      }
+      await t.pump(const Duration(milliseconds: 600));
+      await t.pump();
+      expect(focus.hasFocus, isTrue);
+      expect(CardFlow.debugSnapshotImages, 0);
+      expect(
+        t
+            .widgetList<BackdropFilter>(
+              find.descendant(
+                of: find.byType(Workspace),
+                matching: find.byType(BackdropFilter),
+              ),
+            )
+            .every((f) => f.enabled),
+        isTrue,
+      );
+      final column = find.byKey(const ValueKey('board-column-todo'));
+      final settledWidth = t.getSize(column).width;
+      final pausedGlow = t.widget<CardFlow>(find.byType(CardFlow).first).time;
+      await t.pump(const Duration(milliseconds: 80));
+      expect(t.getSize(column).width, closeTo(settledWidth, .1));
+      expect(CardFlow.debugSnapshotImages, 0);
+      expect(
+        t.widget<CardFlow>(find.byType(CardFlow).first).time,
+        greaterThan(pausedGlow),
+      );
+      for (var i = 0; i < icons.length; i++) {
+        expect(t.element(icons[i]), same(elements[i]));
+        expect((t.getCenter(icons[i]) - initial[i]).distance, lessThan(.1));
+      }
+      expect(t.takeException(), isNull);
+    });
+    testWidgets('$width 导航减少动态立即完成，图标操作和键盘焦点保留', (t) async {
+      await t.runAsync(() => s.preference('navCollapsed', 'false'));
+      await launch(t, width);
+      final settings = find.byKey(const ValueKey('navigation-settings'));
+      final target = find.descendant(
+        of: settings,
+        matching: find.byType(GestureDetector),
+      );
+      final focus = Focus.of(t.element(target));
+      focus.requestFocus();
+      await t.pump();
+      expect(focus.hasFocus, isTrue);
+      final expanded = t.getCenter(
+        find.byKey(const ValueKey('navigation-task-icon')),
+      );
+      await t.runAsync(() => s.preference('navCollapsed', 'true'));
+      await t.pump();
+      expect(focus.hasFocus, isTrue);
+      expect(
+        t.getCenter(find.byKey(const ValueKey('navigation-task-icon'))).dy,
+        closeTo(expanded.dy - 40, .1),
+      );
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      await t.pumpAndSettle();
+      expect(find.text('隐藏滚动条'), findsOneWidget);
+      Navigator.of(t.element(find.text('隐藏滚动条'))).pop();
+      await t.pumpAndSettle();
+      s.query.text = '不存在的测试任务';
+      s.refreshQuery();
+      await t.pump();
+      await t.tap(find.byKey(const ValueKey('navigation-task-icon')));
+      await t.pumpAndSettle();
+      expect(s.query.text, isEmpty);
       expect(t.takeException(), isNull);
     });
   }

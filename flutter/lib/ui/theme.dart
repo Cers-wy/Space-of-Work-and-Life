@@ -279,6 +279,24 @@ class Contour extends CustomClipper<Path> {
   bool shouldReclip(Contour oldClipper) => oldClipper.kind != kind;
 }
 
+/// Scoped to the workspace, whose surfaces sit over the already softened
+/// ambient background. Keep filter elements mounted while resizing so focus,
+/// scroll positions and card state survive the transition.
+class WorkspaceMotion extends InheritedWidget {
+  final bool active;
+  const WorkspaceMotion({
+    super.key,
+    required this.active,
+    required super.child,
+  });
+  static bool activeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<WorkspaceMotion>()?.active ??
+      false;
+  @override
+  bool updateShouldNotify(WorkspaceMotion oldWidget) =>
+      active != oldWidget.active;
+}
+
 class Glass extends StatelessWidget {
   final Widget child;
   final String contour;
@@ -319,6 +337,7 @@ class Glass extends StatelessWidget {
     );
     if (blur && !reduced) {
       surface = BackdropFilter.grouped(
+        enabled: !WorkspaceMotion.activeOf(context),
         filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: surface,
       );
@@ -383,10 +402,13 @@ class PopupSurface extends StatelessWidget {
   }
 }
 
-class CardFlow extends StatelessWidget {
+class CardFlow extends StatefulWidget {
   final Widget child;
   final bool emphasized;
   final double time;
+  static int _snapshots = 0;
+  @visibleForTesting
+  static int get debugSnapshotImages => _snapshots;
   const CardFlow({
     super.key,
     required this.child,
@@ -394,19 +416,82 @@ class CardFlow extends StatelessWidget {
     this.time = 0,
   });
   @override
-  Widget build(BuildContext c) => CustomPaint(
-    foregroundPainter: _FlowPainter(Palette.of(c), emphasized, time),
-    child: child,
-  );
+  State<CardFlow> createState() => _CardFlowState();
+}
+
+class _CardFlowState extends State<CardFlow> {
+  _FlowSnapshot? snapshot;
+  @override
+  Widget build(BuildContext context) {
+    final moving = WorkspaceMotion.activeOf(context);
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    if (!moving || snapshot?.dpr != dpr) {
+      snapshot?.dispose();
+      snapshot = null;
+    }
+    if (moving) snapshot ??= _FlowSnapshot(dpr);
+    return CustomPaint(
+      foregroundPainter: _FlowPainter(
+        Palette.of(context),
+        widget.emphasized,
+        widget.time,
+        snapshot,
+      ),
+      child: widget.child,
+    );
+  }
+
+  @override
+  void dispose() {
+    snapshot?.dispose();
+    super.dispose();
+  }
+}
+
+class _FlowSnapshot {
+  final double dpr;
+  ui.Image? image;
+  _FlowSnapshot(this.dpr);
+  void dispose() {
+    if (image != null) {
+      image!.dispose();
+      image = null;
+      CardFlow._snapshots--;
+    }
+  }
 }
 
 class _FlowPainter extends CustomPainter {
   final Palette p;
   final bool emphasized;
   final double time;
-  _FlowPainter(this.p, this.emphasized, this.time);
+  final _FlowSnapshot? snapshot;
+  _FlowPainter(this.p, this.emphasized, this.time, [this.snapshot]);
   @override
   void paint(Canvas c, Size s) {
+    final frozen = snapshot;
+    if (frozen != null && !s.isEmpty) {
+      if (frozen.image == null) {
+        final recorder = ui.PictureRecorder();
+        final canvas = Canvas(recorder)..scale(frozen.dpr);
+        _FlowPainter(p, emphasized, time).paint(canvas, s);
+        final picture = recorder.endRecording();
+        frozen.image = picture.toImageSync(
+          (s.width * frozen.dpr).ceil(),
+          (s.height * frozen.dpr).ceil(),
+        );
+        picture.dispose();
+        CardFlow._snapshots++;
+      }
+      final image = frozen.image!;
+      c.drawImageRect(
+        image,
+        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+        Offset.zero & s,
+        Paint()..filterQuality = FilterQuality.low,
+      );
+      return;
+    }
     final r = RRect.fromRectAndRadius(
       (Offset.zero & s).deflate(.5),
       const Radius.circular(8),
@@ -466,7 +551,8 @@ class _FlowPainter extends CustomPainter {
   bool shouldRepaint(_FlowPainter o) =>
       o.p.darkness != p.darkness ||
       o.time != time ||
-      o.emphasized != emphasized;
+      o.emphasized != emphasized ||
+      o.snapshot != snapshot;
 }
 
 /// Applied above the Navigator so existing routes, popups and editors update too.

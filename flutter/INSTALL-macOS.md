@@ -1,4 +1,4 @@
-# Space Flutter 2.0.8（9）
+# Space Flutter 2.0.9（10）
 
 适用于 Apple Silicon（arm64）macOS。本次发布为免安装ZIP：完全退出旧版Space Flutter，完整解压ZIP后打开`Space Flutter.app`。也可将应用拖入“应用程序”文件夹以便长期使用；不需要运行安装程序。
 

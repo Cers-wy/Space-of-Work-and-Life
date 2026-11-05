@@ -1,0 +1,82 @@
+{
+  "version": "2.0.9+10",
+  "runtimeFileCount": 19,
+  "files": [
+    {
+      "path": "lib/core/files.dart",
+      "sha256": "e6ea75cf7fa1e161d6c5418c1451c4cc4847df184d475459458786f628f53a94"
+    },
+    {
+      "path": "lib/core/models.dart",
+      "sha256": "6913e0fbff0593b703f6f03ad7bb69ddf5f8ca2e47d0dd904cc6a444c2231429"
+    },
+    {
+      "path": "lib/core/repository.dart",
+      "sha256": "22ea28be57ea01ef2f80eb8ee85f8de2d3393ed6093fb1f4eadc12ceef19618c"
+    },
+    {
+      "path": "lib/core/richtext.dart",
+      "sha256": "207b7be0ac63b963cfa35d026e0a578463bf332f5ce9d351773dbc358c16e8dc"
+    },
+    {
+      "path": "lib/core/sync.dart",
+      "sha256": "5bc6443fc5ea3a998d8c686eda8ddc8b5d98818495e21a54afadb74eb119ad26"
+    },
+    {
+      "path": "lib/core/sync_service.dart",
+      "sha256": "dc519ea37e309bc319011813a1e259e668b23a757100023469712176f0f041f1"
+    },
+    {
+      "path": "lib/host.dart",
+      "sha256": "abb153d0ae57238b8af9cce4bea4650c5964fa870b5afe4da8d607a9cdd2aa6f"
+    },
+    {
+      "path": "lib/main.dart",
+      "sha256": "30d1a22bf9019143a2e174796122c29a8183bff7125ad74bf1dc811dd7c42dc5"
+    },
+    {
+      "path": "lib/store.dart",
+      "sha256": "da5060ed2f6ab1e4d3dd74e7f239526439b89249ac122b377922688ea57d75ae"
+    },
+    {
+      "path": "lib/ui/benchmark.dart",
+      "sha256": "ba8fe68e633486aa61cbc7aa035d948b5ee06ecbc2021ac2c108ce6209050f23"
+    },
+    {
+      "path": "lib/ui/controls.dart",
+      "sha256": "fd3060b71b54e378b099e61c162388223166124a39c2f01973486cf6342f6df2"
+    },
+    {
+      "path": "lib/ui/dialogs.dart",
+      "sha256": "d33e77dc905497d27890fd3f17460a955f4d70a6f64c78cef787af4bf51fec05"
+    },
+    {
+      "path": "lib/ui/gantt_colors.dart",
+      "sha256": "cb5eb94748b59d90e4f77dd8da213f98c860ba974910a62f9be0c70c65312dca"
+    },
+    {
+      "path": "lib/ui/image_preview.dart",
+      "sha256": "a955dd601bcb319290652ab9b9c1ad1697e39b22db8a92df71b18a446d395ab6"
+    },
+    {
+      "path": "lib/ui/schedule.dart",
+      "sha256": "449c359ac02939076e1b375162c07e33229af12381cf5f033c9f9bdbbd77a176"
+    },
+    {
+      "path": "lib/ui/settings_panel.dart",
+      "sha256": "239176d90860079873093240e4392aa190d8330ceafaf572591303111badd1d3"
+    },
+    {
+      "path": "lib/ui/sync_settings.dart",
+      "sha256": "4da11013ccd5fc74d6d416e332e27a23fba787d6dd93dc7211917b6e83e3f9e1"
+    },
+    {
+      "path": "lib/ui/theme.dart",
+      "sha256": "a9417ae46137c43ed2f012764830ee681fb9d366f2e44f8d78f7c06a37b3fb80"
+    },
+    {
+      "path": "lib/ui/workspace.dart",
+      "sha256": "d27fef0cb2e4792be243119484efd0fde65841695b99279a8c667cb73ddf4f80"
+    }
+  ]
+}

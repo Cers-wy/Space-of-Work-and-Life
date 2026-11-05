@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-11-05T09:24:33.892417+08:00",
+  "macOS": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2\nBuildVersion:\t\t26B123",
+  "hardware": [
+    "Mac17,2",
+    "17179869184",
+    "10",
+    "Apple M5"
+  ],
+  "appArchitecture": "work/navigation-209/Production.app/Contents/MacOS/Space Flutter: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]\nwork/navigation-209/Production.app/Contents/MacOS/Space Flutter (for architecture x86_64):\tMach-O 64-bit executable x86_64\nwork/navigation-209/Production.app/Contents/MacOS/Space Flutter (for architecture arm64):\tMach-O 64-bit executable arm64",
+  "flutter": "3.47.9",
+  "dart": "3.13.7",
+  "mode": "Release",
+  "navigationTaskCount": 120,
+  "navigationInitialAppearance": "dark",
+  "foregroundPolicy": "Mac lifecycle resumed throughout each scenario; Windows native foreground PID sampled every 100ms; no parallel builds/tests during measurements",
+  "caveat": "Stage-budget overruns are not presentation dropped-frame counts; short single runs are not statistical significance."
+}

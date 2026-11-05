@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../core/models.dart';
 import '../store.dart';
 import 'theme.dart';
@@ -23,10 +25,22 @@ class _WorkspaceState extends State<Workspace> {
   final filterAnchor = GlobalKey();
   final previewWidths = <String, double>{};
   SpaceStore get s => widget.store;
+  late bool previousNavCollapsed;
+  bool navMoving = false;
+  int navigationEpoch = 0;
   @override
   void initState() {
     super.initState();
     s.searchRequested.addListener(requestSearch);
+    previousNavCollapsed = s.navCollapsed;
+    s.addListener(trackNavigation);
+  }
+
+  void trackNavigation() {
+    if (!mounted || s.navCollapsed == previousNavCollapsed) return;
+    previousNavCollapsed = s.navCollapsed;
+    navigationEpoch++;
+    setState(() => navMoving = !MediaQuery.disableAnimationsOf(context));
   }
 
   void requestSearch() {
@@ -41,6 +55,7 @@ class _WorkspaceState extends State<Workspace> {
   @override
   void dispose() {
     s.searchRequested.removeListener(requestSearch);
+    s.removeListener(trackNavigation);
     search.dispose();
     searchFocus.dispose();
     super.dispose();
@@ -185,97 +200,93 @@ class _WorkspaceState extends State<Workspace> {
               ),
             ],
           );
-          final navigation = ClipRect(
-            child: AnimatedSwitcher(
+          // One persistent sidebar: the parent supplies its animated width.
+          // Never cross-fade two complete glass surfaces or duplicate controls.
+          final expandedNav = box.maxWidth >= 1600 ? 240.0 : 224.0;
+          final navigation = sidebar(expandedNav, s.navCollapsed);
+          final ambient = Ambient();
+          return WorkspaceMotion(
+            active: navMoving,
+            child: TweenAnimationBuilder<double>(
+              onEnd: () {
+                // Keep the final layout frame in resize mode too. Otherwise
+                // column tweens restart just as the navigation finishes.
+                final completedEpoch = navigationEpoch;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted &&
+                      navMoving &&
+                      completedEpoch == navigationEpoch) {
+                    setState(() => navMoving = false);
+                  }
+                });
+              },
+              tween: Tween(end: nav),
               duration: MediaQuery.of(context).disableAnimations
                   ? Duration.zero
                   : spaceDuration,
-              switchInCurve: spaceCurve,
-              switchOutCurve: spaceCurve,
-              layoutBuilder: (current, previous) => Stack(
-                alignment: Alignment.topLeft,
-                children: [...previous, ?current],
-              ),
-              child: SizedBox(
-                key: ValueKey(s.navCollapsed),
-                height: box.maxHeight - 16,
-                child: OverflowBox(
-                  alignment: Alignment.topLeft,
-                  minWidth: nav,
-                  maxWidth: nav,
-                  child: sidebar(nav, s.navCollapsed),
-                ),
-              ),
-            ),
-          );
-          final ambient = Ambient();
-          return TweenAnimationBuilder<double>(
-            tween: Tween(end: nav),
-            duration: MediaQuery.of(context).disableAnimations
-                ? Duration.zero
-                : spaceDuration,
-            curve: spaceCurve,
-            builder: (context, animatedNav, _) => Stack(
-              children: [
-                Positioned.fill(child: ambient),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Positioned(
-                        left: animatedNav + 8,
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: workspaceContent,
-                      ),
-                      Positioned(
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: animatedNav,
-                        child: navigation,
-                      ),
-                    ],
-                  ),
-                ),
-                if (s.notice != null)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 24,
-                    child: Center(
-                      child: Glass(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
+              curve: spaceCurve,
+              builder: (context, animatedNav, _) => Stack(
+                children: [
+                  Positioned.fill(child: ambient),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned(
+                          left: animatedNav + 8,
+                          top: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: workspaceContent,
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(s.notice!, style: textStyle(p, size: 12)),
-                            if (s.canUndo) ...[
-                              const SizedBox(width: 12),
-                              SpaceButton(
-                                height: 32,
-                                onPressed: s.undo,
-                                child: Text(
-                                  '撤销',
-                                  style: textStyle(
-                                    p,
-                                    size: 12,
-                                    color: p.accent,
+                        Positioned(
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: animatedNav,
+                          child: navigation,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (s.notice != null)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 24,
+                      child: Center(
+                        child: Glass(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(s.notice!, style: textStyle(p, size: 12)),
+                              if (s.canUndo) ...[
+                                const SizedBox(width: 12),
+                                SpaceButton(
+                                  height: 32,
+                                  onPressed: s.undo,
+                                  child: Text(
+                                    '撤销',
+                                    style: textStyle(
+                                      p,
+                                      size: 12,
+                                      color: p.accent,
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -307,86 +318,112 @@ class _WorkspaceState extends State<Workspace> {
     );
   }
 
-  Widget sidebar(double width, bool collapsed) {
+  Widget sidebar(double expandedWidth, bool collapsed) {
     final p = Palette.of(context);
-    return Glass(
-      padding: EdgeInsets.symmetric(
-        horizontal: collapsed ? 8 : 16,
-        vertical: 16,
+    const mark = RepaintBoundary(child: Mark(key: ValueKey('navigation-mark')));
+    final taskIcon = RepaintBoundary(
+      child: Container(
+        key: const ValueKey('navigation-task-icon'),
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: p.primary,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.center,
+        child: const SpaceIcon('grid', size: 16, color: Colors.white),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (collapsed)
-            const Center(child: Mark())
-          else
-            Row(
+    );
+    final settings = RepaintBoundary(
+      child: IconButtonS(
+        'gear',
+        '数据与设置（⌘,）',
+        key: const ValueKey('navigation-settings'),
+        onPressed: () => showSettings(context, s),
+      ),
+    );
+    final brand = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Space', style: textStyle(p, size: 24, bold: true)),
+        Text('个人工作台', style: textStyle(p, size: 12, color: p.secondary)),
+      ],
+    );
+    final heading = Text('工作空间', style: textStyle(p, size: 12, color: p.muted));
+    final taskLabel = Row(
+      children: [
+        const Text('任务'),
+        const Spacer(),
+        Text(
+          '${s.state.tasks.length}',
+          style: textStyle(p, size: 12, color: p.muted),
+        ),
+      ],
+    );
+    return Glass(
+      key: const ValueKey('navigation-sidebar'),
+      child: LayoutBuilder(
+        builder: (context, bounds) {
+          final progress = ((bounds.maxWidth - 64) / (expandedWidth - 64))
+              .clamp(0.0, 1.0);
+          Widget label(Widget child) => ExcludeSemantics(
+            excluding: collapsed,
+            child: Opacity(opacity: progress, child: child),
+          );
+          // Lay out labels at a fixed width. Only icon translations, label
+          // opacity and the outer clip change; text never wraps mid-animation.
+          return OverflowBox(
+            alignment: Alignment.topLeft,
+            minWidth: expandedWidth,
+            maxWidth: expandedWidth,
+            child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                const Mark(),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Space', style: textStyle(p, size: 24, bold: true)),
-                      Text(
-                        '个人工作台',
-                        style: textStyle(p, size: 12, color: p.secondary),
+                Positioned(
+                  left: 16,
+                  top: 16,
+                  child: Transform.translate(
+                    offset: Offset(0, 8 * progress),
+                    child: mark,
+                  ),
+                ),
+                Positioned(left: 56, top: 16, child: label(brand)),
+                Positioned(left: 24, top: 80, child: label(heading)),
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  top: 104,
+                  child: Transform.translate(
+                    offset: Offset(-8 * (1 - progress), -40 * (1 - progress)),
+                    child: SpaceButton(
+                      key: const ValueKey('navigation-task'),
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      selected: !collapsed,
+                      onPressed: s.resetQuery,
+                      tooltip: '任务，${s.state.tasks.length}项任务',
+                      child: Row(
+                        children: [
+                          taskIcon,
+                          const SizedBox(width: 12),
+                          Expanded(child: label(taskLabel)),
+                        ],
                       ),
-                    ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 16,
+                  bottom: 16,
+                  child: Transform.translate(
+                    offset: Offset(-2 * (1 - progress), 0),
+                    child: settings,
                   ),
                 ),
               ],
             ),
-          const SizedBox(height: 16),
-          if (!collapsed)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
-              child: Text(
-                '工作空间',
-                style: textStyle(p, size: 12, color: p.muted),
-              ),
-            ),
-          SpaceButton(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            selected: !collapsed,
-            onPressed: s.resetQuery,
-            tooltip: '任务，${s.state.tasks.length}项任务',
-            child: Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: p.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: const SpaceIcon('grid', size: 16, color: Colors.white),
-                ),
-                if (!collapsed) ...[
-                  const SizedBox(width: 12),
-                  const Text('任务'),
-                  const Spacer(),
-                  Text(
-                    '${s.state.tasks.length}',
-                    style: textStyle(p, size: 12, color: p.muted),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const Spacer(),
-          Align(
-            alignment: collapsed ? Alignment.center : Alignment.centerLeft,
-            child: IconButtonS(
-              'gear',
-              '数据与设置（⌘,）',
-              onPressed: () => showSettings(context, s),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -898,6 +935,7 @@ class _WorkspaceState extends State<Workspace> {
                     tween: Tween(end: widths[statuses[i]]!),
                     duration:
                         MediaQuery.of(context).disableAnimations ||
+                            navMoving ||
                             dragActive.value
                         ? Duration.zero
                         : spaceDuration,
@@ -1549,6 +1587,7 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
         active &&
         TickerMode.valuesOf(context).enabled &&
         !widget.preview &&
+        !WorkspaceMotion.activeOf(context) &&
         !dragActive.value &&
         !MediaQuery.of(context).disableAnimations;
     if (enabled && timer == null) {

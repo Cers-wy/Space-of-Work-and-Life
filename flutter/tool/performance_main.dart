@@ -44,6 +44,19 @@ bool nativeForeground() {
   }
 }
 
+// Optional manual start gate lets the UI test driver focus the window before
+// any measured action. This is probe-only code and never ships in the app.
+Future<void> waitForProbeForeground() async {
+  final gate = Platform.environment['SPACE_PROBE_START_GATE'];
+  final deadline = DateTime.now().add(const Duration(minutes: 2));
+  while ((gate != null && !File(gate).existsSync()) || !nativeForeground()) {
+    if (DateTime.now().isAfter(deadline)) {
+      throw StateError('Probe requires its start gate and foreground focus');
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+  }
+}
+
 class ForegroundProbe extends WidgetsBindingObserver {
   bool uninterrupted =
       WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
@@ -111,6 +124,11 @@ Future<Map<String, num>> processSample() async {
   };
 }
 
+double _percentile(Iterable<double> values, double p) {
+  final sorted = values.toList()..sort();
+  return sorted.isEmpty ? 0 : sorted[((sorted.length - 1) * p).ceil()];
+}
+
 Future<Map<String, Object?>> measure(
   String name,
   Future<void> Function() action,
@@ -151,6 +169,34 @@ Future<Map<String, Object?>> measure(
     'rasterP95Ms': p95(
       measuredFrames.map((t) => t.rasterDuration.inMicroseconds / 1000),
     ),
+    'buildP99Ms': _percentile(
+      measuredFrames.map((t) => t.buildDuration.inMicroseconds / 1000),
+      .99,
+    ),
+    'rasterP99Ms': _percentile(
+      measuredFrames.map((t) => t.rasterDuration.inMicroseconds / 1000),
+      .99,
+    ),
+    'buildMaxMs': _percentile(
+      measuredFrames.map((t) => t.buildDuration.inMicroseconds / 1000),
+      1,
+    ),
+    'rasterMaxMs': _percentile(
+      measuredFrames.map((t) => t.rasterDuration.inMicroseconds / 1000),
+      1,
+    ),
+    'refreshRateHz':
+        ui.PlatformDispatcher.instance.views.first.display.refreshRate,
+    'frameBudgetMs':
+        1000 / ui.PlatformDispatcher.instance.views.first.display.refreshRate,
+    'budgetSampleCount': measuredFrames.length,
+    'overBudgetFrames': measuredFrames.where((t) {
+      final budget =
+          1000000 /
+          ui.PlatformDispatcher.instance.views.first.display.refreshRate;
+      return t.buildDuration.inMicroseconds > budget ||
+          t.rasterDuration.inMicroseconds > budget;
+    }).length,
     'lifecycle': WidgetsBinding.instance.lifecycleState?.name,
     'foregroundThroughout': foreground.uninterrupted,
   };
