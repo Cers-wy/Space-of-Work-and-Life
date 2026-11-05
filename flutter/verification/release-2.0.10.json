@@ -1,0 +1,30 @@
+{
+  "commit": "c9b4c296c64847f0f4a73347a02779945b5f4796",
+  "url": "https://github.com/18390208101/Space-macOS-native/releases/tag/v2.0.10",
+  "assets": [
+    {
+      "name": "Space-Flutter-2.0.10-macOS-arm64.dmg",
+      "sha256": "e87e5c3e13e8b28958956448232522e1ac60d4990add88f8ba72d118afa03c9e",
+      "url": "https://github.com/18390208101/Space-macOS-native/releases/download/v2.0.10/Space-Flutter-2.0.10-macOS-arm64.dmg",
+      "size": 24838883
+    },
+    {
+      "name": "Space-Flutter-2.0.10-macOS-arm64.zip",
+      "sha256": "ea98bc505d48d1d4237f48c0e596973e9dbcda8d7049f2e461166d05733df3f7",
+      "url": "https://github.com/18390208101/Space-macOS-native/releases/download/v2.0.10/Space-Flutter-2.0.10-macOS-arm64.zip",
+      "size": 21914934
+    },
+    {
+      "name": "Space-Flutter-2.0.10-Win11-x64-Portable.zip",
+      "sha256": "e3f86f54cb41812ddefc06c98cf35381ae2ae443ef2f647b0895688604589955",
+      "url": "https://github.com/18390208101/Space-macOS-native/releases/download/v2.0.10/Space-Flutter-2.0.10-Win11-x64-Portable.zip",
+      "size": 14783984
+    },
+    {
+      "name": "SHA256SUMS",
+      "sha256": "11c8016cb72f2e82b8772e7118a75aa612620bc10f8b0a2a706429af4623bd20",
+      "url": "https://github.com/18390208101/Space-macOS-native/releases/download/v2.0.10/SHA256SUMS",
+      "size": 316
+    }
+  ]
+}

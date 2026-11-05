@@ -1,0 +1,442 @@
+{
+  "version": "2.0.10+11",
+  "releaseAssetsVerified": true,
+  "removedMacOldDistributions": [
+    {
+      "path": "/Users/cers/Documents/ChatGPT/个人工作台/downloads/Space-Flutter-2.0.9-Win11-x64-Portable.zip",
+      "bytes": 14748563
+    },
+    {
+      "path": "/Users/cers/Documents/ChatGPT/个人工作台/downloads/Space-Flutter-2.0.9-macOS-arm64.dmg",
+      "bytes": 24833485
+    },
+    {
+      "path": "/Users/cers/Documents/ChatGPT/个人工作台/downloads/Space-Flutter-2.0.9-macOS-arm64.zip",
+      "bytes": 21850798
+    },
+    {
+      "path": "/Users/cers/Documents/ChatGPT/个人工作台/downloads/SHA256SUMS.txt",
+      "bytes": 313
+    }
+  ],
+  "preserved": [
+    "Source, valid tests, current verification and historical performance baselines",
+    "work/flutter-sdk-bootstrap toolchain",
+    "local-data-backups and unknown pre-existing ignored files"
+  ],
+  "temporaryCleanup": {
+    "removed": [
+      {
+        "path": "/tmp/space-210-perf-final-build.log",
+        "bytes": 749
+      },
+      {
+        "path": "/tmp/space-210-category-layout.log",
+        "bytes": 7752
+      },
+      {
+        "path": "/tmp/space-210-final-features.log",
+        "bytes": 2680
+      },
+      {
+        "path": "/tmp/space-210-ui-test.log",
+        "bytes": 6583
+      },
+      {
+        "path": "/tmp/space-210-perf-verified",
+        "bytes": 1659758
+      },
+      {
+        "path": "/tmp/space-210-gantt-overflow.log",
+        "bytes": 6305
+      },
+      {
+        "path": "/tmp/space-210-mac-package.log",
+        "bytes": 1879
+      },
+      {
+        "path": "/tmp/space-210-current",
+        "bytes": 1372493227
+      },
+      {
+        "path": "/tmp/space-210-start-gate2",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/space-210-perf-final",
+        "bytes": 1493211
+      },
+      {
+        "path": "/tmp/space-210-analyze-ascii.log",
+        "bytes": 4883
+      },
+      {
+        "path": "/tmp/space-210-perf-after",
+        "bytes": 393518
+      },
+      {
+        "path": "/tmp/space-210-ui.py",
+        "bytes": 8982
+      },
+      {
+        "path": "/tmp/space-210-production-build.log",
+        "bytes": 749
+      },
+      {
+        "path": "/tmp/space-210-analyze.log",
+        "bytes": 3806
+      },
+      {
+        "path": "/tmp/space-210-schedule.py",
+        "bytes": 11810
+      },
+      {
+        "path": "/tmp/space-210-perf-build.log",
+        "bytes": 1098
+      },
+      {
+        "path": "/tmp/space-210-edit.py",
+        "bytes": 8363
+      },
+      {
+        "path": "/tmp/space-210-perf-before-launch.log",
+        "bytes": 289
+      },
+      {
+        "path": "/tmp/space-210-start-gate",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/space-210-analyze-final.log",
+        "bytes": 752
+      },
+      {
+        "path": "/tmp/space-210-feature-test3.log",
+        "bytes": 5700
+      },
+      {
+        "path": "/tmp/space-210-core-test.log",
+        "bytes": 6531
+      },
+      {
+        "path": "/tmp/space-210-gantt-compact.log",
+        "bytes": 2909
+      },
+      {
+        "path": "/tmp/space-210-feature-test2.log",
+        "bytes": 9119
+      },
+      {
+        "path": "/tmp/space-210-perf-before",
+        "bytes": 398295
+      },
+      {
+        "path": "/tmp/space-210-perf-after-focused",
+        "bytes": 396187
+      },
+      {
+        "path": "/tmp/space-210-feature-test.log",
+        "bytes": 29348
+      },
+      {
+        "path": "/tmp/space-210-baseline",
+        "bytes": 1227379119
+      },
+      {
+        "path": "/tmp/space-210-perf-after-launch.log",
+        "bytes": 288
+      },
+      {
+        "path": "/tmp/space-210-feature-test4.log",
+        "bytes": 2549
+      },
+      {
+        "path": "/tmp/space210-final-probe",
+        "bytes": 52784732
+      },
+      {
+        "path": "/tmp/space210-windows-empty.sqlite",
+        "bytes": 57344
+      },
+      {
+        "path": "/tmp/space210-win-after-error.txt",
+        "bytes": 294
+      },
+      {
+        "path": "/tmp/space210-win-inspect.ps1",
+        "bytes": 195
+      },
+      {
+        "path": "/tmp/space210-win-inspect2.ps1",
+        "bytes": 785
+      },
+      {
+        "path": "/tmp/space210-windows-data-tests.log",
+        "bytes": 8778
+      },
+      {
+        "path": "/tmp/space210-old-launch.ps1",
+        "bytes": 223
+      },
+      {
+        "path": "/tmp/space210-windows-build-validation.json",
+        "bytes": 9442
+      },
+      {
+        "path": "/tmp/space210-win-calendar-tests.log",
+        "bytes": 1516
+      },
+      {
+        "path": "/tmp/space210-win-cleanup.ps1",
+        "bytes": 1931
+      },
+      {
+        "path": "/tmp/space210-win-status.ps1",
+        "bytes": 418
+      },
+      {
+        "path": "/tmp/space210-mac-final-startup",
+        "bytes": 57344
+      },
+      {
+        "path": "/tmp/space210-win-after-run.json",
+        "bytes": 181
+      },
+      {
+        "path": "/tmp/space210-baseline-source.zip",
+        "bytes": 511019
+      },
+      {
+        "path": "/tmp/space210-windows-before-focused.json",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/space210-win-schedule-before-focused.ps1",
+        "bytes": 1208
+      },
+      {
+        "path": "/tmp/space210-old-schedule.ps1",
+        "bytes": 1322
+      },
+      {
+        "path": "/tmp/space210-win-schedule-before.ps1",
+        "bytes": 1148
+      },
+      {
+        "path": "/tmp/space210-win-before-run.json",
+        "bytes": 181
+      },
+      {
+        "path": "/tmp/space210-windows-startup.json",
+        "bytes": 194
+      },
+      {
+        "path": "/tmp/space210-windows-baseline-build.log",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/space210-win-task-status.json",
+        "bytes": 12022
+      },
+      {
+        "path": "/tmp/space210-macos-final",
+        "bytes": 1659708
+      },
+      {
+        "path": "/tmp/space210-final-source.zip",
+        "bytes": 520266
+      },
+      {
+        "path": "/tmp/space210-published.json",
+        "bytes": 1328
+      },
+      {
+        "path": "/tmp/space210-win-baseline.ps1",
+        "bytes": 892
+      },
+      {
+        "path": "/tmp/space210-dmg-mount",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/space210-windows-after.json",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/space210-win-init.ps1",
+        "bytes": 129
+      },
+      {
+        "path": "/tmp/space210-release-notes.md",
+        "bytes": 659
+      },
+      {
+        "path": "/tmp/space210-win-build-final.ps1",
+        "bytes": 2872
+      },
+      {
+        "path": "/tmp/space210-win-before-samples.json",
+        "bytes": 197213
+      },
+      {
+        "path": "/tmp/space210-win-after-samples.json",
+        "bytes": 192440
+      },
+      {
+        "path": "/tmp/space210-win-new-tests.log",
+        "bytes": 2182
+      },
+      {
+        "path": "/tmp/space210-win-progress.json",
+        "bytes": 2944
+      },
+      {
+        "path": "/tmp/space210-win-schedule-after.ps1",
+        "bytes": 1161
+      },
+      {
+        "path": "/tmp/space210-mac-extracted",
+        "bytes": 52652988
+      },
+      {
+        "path": "/tmp/space210-final-gate",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/space210-dmg-mount.log",
+        "bytes": 269
+      },
+      {
+        "path": "/tmp/space210-win-startup.ps1",
+        "bytes": 1615
+      },
+      {
+        "path": "/tmp/space210-win-progress.ps1",
+        "bytes": 368
+      },
+      {
+        "path": "/tmp/space210-win-cleanup-result.json",
+        "bytes": 3076
+      },
+      {
+        "path": "/tmp/space210-win-gantt-tests.log",
+        "bytes": 1802
+      },
+      {
+        "path": "/tmp/space210-local-cleanup.py",
+        "bytes": 2204
+      },
+      {
+        "path": "/tmp/space210-win-after-status.txt",
+        "bytes": 517
+      },
+      {
+        "path": "/tmp/space210-windows-before.json",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/Space-Flutter-2.0.10-Win11-x64-Portable.zip",
+        "bytes": 14783984
+      },
+      {
+        "path": "/tmp/work/dmg-packaging/Space-Flutter-2.0.10-macOS-arm64",
+        "bytes": 52655341
+      },
+      {
+        "path": "/Users/cers/Documents/ChatGPT/个人工作台/work/space210-SHA256SUMS",
+        "bytes": 316
+      },
+      {
+        "path": "/Users/cers/Documents/ChatGPT/个人工作台/flutter/verification/screenshots/release-light-gantt.png",
+        "bytes": 109552
+      },
+      {
+        "path": "/Users/cers/Documents/ChatGPT/个人工作台/flutter/verification/screenshots/release-dark-gantt.png",
+        "bytes": 123424
+      },
+      {
+        "path": "/tmp/output/flutter/Space-Flutter-2.0.10-macOS-arm64.dmg.sha256",
+        "bytes": 103
+      },
+      {
+        "path": "/tmp/output/flutter/Space-Flutter-2.0.10-macOS-arm64.zip.sha256",
+        "bytes": 103
+      },
+      {
+        "path": "/tmp/output/flutter/Space-Flutter-2.0.10-macOS-arm64",
+        "bytes": 54117820
+      },
+      {
+        "path": "/tmp/output/flutter/Space-Flutter-2.0.10-macOS-arm64.dmg",
+        "bytes": 24838883
+      },
+      {
+        "path": "/tmp/output/flutter/Space-Flutter-2.0.10-macOS-arm64-verification.json",
+        "bytes": 399
+      },
+      {
+        "path": "/tmp/output/flutter/Space-Flutter-2.0.10-macOS-arm64.zip",
+        "bytes": 21914934
+      }
+    ],
+    "failed": [],
+    "stoppedTestProcesses": [
+      45668
+    ],
+    "removedBytes": 2881576208
+  },
+  "windows": {
+    "retained": [
+      "C:\\SpaceFlutter210\\source",
+      "C:\\SpaceFlutter210\\Space-Flutter-2.0.10-Win11-x64-Portable.zip",
+      "Existing SDKs and unverified older work directories"
+    ],
+    "removed": [
+      "C:\\SpaceFlutter210\\baseline",
+      "C:\\SpaceFlutter210\\bin-before",
+      "C:\\SpaceFlutter210\\bin-after",
+      "C:\\SpaceFlutter210\\production",
+      "C:\\SpaceFlutter210\\final-extracted",
+      "C:\\SpaceFlutter210\\perf-before",
+      "C:\\SpaceFlutter210\\perf-before-focused",
+      "C:\\SpaceFlutter210\\perf-after",
+      "C:\\SpaceFlutter210\\final-startup-data",
+      "C:\\SpaceFlutter210\\source\\build",
+      "C:\\SpaceFlutter210\\source\\.dart_tool",
+      "C:\\SpaceFlutter210\\source\\windows\\flutter\\ephemeral",
+      "C:\\SpaceFlutter210\\source\\test\\core_test.dart.tmp",
+      "C:\\SpaceFlutter210\\baseline-build.log",
+      "C:\\SpaceFlutter210\\baseline-pub.log",
+      "C:\\SpaceFlutter210\\baseline-source.zip",
+      "C:\\SpaceFlutter210\\baseline-status.txt",
+      "C:\\SpaceFlutter210\\bin-after-build.log",
+      "C:\\SpaceFlutter210\\build-status.txt",
+      "C:\\SpaceFlutter210\\data-tests.log",
+      "C:\\SpaceFlutter210\\extraction-status.txt",
+      "C:\\SpaceFlutter210\\feature-calendar-tests.log",
+      "C:\\SpaceFlutter210\\feature-gantt-tests.log",
+      "C:\\SpaceFlutter210\\feature-new-tests.log",
+      "C:\\SpaceFlutter210\\feature-tests.log",
+      "C:\\SpaceFlutter210\\final-source.zip",
+      "C:\\SpaceFlutter210\\foreground-now.json",
+      "C:\\SpaceFlutter210\\init.txt",
+      "C:\\SpaceFlutter210\\perf-after-status.txt",
+      "C:\\SpaceFlutter210\\perf-before-focused-status.txt",
+      "C:\\SpaceFlutter210\\perf-before-status.txt",
+      "C:\\SpaceFlutter210\\production-build.log",
+      "C:\\SpaceFlutter210\\progress.json",
+      "C:\\SpaceFlutter210\\pub.log",
+      "C:\\SpaceFlutter210\\run-after.ps1",
+      "C:\\SpaceFlutter210\\run-before.ps1",
+      "C:\\SpaceFlutter210\\startup-interactive.ps1",
+      "C:\\SpaceFlutter210\\startup-validation.json",
+      "C:\\SpaceFlutter210\\task-status.json",
+      "C:\\SpaceFlutter209\\Space-Flutter-2.0.9-Win11-x64-Portable.zip",
+      "C:\\space210-check.txt",
+      "C:\\space210-inventory.txt"
+    ],
+    "version": "2.0.10+11",
+    "failed": [],
+    "productionDataAccessed": false
+  }
+}
