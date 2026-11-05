@@ -1,3 +1,3 @@
-f120a66951e5af3b504b4dbff670b689da917ba7116df7f22bf95e9fcc543dc1  Space-Flutter-2.0.8-Win11-x64-Portable.zip
-0da128ab3c4417043f30c93a1111876b5cc312542b8c9621455bde17058c3105  Space-Flutter-2.0.8-macOS-arm64.dmg
-6176b4ddbabb71a3f0ae8cf34d4ff0ec53ebb09e40ccf207b2069ff4fd4d0c7c  Space-Flutter-2.0.8-macOS-arm64.zip
+06a97a5d20eb004f68f020d0245957b2038ee70440dc5d8e977482358155d403  Space-Flutter-2.0.9-Win11-x64-Portable.zip
+f41cc7c61c1af948ac2fd71d03ab1d88573c93fe6955cfdf1bf31758ec799832  Space-Flutter-2.0.9-macOS-arm64.dmg
+aad13a0aa90c1e6124952b2612625a6cd59190a2b916957b967fe5de6164eccb  Space-Flutter-2.0.9-macOS-arm64.zip

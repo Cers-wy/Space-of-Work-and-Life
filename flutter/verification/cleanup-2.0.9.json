@@ -1,0 +1,59 @@
+{
+  "version": "2.0.9+10",
+  "date": "2026-11-05",
+  "releaseCommit": "dd6bdd9cffd68bcd36cc918f948ffc77a5bf983c",
+  "macos": {
+    "oldPackagesRemoved": [
+      "downloads/Space-Flutter-2.0.8-Win11-x64-Portable.zip",
+      "downloads/Space-Flutter-2.0.8-macOS-arm64.zip",
+      "downloads/Space-Flutter-2.0.8-macOS-arm64.dmg"
+    ],
+    "temporaryPathsRemoved": [
+      "/Users/cers/Documents/ChatGPT/个人工作台/flutter/build",
+      "/Users/cers/Documents/ChatGPT/个人工作台/flutter/.dart_tool",
+      "/Users/cers/Documents/ChatGPT/个人工作台/flutter/.flutter-plugins-dependencies",
+      "/Users/cers/Documents/ChatGPT/个人工作台/flutter/macos/Flutter/ephemeral",
+      "/Users/cers/Documents/ChatGPT/个人工作台/flutter/windows/flutter/ephemeral",
+      "/Users/cers/Documents/ChatGPT/个人工作台/flutter/linux/flutter/ephemeral",
+      "/Users/cers/Documents/ChatGPT/个人工作台/work/dmg-packaging",
+      "/private/tmp/space-nav209-before",
+      "/private/tmp/space-nav209-after",
+      "/private/tmp/space209-final",
+      "/private/tmp/space209-before-build.log",
+      "/private/tmp/space209-optimized-nav-build.log",
+      "/private/tmp/space209-analyze.log",
+      "/private/tmp/space209-settings-analyze.log",
+      "/private/tmp/space209-settings-before-build.log",
+      "/private/tmp/space209-after-build.log",
+      "/private/tmp/space209-nav-tests.log",
+      "/private/tmp/space209-test.log",
+      "/private/tmp/space209-ascii-analyze.log",
+      "/private/tmp/space209-resource-tests.log",
+      "/private/tmp/space209-final-tests.log",
+      "/private/tmp/space209-settings-test.log",
+      "/Users/cers/Documents/ChatGPT/个人工作台/output/flutter/Space-Flutter-2.0.9-macOS-arm64.zip.sha256",
+      "/Users/cers/Documents/ChatGPT/个人工作台/output/flutter/Space-Flutter-2.0.9-macOS-arm64-verification.json",
+      "/Users/cers/Documents/ChatGPT/个人工作台/output/flutter/Space-Flutter-2.0.9-macOS-arm64",
+      "/Users/cers/Documents/ChatGPT/个人工作台/output/flutter/Space-Flutter-2.0.9-macOS-arm64.dmg.sha256",
+      "/Users/cers/Documents/ChatGPT/个人工作台/output/flutter/Space-Flutter-2.0.9-Win11-x64-Portable.zip",
+      "/Users/cers/Documents/ChatGPT/个人工作台/output/flutter/Space-Flutter-2.0.9-macOS-arm64.dmg",
+      "/Users/cers/Documents/ChatGPT/个人工作台/output/flutter/Space-Flutter-2.0.9-macOS-arm64.zip",
+      "/Users/cers/Documents/ChatGPT/个人工作台/work/navigation-209"
+    ],
+    "knownTemporaryBytesRemoved": 5749362688,
+    "testProcessesStopped": []
+  },
+  "windows": {
+    "status": "unconfirmed; cleanup receipt not returned; skipped under user fast-finish instruction",
+    "note": "Current source and latest portable ZIP were retained; do not claim all guest temporary files removed."
+  },
+  "preserved": [
+    "current source",
+    "downloads latest macOS DMG/ZIP and Windows portable ZIP",
+    "valid tests/fixtures",
+    "verification and performance baselines",
+    "Flutter toolchain",
+    "local-data-backups",
+    "normal Git history"
+  ]
+}
