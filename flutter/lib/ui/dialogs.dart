@@ -899,7 +899,15 @@ Future<void> previewAttachment(Attachment a) async {
 }
 
 Future<void> showFilters(BuildContext c, SpaceStore s) async {
-  await anchoredPopup(c, _Filters(store: s), width: 384, height: 518);
+  await anchoredPopup(
+    c,
+    _Filters(store: s),
+    width: 384,
+    height: 518,
+    barrierColor: s.dark
+        ? Colors.transparent
+        : Colors.black.withValues(alpha: .18),
+  );
 }
 
 class _Filters extends StatefulWidget {
@@ -1012,39 +1020,39 @@ class _FiltersState extends State<_Filters> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SpaceButton(
-                          onPressed: s.saveDefaultFilters,
-                          child: const Text('设为默认配置'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SpaceButton(
-                        onPressed: () async {
-                          await s.preferences({'defaultFilters': '{}'});
-                          s.message('默认筛选已恢复为全部任务');
-                        },
-                        child: const Text('重置默认'),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
           Row(
+            key: const ValueKey('filter-footer'),
             children: [
-              Text(
-                '${s.visible.length} 个匹配任务',
-                style: textStyle(p, size: 12, color: p.muted),
+              Expanded(
+                child: Text(
+                  '${s.visible.length} 个匹配任务',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyle(p, size: 12, color: p.muted),
+                ),
               ),
-              const Spacer(),
               SpaceButton(
                 height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                onPressed: s.saveDefaultFilters,
+                child: const Text('设为默认配置', style: TextStyle(fontSize: 12)),
+              ),
+              const SizedBox(width: 4),
+              SpaceButton(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                onPressed: s.resetDefaultFilters,
+                child: const Text('重置默认', style: TextStyle(fontSize: 12)),
+              ),
+              const SizedBox(width: 4),
+              SpaceButton(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 onPressed: s.query.hasFilters
                     ? () {
                         s.query.clear();
@@ -1052,7 +1060,7 @@ class _FiltersState extends State<_Filters> {
                         s.refreshQuery();
                       }
                     : null,
-                child: const Text('清除筛选'),
+                child: const Text('清除筛选', style: TextStyle(fontSize: 12)),
               ),
             ],
           ),
@@ -1326,6 +1334,11 @@ class _StatusesState extends State<_Statuses> {
           ),
           Expanded(
             child: AnimatedSwitcher(
+              layoutBuilder: (current, previous) => Stack(
+                fit: StackFit.expand,
+                alignment: Alignment.topLeft,
+                children: [...previous, if (current != null) current],
+              ),
               duration: MediaQuery.disableAnimationsOf(c)
                   ? Duration.zero
                   : const Duration(milliseconds: 200),

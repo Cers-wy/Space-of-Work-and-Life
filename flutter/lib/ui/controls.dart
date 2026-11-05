@@ -1128,6 +1128,7 @@ Future<T?> anchoredPopup<T>(
   Widget child, {
   required double width,
   required double height,
+  Color barrierColor = Colors.transparent,
 }) {
   final box = context.findRenderObject() as RenderBox;
   final anchor = box.localToGlobal(Offset.zero) & box.size;
@@ -1140,7 +1141,7 @@ Future<T?> anchoredPopup<T>(
     context: context,
     barrierDismissible: true,
     barrierLabel: '关闭浮层',
-    barrierColor: Colors.transparent,
+    barrierColor: barrierColor,
     transitionDuration: const Duration(milliseconds: 120),
     pageBuilder: (c, a, b) => Stack(
       children: [

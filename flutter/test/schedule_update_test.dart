@@ -72,7 +72,7 @@ void main() {
     s.query.clear();
     s.refreshQuery();
     expect(s.visible.length, 12);
-    final saved = jsonDecode(s.state.settings['defaultFilters']!);
+    final saved = jsonDecode(s.state.settings['defaultFilters.${s.view}']!);
     expect(saved['statuses'], ['todo', 'done']);
   });
   test('内置分类改名、自定义分类引用、SQLite/便携备份持久化和重复名拒绝', () async {

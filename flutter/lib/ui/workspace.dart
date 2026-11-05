@@ -37,7 +37,14 @@ class _WorkspaceState extends State<Workspace> {
   }
 
   void trackNavigation() {
-    if (!mounted || s.navCollapsed == previousNavCollapsed) return;
+    if (!mounted) return;
+    if (search.text != s.query.text) {
+      search.value = TextEditingValue(
+        text: s.query.text,
+        selection: TextSelection.collapsed(offset: s.query.text.length),
+      );
+    }
+    if (s.navCollapsed == previousNavCollapsed) return;
     previousNavCollapsed = s.navCollapsed;
     navigationEpoch++;
     setState(() => navMoving = !MediaQuery.disableAnimationsOf(context));
@@ -479,6 +486,7 @@ class _WorkspaceState extends State<Workspace> {
                 ),
               ),
               if (s.overviewCollapsed) ...[
+                const SizedBox(width: 16, key: ValueKey('category-filter-gap')),
                 IconButtonS(
                   'filter',
                   '筛选与排序',

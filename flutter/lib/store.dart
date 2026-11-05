@@ -10,7 +10,17 @@ import 'host.dart';
 class SpaceStore extends ChangeNotifier {
   final SpaceRepository repository;
   SpaceState state = SpaceState();
-  TaskQuery query = TaskQuery();
+  final _viewQueries = <String, TaskQuery>{};
+  TaskQuery get query => _viewQueries.putIfAbsent(view, () {
+    try {
+      return TaskQuery.fromJson(
+        jsonDecode(state.settings['defaultFilters.$view'] ?? '{}'),
+      )..prune(state);
+    } catch (_) {
+      return TaskQuery();
+    }
+  });
+  set query(TaskQuery value) => _viewQueries[view] = value;
   SpaceState? _undo;
   List<SpaceTask> visible = const [];
   Map<String, List<SpaceTask>> grouped = {};
@@ -76,14 +86,23 @@ class SpaceStore extends ChangeNotifier {
     try {
       state = await repository.load();
       loaded = true;
-      try {
-        query = TaskQuery.fromJson(
-          jsonDecode(state.settings['defaultFilters'] ?? '{}'),
+      // Migrate the former shared default only to the view active at upgrade.
+      if (state.settings.containsKey('defaultFilters') &&
+          state.settings['defaultFilters.migrated'] != 'true') {
+        state = await repository.save(
+          state.copy(
+            settings: {
+              ...state.settings,
+              'defaultFilters.$view':
+                  state.settings['defaultFilters.$view'] ??
+                  state.settings['defaultFilters']!,
+              'defaultFilters.migrated': 'true',
+            },
+          ),
+          preferencesOnly: true,
         );
-        query.prune(state);
-      } catch (_) {
-        query = TaskQuery();
       }
+      _viewQueries.clear();
       error = null;
       _undo = null;
     } catch (e) {
@@ -180,7 +199,11 @@ class SpaceStore extends ChangeNotifier {
       error = '设置保存失败：${readable(e)}';
     }
     busy = false;
-    notifyListeners();
+    if (values.containsKey('viewMode')) {
+      refreshQuery();
+    } else {
+      notifyListeners();
+    }
     if (values.containsKey('appearance') || values.containsKey('dark')) {
       await updateNativeAppearance();
     }
@@ -362,8 +385,16 @@ class SpaceStore extends ChangeNotifier {
   }
 
   Future<void> saveDefaultFilters() async {
-    if (await preferences({'defaultFilters': jsonEncode(query.toJson())})) {
+    if (await preferences({
+      'defaultFilters.$view': jsonEncode(query.toJson()),
+    })) {
       message('当前筛选已设为默认配置');
+    }
+  }
+
+  Future<void> resetDefaultFilters() async {
+    if (await preferences({'defaultFilters.$view': '{}'})) {
+      message('当前视图默认筛选已重置');
     }
   }
 
