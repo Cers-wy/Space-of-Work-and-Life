@@ -1,0 +1,41 @@
+Resolving dependencies...
+Downloading packages...
+  cross_file 0.3.5+5 (0.4.0 available)
+  flutter_keyboard_visibility_linux 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_macos 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_platform_interface 2.0.0 (3.0.0 available)
+  flutter_keyboard_visibility_windows 1.0.0 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading C:/SpaceFlutter210/source/test/core_test.dart
+00:00 +0: C:/SpaceFlutter210/source/test/core_test.dart: 鍘熺敓鏍锋湰 01-json-v1.json 鏃犳崯寰€杩?00:00 +1: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +2: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +3: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +4: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +5: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +6: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +7: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +8: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +9: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +10: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +11: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +12: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +13: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +14: C:/SpaceFlutter210/source/test/store_test.dart: 001/003 棣栨绌哄簱鍙婇粯璁ゅ亸濂斤紱閲嶆柊杞藉叆鏃犲唴瀛樻挙閿€
+00:00 +15: C:/SpaceFlutter210/source/test/core_test.dart: GitHub portable 瀛楄妭涓庡師鐢熸寚绾瑰畬鍏ㄤ竴鑷?00:00 +16: C:/SpaceFlutter210/source/test/store_test.dart: 005/007 鍋忓ソ鐙珛鎸佷箙鍖栵紝鍋忓ソ鍐欏叆涓嶆浛鎹笟鍔℃仮澶嶅揩鐓?00:00 +17: C:/SpaceFlutter210/source/test/store_test.dart: 005/007 鍋忓ソ鐙珛鎸佷箙鍖栵紝鍋忓ソ鍐欏叆涓嶆浛鎹笟鍔℃仮澶嶅揩鐓?00:00 +18: C:/SpaceFlutter210/source/test/core_test.dart: GitHub鍔犲瘑nonce闅忔満涓斿唴瀹圭瓑浠?00:00 +19: C:/SpaceFlutter210/source/test/store_test.dart: 030/031/032 UTF16鏍囬杈圭晫銆乼rim涓庡師瀛愭嫆缁?00:00 +20: C:/SpaceFlutter210/source/test/core_test.dart: 鍘熺敓SP鍖?001 epoch锛屼竷澶╄繃鏈熶笌鍝堝笇鍖归厤
+00:00 +21: C:/SpaceFlutter210/source/test/store_test.dart: 033/039 璇存槑闀垮害涓庢棩鏈熺煕鐩句笉瑕嗙洊鍘熶换鍔?00:00 +22: C:/SpaceFlutter210/source/test/store_test.dart: 033/039 璇存槑闀垮害涓庢棩鏈熺煕鐩句笉瑕嗙洊鍘熶换鍔?00:00 +23: C:/SpaceFlutter210/source/test/store_test.dart: 033/039 璇存槑闀垮害涓庢棩鏈熺煕鐩句笉瑕嗙洊鍘熶换鍔?00:00 +24: C:/SpaceFlutter210/source/test/store_test.dart: 033/039 璇存槑闀垮害涓庢棩鏈熺煕鐩句笉瑕嗙洊鍘熶换鍔?00:00 +25: C:/SpaceFlutter210/source/test/core_test.dart: SQLite鍘熺敓鏍锋湰璇诲啓銆佷笂娆″揩鐓т笌骞跺彂淇濇姢
+00:00 +26: C:/SpaceFlutter210/source/test/core_test.dart: SQLite鍘熺敓鏍锋湰璇诲啓銆佷笂娆″揩鐓т笌骞跺彂淇濇姢
+00:00 +27: C:/SpaceFlutter210/source/test/core_test.dart: SQLite鍘熺敓鏍锋湰璇诲啓銆佷笂娆″揩鐓т笌骞跺彂淇濇姢
+00:00 +28: C:/SpaceFlutter210/source/test/store_test.dart: 055/057/060/063/064 鍋滅敤淇濈暀鍘嗗彶涓庡師鐘舵€佺紪杈戯紝绂佹柊绉诲叆
+00:00 +29: C:/SpaceFlutter210/source/test/store_test.dart: 055/057/060/063/064 鍋滅敤淇濈暀鍘嗗彶涓庡師鐘舵€佺紪杈戯紝绂佹柊绉诲叆
+00:01 +30: C:/SpaceFlutter210/source/test/store_test.dart: 055/057/060/063/064 鍋滅敤淇濈暀鍘嗗彶涓庡師鐘舵€佺紪杈戯紝绂佹柊绉诲叆
+00:01 +31: C:/SpaceFlutter210/source/test/store_test.dart: 059/066/068 鍐呯疆淇濇姢锛涜縼绉诲埌瀹屾垚锛涘垪搴忛噸寮€
+00:01 +32: C:/SpaceFlutter210/source/test/store_test.dart: 069/070/071/072 椤圭洰鍚屼簨鍔″垱寤恒€佺瓑浠峰鐢ㄥ拰澶辫触鏃犲绔嬮」鐩?00:01 +33: C:/SpaceFlutter210/source/test/store_test.dart: 椤圭洰鏀瑰悕銆佸仠鐢ㄦ寔涔呭寲涓庡鍑猴紝绂佹鏂板姞鍏ワ紱鍒犻櫎淇濈暀浠诲姟鍙挙閿€
+00:01 +34: C:/SpaceFlutter210/source/test/store_test.dart: 011鈥?27 鏌ヨAND銆侀」鐩悳绱€佺湡瀹為€炬湡鍜岄粯璁ゆ棩鏈熺嫭绔?00:01 +35: C:/SpaceFlutter210/source/test/store_test.dart: 082/083/088 闄勪欢璺緞涓?0MiB/20涓?20MiB杈圭晫
+00:02 +36: C:/SpaceFlutter210/source/test/store_test.dart: 蹇収瀵煎嚭鎷掔粷娲诲姩搴撲笌鍒悕锛屾仮澶嶄繚鎸佷笟鍔′笖鍙挙閿€
+00:02 +37: C:/SpaceFlutter210/source/test/store_test.dart: 鐢樼壒宸﹀彸绔笉鑳藉€掔疆锛涚Щ鍔ㄦ寜瀹屾暣鍘熷鍖洪棿璁＄畻锛涘畬鎴愭棤due鎸夊畬鎴愭棩
+00:02 +38: All tests passed!

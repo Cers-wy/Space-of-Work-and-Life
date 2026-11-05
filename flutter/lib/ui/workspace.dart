@@ -451,18 +451,24 @@ class _WorkspaceState extends State<Workspace> {
                 child: LayoutBuilder(
                   builder: (c, b) => Row(
                     children: [
-                      Text(
-                        '我的空间',
-                        style: textStyle(p, size: 12, color: p.muted),
-                      ),
-                      const SizedBox(width: 12),
-                      SpaceIcon('right', size: 10, color: p.muted),
-                      const SizedBox(width: 12),
-                      Text(
-                        s.overviewCollapsed
-                            ? '任务 · ${s.visible.length} 个任务'
-                            : '任务管理',
-                        style: textStyle(p, size: 12),
+                      if (b.maxWidth >= 240) ...[
+                        Text(
+                          '我的空间',
+                          style: textStyle(p, size: 12, color: p.muted),
+                        ),
+                        const SizedBox(width: 12),
+                        SpaceIcon('right', size: 10, color: p.muted),
+                        const SizedBox(width: 12),
+                      ],
+                      Expanded(
+                        child: Text(
+                          s.overviewCollapsed
+                              ? '任务 · ${s.visible.length} 个任务'
+                              : '任务管理',
+                          style: textStyle(p, size: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       if (b.maxWidth > 460) ...[
                         const SizedBox(width: 12),
@@ -505,7 +511,7 @@ class _WorkspaceState extends State<Workspace> {
               const SizedBox(width: 8),
               IconButtonS(
                 'status',
-                '任务状态管理',
+                '状态与分类管理',
                 iconSize: 18,
                 onPressed: () => showStatuses(context, s),
               ),
@@ -754,25 +760,32 @@ class _WorkspaceState extends State<Workspace> {
     );
   }
 
-  Widget categoryCounts() => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      for (final k in categories.keys)
-        SpaceButton(
-          height: 24,
-          padding: const EdgeInsets.all(4),
-          selected: s.query.category == k,
-          tooltip: '快速筛选${categories[k]}',
-          onPressed: () {
-            s.query.category = s.query.category == k ? null : k;
-            s.refreshQuery();
-          },
-          child: CategoryLabel(
-            k,
-            count: s.state.tasks.where((t) => t.category == k).length,
-          ),
-        ),
-    ],
+  Widget categoryCounts() => ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 280),
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final k in s.state.taskCategories.keys)
+            SpaceButton(
+              height: 24,
+              padding: const EdgeInsets.all(4),
+              selected: s.query.categoryIDs.contains(k),
+              tooltip: '快速筛选${s.state.taskCategories[k]}',
+              onPressed: () {
+                if (!s.query.categoryIDs.remove(k)) s.query.categoryIDs.add(k);
+                s.refreshQuery();
+              },
+              child: CategoryLabel(
+                k,
+                name: s.state.taskCategories[k],
+                count: s.state.tasks.where((t) => t.category == k).length,
+              ),
+            ),
+        ],
+      ),
+    ),
   );
   Widget viewSwitch() {
     final p = Palette.of(context);
@@ -823,35 +836,20 @@ class _WorkspaceState extends State<Workspace> {
   Widget filterControls() => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      SpaceSelect(
-        value: s.query.status ?? '',
-        options: {
-          '': '所有状态',
-          for (final t in s.state.statuses)
-            t: '${statusName(t)}${s.state.disabledStatuses.contains(t) ? '（已停用）' : ''}',
-        },
-        label: '状态筛选',
+      SpaceMultiSelect(
+        values: s.query.statusIDs,
+        options: {for (final v in s.state.statuses) v: statusName(v)},
+        label: '状态',
         width: 120,
-        active: s.query.status != null,
-        onChanged: (v) {
-          s.query.status = v.isEmpty ? null : v;
-          s.refreshQuery();
-        },
+        onChanged: s.refreshQuery,
       ),
       const SizedBox(width: 8),
-      SpaceSelect(
-        value: s.query.priority ?? '',
-        options: {
-          '': '所有优先级',
-          for (final e in priorities.entries) e.key: '${e.value}优先级',
-        },
-        label: '优先级筛选',
+      SpaceMultiSelect(
+        values: s.query.priorityIDs,
+        options: priorities,
+        label: '优先级',
         width: 136,
-        active: s.query.priority != null,
-        onChanged: (v) {
-          s.query.priority = v.isEmpty ? null : v;
-          s.refreshQuery();
-        },
+        onChanged: s.refreshQuery,
       ),
       const SizedBox(width: 8),
       SizedBox(
@@ -1329,7 +1327,13 @@ class _WorkspaceState extends State<Workspace> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      SizedBox(width: 72, child: CategoryLabel(t.category)),
+                      SizedBox(
+                        width: 72,
+                        child: CategoryLabel(
+                          t.category,
+                          name: s.state.taskCategories[t.category],
+                        ),
+                      ),
                       const SizedBox(width: 16),
                       SpaceSelect(
                         width: 96,
@@ -1686,16 +1690,24 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
             LayoutBuilder(
               builder: (c, box) {
                 final narrow = box.maxWidth < 240;
-                final category = Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 2,
+                final category = ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: math.min(120, box.maxWidth * .35),
                   ),
-                  decoration: BoxDecoration(
-                    color: p.category(t.category).withValues(alpha: .08),
-                    borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: p.category(t.category).withValues(alpha: .08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: CategoryLabel(
+                      t.category,
+                      name: widget.store.state.taskCategories[t.category],
+                    ),
                   ),
-                  child: CategoryLabel(t.category),
                 );
                 final priority = Row(
                   mainAxisSize: MainAxisSize.min,

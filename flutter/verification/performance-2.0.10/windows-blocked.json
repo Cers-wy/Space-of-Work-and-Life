@@ -1,0 +1,28 @@
+{
+  "platform": "Windows 11 ARM64 guest / x64 application under UTM",
+  "status": "blocked, not passed",
+  "scope": [
+    "gantt",
+    "calendar-month"
+  ],
+  "reason": "Flutter foreground gate timed out; UTM display remained stale/transparent and no valid frame report was produced. Native title/process and isolated SQLite startup are verified separately.",
+  "baselineAttempt": "2.0.9 Release, 600 synthetic tasks",
+  "finalAttempt": "2.0.10 Release, 600 synthetic tasks",
+  "nativeFramesAvailable": false,
+  "noProductionDataAccess": true,
+  "beforeRun": {
+    "exitCode": 1,
+    "pid": 7892,
+    "mode": "Release, native GetForegroundWindow sampled every 100ms; Flutter lifecycle may be unavailable",
+    "sessionId": 1
+  },
+  "afterRun": {
+    "exitCode": 1,
+    "pid": 6256,
+    "mode": "Release, native GetForegroundWindow sampled every 100ms; Flutter lifecycle may be unavailable",
+    "sessionId": 1
+  },
+  "nativeSamples": 1066,
+  "nativeForegroundMatches": 0,
+  "error": "Bad state: Probe requires its start gate and foreground focus\n#0      waitForProbeForeground (file:///C:/SpaceFlutter210/source/tool/performance_main.dart:54)\n<asynchronous suspension>\n#1      main (file:///C:/SpaceFlutter210/source/tool/schedule_performance.dart:69)\n<asynchronous suspension>\n"
+}

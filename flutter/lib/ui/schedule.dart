@@ -1,5 +1,9 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
+
 import '../core/models.dart';
 import '../store.dart';
 import 'theme.dart';
@@ -40,20 +44,98 @@ class GanttView extends StatefulWidget {
 }
 
 class _GanttViewState extends State<GanttView> {
-  DateTime anchor = beijingDay();
+  DateTime anchor = DateTime.utc(beijingDay().year, beijingDay().month);
+  final horizontal = ScrollController();
+  DateTime? lastMonthMove;
+  double edgeDistance = 0;
+  String get mode =>
+      ['day', 'week', 'month'].contains(s.state.settings['ganttMode'])
+      ? s.state.settings['ganttMode']!
+      : 'day';
+  int get days => DateTime.utc(anchor.year, anchor.month + 1, 0).day;
+  @override
+  void dispose() {
+    horizontal.dispose();
+    super.dispose();
+  }
+
+  void moveMonth(int delta) {
+    setState(() {
+      anchor = DateTime.utc(anchor.year, anchor.month + delta);
+      edgeDistance = 0;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && horizontal.hasClients) {
+        horizontal.jumpTo(delta > 0 ? 0 : horizontal.position.maxScrollExtent);
+      }
+    });
+  }
+
+  void edgeScroll(double delta) {
+    final now = DateTime.now();
+    if (lastMonthMove != null &&
+        now.difference(lastMonthMove!).inMilliseconds < 600) {
+      return;
+    }
+    if (edgeDistance.sign != delta.sign) edgeDistance = 0;
+    edgeDistance += delta;
+    if (edgeDistance.abs() >= 80) {
+      lastMonthMove = now;
+      moveMonth(delta.sign.toInt());
+    }
+  }
+
+  List<({DateTime start, int days, String title, String detail})> headers() {
+    final result =
+        <({DateTime start, int days, String title, String detail})>[];
+    for (var i = 0; i < days;) {
+      final d = anchor.add(Duration(days: i));
+      final span = mode == 'month'
+          ? days
+          : mode == 'week'
+          ? math.min(8 - d.weekday, days - i)
+          : 1;
+      result.add((
+        start: d,
+        days: span,
+        title: mode == 'month'
+            ? '${d.year}年${d.month}月'
+            : mode == 'week'
+            ? '${shortDay(d)} 至 ${shortDay(d.add(Duration(days: span - 1)))}'
+            : shortDay(d),
+        detail: mode == 'day'
+            ? (dayString(d) == s.today
+                  ? '今天'
+                  : weekday(d).replaceFirst('星期', '周'))
+            : '$span 天',
+      ));
+      i += span;
+    }
+    return result;
+  }
+
   final collapsed = <String>{};
   SpaceStore get s => widget.store;
   @override
   Widget build(BuildContext c) {
     final p = Palette.of(c);
+    final monthEnd = DateTime.utc(anchor.year, anchor.month + 1, 0);
+    final monthTasks = <String?, List<SpaceTask>>{};
+    final today = parseDay(s.today)!;
+    for (final t in s.visible) {
+      final range = TaskSchedule.forTask(t, today);
+      if (!range.end.isBefore(anchor) && !range.start.isAfter(monthEnd)) {
+        monthTasks.putIfAbsent(t.projectID, () => []).add(t);
+      }
+    }
     final groups = <({String id, String name, List<SpaceTask> tasks})>[];
     for (final project in s.state.projects) {
-      final tasks = s.visible.where((t) => t.projectID == project.id).toList();
+      final tasks = monthTasks[project.id] ?? <SpaceTask>[];
       if (tasks.isNotEmpty) {
         groups.add((id: project.id, name: project.name, tasks: tasks));
       }
     }
-    final none = s.visible.where((t) => t.projectID == null).toList();
+    final none = monthTasks[null] ?? <SpaceTask>[];
     if (none.isNotEmpty) groups.add((id: '', name: '未分配项目', tasks: none));
     return Glass(
       child: Column(
@@ -62,14 +144,6 @@ class _GanttViewState extends State<GanttView> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                SpaceIcon('gantt', size: 16, color: p.text),
-                const SizedBox(width: 8),
-                Text('甘特图', style: textStyle(p, size: 16, bold: true)),
-                const SizedBox(width: 12),
-                Text(
-                  '${anchor.year}年${anchor.month}月${anchor.day}日 至 ${anchor.add(const Duration(days: 13)).month}月${anchor.add(const Duration(days: 13)).day}日',
-                  style: textStyle(p, size: 12, color: p.secondary),
-                ),
                 const Spacer(),
                 IconButtonS(
                   'expand-all',
@@ -97,18 +171,31 @@ class _GanttViewState extends State<GanttView> {
                         ),
                 ),
                 const SizedBox(width: 12),
+                for (final entry in const {
+                  'day': '日',
+                  'week': '周',
+                  'month': '月',
+                }.entries)
+                  SpaceButton(
+                    height: 32,
+                    selected: mode == entry.key,
+                    tooltip: '${entry.value}刻度',
+                    onPressed: () => s.preference('ganttMode', entry.key),
+                    child: Text(entry.value),
+                  ),
+                const SizedBox(width: 12),
+                IconButtonS('left', '上个月', onPressed: () => moveMonth(-1)),
                 SizedBox(
                   width: 176,
-                  child: DateField(
-                    label: '查看日期',
-                    allowsClear: false,
-                    value: dayString(anchor),
-                    onChanged: (v) {
-                      final d = parseDay(v);
-                      if (d != null) setState(() => anchor = d);
+                  child: MonthField(
+                    value: anchor,
+                    onChanged: (d) {
+                      setState(() => anchor = d);
+                      if (horizontal.hasClients) horizontal.jumpTo(0);
                     },
                   ),
                 ),
+                IconButtonS('right', '下个月', onPressed: () => moveMonth(1)),
               ],
             ),
           ),
@@ -116,8 +203,15 @@ class _GanttViewState extends State<GanttView> {
           Expanded(
             child: LayoutBuilder(
               builder: (c, b) {
-                final dw = math.max(48.0, (b.maxWidth - 400) / 14),
-                    total = 400 + 14 * math.max(48.0, (b.maxWidth - 400) / 14);
+                final dw = math.max(
+                      mode == 'day'
+                          ? 48.0
+                          : mode == 'week'
+                          ? 16.0
+                          : 8.0,
+                      (b.maxWidth - 400) / days,
+                    ),
+                    total = 400 + days * dw;
                 final rows =
                     <
                       ({
@@ -145,245 +239,293 @@ class _GanttViewState extends State<GanttView> {
                     }
                   }
                 }
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: total.toDouble(),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 64,
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 400,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 184,
-                                        child: Text(
-                                          '项目 / 任务名称',
-                                          style: textStyle(
-                                            p,
-                                            size: 12,
-                                            color: p.secondary,
-                                          ),
-                                        ),
+                return Listener(
+                  onPointerSignal: (event) {
+                    if (event is! PointerScrollEvent ||
+                        !horizontal.hasClients) {
+                      return;
+                    }
+                    final dx = event.scrollDelta.dx != 0
+                        ? event.scrollDelta.dx
+                        : HardwareKeyboard.instance.isShiftPressed
+                        ? event.scrollDelta.dy
+                        : 0.0;
+                    final pos = horizontal.position;
+                    if (dx != 0 &&
+                        (dx < 0 && pos.pixels <= 0 ||
+                            dx > 0 && pos.pixels >= pos.maxScrollExtent)) {
+                      GestureBinding.instance.pointerSignalResolver.register(
+                        event,
+                        (_) => edgeScroll(dx),
+                      );
+                    }
+                  },
+                  child: NotificationListener<OverscrollNotification>(
+                    onNotification: (n) {
+                      if (n.depth == 0 && n.metrics.axis == Axis.horizontal) {
+                        edgeScroll(n.overscroll);
+                      }
+                      return false;
+                    },
+                    child: SingleChildScrollView(
+                      key: const ValueKey('gantt-timeline'),
+                      controller: horizontal,
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                        width: total.toDouble(),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 64,
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 400,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
                                       ),
-                                      SizedBox(
-                                        width: 64,
-                                        child: Text(
-                                          '状态',
-                                          style: textStyle(
-                                            p,
-                                            size: 12,
-                                            color: p.secondary,
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        '开始 / 截止日期',
-                                        style: textStyle(
-                                          p,
-                                          size: 12,
-                                          color: p.secondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              for (var i = 0; i < 14; i++)
-                                Container(
-                                  width: dw,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        dayString(
-                                              anchor.add(Duration(days: i)),
-                                            ) ==
-                                            s.today
-                                        ? p.hover
-                                        : null,
-                                    border: Border.all(
-                                      color: p.border,
-                                      width: .5,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        shortDay(anchor.add(Duration(days: i))),
-                                        style: textStyle(
-                                          p,
-                                          size: 12,
-                                          bold: true,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        dayString(
-                                                  anchor.add(Duration(days: i)),
-                                                ) ==
-                                                s.today
-                                            ? '今天'
-                                            : weekday(
-                                                anchor.add(Duration(days: i)),
-                                              ).replaceFirst('星期', '周'),
-                                        style: textStyle(
-                                          p,
-                                          size: 12,
-                                          color: p.muted,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: rows.length + 1,
-                            itemBuilder: (c, i) {
-                              if (i == rows.length) {
-                                return SpaceButton(
-                                  onPressed: () => editTask(
-                                    c,
-                                    s,
-                                    SpaceTask.create(
-                                      projectID: s.query.projectID,
-                                    ),
-                                  ),
-                                  child: const Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text('＋ 添加任务'),
-                                  ),
-                                );
-                              }
-                              final row = rows[i];
-                              if (row.task != null) {
-                                return _GanttRow(
-                                  task: row.task!,
-                                  store: s,
-                                  anchor: anchor,
-                                  dayWidth: dw,
-                                );
-                              }
-                              final schedules = row.tasks
-                                  .map(
-                                    (t) => TaskSchedule.forTask(
-                                      t,
-                                      parseDay(s.today)!,
-                                    ),
-                                  )
-                                  .toList();
-                              final start = schedules
-                                      .map((x) => x.start)
-                                      .reduce((a, b) => a.isBefore(b) ? a : b),
-                                  end = schedules
-                                      .map((x) => x.end)
-                                      .reduce((a, b) => a.isAfter(b) ? a : b);
-                              final range = _barBounds(
-                                TaskSchedule(start, end),
-                                anchor,
-                                dw,
-                              );
-                              return Container(
-                                height: 48,
-                                color: p.hover.withValues(
-                                  alpha: p.dark ? 0.112 : .056,
-                                ),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 400,
-                                      child: SpaceButton(
-                                        onPressed: () => setState(() {
-                                          if (!collapsed.remove(row.group)) {
-                                            collapsed.add(row.group!);
-                                          }
-                                        }),
-                                        child: Row(
-                                          children: [
-                                            SpaceIcon(
-                                              collapsed.contains(row.group)
-                                                  ? 'right'
-                                                  : 'down',
-                                              size: 12,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            SpaceIcon(
-                                              'folder',
-                                              color: p.purple,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                row.name,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: textStyle(p, bold: true),
-                                              ),
-                                            ),
-                                            Text(
-                                              '${row.tasks.length}',
+                                      child: Row(
+                                        children: [
+                                          SizedBox(
+                                            width: 184,
+                                            child: Text(
+                                              '项目 / 任务名称',
                                               style: textStyle(
                                                 p,
                                                 size: 12,
-                                                color: p.muted,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: dw * 14,
-                                      child: Stack(
-                                        children: [
-                                          Positioned.fill(
-                                            child: CustomPaint(
-                                              painter: _GridPainter(
-                                                anchor,
-                                                dw,
-                                                p,
-                                                s.today,
+                                                color: p.secondary,
                                               ),
                                             ),
                                           ),
-                                          if (range != null)
-                                            Positioned(
-                                              left: range.$1,
-                                              top: 20,
-                                              width: range.$2,
-                                              height: 8,
-                                              child: DecoratedBox(
-                                                decoration: BoxDecoration(
-                                                  color: GanttInk.forStatus(
-                                                    p,
-                                                    'doing',
-                                                  ).fill.withValues(alpha: .7),
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
+                                          SizedBox(
+                                            width: 64,
+                                            child: Text(
+                                              '状态',
+                                              style: textStyle(
+                                                p,
+                                                size: 12,
+                                                color: p.secondary,
                                               ),
                                             ),
+                                          ),
+                                          Text(
+                                            '开始 / 截止日期',
+                                            style: textStyle(
+                                              p,
+                                              size: 12,
+                                              color: p.secondary,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                                  ),
+                                  for (final h in headers())
+                                    Container(
+                                      width: dw * h.days,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        color: dayString(h.start) == s.today
+                                            ? p.hover
+                                            : null,
+                                        border: Border.all(
+                                          color: p.border,
+                                          width: .5,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            h.title,
+                                            maxLines: 1,
+                                            style: textStyle(
+                                              p,
+                                              size: 12,
+                                              bold: true,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            h.detail,
+                                            style: textStyle(
+                                              p,
+                                              size: 12,
+                                              color: p.muted,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: rows.length + 1,
+                                itemExtentBuilder: (i, _) => i == rows.length
+                                    ? 40
+                                    : rows[i].task == null
+                                    ? 48
+                                    : 64,
+                                itemBuilder: (c, i) {
+                                  if (i == rows.length) {
+                                    return SpaceButton(
+                                      onPressed: () => editTask(
+                                        c,
+                                        s,
+                                        SpaceTask.create(
+                                          projectID: s.query.projectID,
+                                        ),
+                                      ),
+                                      child: const Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text('＋ 添加任务'),
+                                      ),
+                                    );
+                                  }
+                                  final row = rows[i];
+                                  if (row.task != null) {
+                                    return _GanttRow(
+                                      task: row.task!,
+                                      store: s,
+                                      anchor: anchor,
+                                      dayWidth: dw,
+                                      days: days,
+                                      mode: mode,
+                                    );
+                                  }
+                                  final schedules = row.tasks
+                                      .map(
+                                        (t) => TaskSchedule.forTask(
+                                          t,
+                                          parseDay(s.today)!,
+                                        ),
+                                      )
+                                      .toList();
+                                  final start = schedules
+                                          .map((x) => x.start)
+                                          .reduce(
+                                            (a, b) => a.isBefore(b) ? a : b,
+                                          ),
+                                      end = schedules
+                                          .map((x) => x.end)
+                                          .reduce(
+                                            (a, b) => a.isAfter(b) ? a : b,
+                                          );
+                                  final range = _barBounds(
+                                    TaskSchedule(start, end),
+                                    anchor,
+                                    dw,
+                                    days,
+                                  );
+                                  return Container(
+                                    height: 48,
+                                    color: p.hover.withValues(
+                                      alpha: p.dark ? 0.112 : .056,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 400,
+                                          child: SpaceButton(
+                                            onPressed: () => setState(() {
+                                              if (!collapsed.remove(
+                                                row.group,
+                                              )) {
+                                                collapsed.add(row.group!);
+                                              }
+                                            }),
+                                            child: Row(
+                                              children: [
+                                                SpaceIcon(
+                                                  collapsed.contains(row.group)
+                                                      ? 'right'
+                                                      : 'down',
+                                                  size: 12,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                SpaceIcon(
+                                                  'folder',
+                                                  color: p.purple,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    row.name,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: textStyle(
+                                                      p,
+                                                      bold: true,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${row.tasks.length}',
+                                                  style: textStyle(
+                                                    p,
+                                                    size: 12,
+                                                    color: p.muted,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: dw * days,
+                                          child: Stack(
+                                            children: [
+                                              Positioned.fill(
+                                                child: CustomPaint(
+                                                  painter: _GridPainter(
+                                                    anchor,
+                                                    dw,
+                                                    p,
+                                                    s.today,
+                                                    days,
+                                                    mode,
+                                                  ),
+                                                ),
+                                              ),
+                                              if (range != null)
+                                                Positioned(
+                                                  left: range.$1,
+                                                  top: 20,
+                                                  width: range.$2,
+                                                  height: 8,
+                                                  child: DecoratedBox(
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          GanttInk.forStatus(
+                                                            p,
+                                                            'doing',
+                                                          ).fill.withValues(
+                                                            alpha: .7,
+                                                          ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            4,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 );
@@ -443,11 +585,12 @@ class _GanttViewState extends State<GanttView> {
   TaskSchedule schedule,
   DateTime anchor,
   double dw,
+  int days,
 ) {
   final start = schedule.start.difference(anchor).inDays,
       end = schedule.end.difference(anchor).inDays;
-  if (end < 0 || start > 13) return null;
-  final a = math.max(0, start), b = math.min(13, end);
+  if (end < 0 || start >= days) return null;
+  final a = math.max(0, start), b = math.min(days - 1, end);
   return (a * dw + 6, math.max(12, (b - a + 1) * dw - 12));
 }
 
@@ -455,11 +598,19 @@ class _GridPainter extends CustomPainter {
   final DateTime anchor;
   final double width;
   final Palette p;
-  final String today;
-  _GridPainter(this.anchor, this.width, this.p, this.today);
+  final String today, mode;
+  final int days;
+  _GridPainter(
+    this.anchor,
+    this.width,
+    this.p,
+    this.today,
+    this.days,
+    this.mode,
+  );
   @override
   void paint(Canvas c, Size size) {
-    for (var i = 0; i < 14; i++) {
+    for (var i = 0; i < days; i++) {
       final d = anchor.add(Duration(days: i)),
           now = dayString(anchor.add(Duration(days: i))) == today;
       final x = i * width;
@@ -472,13 +623,15 @@ class _GridPainter extends CustomPainter {
             ),
         );
       }
-      c.drawLine(
-        Offset(x, 0),
-        Offset(x, size.height),
-        Paint()
-          ..color = now ? p.accent.withValues(alpha: .65) : p.border
-          ..strokeWidth = now ? 1 : .5,
-      );
+      if (mode == 'day' || i == 0 || mode == 'week' && d.weekday == 1 || now) {
+        c.drawLine(
+          Offset(x, 0),
+          Offset(x, size.height),
+          Paint()
+            ..color = now ? p.accent.withValues(alpha: .65) : p.border
+            ..strokeWidth = now ? 1 : .5,
+        );
+      }
     }
     c.drawLine(
       Offset(0, size.height),
@@ -494,7 +647,9 @@ class _GridPainter extends CustomPainter {
       o.anchor != anchor ||
       o.width != width ||
       o.p.dark != p.dark ||
-      o.today != today;
+      o.today != today ||
+      o.days != days ||
+      o.mode != mode;
 }
 
 class _GanttRow extends StatefulWidget {
@@ -502,11 +657,15 @@ class _GanttRow extends StatefulWidget {
   final SpaceStore store;
   final DateTime anchor;
   final double dayWidth;
+  final int days;
+  final String mode;
   const _GanttRow({
     required this.task,
     required this.store,
     required this.anchor,
     required this.dayWidth,
+    required this.days,
+    required this.mode,
   });
   @override
   State<_GanttRow> createState() => _GanttRowState();
@@ -555,7 +714,12 @@ class _GanttRowState extends State<_GanttRow> {
   Widget build(BuildContext c) {
     final p = Palette.of(c), t = widget.task;
     final schedule = preview ?? original;
-    final bounds = _barBounds(schedule, widget.anchor, widget.dayWidth);
+    final bounds = _barBounds(
+      schedule,
+      widget.anchor,
+      widget.dayWidth,
+      widget.days,
+    );
     final color = p.status(t.status);
     final ink = GanttInk.forStatus(p, t.status);
     return SizedBox(
@@ -585,7 +749,11 @@ class _GanttRowState extends State<_GanttRow> {
                               style: textStyle(p, bold: true),
                             ),
                             const SizedBox(height: 4),
-                            CategoryLabel(t.category),
+                            CategoryLabel(
+                              t.category,
+                              name:
+                                  widget.store.state.taskCategories[t.category],
+                            ),
                           ],
                         ),
                       ),
@@ -625,7 +793,7 @@ class _GanttRowState extends State<_GanttRow> {
             ),
           ),
           SizedBox(
-            width: widget.dayWidth * 14,
+            width: widget.dayWidth * widget.days,
             height: 64,
             child: Stack(
               children: [
@@ -636,6 +804,8 @@ class _GanttRowState extends State<_GanttRow> {
                       widget.dayWidth,
                       p,
                       widget.store.today,
+                      widget.days,
+                      widget.mode,
                     ),
                   ),
                 ),
@@ -667,7 +837,7 @@ class _GanttRowState extends State<_GanttRow> {
                                 handle(
                                   'start',
                                   SizedBox(
-                                    width: 12,
+                                    width: math.min(12.0, bounds.$2 / 3),
                                     height: 32,
                                     child: Center(
                                       child: Container(
@@ -704,12 +874,14 @@ class _GanttRowState extends State<_GanttRow> {
                                 ),
                               ),
                               if (!schedule.end.isAfter(
-                                widget.anchor.add(const Duration(days: 13)),
+                                widget.anchor.add(
+                                  Duration(days: widget.days - 1),
+                                ),
                               ))
                                 handle(
                                   'end',
                                   SizedBox(
-                                    width: 12,
+                                    width: math.min(12.0, bounds.$2 / 3),
                                     height: 32,
                                     child: Center(
                                       child: Container(
@@ -753,6 +925,44 @@ class _CalendarViewState extends State<CalendarView> {
   List<SpaceTask>? _cachedTasks;
   String? _cachedDay;
   Map<String, TaskSchedule> _schedules = {};
+  List<SpaceTask>? _monthTasks;
+  String? _monthDay;
+  final _monthCache = <String, Map<int, List<SpaceTask>>>{};
+  Map<int, List<SpaceTask>> _monthBuckets = {};
+  void prepareMonth(DateTime start, DateTime end) {
+    if (!identical(_monthTasks, s.visible) || _monthDay != s.today) {
+      _monthTasks = s.visible;
+      _monthDay = s.today;
+      _monthCache.clear();
+    }
+    final key = '${dayString(start)}/${dayString(end)}';
+    final cached = _monthCache.remove(key);
+    if (cached != null) {
+      _monthBuckets = cached;
+    } else {
+      _monthBuckets = {};
+      final startDay =
+          start.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay;
+      final endDay = end.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay;
+      for (final t in s.visible) {
+        final range = scheduleFor(t);
+        final first = math.max(
+          startDay,
+          range.start.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay,
+        );
+        final last = math.min(
+          endDay,
+          range.end.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay,
+        );
+        for (var d = first; d <= last; d++) {
+          _monthBuckets.putIfAbsent(d, () => []).add(t);
+        }
+      }
+    }
+    _monthCache[key] = _monthBuckets;
+    if (_monthCache.length > 2) _monthCache.remove(_monthCache.keys.first);
+  }
+
   TaskSchedule scheduleFor(SpaceTask task) {
     if (!identical(_cachedTasks, s.visible) || _cachedDay != s.today) {
       _cachedTasks = s.visible;
@@ -978,7 +1188,12 @@ class _CalendarViewState extends State<CalendarView> {
           const SizedBox(height: 8),
           Row(
             children: [
-              CategoryLabel(t.category),
+              Flexible(
+                child: CategoryLabel(
+                  t.category,
+                  name: s.state.taskCategories[t.category],
+                ),
+              ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -1016,9 +1231,10 @@ class _CalendarViewState extends State<CalendarView> {
       final last = DateTime.utc(anchor.year, anchor.month + 1, 0);
       final count = ((last.difference(start).inDays + 7) ~/ 7) * 7;
       final rows = count ~/ 7;
+      prepareMonth(start, start.add(Duration(days: count - 1)));
       final side = b.maxWidth >= 1100 ? 280.0 : 232.0;
       final height = math.max(88.0, (b.maxHeight - 32) / rows);
-      final limit = math.max(1, math.min(3, ((height - 70) / 24).floor()));
+      final limit = math.max(0, ((height - 44) / 22).floor());
       return Row(
         children: [
           Expanded(
@@ -1075,7 +1291,13 @@ class _CalendarViewState extends State<CalendarView> {
   );
   Widget monthCell(DateTime d, double height, int limit) {
     final p = Palette.of(context);
-    final tasks = items(d);
+    final tasks =
+        _monthBuckets[d.millisecondsSinceEpoch ~/
+            Duration.millisecondsPerDay] ??
+        const <SpaceTask>[];
+    if (tasks.length > limit) {
+      limit = math.max(0, ((height - 44 - 18) / 22).floor());
+    }
     final isSelected = dayString(d) == dayString(selected);
     final today = dayString(d) == s.today;
     return GestureDetector(
@@ -1122,7 +1344,7 @@ class _CalendarViewState extends State<CalendarView> {
               const SizedBox(height: 4),
               for (final t in tasks.take(limit))
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: 2),
                   child: GestureDetector(
                     onTap: () {
                       setState(() => selected = d);
@@ -1165,7 +1387,7 @@ class _CalendarViewState extends State<CalendarView> {
                   child: SizedBox(
                     height: 18,
                     child: Text(
-                      '还有 ${tasks.length - limit} 项',
+                      '${tasks.length - limit}…',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textStyle(p, size: 12, color: p.muted),
@@ -1289,4 +1511,103 @@ class _DashedOutline extends CustomPainter {
   @override
   bool shouldRepaint(_DashedOutline old) =>
       old.color != color || old.width != width || old.dashed != dashed;
+}
+
+class MonthField extends StatelessWidget {
+  final DateTime value;
+  final ValueChanged<DateTime> onChanged;
+  const MonthField({super.key, required this.value, required this.onChanged});
+  @override
+  Widget build(BuildContext c) => Builder(
+    builder: (anchor) => SpaceButton(
+      tooltip: '选择年月',
+      onPressed: () async {
+        var year = value.year;
+        final result = await anchoredPopup<DateTime>(
+          anchor,
+          StatefulBuilder(
+            builder: (c, set) => Focus(
+              autofocus: true,
+              onKeyEvent: (_, event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  Navigator.pop(c);
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: Glass(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        IconButtonS(
+                          'left',
+                          '上一年',
+                          onPressed: year > 1 ? () => set(() => year--) : null,
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              '$year 年',
+                              style: textStyle(Palette.of(c), bold: true),
+                            ),
+                          ),
+                        ),
+                        IconButtonS(
+                          'right',
+                          '下一年',
+                          onPressed: year < 9998
+                              ? () => set(() => year++)
+                              : null,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    for (var row = 0; row < 4; row++)
+                      Row(
+                        children: [
+                          for (var col = 1; col <= 3; col++)
+                            Expanded(
+                              child: SpaceButton(
+                                selected:
+                                    year == value.year &&
+                                    row * 3 + col == value.month,
+                                onPressed: () => Navigator.pop(
+                                  c,
+                                  DateTime.utc(year, row * 3 + col),
+                                ),
+                                child: Text('${row * 3 + col}月'),
+                              ),
+                            ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          width: 280,
+          height: 256,
+        );
+        if (result != null) onChanged(result);
+      },
+      child: Row(
+        children: [
+          const SpaceIcon('calendar'),
+          const SizedBox(width: 8),
+          AnimatedSwitcher(
+            duration: MediaQuery.disableAnimationsOf(c)
+                ? Duration.zero
+                : const Duration(milliseconds: 200),
+            child: Text('${value.year}年${value.month}月', key: ValueKey(value)),
+          ),
+          const Spacer(),
+          const SpaceIcon('down', size: 9),
+        ],
+      ),
+    ),
+  );
 }

@@ -1,0 +1,17 @@
+Resolving dependencies...
+Downloading packages...
+  cross_file 0.3.5+5 (0.4.0 available)
+  flutter_keyboard_visibility_linux 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_macos 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_platform_interface 2.0.0 (3.0.0 available)
+  flutter_keyboard_visibility_windows 1.0.0 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading C:/SpaceFlutter210/source/test/workspace_test.dart
+00:00 +0: 鐢樼壒鍥鹃粦鐧戒富棰橀鑹插彲璇伙紝鐘舵€佺嫭绔嬩笖涓嶄緷璧栧叏灞€涓婚鏀硅壊
+00:00 +1: light 鐢樼壒鍥鹃粯璁ゆ帓鏈熷拰鑷畾涔夌姸鎬佷娇鐢ㄥ彲璇诲～鑹?00:02 +2: dark 鐢樼壒鍥鹃粯璁ゆ帓鏈熷拰鑷畾涔夌姸鎬佷娇鐢ㄥ彲璇诲～鑹?00:03 +3: 鐢樼壒鏁存潯鎷栧姩鎸夎嚜鐒舵棩钀藉簱涓庢挙閿€
+00:05 +4: All tests passed!

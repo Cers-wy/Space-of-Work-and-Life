@@ -1,7 +1,9 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+
 import '../core/models.dart';
 import 'theme.dart';
 
@@ -510,8 +512,9 @@ class Mark extends StatelessWidget {
 
 class CategoryLabel extends StatelessWidget {
   final String category;
+  final String? name;
   final int? count;
-  const CategoryLabel(this.category, {super.key, this.count});
+  const CategoryLabel(this.category, {super.key, this.count, this.name});
   @override
   Widget build(BuildContext c) {
     final p = Palette.of(c);
@@ -527,9 +530,13 @@ class CategoryLabel extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Text(
-          '${categories[category]}${count == null ? '' : ' $count'}',
-          style: textStyle(p, size: 12, color: p.secondary),
+        Flexible(
+          child: Text(
+            '${name ?? categories[category] ?? category}${count == null ? '' : ' $count'}',
+            style: textStyle(p, size: 12, color: p.secondary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );
@@ -1227,6 +1234,104 @@ class _BoardResizeHandleState extends State<BoardResizeHandle> {
                   ),
                 ),
               ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class SpaceMultiSelect extends StatelessWidget {
+  final Set<String> values;
+  final Map<String, String> options;
+  final String label;
+  final double? width;
+  final VoidCallback onChanged;
+  const SpaceMultiSelect({
+    super.key,
+    required this.values,
+    required this.options,
+    required this.label,
+    required this.onChanged,
+    this.width,
+  });
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: width,
+    child: Builder(
+      builder: (anchor) => SpaceButton(
+        tooltip: label,
+        selected: values.isNotEmpty,
+        onPressed: () => anchoredPopup(
+          anchor,
+          StatefulBuilder(
+            builder: (c, set) => Glass(
+              padding: const EdgeInsets.all(8),
+              child: Focus(
+                autofocus: true,
+                onKeyEvent: (_, event) {
+                  if (event is KeyDownEvent &&
+                      event.logicalKey == LogicalKeyboardKey.escape) {
+                    Navigator.pop(c);
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 344),
+                    child: ListView(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      children: [
+                        SpaceButton(
+                          onPressed: () {
+                            values.clear();
+                            onChanged();
+                            set(() {});
+                          },
+                          child: Text('全部$label'),
+                        ),
+                        for (final e in options.entries)
+                          CheckboxListTile(
+                            dense: true,
+                            title: Text(e.value),
+                            value: values.contains(e.key),
+                            onChanged: (_) {
+                              if (!values.remove(e.key)) {
+                                values.add(e.key);
+                              }
+                              onChanged();
+                              set(() {});
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          width: 280,
+          height: (options.length * 48.0 + 64).clamp(112, 360),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: Text(
+                values.isEmpty
+                    ? '全部$label'
+                    : values.length == 1
+                    ? (options[values.first] ?? label)
+                    : '$label · 已选${values.length}项',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const SpaceIcon('down', size: 9),
           ],
         ),
       ),

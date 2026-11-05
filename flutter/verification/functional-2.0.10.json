@@ -1,0 +1,42 @@
+{
+  "version": "2.0.10+11",
+  "platforms": {
+    "macos": {
+      "passed": 50,
+      "commands": [
+        {
+          "command": "flutter test test/core_test.dart test/store_test.dart --reporter expanded",
+          "passed": 38
+        },
+        {
+          "command": "flutter test test/schedule_update_test.dart test/workspace_test.dart --name '同条件|内置分类|甘特|月格|分类长名称|筛选面板|日历日周月' --reporter expanded",
+          "passed": 12
+        }
+      ]
+    },
+    "windows": {
+      "passed": 50,
+      "commands": [
+        {
+          "command": "flutter test test/core_test.dart test/store_test.dart --reporter expanded",
+          "passed": 38
+        },
+        {
+          "command": "flutter test test/schedule_update_test.dart --reporter expanded",
+          "passed": 7
+        },
+        {
+          "command": "flutter test test/workspace_test.dart --plain-name 甘特 --reporter expanded",
+          "passed": 4
+        },
+        {
+          "command": "flutter test test/workspace_test.dart --plain-name 日历日周月 --reporter expanded",
+          "passed": 1
+        }
+      ]
+    }
+  },
+  "isolatedDataOnly": true,
+  "staticAnalysis": "ASCII copy: no errors, 3 existing Quill experimental API warnings and 1 existing constructor-order info",
+  "logs": "functional-2.0.10/"
+}

@@ -1,0 +1,18 @@
+Resolving dependencies...
+Downloading packages...
+  cross_file 0.3.5+5 (0.4.0 available)
+  flutter_keyboard_visibility_linux 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_macos 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_platform_interface 2.0.0 (3.0.0 available)
+  flutter_keyboard_visibility_windows 1.0.0 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading C:/SpaceFlutter210/source/test/schedule_update_test.dart
+00:00 +0: 鍚屾潯浠跺閫塐R锛屼笉鍚屾潯浠禔ND锛涢粯璁ょ瓫閫夊惈鎺掑簭閲嶅惎鎭㈠骞舵竻闄ゅけ鏁堝紩鐢?00:00 +1: 鍐呯疆鍒嗙被鏀瑰悕銆佽嚜瀹氫箟鍒嗙被寮曠敤銆丼QLite/渚挎惡澶囦唤鎸佷箙鍖栧拰閲嶅鍚嶆嫆缁?00:00 +2: 鐢樼壒褰撳墠鏁存湀銆佹棩鍛ㄦ湀鍒诲害銆佸勾鏈堥€夋嫨鍜岃法骞村乏鍙冲垏鎹紝鏃犳渶灏忕獥鍙ｆ孩鍑?00:04 +3: 鐢樼壒杈圭紭妯悜婊氬姩鍒囨崲鏈堜唤锛屾櫘閫氱旱鍚戞粴鍔ㄤ笉鍒囨崲
+00:05 +4: 鏈堟牸楂樺害鑷€傚簲锛屾棤婧㈠嚭鎵嶆樉绀哄墿浣欐暟鈥︼紝澧為珮鍙秴杩?椤?00:06 +5: 鍒嗙被闀垮悕绉板湪浠诲姟鍚勮鍥句腑涓嶄細鎾戠牬甯冨眬
+00:08 +6: 绛涢€夐潰鏉挎敮鎸佸閫夈€侀粯璁や繚瀛橈紝鐘舵€佸拰鍒嗙被鍚屼竴璁剧疆鐣岄潰
+00:13 +7: All tests passed!

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:uuid/uuid.dart';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
 
@@ -195,7 +196,8 @@ class SpaceTask {
         description.length > 5000) {
       invalid('任务标题或说明长度无效');
     }
-    if (!categories.containsKey(category) ||
+    if ((!categories.containsKey(category) &&
+            !RegExp(r'^category:[A-Z0-9-]{36}$').hasMatch(category)) ||
         !priorities.containsKey(priority)) {
       invalid('任务分类或优先级无效');
     }
@@ -275,6 +277,10 @@ class SpaceState {
     workspaceID: workspaceID ?? this.workspaceID,
     revision: revision ?? this.revision,
   );
+  Map<String, String> get taskCategories =>
+      settings.containsKey('taskCategories')
+      ? Map<String, String>.from(jsonDecode(settings['taskCategories']!))
+      : {...categories};
   List<String> get displayStatuses => statuses
       .where(
         (s) => !disabledStatuses.contains(s) || tasks.any((t) => t.status == s),
@@ -313,6 +319,10 @@ class SpaceState {
         statuses: statuses,
         disabledStatuses: [...disabledStatuses]..sort(),
         projects: projects,
+        settings: {
+          if (settings.containsKey('taskCategories'))
+            'taskCategories': settings['taskCategories']!,
+        },
       ).toJson(now: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true));
     }
     return {
@@ -395,11 +405,30 @@ class SpaceState {
         invalid('项目定义无效或重复');
       }
     }
+    final definitions = taskCategories;
+    final categoryNames = <String>{};
+    if (definitions.isEmpty ||
+        definitions.length > 100 ||
+        !categories.keys.every(definitions.containsKey)) {
+      invalid('分类定义无效');
+    }
+    for (final e in definitions.entries) {
+      if ((!categories.containsKey(e.key) &&
+              !RegExp(r'^category:[A-Z0-9-]{36}$').hasMatch(e.key)) ||
+          e.value != normalizedName(e.value) ||
+          e.value.isEmpty ||
+          e.value.length > 20 ||
+          controls(e.value) ||
+          !categoryNames.add(unorm.nfc(e.value).toLowerCase())) {
+        invalid('分类名称须为1至20字且不能重复');
+      }
+    }
     final tids = <String>{};
     for (final t in tasks) {
       t.validate();
       if (!tids.add(t.id) ||
           !statuses.contains(t.status) ||
+          !definitions.containsKey(t.category) ||
           t.projectID != null && !pids.contains(t.projectID)) {
         invalid('任务ID重复或引用缺失');
       }
@@ -415,18 +444,85 @@ class SpaceState {
 
 class TaskQuery {
   String text = '', dueFilter = 'all', sort = 'due';
-  String? category, status, priority, projectID;
+  final categoryIDs = <String>{},
+      statusIDs = <String>{},
+      priorityIDs = <String>{},
+      projectIDs = <String>{},
+      dueFilters = <String>{};
+  String? get category => categoryIDs.length == 1 ? categoryIDs.first : null;
+  set category(String? v) {
+    categoryIDs.clear();
+    if (v != null) categoryIDs.add(v);
+  }
+
+  String? get status => statusIDs.length == 1 ? statusIDs.first : null;
+  set status(String? v) {
+    statusIDs.clear();
+    if (v != null) statusIDs.add(v);
+  }
+
+  String? get priority => priorityIDs.length == 1 ? priorityIDs.first : null;
+  set priority(String? v) {
+    priorityIDs.clear();
+    if (v != null) priorityIDs.add(v);
+  }
+
+  String? get projectID => projectIDs.length == 1 ? projectIDs.first : null;
+  set projectID(String? v) {
+    projectIDs.clear();
+    if (v != null) projectIDs.add(v);
+  }
+
+  Map<String, dynamic> toJson() => {
+    'text': text,
+    'sort': sort,
+    'categories': categoryIDs.toList(),
+    'statuses': statusIDs.toList(),
+    'priorities': priorityIDs.toList(),
+    'projects': projectIDs.toList(),
+    'dates': dueFilters.toList(),
+    'dueFilter': dueFilter,
+  };
+  TaskQuery();
+  factory TaskQuery.fromJson(Map<String, dynamic> j) {
+    final q = TaskQuery();
+    q.text = j['text'] as String? ?? '';
+    q.sort = ['due', 'priority', 'created'].contains(j['sort'])
+        ? j['sort']
+        : 'due';
+    q.dueFilter = j['dueFilter'] as String? ?? 'all';
+    for (final pair in [
+      (q.categoryIDs, 'categories'),
+      (q.statusIDs, 'statuses'),
+      (q.priorityIDs, 'priorities'),
+      (q.projectIDs, 'projects'),
+      (q.dueFilters, 'dates'),
+    ]) {
+      pair.$1.addAll(List<String>.from(j[pair.$2] ?? []));
+    }
+    return q;
+  }
+  void prune(SpaceState s) {
+    categoryIDs.removeWhere((v) => !s.taskCategories.containsKey(v));
+    statusIDs.removeWhere((v) => !s.statuses.contains(v));
+    priorityIDs.removeWhere((v) => !priorities.containsKey(v));
+    projectIDs.removeWhere((v) => !s.projects.any((p) => p.id == v));
+    dueFilters.removeWhere((v) => !['today', 'overdue', 'none'].contains(v));
+  }
+
   bool get hasFilters =>
       text.isNotEmpty ||
-      category != null ||
-      status != null ||
-      priority != null ||
-      projectID != null ||
+      categoryIDs.isNotEmpty ||
+      statusIDs.isNotEmpty ||
+      priorityIDs.isNotEmpty ||
+      projectIDs.isNotEmpty ||
+      dueFilters.isNotEmpty ||
       dueFilter != 'all';
   void clear() {
     text = '';
     category = status = priority = projectID = null;
     dueFilter = 'all';
+    dueFilters.clear();
   }
 
   List<SpaceTask> apply(SpaceState state, String today) {
@@ -439,14 +535,18 @@ class TaskQuery {
                   '${t.title} ${t.description} ${projectNames[t.projectID] ?? ''}'
                       .toLowerCase()
                       .contains(term)) &&
-              (category == null || t.category == category) &&
-              (status == null || t.status == status) &&
-              (priority == null || t.priority == priority) &&
-              (projectID == null || t.projectID == projectID) &&
-              (dueFilter == 'all' ||
-                  dueFilter == 'none' && t.due.isEmpty ||
-                  dueFilter == 'today' && t.due == today ||
-                  dueFilter == 'overdue' && t.overdue(today)),
+              (categoryIDs.isEmpty || categoryIDs.contains(t.category)) &&
+              (statusIDs.isEmpty || statusIDs.contains(t.status)) &&
+              (priorityIDs.isEmpty || priorityIDs.contains(t.priority)) &&
+              (projectIDs.isEmpty || projectIDs.contains(t.projectID)) &&
+              (dueFilters.isNotEmpty
+                  ? (dueFilters.contains('none') && t.due.isEmpty ||
+                        dueFilters.contains('today') && t.due == today ||
+                        dueFilters.contains('overdue') && t.overdue(today))
+                  : (dueFilter == 'all' ||
+                        dueFilter == 'none' && t.due.isEmpty ||
+                        dueFilter == 'today' && t.due == today ||
+                        dueFilter == 'overdue' && t.overdue(today))),
         )
         .toList();
     final createdTimes = {for (final t in result) t.id: validTime(t.createdAt)};

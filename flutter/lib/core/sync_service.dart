@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:path/path.dart' as path;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+
 import '../host.dart';
 import '../store.dart';
 import 'models.dart';
@@ -119,9 +121,8 @@ class GitHubAPI {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 45);
     try {
-      final uri = Uri.parse(
-        'https://api.github.com$path',
-      ).replace(queryParameters: query);
+      final uri = Uri.parse('https://api.github.com$path')
+          .replace(queryParameters: query);
       final req = await client
           .openUrl(method, uri)
           .timeout(const Duration(seconds: 45));
@@ -446,7 +447,10 @@ class SyncService extends ChangeNotifier {
     try {
       if (await store.commit(
         value.backup.copy(
-          settings: store.state.settings,
+          settings: {
+            ...store.state.settings,
+            'taskCategories': jsonEncode(value.backup.taskCategories),
+          },
           workspaceID: store.state.workspaceID,
         ),
         '云端数据已恢复',

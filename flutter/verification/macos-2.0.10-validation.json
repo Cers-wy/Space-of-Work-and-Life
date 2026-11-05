@@ -1,0 +1,50 @@
+{
+  "version": "2.0.10+11",
+  "dmgCopiedAppMatchesZipApp": true,
+  "signature": "adhoc; codesign --verify --deep --strict passed",
+  "files": {
+    "Contents/Info.plist": "591f543e5993aa48c80b49c7fb35b0269ac899f8e20b2ad6db582e2ecb5b0974",
+    "Contents/PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+    "Contents/_CodeSignature/CodeResources": "28710ad21ef0a38678888dfe52a8850b22a2908b68a5552a03e7ae60e6e847d4",
+    "Contents/MacOS/Space Flutter": "78135e44cbf2de85f20cf164464ee63ad98172794f23ce62054b20bcebfbb1cb",
+    "Contents/Resources/AppIcon.icns": "2f16a8e99567a2b4dcc31da806fb3c1203a597355740570227b9feeb7239fedc",
+    "Contents/Resources/Assets.car": "0b78d866a2ce2543bc7c4c996c06a9d5ffe1bb9747c222cb04980fc2263ebae3",
+    "Contents/Resources/Base.lproj/MainMenu.nib": "86488ff45f44ef0df1e6e713d2d058c5d512b4b246bd82ffece2a22d37f40c64",
+    "Contents/Resources/url_launcher_macos_url_launcher_macos.bundle/Contents/Info.plist": "18f4cd2fd6c9ff5cf66e6e3b4b9d64b0254debe3d0825d3d2371902d8f78153c",
+    "Contents/Resources/url_launcher_macos_url_launcher_macos.bundle/Contents/Resources/PrivacyInfo.xcprivacy": "204d035a88eab2281b3d914f46c796766ae78e3cb82537711928dca9e28dbbb8",
+    "Contents/Resources/quill_native_bridge_macos_quill_native_bridge_macos.bundle/Contents/Info.plist": "d157f87f0ea6628eaac5d133db4f2464d52a06766ae7f85eaa6a73ab8d65ee0d",
+    "Contents/Resources/quill_native_bridge_macos_quill_native_bridge_macos.bundle/Contents/Resources/PrivacyInfo.xcprivacy": "2b90f999b2194ba5d1f8e6b181b9d8fa5c1037d389d2be4428e18e3074e8388a",
+    "Contents/Frameworks/FlutterMacOS.framework/FlutterMacOS": "0cf871403716d0aec6766cc6ef601f71eeb71039cef0041caf26cddd65d15821",
+    "Contents/Frameworks/FlutterMacOS.framework/Versions/A/FlutterMacOS": "0cf871403716d0aec6766cc6ef601f71eeb71039cef0041caf26cddd65d15821",
+    "Contents/Frameworks/FlutterMacOS.framework/Versions/A/_CodeSignature/CodeResources": "7f18dd1332af1ca7f68d30b8158af033c32093a4062bff7f69cd6ff5af5ba97a",
+    "Contents/Frameworks/FlutterMacOS.framework/Versions/A/Resources/icudtl.dat": "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7",
+    "Contents/Frameworks/FlutterMacOS.framework/Versions/A/Resources/PrivacyInfo.xcprivacy": "42542470043a0a3af3ab452ae4355bf764b916b7a442d3c814f362241a794454",
+    "Contents/Frameworks/FlutterMacOS.framework/Versions/A/Resources/Info.plist": "73af7556d845f54efea81febe2a2332adb43c4a41789aef865fa864ac33badfa",
+    "Contents/Frameworks/sqlite3.framework/sqlite3": "f70b268280f763ce7de192c546e787cc105ffb741f467c7e50b24fdcbb4a0677",
+    "Contents/Frameworks/sqlite3.framework/Versions/A/sqlite3": "f70b268280f763ce7de192c546e787cc105ffb741f467c7e50b24fdcbb4a0677",
+    "Contents/Frameworks/sqlite3.framework/Versions/A/_CodeSignature/CodeResources": "1b801429a9d688e57ebd4a9a72ca5de5ef1f0c1f02fe2bf091e1bcd4809072ca",
+    "Contents/Frameworks/sqlite3.framework/Versions/A/Resources/Info.plist": "7bd8795d9bcbdebbb396fd334ec789265f9947fe36fff90cf6046fab60b209e9",
+    "Contents/Frameworks/App.framework/App": "5c4c66eff8182beb257e6e2d07028ddcc6d5241ecc56a68300e20546ed87ff7a",
+    "Contents/Frameworks/App.framework/Versions/A/App": "5c4c66eff8182beb257e6e2d07028ddcc6d5241ecc56a68300e20546ed87ff7a",
+    "Contents/Frameworks/App.framework/Versions/A/_CodeSignature/CodeResources": "c70a424581eb9283131e747aba9d3234dee3e97e470044a3c2ab1a291d7998b2",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/Info.plist": "08b03b58e4ff25c66f5e60193b2728ab5246563bc4f253211a5c4835bbc1d333",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/NOTICES.Z": "f0531643bfeb8d76e3b4a41224cdad8d3ccb7c5a1627b9d8158181f66eff83fb",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/NativeAssetsManifest.json": "cea3779f6121a939aabcb2c712dabc81da99ef01ef16410b18b14a3f86c1c5bd",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json": "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.bin": "f566cc6fccc657365c0197accf3a7d6f80f85209ff666ff774f4dcbc524aa842",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/shaders/ink_sparkle.frag": "c4b3f5d1db405d50b8b7678d8bb446237f37ead86501e32c7a77fac963baff2d",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/shaders/stretch_effect.frag": "50c8c225a68bcb36805a9d3fde5be28e315e666fd1c142a2d88f3fb5dfc7d9ff",
+    "Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/fonts/MaterialIcons-Regular.otf": "6c76c04538aa399114ad74fbba42f6487ae7851037f53a49d4f78dc1da629bf8"
+  },
+  "isolatedStartup": {
+    "source": "app copied from final read-only DMG",
+    "emptyHome": true,
+    "ganttEntry": true,
+    "calendarMonthEntry": true,
+    "database": {
+      "quickCheck": "ok",
+      "tasks": 0,
+      "projects": 0
+    }
+  }
+}

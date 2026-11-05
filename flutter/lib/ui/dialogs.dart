@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:flutter_quill/quill_delta.dart' show Delta;
+
 import '../core/models.dart';
 import '../core/richtext.dart';
 import '../host.dart';
@@ -573,7 +575,7 @@ class _TaskEditorState extends State<_TaskEditor> {
                         '所属分类',
                         SpaceSelect(
                           value: draft.category,
-                          options: categories,
+                          options: s.state.taskCategories,
                           label: '所属分类',
                           onChanged: (v) => setState(
                             () => draft = draft.patch({'category': v}),
@@ -959,94 +961,40 @@ class _FiltersState extends State<_Filters> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  field(
-                    c,
-                    '任务状态',
-                    SpaceSelect(
-                      value: s.query.status ?? '',
-                      options: {
-                        '': '所有状态',
-                        for (final status in s.state.statuses)
-                          status:
-                              '${statusName(status)}${s.state.disabledStatuses.contains(status) ? '（已停用）' : ''}',
-                      },
-                      label: '状态',
-                      onChanged: (v) {
-                        s.query.status = v.isEmpty ? null : v;
-                        s.refreshQuery();
-                      },
+                  for (final spec in [
+                    (
+                      '任务状态',
+                      s.query.statusIDs,
+                      {for (final v in s.state.statuses) v: statusName(v)},
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  field(
-                    c,
-                    '优先级',
-                    SpaceSelect(
-                      value: s.query.priority ?? '',
-                      options: {
-                        '': '所有优先级',
-                        for (final e in priorities.entries)
-                          e.key: '${e.value}优先级',
-                      },
-                      label: '优先级',
-                      onChanged: (v) {
-                        s.query.priority = v.isEmpty ? null : v;
-                        s.refreshQuery();
-                      },
+                    ('优先级', s.query.priorityIDs, priorities),
+                    ('所属分类', s.query.categoryIDs, s.state.taskCategories),
+                    (
+                      '截止日期',
+                      s.query.dueFilters,
+                      {'today': '今天截止', 'overdue': '已逾期', 'none': '未设置日期'},
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  field(
-                    c,
-                    '所属分类',
-                    SpaceSelect(
-                      value: s.query.category ?? '',
-                      options: {'': '所有分类', ...categories},
-                      label: '分类',
-                      onChanged: (v) {
-                        s.query.category = v.isEmpty ? null : v;
-                        s.refreshQuery();
-                      },
+                    (
+                      '项目',
+                      s.query.projectIDs,
+                      {for (final v in s.state.projects) v.id: v.name},
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  field(
-                    c,
-                    '截止日期',
-                    SpaceSelect(
-                      value: s.query.dueFilter,
-                      options: const {
-                        'all': '所有日期',
-                        'today': '今天截止',
-                        'overdue': '已逾期',
-                        'none': '未设置日期',
-                      },
-                      label: '截止日期',
-                      onChanged: (v) {
-                        s.query.dueFilter = v;
-                        s.refreshQuery();
-                      },
+                  ]) ...[
+                    field(
+                      c,
+                      spec.$1,
+                      SpaceMultiSelect(
+                        values: spec.$2,
+                        options: spec.$3,
+                        label: spec.$1,
+                        onChanged: () {
+                          if (spec.$1 == '截止日期') s.query.dueFilter = 'all';
+                          s.refreshQuery();
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  field(
-                    c,
-                    '项目',
-                    SpaceSelect(
-                      value: s.query.projectID ?? '',
-                      options: {
-                        '': '所有项目',
-                        for (final project in s.state.projects)
-                          project.id: project.name,
-                      },
-                      label: '项目筛选',
-                      onChanged: (v) {
-                        s.query.projectID = v.isEmpty ? null : v;
-                        s.refreshQuery();
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                  ],
                   field(
                     c,
                     '排序方式',
@@ -1063,6 +1011,25 @@ class _FiltersState extends State<_Filters> {
                         s.refreshQuery();
                       },
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SpaceButton(
+                          onPressed: s.saveDefaultFilters,
+                          child: const Text('设为默认配置'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SpaceButton(
+                        onPressed: () async {
+                          await s.preferences({'defaultFilters': '{}'});
+                          s.message('默认筛选已恢复为全部任务');
+                        },
+                        child: const Text('重置默认'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -1302,6 +1269,7 @@ class _Statuses extends StatefulWidget {
 
 class _StatusesState extends State<_Statuses> {
   final name = TextEditingController();
+  bool categoriesPage = false;
   SpaceStore get s => widget.store;
   @override
   void initState() {
@@ -1325,7 +1293,7 @@ class _StatusesState extends State<_Statuses> {
     final p = Palette.of(c);
     return sheetFrame(
       c,
-      title: '任务状态管理',
+      title: '状态与分类管理',
       close: () => Navigator.pop(c),
       footer: [
         const Spacer(),
@@ -1336,166 +1304,252 @@ class _StatusesState extends State<_Statuses> {
           child: const Text('完成'),
         ),
       ],
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '新增状态后，看板会自动增加一列。',
-              style: textStyle(p, size: 12, color: p.secondary),
-            ),
-            const SizedBox(height: 16),
-            Row(
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                Expanded(
-                  child: SpaceInput(
-                    controller: name,
-                    hint: '新状态名称，1至20字',
-                    label: '新状态名称',
-                  ),
-                ),
-                const SizedBox(width: 12),
                 SpaceButton(
-                  primary: true,
-                  onPressed: () async {
-                    await s.addStatus(name.text);
-                    if (s.error == null) name.clear();
-                  },
-                  child: const Text('新增状态'),
+                  selected: !categoriesPage,
+                  onPressed: () => setState(() => categoriesPage = false),
+                  child: const Text('任务状态'),
+                ),
+                const SizedBox(width: 8),
+                SpaceButton(
+                  selected: categoriesPage,
+                  onPressed: () => setState(() => categoriesPage = true),
+                  child: const Text('任务分类'),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            for (final status in s.state.statuses) ...[
-              Glass(
-                blur: false,
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: p.status(status),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        statusName(status),
-                        style: textStyle(p, bold: true),
-                      ),
-                    ),
-                    Text(
-                      '${s.state.tasks.where((t) => t.status == status).length} 项',
-                      style: textStyle(p, size: 12, color: p.muted),
-                    ),
-                    const SizedBox(width: 12),
-                    if (builtins.contains(status))
-                      Text('内置', style: textStyle(p, size: 12, color: p.muted))
-                    else ...[
-                      SpaceButton(
-                        height: 32,
-                        onPressed: () => s.toggleStatus(status),
-                        child: Text(
-                          s.state.disabledStatuses.contains(status)
-                              ? '启用'
-                              : '停用',
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SpaceButton(
-                        height: 32,
-                        danger: true,
-                        onPressed: () async {
-                          String target = s.state.statuses.firstWhere(
-                            (x) =>
-                                x != status &&
-                                !s.state.disabledStatuses.contains(x),
-                          );
-                          final chosen = await showDialog<String>(
-                            context: c,
-                            builder: (c) => StatefulBuilder(
-                              builder: (c, set) => Dialog(
-                                backgroundColor: Colors.transparent,
-                                child: SizedBox(
-                                  width: 400,
-                                  child: Glass(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '迁移后删除${statusName(status)}',
-                                          style: textStyle(
-                                            p,
-                                            size: 16,
-                                            bold: true,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          '该状态的全部任务将迁移到所选状态，其他字段保留。',
-                                          style: textStyle(p, size: 12),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        SpaceSelect(
-                                          value: target,
-                                          options: {
-                                            for (final v in s.state.statuses)
-                                              if (v != status &&
-                                                  !s.state.disabledStatuses
-                                                      .contains(v))
-                                                v: statusName(v),
-                                          },
-                                          label: '迁移目标',
-                                          onChanged: (v) =>
-                                              set(() => target = v),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            SpaceButton(
-                                              onPressed: () => Navigator.pop(c),
-                                              child: const Text('取消'),
-                                            ),
-                                            SpaceButton(
-                                              primary: true,
-                                              onPressed: () =>
-                                                  Navigator.pop(c, target),
-                                              child: const Text('迁移并删除'),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+          ),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: MediaQuery.disableAnimationsOf(c)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 200),
+              child: categoriesPage
+                  ? _CategorySettings(
+                      key: const ValueKey('categories'),
+                      store: s,
+                    )
+                  : SingleChildScrollView(
+                      key: const ValueKey('statuses'),
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '新增状态后，看板会自动增加一列。',
+                            style: textStyle(p, size: 12, color: p.secondary),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SpaceInput(
+                                  controller: name,
+                                  hint: '新状态名称，1至20字',
+                                  label: '新状态名称',
                                 ),
                               ),
+                              const SizedBox(width: 12),
+                              SpaceButton(
+                                primary: true,
+                                onPressed: () async {
+                                  await s.addStatus(name.text);
+                                  if (s.error == null) name.clear();
+                                },
+                                child: const Text('新增状态'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          for (final status in s.state.statuses) ...[
+                            Glass(
+                              blur: false,
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 7,
+                                    height: 7,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: p.status(status),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      statusName(status),
+                                      style: textStyle(p, bold: true),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${s.state.tasks.where((t) => t.status == status).length} 项',
+                                    style: textStyle(
+                                      p,
+                                      size: 12,
+                                      color: p.muted,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  if (builtins.contains(status))
+                                    Text(
+                                      '内置',
+                                      style: textStyle(
+                                        p,
+                                        size: 12,
+                                        color: p.muted,
+                                      ),
+                                    )
+                                  else ...[
+                                    SpaceButton(
+                                      height: 32,
+                                      onPressed: () => s.toggleStatus(status),
+                                      child: Text(
+                                        s.state.disabledStatuses.contains(
+                                              status,
+                                            )
+                                            ? '启用'
+                                            : '停用',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    SpaceButton(
+                                      height: 32,
+                                      danger: true,
+                                      onPressed: () async {
+                                        String target = s.state.statuses
+                                            .firstWhere(
+                                              (x) =>
+                                                  x != status &&
+                                                  !s.state.disabledStatuses
+                                                      .contains(x),
+                                            );
+                                        final chosen = await showDialog<String>(
+                                          context: c,
+                                          builder: (c) => StatefulBuilder(
+                                            builder: (c, set) => Dialog(
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              child: SizedBox(
+                                                width: 400,
+                                                child: Glass(
+                                                  padding: const EdgeInsets.all(
+                                                    24,
+                                                  ),
+                                                  child: Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        '迁移后删除${statusName(status)}',
+                                                        style: textStyle(
+                                                          p,
+                                                          size: 16,
+                                                          bold: true,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 16,
+                                                      ),
+                                                      Text(
+                                                        '该状态的全部任务将迁移到所选状态，其他字段保留。',
+                                                        style: textStyle(
+                                                          p,
+                                                          size: 12,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 16,
+                                                      ),
+                                                      SpaceSelect(
+                                                        value: target,
+                                                        options: {
+                                                          for (final v
+                                                              in s
+                                                                  .state
+                                                                  .statuses)
+                                                            if (v != status &&
+                                                                !s
+                                                                    .state
+                                                                    .disabledStatuses
+                                                                    .contains(
+                                                                      v,
+                                                                    ))
+                                                              v: statusName(v),
+                                                        },
+                                                        label: '迁移目标',
+                                                        onChanged: (v) => set(
+                                                          () => target = v,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 16,
+                                                      ),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          SpaceButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                  c,
+                                                                ),
+                                                            child: const Text(
+                                                              '取消',
+                                                            ),
+                                                          ),
+                                                          SpaceButton(
+                                                            primary: true,
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                  c,
+                                                                  target,
+                                                                ),
+                                                            child: const Text(
+                                                              '迁移并删除',
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                        if (chosen != null) {
+                                          await s.deleteStatus(status, chosen);
+                                        }
+                                      },
+                                      child: const Text('删除'),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                          );
-                          if (chosen != null) {
-                            await s.deleteStatus(status, chosen);
-                          }
-                        },
-                        child: const Text('删除'),
+                            const SizedBox(height: 8),
+                          ],
+                          if (s.error != null)
+                            Text(
+                              s.error!,
+                              style: textStyle(p, size: 12, color: p.red),
+                            ),
+                        ],
                       ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-            if (s.error != null)
-              Text(s.error!, style: textStyle(p, size: 12, color: p.red)),
-          ],
-        ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1610,5 +1664,106 @@ Future<void> showHelp(BuildContext c, SpaceStore s) async {
   } finally {
     s.modal = false;
     s.refreshQuery();
+  }
+}
+
+class _CategorySettings extends StatefulWidget {
+  final SpaceStore store;
+  const _CategorySettings({super.key, required this.store});
+  @override
+  State<_CategorySettings> createState() => _CategorySettingsState();
+}
+
+class _CategorySettingsState extends State<_CategorySettings> {
+  final name = TextEditingController();
+  String? editing;
+  @override
+  void dispose() {
+    name.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext c) {
+    final s = widget.store, p = Palette.of(c);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '分类可自定义或改名，已有任务会保留所属分类。',
+            style: textStyle(p, size: 12, color: p.secondary),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: SpaceInput(
+                  controller: name,
+                  label: '分类名称',
+                  hint: '分类名称，1至20字',
+                ),
+              ),
+              const SizedBox(width: 12),
+              SpaceButton(
+                primary: true,
+                onPressed: s.busy
+                    ? null
+                    : () async {
+                        await s.saveCategory(name.text, id: editing);
+                        if (s.error == null && mounted) {
+                          setState(() {
+                            name.clear();
+                            editing = null;
+                          });
+                        }
+                      },
+                child: Text(editing == null ? '新增分类' : '保存分类'),
+              ),
+              if (editing != null)
+                SpaceButton(
+                  onPressed: () => setState(() {
+                    editing = null;
+                    name.clear();
+                  }),
+                  child: const Text('取消'),
+                ),
+            ],
+          ),
+          if (s.error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(s.error!, style: textStyle(p, color: p.red)),
+            ),
+          const SizedBox(height: 24),
+          for (final e in s.state.taskCategories.entries) ...[
+            Glass(
+              blur: false,
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(child: CategoryLabel(e.key, name: e.value)),
+                  Text(
+                    '${s.state.tasks.where((t) => t.category == e.key).length} 项',
+                    style: textStyle(p, size: 12, color: p.muted),
+                  ),
+                  const SizedBox(width: 12),
+                  SpaceButton(
+                    height: 32,
+                    onPressed: () => setState(() {
+                      editing = e.key;
+                      name.text = e.value;
+                    }),
+                    child: const Text('编辑'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
   }
 }

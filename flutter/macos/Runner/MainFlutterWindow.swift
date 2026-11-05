@@ -136,7 +136,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
       item.submenu=submenu;menu.insertItem(item,at:min(menu.items.count, title=="文件" ? 1:4))
     }
     add("文件",[("新建任务","new","n")])
-    add("工作台",[("任务状态管理…","statuses",""),("看板视图","board","1"),("列表视图","list","2"),("甘特图视图","gantt","3"),("日历视图","calendar","4"),("展开或收起导航","nav",""),("展开或收起概览","overview",""),("切换主题","theme",""),("重新载入任务","reload","")])
+    add("工作台",[("状态与分类管理…","statuses",""),("看板视图","board","1"),("列表视图","list","2"),("甘特图视图","gantt","3"),("日历视图","calendar","4"),("展开或收起导航","nav",""),("展开或收起概览","overview",""),("切换主题","theme",""),("重新载入任务","reload","")])
     func entry(_ name:String,_ action:String,_ key:String)->NSMenuItem { let item=NSMenuItem(title:name,action:#selector(performSpaceAction(_:)),keyEquivalent:key);item.target=self;item.representedObject=action;item.keyEquivalentModifierMask = .command;return item }
     if let app=menu.items.first?.submenu { app.insertItem(entry("数据与设置…","settings",","),at:min(2,app.items.count)) }
     if let edit=menu.items.first(where:{$0.title=="编辑"})?.submenu {

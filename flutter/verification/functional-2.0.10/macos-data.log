@@ -1,0 +1,53 @@
+Resolving dependencies...
+Downloading packages...
+  cross_file 0.3.5+5 (0.4.0 available)
+  flutter_keyboard_visibility_linux 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_macos 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_platform_interface 2.0.0 (3.0.0 available)
+  flutter_keyboard_visibility_windows 1.0.0 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart
+00:00 +0: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +1: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +2: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +3: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +4: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +5: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +6: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +7: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +8: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +9: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +10: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +11: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +12: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +13: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +14: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +15: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +16: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +17: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +18: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +19: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +20: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +21: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +22: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +23: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +24: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/core_test.dart: 本地SP快照独占创建，防止覆盖已有包
+00:00 +25: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 005/007 偏好独立持久化，偏好写入不替换业务恢复快照
+00:00 +26: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 030/031/032 UTF16标题边界、trim与原子拒绝
+00:00 +27: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 033/039 说明长度与日期矛盾不覆盖原任务
+00:00 +28: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 041/042 旧草稿与已删除任务不能覆盖或复活
+00:00 +29: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 047/048/050 完成、重开与同状态无重复修订
+00:00 +30: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 055/057/060/063/064 停用保留历史与原状态编辑，禁新移入
+00:00 +31: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 059/066/068 内置保护；迁移到完成；列序重开
+00:00 +32: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 069/070/071/072 项目同事务创建、等价复用和失败无孤立项目
+00:00 +33: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 项目改名、停用持久化与导出，禁止新加入；删除保留任务可撤销
+00:00 +34: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 011–027 查询AND、项目搜索、真实逾期和默认日期独立
+00:00 +35: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 082/083/088 附件路径与10MiB/20个/20MiB边界
+00:00 +36: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 快照导出拒绝活动库与别名，恢复保持业务且可撤销
+00:00 +37: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 甘特左右端不能倒置；移动按完整原始区间计算；完成无due按完成日
+00:00 +38: All tests passed!

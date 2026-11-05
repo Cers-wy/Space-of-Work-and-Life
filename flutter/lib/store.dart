@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart';
+
 import 'core/models.dart';
 import 'core/repository.dart';
 import 'host.dart';
@@ -73,6 +76,14 @@ class SpaceStore extends ChangeNotifier {
     try {
       state = await repository.load();
       loaded = true;
+      try {
+        query = TaskQuery.fromJson(
+          jsonDecode(state.settings['defaultFilters'] ?? '{}'),
+        );
+        query.prune(state);
+      } catch (_) {
+        query = TaskQuery();
+      }
       error = null;
       _undo = null;
     } catch (e) {
@@ -93,6 +104,7 @@ class SpaceStore extends ChangeNotifier {
   }
 
   void refreshQuery() {
+    query.prune(state);
     visible = query.apply(state, today);
     grouped = {for (final s in state.displayStatuses) s: <SpaceTask>[]};
     for (final t in visible) {
@@ -347,6 +359,26 @@ class SpaceStore extends ChangeNotifier {
       query.projectID = null;
       refreshQuery();
     }
+  }
+
+  Future<void> saveDefaultFilters() async {
+    if (await preferences({'defaultFilters': jsonEncode(query.toJson())})) {
+      message('当前筛选已设为默认配置');
+    }
+  }
+
+  Future<void> saveCategory(String name, {String? id}) async {
+    final definitions = state.taskCategories;
+    definitions[id ?? 'category:${uid()}'] = normalizedName(name);
+    await commit(
+      state.copy(
+        settings: {
+          ...state.settings,
+          'taskCategories': jsonEncode(definitions),
+        },
+      ),
+      id == null ? '分类已添加' : '分类已更新',
+    );
   }
 
   Future<void> addStatus(String name) async {

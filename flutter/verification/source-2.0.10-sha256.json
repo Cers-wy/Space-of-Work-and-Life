@@ -1,0 +1,82 @@
+{
+  "version": "2.0.10+11",
+  "macosWindowsMatch": true,
+  "source": [
+    {
+      "sha256": "abb153d0ae57238b8af9cce4bea4650c5964fa870b5afe4da8d607a9cdd2aa6f",
+      "path": "lib/host.dart"
+    },
+    {
+      "sha256": "30d1a22bf9019143a2e174796122c29a8183bff7125ad74bf1dc811dd7c42dc5",
+      "path": "lib/main.dart"
+    },
+    {
+      "sha256": "2b9d763ce42d1d93ab293a2cfbde31966c106244d8110af4ec0005fda815dbc4",
+      "path": "lib/store.dart"
+    },
+    {
+      "sha256": "e6ea75cf7fa1e161d6c5418c1451c4cc4847df184d475459458786f628f53a94",
+      "path": "lib/core/files.dart"
+    },
+    {
+      "sha256": "573b5886d2966ff514d6f959c464383bb4dcecfcc75118cddfb603a3fd8b6988",
+      "path": "lib/core/models.dart"
+    },
+    {
+      "sha256": "22ea28be57ea01ef2f80eb8ee85f8de2d3393ed6093fb1f4eadc12ceef19618c",
+      "path": "lib/core/repository.dart"
+    },
+    {
+      "sha256": "207b7be0ac63b963cfa35d026e0a578463bf332f5ce9d351773dbc358c16e8dc",
+      "path": "lib/core/richtext.dart"
+    },
+    {
+      "sha256": "5bc6443fc5ea3a998d8c686eda8ddc8b5d98818495e21a54afadb74eb119ad26",
+      "path": "lib/core/sync.dart"
+    },
+    {
+      "sha256": "7ccb589ec8478a3f8968a4a1ebfdac7560e8bbd4d2ca76b1863771f28ba95ee2",
+      "path": "lib/core/sync_service.dart"
+    },
+    {
+      "sha256": "ba8fe68e633486aa61cbc7aa035d948b5ee06ecbc2021ac2c108ce6209050f23",
+      "path": "lib/ui/benchmark.dart"
+    },
+    {
+      "sha256": "89fb2def2bf2dcc381c7d70feb819db4b7b4bc014dea7c53333a9b09d01dcb5b",
+      "path": "lib/ui/controls.dart"
+    },
+    {
+      "sha256": "ed6dbb7554b730595ea48cd6e96c9ffe4ffb11be74d2d0ed763352a30e29b8e5",
+      "path": "lib/ui/dialogs.dart"
+    },
+    {
+      "sha256": "cb5eb94748b59d90e4f77dd8da213f98c860ba974910a62f9be0c70c65312dca",
+      "path": "lib/ui/gantt_colors.dart"
+    },
+    {
+      "sha256": "a955dd601bcb319290652ab9b9c1ad1697e39b22db8a92df71b18a446d395ab6",
+      "path": "lib/ui/image_preview.dart"
+    },
+    {
+      "sha256": "621a8a29231828904a3d937ae42bf1cc6f2da5e3f676a06d4da629ead49c81cd",
+      "path": "lib/ui/schedule.dart"
+    },
+    {
+      "sha256": "239176d90860079873093240e4392aa190d8330ceafaf572591303111badd1d3",
+      "path": "lib/ui/settings_panel.dart"
+    },
+    {
+      "sha256": "4da11013ccd5fc74d6d416e332e27a23fba787d6dd93dc7211917b6e83e3f9e1",
+      "path": "lib/ui/sync_settings.dart"
+    },
+    {
+      "sha256": "a9417ae46137c43ed2f012764830ee681fb9d366f2e44f8d78f7c06a37b3fb80",
+      "path": "lib/ui/theme.dart"
+    },
+    {
+      "sha256": "a44bddf8acc4781e0f4d721a309d4b790a6887928f3a3d8b7dd7a0d9a77d3e21",
+      "path": "lib/ui/workspace.dart"
+    }
+  ]
+}

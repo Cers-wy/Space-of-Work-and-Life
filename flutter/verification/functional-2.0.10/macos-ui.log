@@ -1,0 +1,27 @@
+Resolving dependencies...
+Downloading packages...
+  cross_file 0.3.5+5 (0.4.0 available)
+  flutter_keyboard_visibility_linux 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_macos 1.0.0 (2.0.0 available)
+  flutter_keyboard_visibility_platform_interface 2.0.0 (3.0.0 available)
+  flutter_keyboard_visibility_windows 1.0.0 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+8 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/schedule_update_test.dart
+00:00 +0: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 甘特图黑白主题颜色可读，状态独立且不依赖全局主题改色
+00:00 +1: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/schedule_update_test.dart: 同条件多选OR，不同条件AND；默认筛选含排序重启恢复并清除失效引用
+00:00 +2: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: light 甘特图默认排期和自定义状态使用可读填色
+00:00 +3: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: light 甘特图默认排期和自定义状态使用可读填色
+00:00 +4: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/schedule_update_test.dart: 甘特当前整月、日周月刻度、年月选择和跨年左右切换，无最小窗口溢出
+00:00 +5: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/schedule_update_test.dart: 甘特当前整月、日周月刻度、年月选择和跨年左右切换，无最小窗口溢出
+00:00 +6: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 甘特整条拖动按自然日落库与撤销
+00:01 +7: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 甘特整条拖动按自然日落库与撤销
+00:01 +8: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 甘特整条拖动按自然日落库与撤销
+00:01 +9: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/schedule_update_test.dart: 分类长名称在任务各视图中不会撑破布局
+00:01 +10: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/schedule_update_test.dart: 分类长名称在任务各视图中不会撑破布局
+00:01 +11: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/schedule_update_test.dart: 筛选面板支持多选、默认保存，状态和分类同一设置界面
+00:02 +12: All tests passed!
