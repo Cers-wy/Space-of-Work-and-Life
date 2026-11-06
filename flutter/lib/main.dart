@@ -65,6 +65,10 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     accessibility();
     DesktopHost.channel.setMethodCallHandler((call) async {
+      if (call.method == 'systemAppearanceChanged') {
+        await widget.store.updateSystemAppearance();
+        return;
+      }
       if (call.method == 'accessibilityChanged') {
         await accessibility();
         return;
@@ -93,7 +97,7 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
         case 'overview':
           await s.preference('overviewCollapsed', '${!s.overviewCollapsed}');
         case 'theme':
-          await s.preference('dark', '${!s.dark}');
+          await s.toggleTheme();
         case 'board':
         case 'list':
         case 'gantt':
@@ -112,6 +116,7 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       widget.store.refreshDay();
+      widget.store.updateSystemAppearance();
     } else {
       dragActive.value = false;
     }
@@ -153,11 +158,7 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
         debugShowCheckedModeBanner: false,
         theme: spaceTheme(false),
         darkTheme: spaceTheme(true),
-        themeMode: switch (s.appearance) {
-          'dark' => ThemeMode.dark,
-          'light' => ThemeMode.light,
-          _ => ThemeMode.system,
-        },
+        themeMode: s.dark ? ThemeMode.dark : ThemeMode.light,
         themeAnimationDuration:
             reducedMotion ||
                 WidgetsBinding

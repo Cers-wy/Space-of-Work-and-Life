@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui' as ui;
+import 'dart:ui' show SemanticsAction;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:space_flutter/core/models.dart';
@@ -12,9 +11,9 @@ import 'package:space_flutter/core/sync_service.dart';
 import 'package:space_flutter/host.dart';
 import 'package:space_flutter/main.dart';
 import 'package:space_flutter/store.dart';
-import 'package:space_flutter/ui/controls.dart';
+import 'package:space_flutter/ui/settings_controls.dart';
+import 'package:space_flutter/core/releases.dart';
 import 'package:space_flutter/ui/dialogs.dart';
-import 'package:space_flutter/ui/theme.dart';
 import 'package:space_flutter/ui/workspace.dart';
 
 class MemoryGitHub extends GitHubAPI {
@@ -170,7 +169,13 @@ void main() {
     await sync.initialize();
     await sync.save(GitHubConfig.fromUrl(url), token, legacyKey);
     await store.commit(
-      demoState().copy(settings: store.state.settings),
+      // SQLite snapshots materialize the built-in category map.
+      demoState().copy(
+        settings: {
+          ...store.state.settings,
+          'taskCategories': jsonEncode(demoState().taskCategories),
+        },
+      ),
       '合成任务',
     );
     final fingerprint = SyncCodec.fingerprint(store.state);
@@ -249,78 +254,98 @@ void main() {
     }
   });
 
-  final screenshotKey = GlobalKey();
-  Future<void> launch(WidgetTester t, {bool animations = false}) async {
-    t.view.physicalSize = const Size(1020, 860);
+  Future<void> launch(
+    WidgetTester t, {
+    double width = 1020,
+    bool animations = false,
+  }) async {
+    t.view.physicalSize = Size(width, 860);
     t.view.devicePixelRatio = 1;
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
     t.platformDispatcher.accessibilityFeaturesTestValue =
         FakeAccessibilityFeatures(disableAnimations: !animations);
     addTearDown(t.platformDispatcher.clearAccessibilityFeaturesTestValue);
-    await t.pumpWidget(
-      RepaintBoundary(
-        key: screenshotKey,
-        child: SpaceApp(store: store),
-      ),
-    );
+    await t.pumpWidget(SpaceApp(store: store));
     await t.pumpAndSettle();
   }
 
-  Future<void> capture(WidgetTester t, String name) async {
-    await t.runAsync(() async {
-      await Directory('verification/screenshots').create(recursive: true);
-      final boundary =
-          screenshotKey.currentContext!.findRenderObject()
-              as RenderRepaintBoundary;
-      final picture = await boundary.toImage(pixelRatio: 1);
-      final data = await picture.toByteData(format: ui.ImageByteFormat.png);
-      await File(
-        'verification/screenshots/$name.png',
-      ).writeAsBytes(data!.buffer.asUint8List());
-      picture.dispose();
-    });
+  ReleaseChecker fakeUpdates() => ReleaseChecker(
+    infoLoader: () async => {'version': '2.1.0', 'build': '13'},
+    releaseLoader: () async => [
+      {
+        'tag_name': 'v2.2.0',
+        'draft': false,
+        'prerelease': false,
+        'html_url': '$projectUrl/releases/tag/v2.2.0',
+        'assets': [
+          {'name': 'Space-2.2.0-macOS-arm64.dmg'},
+        ],
+      },
+    ],
+    platform: 'macos',
+  );
+  Future<void> openSettings(WidgetTester t) async {
+    final updates = fakeUpdates();
+    addTearDown(updates.dispose);
+    showSettings(t.element(find.byType(Workspace)), store, updates: updates);
+    await t.pumpAndSettle();
   }
 
-  testWidgets('系统跟随、手动覆盖、重开保留及连续过渡中间帧', (t) async {
+  Future<void> select(WidgetTester t, int index) async {
+    await t.tap(find.byKey(ValueKey('settings-category-$index')));
+    await t.pumpAndSettle();
+  }
+
+  Future<void> close(WidgetTester t) async {
+    await t.tap(find.byTooltip('关闭设置'));
+    await t.pumpAndSettle();
+  }
+
+  testWidgets('跟随系统临时切换、重复通知、系统变化、固定主题和重启', (t) async {
     t.platformDispatcher.platformBrightnessTestValue = Brightness.light;
     addTearDown(t.platformDispatcher.clearPlatformBrightnessTestValue);
+    await t.runAsync(store.updateSystemAppearance);
     await launch(t, animations: true);
-    final context = t.element(find.byType(Workspace));
-    expect(store.appearance, 'system');
-    expect(Palette.of(context).darkness, 0);
-    t.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
-    await t.pump();
-    await t.pump(const Duration(milliseconds: 90));
-    final middle = Palette.of(context);
-    expect(middle.darkness, greaterThan(0));
-    expect(middle.darkness, lessThan(1));
-    expect(middle.canvas, isNot(const Palette(false).canvas));
-    expect(middle.canvas, isNot(const Palette(true).canvas));
+    await t.runAsync(store.toggleTheme);
     await t.pumpAndSettle();
-    expect(Palette.of(context).darkness, 1);
+    expect(store.appearance, 'system');
+    expect(store.dark, isTrue);
+    expect(store.temporaryDark, isTrue);
+    await t.runAsync(store.updateSystemAppearance);
+    expect(store.temporaryDark, isTrue);
+    final reopened = SpaceStore(SpaceRepository(dir));
+    await t.runAsync(reopened.initialize);
+    expect(reopened.appearance, 'system');
+    expect(reopened.temporaryDark, isNull);
+    reopened.dispose();
+    t.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    await t.runAsync(store.updateSystemAppearance);
+    await t.pumpAndSettle();
+    expect(store.temporaryDark, isNull);
+    expect(store.dark, isTrue);
     await t.runAsync(() => store.preference('appearance', 'light'));
     await t.pumpAndSettle();
-    expect(Palette.of(context).darkness, 0);
     t.platformDispatcher.platformBrightnessTestValue = Brightness.light;
-    await t.pumpAndSettle();
+    await t.runAsync(store.updateSystemAppearance);
     t.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    await t.runAsync(store.updateSystemAppearance);
     await t.pumpAndSettle();
-    expect(Palette.of(context).darkness, 0);
-    await t.runAsync(store.reload);
+    expect(store.dark, isFalse);
     expect(store.appearance, 'light');
-    await t.runAsync(() => store.preference('appearance', 'system'));
+    await t.runAsync(store.toggleTheme);
     await t.pumpAndSettle();
-    expect(Palette.of(context).darkness, 1);
+    expect(store.appearance, 'dark');
+    expect(t.takeException(), isNull);
   });
-
-  testWidgets('数据库导入导出使用专用文件面板，取消不改数据库；附件另存保持通用', (t) async {
+  testWidgets('备份文件面板取消不修改数据，关于版本与系统外部链接', (t) async {
     final calls = <MethodCall>[];
     binding.defaultBinaryMessenger.setMockMethodCallHandler(
       DesktopHost.channel,
       (call) async {
         calls.add(call);
         if (call.method == 'openFiles') return <String>[];
+        if (call.method == 'openExternal') return true;
         return null;
       },
     );
@@ -331,19 +356,19 @@ void main() {
       ),
     );
     await launch(t);
-    showSettings(t.element(find.byType(Workspace)), store);
-    await t.pumpAndSettle();
+    await openSettings(t);
+    await select(t, 2);
     final original = await t.runAsync(
       () => File(store.repository.path).readAsBytes(),
     );
-    await t.tap(find.widgetWithText(SpaceButton, '导出SQLite'));
+    await t.tap(find.widgetWithText(SettingsAction, '导出'));
+    await t.pumpAndSettle();
+    await t.tap(find.widgetWithText(SettingsAction, '选择文件'));
     await t.pumpAndSettle();
     expect(calls.singleWhere((c) => c.method == 'saveFile').arguments, {
       'name': 'Space备份.sqlite',
       'sqliteOnly': true,
     });
-    await t.tap(find.widgetWithText(SpaceButton, '导入SQLite'));
-    await t.pumpAndSettle();
     expect(calls.singleWhere((c) => c.method == 'openFiles').arguments, {
       'multiple': false,
       'sqliteOnly': true,
@@ -352,202 +377,89 @@ void main() {
       await t.runAsync(() => File(store.repository.path).readAsBytes()),
       original,
     );
-    expect(find.text('导入备份'), findsNothing);
-    await t.runAsync(() => DesktopHost.saveFile('附件.txt'));
-    expect(calls.lastWhere((c) => c.method == 'saveFile').arguments, {
-      'name': '附件.txt',
-      'sqliteOnly': false,
-    });
-    await t.tap(find.text('完成'));
+    await select(t, 5);
+    expect(find.text('新版 2.2.0 可下载'), findsOneWidget);
+    expect(find.text('Cers'), findsOneWidget);
+    await t.tap(find.text('GitHub 项目'));
     await t.pumpAndSettle();
+    expect(
+      (calls.lastWhere((c) => c.method == 'openExternal').arguments
+          as Map)['url'],
+      projectUrl,
+    );
+    await close(t);
+    expect(store.modal, isFalse);
   });
-
-  testWidgets('连接字段自动落库，关闭重开保留；云端按钮先确认', (t) async {
+  testWidgets('连接编辑自动保存，切换栏目不丢失，上传仍需确认', (t) async {
     await launch(t);
-    showSettings(t.element(find.byType(Workspace)), store);
-    await t.pumpAndSettle();
-    // SpaceInput exposes its label through Semantics rather than InputDecoration.
-    Finder controllerInput(String hint) => find.byWidgetPredicate(
+    await openSettings(t);
+    await select(t, 3);
+    Finder input(String hint) => find.byWidgetPredicate(
       (w) => w is TextField && w.decoration?.hintText == hint,
     );
-    await t.enterText(controllerInput('https://github.com/账号/仓库'), url);
-    await t.enterText(controllerInput('填写此仓库的访问令牌'), token);
-    await t.enterText(controllerInput('自行设置至少12个字符，其他设备使用相同密钥'), legacyKey);
+    await t.enterText(input('https://github.com/账号/仓库'), url);
+    await t.enterText(input('填写此仓库的访问令牌'), token);
+    await t.enterText(input('自行设置至少12个字符，其他设备使用相同密钥'), legacyKey);
     await t.pump(const Duration(milliseconds: 700));
-    await t.runAsync(() async {
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-    });
-    await t.pumpAndSettle();
-    expect(store.state.settings['github.token'], token);
-    expect(store.state.settings['github.key'], legacyKey);
-    await t.scrollUntilVisible(
-      find.text('同步数据到云端'),
-      240,
-      scrollable: find.byType(Scrollable).last,
+    await t.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
     );
     await t.pumpAndSettle();
-    await t.tap(find.text('同步数据到云端'));
+    expect(store.state.settings['github.token'], token);
+    await select(t, 1);
+    await select(t, 3);
+    expect(find.text(url), findsOneWidget);
+    await t.tap(find.text('同步到云端'));
     await t.pumpAndSettle();
-    expect(find.text('同步到云端'), findsOneWidget);
+    expect(find.text('同步数据到云端'), findsOneWidget);
     await t.tap(find.text('取消'));
     await t.pumpAndSettle();
-    await t.tap(find.text('完成'));
-    await t.pumpAndSettle();
-    showSettings(t.element(find.byType(Workspace)), store);
-    await t.pumpAndSettle();
+    await close(t);
+    await openSettings(t);
+    await select(t, 3);
     expect(find.text(url), findsOneWidget);
-    expect(controllerInput('已保存到SQLite，留空保留'), findsNWidgets(2));
-    await t.tap(find.text('完成'));
-    await t.pumpAndSettle();
+    await close(t);
   });
-
+  testWidgets('关闭按钮支持辅助功能激活，不依赖鼠标坐标', (t) async {
+    await launch(t);
+    await openSettings(t);
+    final handle = t.ensureSemantics();
+    final target = find.descendant(
+      of: find.byKey(const ValueKey('settings-close')),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.button == true &&
+            w.properties.label == '关闭设置',
+      ),
+    );
+    final node = t.getSemantics(target);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await t.pumpAndSettle();
+    expect(store.modal, isFalse);
+    handle.dispose();
+  });
   for (final width in [700.0, 1020.0, 1440.0]) {
     for (final dark in [false, true]) {
-      testWidgets('$width ${dark ? '深' : '浅'}色设置分栏、滚动、按钮和分类自适应', (t) async {
-        final font = File('/System/Library/Fonts/STHeiti Medium.ttc');
-        await t.runAsync(() async {
-          if (font.existsSync()) {
-            await (FontLoader(
-              'PingFang SC',
-            )..addFont(font.readAsBytes().then(ByteData.sublistView))).load();
-          }
-          await store.preference('appearance', dark ? 'dark' : 'light');
-        });
-        await launch(t);
-        t.view.physicalSize = Size(width, width >= 1400 ? 1000 : 860);
-        await t.pumpAndSettle();
-        showSettings(t.element(find.byType(Workspace)), store);
-        await t.pumpAndSettle();
-        expect(find.text('跟随系统'), findsOneWidget);
-        final appearance = t.getRect(find.text('界面主题'));
-        final cloud = t.getRect(find.text('GitHub 私有仓库同步'));
-        if (width >= 1000) {
-          expect(cloud.left, greaterThan(appearance.right));
-          expect(
-            (cloud.top - t.getRect(find.text('外观与交互').last).top).abs(),
-            lessThan(1),
-          );
-        } else {
-          expect(cloud.top, greaterThan(appearance.bottom));
+      testWidgets('$width ${dark ? '深' : '浅'}色六页导航、标题栏和滚动适配', (t) async {
+        await t.runAsync(
+          () => store.preference('appearance', dark ? 'dark' : 'light'),
+        );
+        await launch(t, width: width);
+        await openSettings(t);
+        expect(
+          t.getSize(find.byKey(const ValueKey('settings-titlebar'))).height,
+          t.getSize(find.byKey(const ValueKey('workspace-titlebar'))).height,
+        );
+        for (final i in [1, 2, 3, 4, 5, 0]) {
+          await select(t, i);
+          expect(t.takeException(), isNull);
         }
-        final export = t.getRect(find.widgetWithText(SpaceButton, '导出SQLite'));
-        final import = t.getRect(find.widgetWithText(SpaceButton, '导入SQLite'));
-        final restore = t.getRect(find.widgetWithText(SpaceButton, '恢复上次备份'));
-        final reveal = t.getRect(find.widgetWithText(SpaceButton, '打开数据库文件夹'));
-        expect(export.top, import.top);
-        expect(restore.top, reveal.top);
-        expect(restore.top, greaterThan(export.bottom));
-        expect(export.right, lessThan(import.left));
-        expect(export.width, lessThan(280));
-        expect(find.text('同步数据到云端'), findsOneWidget);
-        expect(find.text('恢复云端数据'), findsOneWidget);
-        for (final removed in [
-          '本地数据库',
-          '其他位置的手动快照同步',
-          '导出JSON',
-          '保存GitHub配置',
-          '创建访问令牌…',
-          '下载云端预览',
-        ]) {
-          expect(find.text(removed), findsNothing);
-        }
-        if (width >= 1400) {
-          await capture(t, 'settings-2.0.9-${dark ? 'dark' : 'light'}');
-        }
-        await t.tap(find.byKey(const ValueKey('settings-category-4')));
+        await t.sendKeyEvent(LogicalKeyboardKey.escape);
         await t.pumpAndSettle();
-        expect(find.text('界面主题'), findsNothing);
-        expect(find.text('仓库地址'), findsNothing);
-        expect(find.text('载入演示任务'), findsOneWidget);
-        final demo = t.getRect(find.widgetWithText(SpaceButton, '载入演示任务'));
-        final clear = t.getRect(find.widgetWithText(SpaceButton, '清空所有任务'));
-        expect(clear.top, greaterThan(demo.bottom));
-        await t.tap(find.byKey(const ValueKey('settings-category-0')));
-        await t.pumpAndSettle();
-        expect(find.text('界面主题'), findsOneWidget);
-        expect(t.takeException(), isNull);
-        await t.tap(find.text('完成'));
-        await t.pumpAndSettle();
+        expect(store.modal, isFalse);
       });
     }
   }
-
-  testWidgets('分类切换和窗口调整保留未提交配置、键盘可切换并Esc关闭', (t) async {
-    await launch(t, animations: true);
-    showSettings(t.element(find.byType(Workspace)), store);
-    await t.pumpAndSettle();
-    Finder tokenInput() => find.byWidgetPredicate(
-      (w) => w is TextField && w.decoration?.hintText == '填写此仓库的访问令牌',
-    );
-    await t.enterText(tokenInput(), 'test-only-draft');
-    final originalController = t.widget<TextField>(tokenInput()).controller;
-    await t.tap(find.byKey(const ValueKey('settings-category-1')));
-    await t.pump(const Duration(milliseconds: 60));
-    await t.tap(find.byKey(const ValueKey('settings-category-3')));
-    await t.pump(const Duration(milliseconds: 60));
-    t.view.physicalSize = const Size(700, 860);
-    await t.pumpAndSettle();
-    expect(
-      t.widget<TextField>(tokenInput()).controller,
-      same(originalController),
-    );
-    expect(originalController!.text, 'test-only-draft');
-    expect(t.widget<TextField>(tokenInput()).obscureText, isTrue);
-    await t.tap(find.byTooltip('显示Token令牌'));
-    await t.pumpAndSettle();
-    expect(t.widget<TextField>(tokenInput()).obscureText, isFalse);
-    final nav = find.byKey(const ValueKey('settings-category-2'));
-    Focus.of(
-      t.element(
-        find.descendant(of: nav, matching: find.byType(GestureDetector)).first,
-      ),
-    ).requestFocus();
-    await t.pump();
-    await t.sendKeyEvent(LogicalKeyboardKey.enter);
-    await t.pumpAndSettle();
-    expect(find.text('本地备份与恢复'), findsOneWidget);
-    expect(find.text('仓库地址'), findsNothing);
-    expect(t.takeException(), isNull);
-    await t.sendKeyEvent(LogicalKeyboardKey.escape);
-    await t.pumpAndSettle();
-    expect(find.text('数据与设置'), findsNothing);
-    expect(store.modal, isFalse);
-    expect(store.state.settings['github.token'], isNull);
-  });
-
-  testWidgets('数据管理确认取消不改任务，主题与滚动条立即生效并持久化', (t) async {
-    await t.runAsync(() => store.commit(demoState(), '合成数据'));
-    await launch(t);
-    showSettings(t.element(find.byType(Workspace)), store);
-    await t.pumpAndSettle();
-    await t.tap(find.byKey(const ValueKey('settings-category-4')));
-    await t.pumpAndSettle();
-    final count = store.state.tasks.length;
-    await t.tap(find.widgetWithText(SpaceButton, '清空所有任务'));
-    await t.pumpAndSettle();
-    await t.tap(find.text('取消'));
-    await t.pumpAndSettle();
-    expect(store.state.tasks.length, count);
-    await t.tap(find.byKey(const ValueKey('settings-category-1')));
-    await t.pumpAndSettle();
-    await t.tap(find.text('深色'));
-    await t.runAsync(
-      () async => Future<void>.delayed(const Duration(milliseconds: 30)),
-    );
-    await t.pumpAndSettle();
-    expect(store.appearance, 'dark');
-    final previous = store.hideScrollbars;
-    await t.tap(find.byType(Switch));
-    await t.runAsync(
-      () async => Future<void>.delayed(const Duration(milliseconds: 30)),
-    );
-    await t.pumpAndSettle();
-    expect(store.hideScrollbars, !previous);
-    await t.runAsync(store.reload);
-    await t.pumpAndSettle();
-    expect(store.appearance, 'dark');
-    expect(store.hideScrollbars, !previous);
-    await t.tap(find.text('完成'));
-    await t.pumpAndSettle();
-  });
 }

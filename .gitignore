@@ -3,3 +3,7 @@ work/
 output/
 local-data-backups/
 flutter/verification/screenshots/
+
+# Installers are published as GitHub Release assets.
+downloads/*.dmg
+downloads/*.zip

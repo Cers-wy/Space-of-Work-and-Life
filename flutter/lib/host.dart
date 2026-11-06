@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 class DesktopHost {
   static const channel = MethodChannel('com.cers.space/desktop');
@@ -35,6 +36,28 @@ class DesktopHost {
       channel.invokeMethod('reveal', {'path': path});
   static Future<void> preview(String path) async =>
       channel.invokeMethod('preview', {'path': path});
+  static Future<bool> openExternal(Uri uri) async {
+    if (!['https', 'mailto'].contains(uri.scheme)) return false;
+    return await channel.invokeMethod<bool>('openExternal', {
+          'url': uri.toString(),
+        }) ??
+        false;
+  }
+
+  static Future<Map<String, dynamic>> appInfo() async =>
+      Map<String, dynamic>.from(await channel.invokeMethod('appInfo') ?? {});
+
+  static Future<bool> systemDark() async {
+    try {
+      final value = await channel.invokeMethod<bool>('systemAppearance');
+      if (value != null) return value;
+    } on MissingPluginException {
+      // Widget tests use the binding's simulated platform appearance.
+    }
+    return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+        Brightness.dark;
+  }
+
   static Future<void> appearance(bool dark, {bool system = false}) async {
     try {
       await channel.invokeMethod('appearance', {

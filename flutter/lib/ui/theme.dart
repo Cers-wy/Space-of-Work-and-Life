@@ -65,6 +65,7 @@ class Palette extends ThemeExtension<Palette> {
 }
 
 const spaceCurve = Cubic(.22, 1, .36, 1);
+const spaceTitleBarHeight = 40.0;
 const spaceDuration = Duration(milliseconds: 500);
 TextStyle textStyle(
   Palette p, {
@@ -269,7 +270,10 @@ class Contour extends CustomClipper<Path> {
         ..close();
     }
     return Path()..addRRect(
-      RRect.fromRectAndRadius(Offset.zero & s, const Radius.circular(8)),
+      RRect.fromRectAndRadius(
+        Offset.zero & s,
+        Radius.circular(kind == 'settings' ? 16 : 8),
+      ),
     );
   }
 
@@ -299,12 +303,14 @@ class WorkspaceMotion extends InheritedWidget {
 
 class Glass extends StatelessWidget {
   final Widget child;
+  final Widget? background;
   final String contour;
   final bool card, blur;
   final EdgeInsetsGeometry? padding;
   const Glass({
     super.key,
     required this.child,
+    this.background,
     this.contour = '',
     this.card = false,
     this.blur = true,
@@ -346,7 +352,14 @@ class Glass extends StatelessWidget {
       clipper: shape,
       child: CustomPaint(
         foregroundPainter: _GlassEdge(shape, p),
-        child: surface,
+        child: background == null
+            ? surface
+            : Stack(
+                children: [
+                  Positioned.fill(child: background!),
+                  surface,
+                ],
+              ),
       ),
     );
   }

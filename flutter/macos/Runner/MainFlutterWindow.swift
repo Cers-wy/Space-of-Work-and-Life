@@ -49,6 +49,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         self.appearance = a["system"] as? Bool == true ? nil : NSAppearance(named: dark ? .darkAqua : .aqua)
         self.backgroundColor = dark ? .black : .windowBackgroundColor
         result(nil)
+      case "systemAppearance":
+        result(NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+      case "appInfo":
+        result(["version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "",
+                "build": Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""])
+      case "openExternal":
+        guard let value = a["url"] as? String, let url = URL(string: value),
+              ["https", "mailto"].contains(url.scheme?.lowercased() ?? "") else { result(false); return }
+        result(NSWorkspace.shared.open(url))
       case "dirty":
         MainFlutterWindow.hasUnsavedEdits = a["dirty"] as? Bool ?? false
         result(nil)
@@ -98,6 +107,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
       }
     }
     NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil, queue: .main) { [weak self] _ in self?.desktopChannel?.invokeMethod("accessibilityChanged", arguments: nil) }
+    DistributedNotificationCenter.default().addObserver(forName: NSNotification.Name("AppleInterfaceThemeChangedNotification"), object: nil, queue: .main) { [weak self] _ in
+      self?.desktopChannel?.invokeMethod("systemAppearanceChanged", arguments: nil)
+    }
     delegate = self
     super.awakeFromNib()
     title = "Space"

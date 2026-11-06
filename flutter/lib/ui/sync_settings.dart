@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/sync_service.dart';
 import '../store.dart';
 import 'theme.dart';
-import 'controls.dart';
+import 'settings_controls.dart';
 import 'dialogs.dart' show confirm;
 
 class GitHubSettings extends StatefulWidget {
@@ -20,7 +20,7 @@ class _GitHubSettingsState extends State<GitHubSettings> {
       recoveryKey = TextEditingController();
   Timer? debounce;
   bool loading = true, working = false;
-  bool showToken = false, showRecoveryKey = false;
+  bool showToken = false, showRecoveryKey = false, showHelp = false;
   String? error;
 
   @override
@@ -142,60 +142,74 @@ class _GitHubSettingsState extends State<GitHubSettings> {
     bool revealed = false,
   }) {
     final p = Palette.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(child: Text(label, style: textStyle(p))),
-            if (saved)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: p.green.withValues(alpha: .1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '已保存',
-                  style: textStyle(p, size: 12, color: p.green),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        IgnorePointer(
-          ignoring: loading || working || sync.busy,
-          child: Row(
-            children: [
-              Expanded(
-                child: SpaceInput(
-                  controller: controller,
-                  hint: hint,
-                  label: label,
-                  obscure: obscure && !revealed,
-                  borderColor: p.blend(
-                    const Color(0xffe1e7f0),
-                    const Color(0xff313131),
-                  ),
-                ),
-              ),
-              if (toggle != null) ...[
-                const SizedBox(width: 4),
-                SpaceButton(
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  tooltip: '${revealed ? '隐藏' : '显示'}$label',
-                  onPressed: loading || working || sync.busy ? null : toggle,
-                  child: Text(
-                    revealed ? '隐藏' : '显示',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
-              ],
-            ],
+    final input = SizedBox(
+      height: 40,
+      child: TextField(
+        controller: controller,
+        enabled: !loading && !working && !sync.busy,
+        obscureText: obscure && !revealed,
+        style: textStyle(p),
+        decoration: InputDecoration(
+          isDense: true,
+          hintText: hint,
+          hintStyle: textStyle(p, color: p.muted),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
           ),
+          filled: true,
+          fillColor: p.card.withValues(alpha: .46),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(
+              color: p.blend(const Color(0xffe1e7f0), const Color(0xff313131)),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: p.accent, width: 2),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: p.border),
+          ),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 40,
+            maxWidth: 40,
+          ),
+          suffixIcon: toggle == null
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: SettingsAction(
+                    height: 32,
+                    quiet: true,
+                    padding: EdgeInsets.zero,
+                    tooltip: '${revealed ? '隐藏' : '显示'}$label',
+                    onPressed: loading || working || sync.busy ? null : toggle,
+                    child: SettingsIcon(revealed ? 'eye-off' : 'eye', size: 16),
+                  ),
+                ),
         ),
-      ],
+      ),
+    );
+    final caption = Text(label, style: textStyle(p));
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: LayoutBuilder(
+        builder: (context, box) => box.maxWidth < 520
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [caption, const SizedBox(height: 8), input],
+              )
+            : Row(
+                children: [
+                  SizedBox(width: 112, child: caption),
+                  const SizedBox(width: 16),
+                  Expanded(child: input),
+                ],
+              ),
+      ),
     );
   }
 
@@ -203,158 +217,139 @@ class _GitHubSettingsState extends State<GitHubSettings> {
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     final enabled = !loading && !working && !sync.busy && !widget.store.busy;
-    final succeeded =
-        sync.message == '数据已同步到云端' || sync.message == '已备份本地并恢复云端数据';
-    final statusColor = error != null
-        ? p.red
-        : working || sync.busy
-        ? p.accent
-        : succeeded
-        ? p.green
-        : p.secondary;
     final date = sync.lastSyncedAt?.toLocal();
-    String two(int n) => '$n'.padLeft(2, '0');
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          liveRegion: true,
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: .08),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SpaceIcon(
-                  succeeded && error == null && !working && !sync.busy
-                      ? 'check'
-                      : 'tray',
-                  size: 18,
-                  color: statusColor,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loading ? '正在读取连接配置…' : error ?? sync.message,
-                        style: textStyle(
-                          p,
-                          size: 12,
-                          bold: true,
-                          color: statusColor,
-                        ),
-                      ),
-                      if (date != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          '最近同步：${date.year}/${two(date.month)}/${two(date.day)} ${two(date.hour)}:${two(date.minute)}',
-                          style: textStyle(p, size: 12, color: p.muted),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        field('仓库地址', address, 'https://github.com/账号/仓库'),
-        const SizedBox(height: 16),
-        field(
-          'Token令牌',
-          token,
-          sync.hasToken ? '已保存到SQLite，留空保留' : '填写此仓库的访问令牌',
-          obscure: true,
-          saved: sync.hasToken,
-          revealed: showToken,
-          toggle: () => setState(() => showToken = !showToken),
-        ),
-        const SizedBox(height: 16),
-        field(
-          '恢复密钥',
-          recoveryKey,
-          sync.hasKey ? '已保存到SQLite，留空保留' : '自行设置至少12个字符，其他设备使用相同密钥',
-          obscure: true,
-          saved: sync.hasKey,
-          revealed: showRecoveryKey,
-          toggle: () => setState(() => showRecoveryKey = !showRecoveryKey),
-        ),
-        const SizedBox(height: 8),
-        Text('留空则保留已保存的令牌和密钥', style: textStyle(p, size: 12, color: p.muted)),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+    return LayoutBuilder(
+      builder: (context, box) {
+        final indent = box.maxWidth < 520 ? 0.0 : 128.0;
+        Widget indented(Widget child) => Padding(
+          padding: EdgeInsets.only(left: indent),
+          child: child,
+        );
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SpaceButton(
-              primary: true,
-              onPressed: enabled ? () => transfer(false) : null,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                loading ? '正在读取连接配置…' : error ?? sync.message,
+                style: textStyle(
+                  p,
+                  size: 12,
+                  color: error != null ? p.red : p.muted,
+                ),
+              ),
+            ),
+            field('仓库地址', address, 'https://github.com/账号/仓库'),
+            field(
+              '访问令牌',
+              token,
+              sync.hasToken ? '已保存到SQLite，留空保留' : '填写此仓库的访问令牌',
+              obscure: true,
+              saved: sync.hasToken,
+              revealed: showToken,
+              toggle: () => setState(() => showToken = !showToken),
+            ),
+            field(
+              '恢复密钥',
+              recoveryKey,
+              sync.hasKey ? '已保存到SQLite，留空保留' : '自行设置至少12个字符，其他设备使用相同密钥',
+              obscure: true,
+              saved: sync.hasKey,
+              revealed: showRecoveryKey,
+              toggle: () => setState(() => showRecoveryKey = !showRecoveryKey),
+            ),
+            const SizedBox(height: 8),
+            indented(
+              Text(
+                '已保存的令牌和密钥，留空即可保留。',
+                style: textStyle(p, size: 12, color: p.muted),
+              ),
+            ),
+            const SizedBox(height: 24),
+            indented(
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
                 children: [
-                  SpaceIcon('up', size: 16, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text('同步数据到云端'),
+                  SettingsAction(
+                    onPressed: enabled ? () => transfer(false) : null,
+                    child: const Text('同步到云端'),
+                  ),
+                  SettingsAction(
+                    quiet: true,
+                    onPressed: enabled ? () => transfer(true) : null,
+                    child: const Text('恢复云端数据'),
+                  ),
                 ],
               ),
             ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: p.blend(
-                    const Color(0xffe1e7f0),
-                    const Color(0xff313131),
-                  ),
-                ),
-                borderRadius: BorderRadius.circular(8),
+            const SizedBox(height: 16),
+            indented(
+              Text(
+                '连接配置自动保存在本机。',
+                style: textStyle(p, size: 12, color: p.muted),
               ),
-              child: SpaceButton(
-                onPressed: enabled ? () => transfer(true) : null,
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SpaceIcon('down', size: 16),
-                    SizedBox(width: 8),
-                    Text('恢复云端数据'),
-                  ],
+            ),
+            if (date != null) ...[
+              const SizedBox(height: 8),
+              indented(
+                Text(
+                  '最近同步：${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
+                  style: textStyle(p, size: 12, color: p.muted),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            indented(
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SettingsAction(
+                  quiet: true,
+                  padding: EdgeInsets.zero,
+                  onPressed: () => setState(() => showHelp = !showHelp),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedRotation(
+                        turns: showHelp ? .25 : 0,
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : spaceDuration,
+                        curve: spaceCurve,
+                        child: const SettingsIcon('right', size: 12),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '备份与恢复说明',
+                        style: textStyle(p, size: 12, color: p.muted),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+            indented(
+              AnimatedSwitcher(
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 300),
+                switchInCurve: spaceCurve,
+                switchOutCurve: spaceCurve,
+                child: showHelp
+                    ? Padding(
+                        key: const ValueKey('sync-help'),
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          '云端只保存加密任务数据，恢复时需使用相同密钥。恢复前会先备份当前本地任务库。',
+                          style: textStyle(p, size: 12, color: p.muted),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ),
           ],
-        ),
-        const SizedBox(height: 24),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: p.accent.withValues(alpha: .06),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('备份与恢复说明', style: textStyle(p, bold: true)),
-              const SizedBox(height: 8),
-              Text(
-                '云端仅保存加密任务数据，恢复时需使用相同密钥。',
-                style: textStyle(p, size: 12, color: p.secondary),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'SQLite 导出文件包含本机连接配置，请妥善保管。',
-                style: textStyle(p, size: 12, color: p.secondary),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text('连接配置自动保存在本机', style: textStyle(p, size: 12, color: p.muted)),
-      ],
+        );
+      },
     );
   }
 }

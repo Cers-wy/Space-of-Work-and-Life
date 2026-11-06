@@ -53,6 +53,10 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (desktop_ && (message == WM_SETTINGCHANGE || message == WM_THEMECHANGED ||
+                   message == WM_DWMCOLORIZATIONCOLORCHANGED)) {
+    desktop_->NotifySystemAppearance();
+  }
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
     std::optional<LRESULT> result =
@@ -64,6 +68,9 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   switch (message) {
+    case WM_DWMCOLORIZATIONCOLORCHANGED:
+      // Dart applies the effective appearance, including a fixed user choice.
+      return 0;
     case WM_GETMINMAXINFO: {
       auto* info = reinterpret_cast<MINMAXINFO*>(lparam);
       const double scale = GetDpiForWindow(hwnd) / 96.0;

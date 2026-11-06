@@ -14,7 +14,7 @@ import 'sync.dart';
 class GitHubConfig {
   final String owner, repository, branch, path;
   const GitHubConfig({
-    this.owner = '18390208101',
+    this.owner = 'Cers-wy',
     this.repository = 'space-sync-data',
     this.branch = 'main',
     this.path = 'backups/latest.space',
@@ -121,8 +121,9 @@ class GitHubAPI {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 45);
     try {
-      final uri = Uri.parse('https://api.github.com$path')
-          .replace(queryParameters: query);
+      final uri = Uri.parse(
+        'https://api.github.com$path',
+      ).replace(queryParameters: query);
       final req = await client
           .openUrl(method, uri)
           .timeout(const Duration(seconds: 45));

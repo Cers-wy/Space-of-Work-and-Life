@@ -1,20 +1,21 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../core/releases.dart';
 import '../host.dart';
 import '../store.dart';
 import 'controls.dart';
 import 'dialogs.dart' show confirm, importBackup;
+import 'settings_controls.dart';
 import 'sync_settings.dart';
 import 'theme.dart';
 
-/// Settings remain mounted when filtering, so in-progress connection edits and
-/// their debounced persistence survive navigation and window resizing.
 class SettingsPanel extends StatefulWidget {
   final SpaceStore store;
-  const SettingsPanel({super.key, required this.store});
-
+  final ReleaseChecker? updates;
+  const SettingsPanel({super.key, required this.store, this.updates});
   @override
   State<SettingsPanel> createState() => _SettingsPanelState();
 }
@@ -22,18 +23,21 @@ class SettingsPanel extends StatefulWidget {
 class _SettingsPanelState extends State<SettingsPanel>
     with SingleTickerProviderStateMixin {
   SpaceStore get s => widget.store;
+  late final ReleaseChecker updates;
   final scroll = ScrollController();
   late final AnimationController fade;
   late final Animation<double> opacity;
   int selected = 0;
+  String? linkError;
+  bool copyEmail = false;
   static const categories = [
-    ('gear', '全部设置'),
-    ('sun', '外观与交互'),
-    ('save', '备份与恢复'),
-    ('tray', '云端同步'),
-    ('project', '数据管理'),
+    ('all', '全部设置', '管理你的工作台偏好'),
+    ('appearance', '外观与交互', '选择主题与交互偏好'),
+    ('backup', '备份与恢复', '为本机数据保留一份副本'),
+    ('cloud', '云端同步', '通过 GitHub 私有仓库备份和恢复任务数据'),
+    ('data', '数据管理', '管理示例内容和本机任务'),
+    ('info', '关于 Space', '软件信息与更新'),
   ];
-
   @override
   void initState() {
     super.initState();
@@ -44,6 +48,9 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
     opacity = fade.drive(CurveTween(curve: spaceCurve));
     s.addListener(change);
+    updates = widget.updates ?? ReleaseChecker();
+    updates.addListener(change);
+    updates.check();
   }
 
   void change() {
@@ -64,6 +71,8 @@ class _SettingsPanelState extends State<SettingsPanel>
   @override
   void dispose() {
     s.removeListener(change);
+    updates.removeListener(change);
+    if (widget.updates == null) updates.dispose();
     scroll.dispose();
     fade.dispose();
     super.dispose();
@@ -80,658 +89,747 @@ class _SettingsPanelState extends State<SettingsPanel>
 
   Color border(Palette p) =>
       p.blend(const Color(0xffe1e7f0), const Color(0xff313131));
-
-  Widget card(String title, Widget child, {String? subtitle, String? icon}) {
+  Widget section(String title, List<Widget> children) {
     final p = Palette.of(context);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: p.blend(Colors.white, const Color(0xff1f1f1f)),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: border(p)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              if (icon != null) ...[
-                SpaceIcon(icon, size: 20),
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                child: Text(title, style: textStyle(p, size: 18, bold: true)),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(title, style: textStyle(p, bold: true)),
           ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 4),
-            Text(subtitle, style: textStyle(p, size: 12, color: p.muted)),
-          ],
-          const SizedBox(height: 16),
-          child,
+          ...children,
         ],
       ),
+    );
+  }
+
+  Widget row(String label, {String? detail, Widget? trailing}) {
+    final p = Palette.of(context);
+    final text = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: textStyle(p)),
+        if (detail != null) ...[
+          const SizedBox(height: 4),
+          Text(detail, style: textStyle(p, size: 12, color: p.muted)),
+        ],
+      ],
+    );
+    return Container(
+      constraints: BoxConstraints(minHeight: detail == null ? 48 : 64),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: border(p))),
+      ),
+      child: LayoutBuilder(
+        builder: (context, box) => box.maxWidth < 400 && trailing != null
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  text,
+                  const SizedBox(height: 12),
+                  Align(alignment: Alignment.centerRight, child: trailing),
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(child: text),
+                  if (trailing != null) ...[
+                    const SizedBox(width: 16),
+                    trailing,
+                  ],
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget button(
+    String label,
+    VoidCallback? onPressed, {
+    String? icon,
+    bool quiet = false,
+    bool danger = false,
+  }) => SettingsAction(
+    onPressed: onPressed,
+    quiet: quiet,
+    danger: danger,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) ...[
+          SettingsIcon(
+            icon,
+            size: 16,
+            color: danger ? Palette.of(context).red : null,
+          ),
+          const SizedBox(width: 8),
+        ],
+        Text(label),
+      ],
+    ),
+  );
+  String get themeSummary => s.appearance == 'system'
+      ? '跟随系统 · ${s.temporaryDark == null ? '' : '临时'}${s.dark ? '深色' : '浅色'}'
+      : '固定${s.dark ? '深色' : '浅色'}';
+
+  Widget overview() {
+    final p = Palette.of(context);
+    Widget entry(int index, String detail, String summary) => Container(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: border(p))),
+      ),
+      child: SettingsAction(
+        height: 72,
+        quiet: true,
+        padding: EdgeInsets.zero,
+        onPressed: () => select(index),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(categories[index].$2, style: textStyle(p)),
+                  const SizedBox(height: 4),
+                  Text(detail, style: textStyle(p, size: 12, color: p.muted)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            if (summary.isNotEmpty)
+              Flexible(
+                child: Text(
+                  summary,
+                  textAlign: TextAlign.right,
+                  style: textStyle(p, size: 12, color: p.muted),
+                ),
+              ),
+            const SizedBox(width: 8),
+            const SettingsIcon('right', size: 16),
+          ],
+        ),
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        section('工作台', [
+          entry(1, '主题与滚动体验', themeSummary),
+          entry(2, '导出、导入和恢复本地备份', 'SQLite 本地备份'),
+          entry(3, '通过私有仓库接续工作', ''),
+          entry(4, '示例内容与任务清理', ''),
+        ]),
+        section('软件', [
+          entry(5, '作者、反馈与软件更新', updates.installed?.toString() ?? ''),
+        ]),
+      ],
     );
   }
 
   Widget appearance() {
     final p = Palette.of(context);
-    return card(
-      '外观与交互',
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    final choices = Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: p.blend(
+          Colors.white.withValues(alpha: .45),
+          const Color(0xff181818).withValues(alpha: .55),
+        ),
+        border: Border.all(color: border(p)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Wrap(
+        spacing: 4,
+        runSpacing: 4,
         children: [
-          Text('界面主题', style: textStyle(p, bold: true)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              for (final choice in const {
-                'system': '跟随系统',
-                'light': '浅色',
-                'dark': '深色',
-              }.entries) ...[
-                if (choice.key != 'system') const SizedBox(width: 8),
-                Expanded(
-                  child: _ThemeTile(
-                    value: choice.key,
-                    label: choice.value,
-                    selected: s.appearance == choice.key,
-                    onPressed: s.busy
-                        ? null
-                        : () => s.preference('appearance', choice.key),
+          for (final choice in const [
+            ('system', '跟随系统'),
+            ('light', '浅色'),
+            ('dark', '深色'),
+          ])
+            SettingsAction(
+              height: 32,
+              quiet: true,
+              navigation: true,
+              selected: s.appearance == choice.$1,
+              onPressed: s.busy
+                  ? null
+                  : () => s.preference('appearance', choice.$1),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SettingsIcon(
+                    choice.$1 == 'light'
+                        ? 'sun'
+                        : choice.$1 == 'dark'
+                        ? 'moon'
+                        : 'system',
+                    size: 16,
                   ),
+                  const SizedBox(width: 8),
+                  Text(choice.$2, style: textStyle(p, size: 12)),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        section('外观', [
+          row('主题', trailing: choices),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              Text(
+                s.appearance == 'system'
+                    ? '系统当前为${s.systemDark ? '深色' : '浅色'}。'
+                    : '固定${s.dark ? '深色' : '浅色'}，不随系统切换。',
+                style: textStyle(p, size: 12, color: p.muted),
+              ),
+              if (s.temporaryDark != null && s.appearance == 'system') ...[
+                Text(
+                  '临时${s.dark ? '深色' : '浅色'}',
+                  style: textStyle(p, size: 12, color: p.accent),
                 ),
+                button('恢复跟随', s.resumeSystemAppearance, quiet: true),
               ],
             ],
           ),
-          const SizedBox(height: 8),
-          Text('随系统自动切换浅色与深色外观', style: textStyle(p, size: 12, color: p.muted)),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: border(p)),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('隐藏滚动条', style: textStyle(p, bold: true)),
-                    const SizedBox(height: 4),
-                    Text(
-                      '仍可使用滚轮、触控板和键盘滚动',
-                      style: textStyle(p, size: 12, color: p.muted),
-                    ),
-                  ],
+        ]),
+        section('交互', [
+          row(
+            '隐藏滚动条',
+            detail: '仍可使用滚轮、触控板和键盘滚动',
+            trailing: SizedBox(
+              width: 48,
+              height: 32,
+              child: FittedBox(
+                child: Semantics(
+                  label: '隐藏滚动条',
+                  child: Switch.adaptive(
+                    activeTrackColor: p.primary,
+                    value: s.hideScrollbars,
+                    onChanged: s.busy
+                        ? null
+                        : (value) => s.preference('hideScrollbars', '$value'),
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Semantics(
-                label: '隐藏滚动条',
-                child: Switch.adaptive(
-                  activeTrackColor: p.primary,
-                  value: s.hideScrollbars,
-                  onChanged: s.busy
-                      ? null
-                      : (value) => s.preference('hideScrollbars', '$value'),
-                ),
-              ),
-            ],
+            ),
           ),
-        ],
-      ),
+        ]),
+        section('主题切换说明', [
+          row(
+            '跟随系统时，主界面的明暗切换仅临时生效。',
+            detail: '系统下次切换外观或重启 Space 后，会恢复跟随。\n在此选择浅色或深色后，将固定使用该外观。',
+          ),
+        ]),
+      ],
     );
   }
 
   Widget backup() {
-    return card(
-      '本地备份与恢复',
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          LayoutBuilder(
-            builder: (context, box) {
-              final width = (box.maxWidth - 8) / 2;
-              Widget button(String label, String icon, VoidCallback? action) =>
-                  SizedBox(
-                    width: width,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: border(Palette.of(context))),
-                      ),
-                      child: SpaceButton(
-                        onPressed: action,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (width >= 160) ...[
-                              SpaceIcon(icon, size: 16),
-                              const SizedBox(width: 8),
-                            ],
-                            Flexible(
-                              child: Text(
-                                label,
-                                style: TextStyle(
-                                  fontSize: width < 160 ? 12 : 14,
-                                ),
-                                maxLines: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-              final enabled = s.loaded && !s.busy;
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  button(
-                    '导出SQLite',
-                    'up',
-                    enabled
-                        ? () => action(() async {
-                            final path = await DesktopHost.saveFile(
-                              'Space备份.sqlite',
-                              sqliteOnly: true,
-                            );
-                            if (path != null) {
-                              await s.repository.exportSQLite(path);
-                              s.message('SQLite备份已导出');
-                            }
-                          })
-                        : null,
-                  ),
-                  button(
-                    '导入SQLite',
-                    'down',
-                    enabled ? () => importBackup(context, s) : null,
-                  ),
-                  button(
-                    '恢复上次备份',
-                    'undo',
-                    enabled && File(s.repository.previous).existsSync()
-                        ? () => action(() async {
-                            final incoming = await s.repository.readExternal(
-                              s.repository.previous,
-                            );
-                            if (!context.mounted) return;
-                            if (await confirm(
-                                  context,
-                                  '恢复上次备份',
-                                  '恢复写入前的 ${incoming.tasks.length} 项任务？当前任务库也会先备份。',
-                                  '恢复',
-                                ) &&
-                                context.mounted) {
-                              await s.applyBackup(incoming);
-                            }
-                          })
-                        : null,
-                  ),
-                  button(
-                    '打开数据库文件夹',
-                    'folder',
-                    enabled
-                        ? () => DesktopHost.reveal(s.repository.path)
-                        : null,
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '导入前自动备份，校验通过后再确认恢复。',
-            style: textStyle(
-              Palette.of(context),
-              size: 12,
-              color: Palette.of(context).muted,
-            ),
-          ),
-        ],
-      ),
-      subtitle: 'SQLite 数据库',
-    );
-  }
-
-  Widget management() {
-    final p = Palette.of(context);
-    return card(
-      '数据管理',
-      Column(
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text('体验示例内容', style: textStyle(p))),
-              const SizedBox(width: 8),
-              SpaceButton(
-                height: 32,
-                onPressed: s.busy
-                    ? null
-                    : () => action(() async {
-                        if (await confirm(
-                          context,
-                          '载入演示任务',
-                          '将当前任务替换为合成演示数据，可以撤销。',
-                          '载入演示任务',
-                        )) {
-                          await s.commit(
-                            demoState().copy(
-                              settings: s.state.settings,
-                              workspaceID: s.state.workspaceID,
-                            ),
-                            '已载入演示任务',
-                          );
-                        }
-                      }),
-                child: const Text('载入演示任务', style: TextStyle(fontSize: 12)),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Divider(height: 1, color: border(p)),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('清空全部任务', style: textStyle(p, color: p.red)),
-                    const SizedBox(height: 4),
-                    Text(
-                      '操作前需再次确认，可撤销',
-                      style: textStyle(p, size: 12, color: p.muted),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              SpaceButton(
-                height: 32,
-                danger: true,
-                onPressed: s.busy || s.state.tasks.isEmpty
-                    ? null
-                    : () => action(() async {
-                        if (await confirm(
-                          context,
-                          '清空所有任务',
-                          '项目和状态保留，可以撤销恢复任务。',
-                          '清空所有任务',
-                        )) {
-                          await s.commit(s.state.copy(tasks: []), '任务已清空，可撤销');
-                        }
-                      }),
-                child: const Text('清空所有任务', style: TextStyle(fontSize: 12)),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget retained(bool visible, Widget child) => ExcludeFocus(
-    excluding: !visible,
-    child: Visibility(visible: visible, maintainState: true, child: child),
-  );
-
-  Widget navigation(bool compact) {
-    final p = Palette.of(context);
-    return ColoredBox(
-      color: p.blend(const Color(0xfff1f4f9), const Color(0xff181818)),
-      child: FocusTraversalGroup(
-        child: Padding(
-          padding: EdgeInsets.all(compact ? 8 : 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (var i = 0; i < categories.length; i++) ...[
-                if (i > 0) const SizedBox(height: 8),
-                SpaceButton(
-                  key: ValueKey('settings-category-$i'),
-                  selected: selected == i,
-                  tooltip: compact ? categories[i].$2 : null,
-                  height: 40,
-                  padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 12),
-                  onPressed: () => select(i),
-                  child: Row(
-                    mainAxisAlignment: compact
-                        ? MainAxisAlignment.center
-                        : MainAxisAlignment.start,
-                    children: [
-                      SpaceIcon(
-                        categories[i].$1,
-                        size: 18,
-                        color: selected == i ? p.accent : p.secondary,
-                      ),
-                      if (!compact) ...[
-                        const SizedBox(width: 8),
-                        Text(categories[i].$2),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-              const Spacer(),
-              if (!compact)
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: p.green,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '数据保存在本机',
-                      style: textStyle(p, size: 12, color: p.muted),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget content() {
-    final p = Palette.of(context);
-    final all = selected == 0;
-    return FadeTransition(
-      opacity: opacity,
-      child: SingleChildScrollView(
-        key: const ValueKey('settings-scroll'),
-        controller: scroll,
-        padding: const EdgeInsets.all(24),
-        child: FocusTraversalGroup(
-          child: LayoutBuilder(
-            builder: (context, box) {
-              final dual = all && box.maxWidth >= 720;
-              final left = dual ? (box.maxWidth - 16) * .46 : box.maxWidth;
-              final right = dual ? box.maxWidth - left - 16 : box.maxWidth;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    all ? '工作台偏好' : categories[selected].$2,
-                    style: textStyle(p, size: 24, bold: true),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '管理界面外观、数据备份与云端同步',
-                    style: textStyle(p, size: 14, color: p.muted),
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    key: const ValueKey('settings-columns'),
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: [
-                      retained(
-                        all || selected != 3,
-                        SizedBox(
-                          width: left,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              retained(all || selected == 1, appearance()),
-                              if (all) const SizedBox(height: 16),
-                              retained(all || selected == 2, backup()),
-                              if (all) const SizedBox(height: 16),
-                              retained(all || selected == 4, management()),
-                            ],
-                          ),
-                        ),
-                      ),
-                      retained(
-                        all || selected == 3,
-                        SizedBox(
-                          width: right,
-                          child: card(
-                            'GitHub 私有仓库同步',
-                            GitHubSettings(store: s),
-                            subtitle: '通过私有仓库备份和恢复任务数据',
-                            icon: 'tray',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (s.error != null || s.notice != null) ...[
-                    const SizedBox(height: 16),
-                    Semantics(
-                      liveRegion: true,
-                      child: Text(
-                        s.error ?? s.notice!,
-                        style: textStyle(
-                          p,
-                          size: 12,
-                          color: s.error != null ? p.red : p.green,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final p = Palette.of(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: p.blend(const Color(0xfff7f9fc), const Color(0xff181818)),
-          border: Border.all(color: border(p)),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Row(
-                children: [
-                  const Mark(size: 32),
-                  const SizedBox(width: 8),
-                  Text('Space', style: textStyle(p, size: 20, bold: true)),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    child: Text(
-                      '数据与设置',
-                      style: textStyle(p, size: 18, bold: true),
-                    ),
-                  ),
-                  IconButtonS(
-                    'x',
-                    '关闭数据与设置',
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-            ),
-            Divider(height: 1, color: border(p)),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, box) {
-                  final compact = box.maxWidth < 760;
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        width: compact ? 64 : 184,
-                        child: navigation(compact),
-                      ),
-                      Expanded(child: content()),
-                    ],
-                  );
-                },
-              ),
-            ),
-            Divider(height: 1, color: border(p)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Space · 个人工作台',
-                      style: textStyle(p, size: 12, color: p.muted),
-                    ),
-                  ),
-                  SpaceButton(
-                    height: 32,
-                    primary: true,
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('完成'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ThemeTile extends StatelessWidget {
-  final String value, label;
-  final bool selected;
-  final VoidCallback? onPressed;
-  const _ThemeTile({
-    required this.value,
-    required this.label,
-    required this.selected,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final p = Palette.of(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: selected ? p.hover : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: selected
-              ? p.accent
-              : p.blend(const Color(0xffe1e7f0), const Color(0xff313131)),
-        ),
-      ),
-      child: SpaceButton(
-        selected: selected,
-        height: 96,
-        padding: const EdgeInsets.all(8),
-        onPressed: onPressed,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 80,
-              height: 48,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Row(
-                        children: [
-                          Expanded(child: _MiniWindow(dark: value == 'dark')),
-                          if (value == 'system')
-                            const Expanded(child: _MiniWindow(dark: true)),
-                        ],
-                      ),
-                    ),
-                    if (selected)
-                      Positioned(
-                        right: 2,
-                        top: 2,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: p.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(2),
-                            child: SpaceIcon(
-                              'check',
-                              size: 12,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontSize: 12)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MiniWindow extends StatelessWidget {
-  final bool dark;
-  const _MiniWindow({required this.dark});
-  @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: dark ? const Color(0xff272727) : const Color(0xfff1f4f9),
-    child: Column(
+    final p = Palette.of(context), enabled = s.loaded && !s.busy;
+    final previous = File(s.repository.previous).existsSync();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          height: 8,
-          color: dark ? const Color(0xff313131) : const Color(0xffe1e7f0),
-        ),
-        Expanded(
-          child: Row(
-            children: [
-              Container(
-                width: 12,
-                color: dark ? const Color(0xff181818) : const Color(0xffe7edf7),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (var i = 0; i < 3; i++) ...[
-                        Expanded(
-                          child: ColoredBox(
-                            color: dark
-                                ? const Color(0xff313131)
-                                : Colors.white,
-                          ),
-                        ),
-                        if (i < 2) const SizedBox(height: 2),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
+        section('本地备份', [
+          row(
+            '导出备份',
+            detail: '保存为 SQLite 文件',
+            trailing: button(
+              '导出',
+              enabled
+                  ? () => action(() async {
+                      final path = await DesktopHost.saveFile(
+                        'Space备份.sqlite',
+                        sqliteOnly: true,
+                      );
+                      if (path != null) {
+                        await s.repository.exportSQLite(path);
+                        s.message('SQLite备份已导出');
+                      }
+                    })
+                  : null,
+              icon: 'up',
+            ),
           ),
+          row(
+            '导入备份',
+            detail: '校验文件内容后，再确认替换当前数据',
+            trailing: button(
+              '选择文件',
+              enabled ? () => importBackup(context, s) : null,
+              icon: 'down',
+            ),
+          ),
+          row(
+            '恢复上次备份',
+            detail: previous ? '恢复上一次写入前的本地数据' : '尚无可恢复的历史备份',
+            trailing: button(
+              '恢复',
+              enabled && previous
+                  ? () => action(() async {
+                      final incoming = await s.repository.readExternal(
+                        s.repository.previous,
+                      );
+                      if (!mounted) return;
+                      if (await confirm(
+                            context,
+                            '恢复上次备份',
+                            '恢复写入前的 ${incoming.tasks.length} 项任务？当前任务库也会先备份。',
+                            '恢复',
+                          ) &&
+                          mounted) {
+                        await s.applyBackup(incoming);
+                      }
+                    })
+                  : null,
+              icon: 'backup',
+            ),
+          ),
+          row(
+            '数据库位置',
+            detail: '打开 Space 本地数据目录',
+            trailing: button(
+              '打开文件夹',
+              enabled
+                  ? () => action(() => DesktopHost.reveal(s.repository.path))
+                  : null,
+              icon: 'folder',
+            ),
+          ),
+        ]),
+        const SizedBox(height: 16),
+        Text(
+          '导入前自动备份。导出的 SQLite 文件包含本机连接配置，请妥善保存。',
+          style: textStyle(p, size: 12, color: p.muted),
         ),
       ],
+    );
+  }
+
+  Widget management() => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      section('示例内容', [
+        row(
+          '体验示例任务',
+          detail: '以合成任务替换当前内容，可撤销',
+          trailing: button(
+            '载入示例',
+            s.busy
+                ? null
+                : () => action(() async {
+                    if (await confirm(
+                          context,
+                          '载入示例任务',
+                          '将当前任务替换为合成示例数据，可以撤销。',
+                          '载入示例',
+                        ) &&
+                        mounted) {
+                      await s.commit(
+                        demoState().copy(
+                          settings: s.state.settings,
+                          workspaceID: s.state.workspaceID,
+                        ),
+                        '已载入示例任务',
+                      );
+                    }
+                  }),
+          ),
+        ),
+      ]),
+      section('任务清理', [
+        row(
+          '清空全部任务',
+          detail: '保留项目与状态，清空后可撤销',
+          trailing: button(
+            '清空任务',
+            s.busy || s.state.tasks.isEmpty
+                ? null
+                : () => action(() async {
+                    if (await confirm(
+                          context,
+                          '清空全部任务',
+                          '项目和状态保留，可以撤销恢复任务。',
+                          '清空任务',
+                        ) &&
+                        mounted) {
+                      await s.commit(s.state.copy(tasks: []), '任务已清空，可撤销');
+                    }
+                  }),
+            icon: 'trash',
+            danger: true,
+          ),
+        ),
+      ]),
+    ],
+  );
+  Future<void> open(Uri uri) async {
+    try {
+      if (await DesktopHost.openExternal(uri)) return;
+    } catch (_) {
+      /* Show a usable inline fallback below. */
+    }
+    if (!mounted) return;
+    setState(() {
+      copyEmail = uri.scheme == 'mailto';
+      linkError = copyEmail
+          ? '无法打开邮件客户端，可复制邮箱地址。'
+          : '无法打开浏览器，请复制项目地址后访问：$projectUrl';
+    });
+  }
+
+  Widget infoRow(String label, Widget value) {
+    final p = Palette.of(context);
+    return Container(
+      constraints: const BoxConstraints(minHeight: 48),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: border(p))),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(label, style: textStyle(p, size: 12, color: p.muted)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: value),
+        ],
+      ),
+    );
+  }
+
+  Widget about() {
+    final p = Palette.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Row(
+            children: [
+              const Mark(size: 40),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Space', style: textStyle(p, size: 18, bold: true)),
+                  Text('个人工作台', style: textStyle(p, size: 12, color: p.muted)),
+                ],
+              ),
+            ],
+          ),
+        ),
+        infoRow(
+          '版本',
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                updates.installed?.toString() ?? '读取中…',
+                style: textStyle(p),
+              ),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  updates.label,
+                  style: textStyle(
+                    p,
+                    size: 12,
+                    color: updates.status == UpdateStatus.available
+                        ? p.accent
+                        : p.muted,
+                  ),
+                ),
+              ),
+              button(
+                '检查更新',
+                updates.status == UpdateStatus.checking ? null : updates.check,
+                quiet: true,
+                icon: 'refresh',
+              ),
+            ],
+          ),
+        ),
+        infoRow('作者', Text('Cers', style: textStyle(p))),
+        infoRow(
+          'Bug 反馈',
+          Align(
+            alignment: Alignment.centerLeft,
+            child: button(
+              feedbackEmail,
+              () => open(Uri(scheme: 'mailto', path: feedbackEmail)),
+              quiet: true,
+            ),
+          ),
+        ),
+        infoRow(
+          '项目',
+          Align(
+            alignment: Alignment.centerLeft,
+            child: button(
+              'GitHub 项目',
+              () => open(Uri.parse(projectUrl)),
+              quiet: true,
+              icon: 'external',
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Semantics(
+          liveRegion: true,
+          child: Text(
+            updates.message,
+            style: textStyle(p, size: 12, color: p.muted),
+          ),
+        ),
+        if (updates.status == UpdateStatus.available ||
+            updates.status == UpdateStatus.unavailable ||
+            updates.status == UpdateStatus.failed) ...[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: button(
+              updates.status == UpdateStatus.available ? '下载新版' : '查看发布页',
+              () => open(updates.releaseUrl),
+              icon: 'external',
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        Text(
+          '暂不支持在线热更新，请前往发布页下载安装。',
+          style: textStyle(p, size: 12, color: p.muted),
+        ),
+        if (linkError != null) ...[
+          const SizedBox(height: 16),
+          Text(linkError!, style: textStyle(p, size: 12, color: p.red)),
+          if (copyEmail)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: button('复制邮箱', () async {
+                await Clipboard.setData(
+                  const ClipboardData(text: feedbackEmail),
+                );
+                if (mounted) setState(() => linkError = '邮箱地址已复制。');
+              }, quiet: true),
+            ),
+        ],
+      ],
+    );
+  }
+
+  Widget retained(int index, Widget child) => ExcludeFocus(
+    excluding: selected != index,
+    child: TickerMode(
+      enabled: selected == index,
+      child: Offstage(offstage: selected != index, child: child),
     ),
   );
+  Widget navigation(bool compact) {
+    final p = Palette.of(context);
+    return Container(
+      color: p.blend(
+        const Color(0xfff1f4f9).withValues(alpha: .52),
+        const Color(0xff181818).withValues(alpha: .35),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (!compact)
+            Padding(
+              padding: const EdgeInsets.only(left: 12, bottom: 12),
+              child: Text(
+                '偏好设置',
+                style: textStyle(p, size: 12, color: p.muted),
+              ),
+            ),
+          for (var i = 0; i < categories.length; i++) ...[
+            SettingsAction(
+              key: ValueKey('settings-category-$i'),
+              height: 40,
+              quiet: true,
+              navigation: true,
+              selected: selected == i,
+              tooltip: compact ? categories[i].$2 : null,
+              padding: EdgeInsets.symmetric(horizontal: compact ? 0 : 12),
+              onPressed: () => select(i),
+              child: Row(
+                mainAxisAlignment: compact
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
+                children: [
+                  SettingsIcon(categories[i].$1),
+                  if (!compact) ...[
+                    const SizedBox(width: 12),
+                    Text(
+                      categories[i].$2,
+                      style: textStyle(p, color: p.secondary),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
+          const Spacer(),
+          if (!compact)
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                '•  数据保存在本机',
+                style: textStyle(p, size: 12, color: p.muted),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    return Glass(
+      contour: 'settings',
+      background: const Ambient(),
+      blur: false,
+      child: Column(
+        children: [
+          SizedBox(
+            key: const ValueKey('settings-titlebar'),
+            height: spaceTitleBarHeight,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Text('设置', style: textStyle(p, bold: true)),
+                  const SizedBox(width: 12),
+                  Text('Space', style: textStyle(p, size: 12, color: p.muted)),
+                  const Spacer(),
+                  SettingsAction(
+                    height: 32,
+                    quiet: true,
+                    key: const ValueKey('settings-close'),
+                    tooltip: '关闭设置',
+                    padding: const EdgeInsets.all(8),
+                    onPressed: () => Navigator.pop(context),
+                    child: const SettingsIcon('close', size: 16),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Divider(height: 1, color: border(p)),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, box) {
+                final compact = box.maxWidth < 760;
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      width: compact ? 64 : 184,
+                      child: navigation(compact),
+                    ),
+                    VerticalDivider(width: 1, color: border(p)),
+                    Expanded(
+                      child: FadeTransition(
+                        opacity: opacity,
+                        child: SingleChildScrollView(
+                          key: const ValueKey('settings-scroll'),
+                          controller: scroll,
+                          padding: EdgeInsets.all(compact ? 24 : 32),
+                          child: FocusTraversalGroup(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  categories[selected].$2,
+                                  style: textStyle(p, size: 20, bold: true),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  categories[selected].$3,
+                                  style: textStyle(p, size: 12, color: p.muted),
+                                ),
+                                retained(0, overview()),
+                                retained(1, appearance()),
+                                retained(2, backup()),
+                                retained(
+                                  3,
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 24),
+                                    child: GitHubSettings(store: s),
+                                  ),
+                                ),
+                                retained(4, management()),
+                                retained(5, about()),
+                                if (s.error != null || s.notice != null) ...[
+                                  const SizedBox(height: 16),
+                                  Semantics(
+                                    liveRegion: true,
+                                    child: Text(
+                                      s.error ?? s.notice!,
+                                      style: textStyle(
+                                        p,
+                                        size: 12,
+                                        color: s.error != null
+                                            ? p.red
+                                            : p.green,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          Divider(height: 1, color: border(p)),
+          SizedBox(
+            height: 32,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      themeSummary,
+                      style: textStyle(p, size: 12, color: p.muted),
+                    ),
+                  ),
+                  Text(
+                    'Space ${updates.installed ?? ''}',
+                    style: textStyle(p, size: 12, color: p.muted),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

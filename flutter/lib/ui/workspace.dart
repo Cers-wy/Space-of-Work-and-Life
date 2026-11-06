@@ -442,107 +442,111 @@ class _WorkspaceState extends State<Workspace> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              IconButtonS(
-                s.navCollapsed ? 'sidebar-open' : 'sidebar-close',
-                s.navCollapsed ? '展开导航' : '收起导航',
-                key: const ValueKey('navigation-toggle'),
-                size: 32,
-                iconSize: 18,
-                onPressed: () =>
-                    s.preference('navCollapsed', '${!s.navCollapsed}'),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (c, b) => Row(
-                    children: [
-                      if (b.maxWidth >= 240) ...[
-                        Text(
-                          '我的空间',
-                          style: textStyle(p, size: 12, color: p.muted),
+          SizedBox(
+            key: const ValueKey('workspace-titlebar'),
+            height: spaceTitleBarHeight,
+            child: Row(
+              children: [
+                IconButtonS(
+                  s.navCollapsed ? 'sidebar-open' : 'sidebar-close',
+                  s.navCollapsed ? '展开导航' : '收起导航',
+                  key: const ValueKey('navigation-toggle'),
+                  size: 32,
+                  iconSize: 18,
+                  onPressed: () =>
+                      s.preference('navCollapsed', '${!s.navCollapsed}'),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (c, b) => Row(
+                      children: [
+                        if (b.maxWidth >= 240) ...[
+                          Text(
+                            '我的空间',
+                            style: textStyle(p, size: 12, color: p.muted),
+                          ),
+                          const SizedBox(width: 12),
+                          SpaceIcon('right', size: 10, color: p.muted),
+                          const SizedBox(width: 12),
+                        ],
+                        Expanded(
+                          child: Text(
+                            s.overviewCollapsed
+                                ? '任务 · ${s.visible.length} 个任务'
+                                : '任务管理',
+                            style: textStyle(p, size: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        const SizedBox(width: 12),
-                        SpaceIcon('right', size: 10, color: p.muted),
-                        const SizedBox(width: 12),
+                        if (b.maxWidth > 460) ...[
+                          const SizedBox(width: 12),
+                          categoryCounts(),
+                        ],
                       ],
-                      Expanded(
-                        child: Text(
-                          s.overviewCollapsed
-                              ? '任务 · ${s.visible.length} 个任务'
-                              : '任务管理',
-                          style: textStyle(p, size: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (b.maxWidth > 460) ...[
-                        const SizedBox(width: 12),
-                        categoryCounts(),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              if (s.overviewCollapsed) ...[
-                const SizedBox(width: 16, key: ValueKey('category-filter-gap')),
+                if (s.overviewCollapsed) ...[
+                  const SizedBox(
+                    width: 16,
+                    key: ValueKey('category-filter-gap'),
+                  ),
+                  IconButtonS(
+                    'filter',
+                    '筛选与排序',
+                    key: filterAnchor,
+                    selected: true,
+                    onPressed: filters,
+                  ),
+                  const SizedBox(width: 8),
+                  viewSwitch(),
+                  const SizedBox(width: 8),
+                  IconButtonS(
+                    'plus',
+                    '新建任务（⌘N / N）',
+                    primary: true,
+                    onPressed: s.loaded ? newTask : null,
+                  ),
+                  const SizedBox(width: 16),
+                ],
+                ThemeToggle(dark: s.dark, onToggle: s.toggleTheme),
+                const SizedBox(width: 8),
                 IconButtonS(
-                  'filter',
-                  '筛选与排序',
-                  key: filterAnchor,
-                  selected: true,
-                  onPressed: filters,
+                  'project',
+                  '项目管理',
+                  iconSize: 18,
+                  onPressed: () => showProjects(context, s),
                 ),
-                const SizedBox(width: 8),
-                viewSwitch(),
                 const SizedBox(width: 8),
                 IconButtonS(
-                  'plus',
-                  '新建任务（⌘N / N）',
-                  primary: true,
-                  onPressed: s.loaded ? newTask : null,
+                  'status',
+                  '状态与分类管理',
+                  iconSize: 18,
+                  onPressed: () => showStatuses(context, s),
                 ),
-                const SizedBox(width: 16),
-              ],
-              ThemeToggle(
-                dark: s.dark,
-                onToggle: () => s.preference('dark', '${!s.dark}'),
-              ),
-              const SizedBox(width: 8),
-              IconButtonS(
-                'project',
-                '项目管理',
-                iconSize: 18,
-                onPressed: () => showProjects(context, s),
-              ),
-              const SizedBox(width: 8),
-              IconButtonS(
-                'status',
-                '状态与分类管理',
-                iconSize: 18,
-                onPressed: () => showStatuses(context, s),
-              ),
-              if (s.canUndo) ...[
+                if (s.canUndo) ...[
+                  const SizedBox(width: 8),
+                  IconButtonS('undo', '撤销最近一次更改（⌘Z）', onPressed: s.undo),
+                ],
                 const SizedBox(width: 8),
-                IconButtonS('undo', '撤销最近一次更改（⌘Z）', onPressed: s.undo),
-              ],
-              const SizedBox(width: 8),
-              IconButtonS(
-                'help',
-                '使用帮助',
-                onPressed: () => showHelp(context, s),
-              ),
-              const SizedBox(width: 8),
-              IconButtonS(
-                s.overviewCollapsed ? 'down' : 'up',
-                s.overviewCollapsed ? '展开概览' : '收起概览',
-                onPressed: () => s.preference(
-                  'overviewCollapsed',
-                  '${!s.overviewCollapsed}',
+                IconButtonS(
+                  'help',
+                  '使用帮助',
+                  onPressed: () => showHelp(context, s),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                IconButtonS(
+                  s.overviewCollapsed ? 'down' : 'up',
+                  s.overviewCollapsed ? '展开概览' : '收起概览',
+                  onPressed: () => s.preference(
+                    'overviewCollapsed',
+                    '${!s.overviewCollapsed}',
+                  ),
+                ),
+              ],
+            ),
           ),
           ClipRect(
             child: Align(

@@ -8,6 +8,7 @@ import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:flutter_quill/quill_delta.dart' show Delta;
 
 import '../core/models.dart';
+import '../core/releases.dart';
 import '../core/richtext.dart';
 import '../host.dart';
 import '../store.dart';
@@ -1588,12 +1589,74 @@ Future<void> importBackup(BuildContext c, SpaceStore s) async {
   }
 }
 
-Future<void> showSettings(BuildContext c, SpaceStore s) async {
+Future<void> showSettings(
+  BuildContext c,
+  SpaceStore s, {
+  ReleaseChecker? updates,
+}) async {
   if (s.modal) return;
   s.modal = true;
   s.refreshQuery();
   try {
-    await sheet(c, SettingsPanel(store: s), width: 1400, height: 940);
+    final reduced = MediaQuery.disableAnimationsOf(c);
+    await showGeneralDialog<void>(
+      context: c,
+      barrierDismissible: false,
+      barrierColor: Colors.transparent,
+      transitionDuration: reduced
+          ? const Duration(milliseconds: 200)
+          : spaceDuration,
+      pageBuilder: (context, a, b) => Stack(
+        children: [
+          Positioned.fill(
+            child: ModalBarrier(
+              color: Colors.black.withValues(
+                alpha: Palette.of(context).dark ? .28 : .18,
+              ),
+              dismissible: true,
+              semanticsLabel: '关闭设置',
+              onDismiss: () => Navigator.pop(context),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: 960,
+                height: 640,
+                child: Focus(
+                  autofocus: true,
+                  onKeyEvent: (node, event) {
+                    if (event is KeyDownEvent &&
+                        event.logicalKey == LogicalKeyboardKey.escape) {
+                      Navigator.pop(context);
+                      return KeyEventResult.handled;
+                    }
+                    return KeyEventResult.ignored;
+                  },
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: SettingsPanel(store: s, updates: updates),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      transitionBuilder: (context, animation, secondary, child) {
+        final curve = animation.drive(CurveTween(curve: spaceCurve));
+        return FadeTransition(
+          opacity: curve,
+          child: reduced
+              ? child
+              : ScaleTransition(
+                  scale: Tween<double>(begin: .985, end: 1).animate(curve),
+                  child: child,
+                ),
+        );
+      },
+    );
   } finally {
     s.modal = false;
     s.refreshQuery();

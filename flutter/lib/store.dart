@@ -30,6 +30,12 @@ class SpaceStore extends ChangeNotifier {
   Timer? _noticeTimer, _dayTimer;
   final searchRequested = ValueNotifier<int>(0);
   SpaceStore(this.repository);
+  bool? _systemDark, _temporaryDark;
+  bool get systemDark =>
+      _systemDark ??
+      (WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+          Brightness.dark);
+  bool? get temporaryDark => _temporaryDark;
   String get appearance =>
       ['system', 'light', 'dark'].contains(state.settings['appearance'])
       ? state.settings['appearance']!
@@ -37,17 +43,37 @@ class SpaceStore extends ChangeNotifier {
       ? (state.settings['dark'] == 'true' ? 'dark' : 'light')
       : 'system';
   bool get dark => appearance == 'system'
-      ? WidgetsBinding.instance.platformDispatcher.platformBrightness ==
-            Brightness.dark
+      ? _temporaryDark ?? systemDark
       : appearance == 'dark';
   Future<void> updateSystemAppearance() async {
-    if (appearance != 'system') return;
+    final current = await DesktopHost.systemDark();
+    if (_systemDark == current) return;
+    _systemDark = current;
+    if (appearance == 'system') _temporaryDark = null;
     notifyListeners();
     await updateNativeAppearance();
   }
 
-  Future<void> updateNativeAppearance() =>
-      DesktopHost.appearance(dark, system: appearance == 'system');
+  Future<void> toggleTheme() async {
+    if (appearance != 'system') {
+      await preference('appearance', dark ? 'light' : 'dark');
+      return;
+    }
+    _temporaryDark = !dark;
+    notifyListeners();
+    await updateNativeAppearance();
+  }
+
+  Future<void> resumeSystemAppearance() async {
+    _temporaryDark = null;
+    notifyListeners();
+    await updateNativeAppearance();
+  }
+
+  Future<void> updateNativeAppearance() => DesktopHost.appearance(
+    dark,
+    system: appearance == 'system' && _temporaryDark == null,
+  );
   bool get navCollapsed => state.settings.containsKey('navCollapsed')
       ? state.settings['navCollapsed'] == 'true'
       : true;
@@ -73,6 +99,7 @@ class SpaceStore extends ChangeNotifier {
       : 'month';
   bool get canUndo => _undo != null && !busy && loaded && !modal;
   Future<void> initialize() async {
+    _systemDark = await DesktopHost.systemDark();
     await reload();
     _dayTimer = Timer.periodic(
       const Duration(seconds: 30),
@@ -195,6 +222,9 @@ class SpaceStore extends ChangeNotifier {
       );
       error = null;
       saved = true;
+      if (values.containsKey('appearance') || values.containsKey('dark')) {
+        _temporaryDark = null;
+      }
     } catch (e) {
       error = '设置保存失败：${readable(e)}';
     }

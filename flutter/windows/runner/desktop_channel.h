@@ -19,6 +19,9 @@ class SpaceDesktopChannel {
     channel_->SetMethodCallHandler([this](const auto& call, auto result) { Handle(call, std::move(result)); });
   }
   bool dirty = false;
+  void NotifySystemAppearance() {
+    channel_->InvokeMethod("systemAppearanceChanged", std::make_unique<flutter::EncodableValue>());
+  }
  private:
   HWND window_;
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel_;
@@ -48,6 +51,17 @@ class SpaceDesktopChannel {
     }
     if(method=="dirty"){dirty=boolean("dirty");result->Success();return;}
     if(method=="appearance"){BOOL dark=boolean("dark");DwmSetWindowAttribute(window_,20,&dark,sizeof(dark));result->Success();return;}
+    if(method=="systemAppearance"){
+      DWORD light=1,size=sizeof(DWORD);HKEY key=nullptr;
+      if(RegOpenKeyExW(HKEY_CURRENT_USER,L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",0,KEY_READ,&key)==ERROR_SUCCESS){RegQueryValueExW(key,L"AppsUseLightTheme",nullptr,nullptr,reinterpret_cast<LPBYTE>(&light),&size);RegCloseKey(key);}
+      result->Success(V(light==0));return;
+    }
+    if(method=="appInfo"){result->Success(V(M{{V("version"),V(FLUTTER_VERSION)},{V("build"),V(std::to_string(FLUTTER_VERSION_BUILD))}}));return;}
+    if(method=="openExternal"){
+      const auto url=text("url");if(url.rfind("https://",0)!=0&&url.rfind("mailto:",0)!=0){result->Success(V(false));return;}
+      auto value=wide(url);auto opened=ShellExecuteW(window_,L"open",value.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
+      result->Success(V(reinterpret_cast<INT_PTR>(opened)>32));return;
+    }
     if(method=="openFiles"){
       IFileOpenDialog* dialog=nullptr;L files;
       if(SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&dialog)))){
