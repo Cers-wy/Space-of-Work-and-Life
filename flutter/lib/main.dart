@@ -77,6 +77,20 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
       final c = navigatorKey.currentContext;
       if (c == null || widget.store.modal) return;
       final s = widget.store;
+      if (s.area != SpaceArea.tasks &&
+          const {
+            'new',
+            'reload',
+            'statuses',
+            'undo',
+            'overview',
+            'board',
+            'list',
+            'gantt',
+            'calendar',
+          }.contains(call.arguments)) {
+        return;
+      }
       switch (call.arguments) {
         case 'search':
           s.searchRequested.value++;
@@ -135,6 +149,7 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
       final s = widget.store;
       DesktopHost.menuState({
         'modal': s.modal,
+        'area': s.area.name,
         'loaded': s.loaded,
         'canUndo': s.canUndo,
         'navCollapsed': s.navCollapsed,

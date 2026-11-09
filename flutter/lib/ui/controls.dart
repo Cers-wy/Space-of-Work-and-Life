@@ -289,6 +289,33 @@ class _IconPainter extends CustomPainter {
           Offset(17, 18),
           Offset(17, 11),
         ]);
+      case 'upload':
+        path(const [Offset(6, 6), Offset(10, 2), Offset(14, 6)]);
+        line(10, 2, 10, 13);
+        path(const [
+          Offset(3, 11),
+          Offset(3, 18),
+          Offset(17, 18),
+          Offset(17, 11),
+        ]);
+      case 'refresh':
+        c.drawArc(
+          const Rect.fromLTWH(3, 3, 14, 14),
+          math.pi * .2,
+          math.pi * 1.6,
+          false,
+          p,
+        );
+        path(const [Offset(16, 2), Offset(16, 6), Offset(12, 6)]);
+      case 'preview':
+        c.drawPath(
+          Path()
+            ..moveTo(2, 10)
+            ..quadraticBezierTo(10, 0, 18, 10)
+            ..quadraticBezierTo(10, 20, 2, 10),
+          p,
+        );
+        c.drawCircle(const Offset(10, 10), 2.5, p);
       case 'trash':
         line(3, 5, 17, 5);
         line(7, 2, 13, 2);
@@ -300,6 +327,49 @@ class _IconPainter extends CustomPainter {
         ]);
         line(9, 8, 9, 15);
         line(12, 8, 12, 15);
+      case 'tools':
+        c.drawPath(
+          Path()
+            ..moveTo(16.6, 2.2)
+            ..cubicTo(13.5, 1.2, 11.1, 3.8, 11.8, 7.2)
+            ..lineTo(3.0, 16)
+            ..quadraticBezierTo(2.0, 17.2, 3.1, 18.1)
+            ..quadraticBezierTo(4.2, 19.1, 5.3, 18)
+            ..lineTo(14, 9.3)
+            ..cubicTo(17.4, 10.1, 20, 7.2, 18.9, 4.2)
+            ..lineTo(16.5, 6.5)
+            ..lineTo(14.5, 5.8)
+            ..lineTo(14.1, 4.5)
+            ..close(),
+          p,
+        );
+        path(const [Offset(9, 10), Offset(2, 4), Offset(4, 2), Offset(10, 8)]);
+        path(const [
+          Offset(13, 12),
+          Offset(18, 16.5),
+          Offset(18, 18),
+          Offset(16.5, 18),
+          Offset(12, 13.5),
+        ]);
+      case 'invoice':
+        path(const [
+          Offset(4, 2),
+          Offset(16, 2),
+          Offset(16, 18),
+          Offset(13, 16),
+          Offset(10, 18),
+          Offset(7, 16),
+          Offset(4, 18),
+          Offset(4, 2),
+        ]);
+        line(7, 6, 13, 6);
+        line(7, 9.5, 13, 9.5);
+        line(7, 13, 10.5, 13);
+      case 'printer':
+        rect(3, 7, 14, 7);
+        path(const [Offset(6, 7), Offset(6, 2), Offset(14, 2), Offset(14, 7)]);
+        rect(6, 11, 8, 7);
+        line(13.5, 9, 14.5, 9);
       case 'file':
         path(const [
           Offset(4, 2),
@@ -357,7 +427,9 @@ class SpaceButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final String? tooltip;
   final bool primary, selected, danger;
-  final double height;
+  final bool showSelectedBackground;
+  final double? height;
+  final double surfaceInset;
   final EdgeInsetsGeometry padding;
   const SpaceButton({
     super.key,
@@ -366,8 +438,10 @@ class SpaceButton extends StatefulWidget {
     this.tooltip,
     this.primary = false,
     this.selected = false,
+    this.showSelectedBackground = true,
     this.danger = false,
     this.height = 40,
+    this.surfaceInset = 0,
     this.padding = const EdgeInsets.symmetric(horizontal: 12),
   });
   @override
@@ -379,10 +453,20 @@ class _SpaceButtonState extends State<SpaceButton> {
   @override
   Widget build(BuildContext context) {
     final w = widget, p = Palette.of(context);
+    final filledSelection = w.selected && w.showSelectedBackground;
+    final background = w.primary
+        ? p.primary
+        : filledSelection
+        ? p.selectedButtonBackground()
+        : hover && !w.selected
+        ? p.hover
+        : Colors.transparent;
     final color = w.primary
         ? Colors.white
         : w.danger
         ? p.red
+        : filledSelection
+        ? p.selectedButtonForeground()
         : w.selected
         ? p.accent
         : p.secondary;
@@ -406,7 +490,9 @@ class _SpaceButtonState extends State<SpaceButton> {
         label: w.tooltip,
         enabled: w.onPressed != null,
         selected: w.selected,
+        onTap: w.onPressed,
         child: GestureDetector(
+          excludeFromSemantics: true,
           behavior: HitTestBehavior.opaque,
           onTap: w.onPressed,
           onTapDown: (_) => setState(() => pressed = true),
@@ -418,23 +504,34 @@ class _SpaceButtonState extends State<SpaceButton> {
                 : pressed
                 ? 0.8
                 : 1,
-            child: Container(
-              height: w.height,
-              padding: w.padding,
-              decoration: BoxDecoration(
-                color: w.primary
-                    ? p.primary
-                    : w.selected || hover
-                    ? p.hover
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-                border: focus ? Border.all(color: p.accent, width: 2) : null,
-              ),
-              child: DefaultTextStyle(
-                style: textStyle(p, bold: true, color: color),
-                child: IconTheme(
-                  data: IconThemeData(color: color, size: 14),
-                  child: Center(widthFactor: 1, child: w.child),
+            child: Padding(
+              padding: EdgeInsets.all(w.surfaceInset),
+              child: Container(
+                height: w.height == null
+                    ? null
+                    : w.height! - 2 * w.surfaceInset,
+                padding: w.padding,
+                decoration: BoxDecoration(
+                  color: background,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                foregroundDecoration: focus
+                    ? BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: filledSelection
+                              ? p.selectedButtonForeground()
+                              : p.accent,
+                          width: 2,
+                        ),
+                      )
+                    : null,
+                child: DefaultTextStyle(
+                  style: textStyle(p, bold: true, color: color),
+                  child: IconTheme(
+                    data: IconThemeData(color: color, size: 14),
+                    child: Center(widthFactor: 1, child: w.child),
+                  ),
                 ),
               ),
             ),
@@ -450,8 +547,9 @@ class _SpaceButtonState extends State<SpaceButton> {
 class IconButtonS extends StatelessWidget {
   final String icon, label;
   final VoidCallback? onPressed;
-  final bool primary, selected;
+  final bool primary, selected, danger;
   final double size, iconSize;
+  final double _surfaceInset;
   const IconButtonS(
     this.icon,
     this.label, {
@@ -459,9 +557,23 @@ class IconButtonS extends StatelessWidget {
     this.onPressed,
     this.primary = false,
     this.selected = false,
-    this.size = 36,
+    this.danger = false,
+    this.size = 32,
+    this.iconSize = 16,
+  }) : _surfaceInset = 0;
+
+  const IconButtonS.toolbar(
+    this.icon,
+    this.label, {
+    super.key,
+    this.onPressed,
+    this.primary = false,
+    this.selected = false,
+    this.danger = false,
     this.iconSize = 14,
-  });
+  }) : size = 32,
+       _surfaceInset = 2;
+
   @override
   Widget build(BuildContext c) {
     final p = Palette.of(c);
@@ -473,7 +585,9 @@ class IconButtonS extends StatelessWidget {
         onPressed: onPressed,
         primary: primary,
         selected: selected,
+        danger: danger,
         height: size,
+        surfaceInset: _surfaceInset,
         padding: EdgeInsets.zero,
         child: SpaceIcon(
           icon,
@@ -482,8 +596,10 @@ class IconButtonS extends StatelessWidget {
               ? p.muted.withValues(alpha: .35)
               : primary
               ? Colors.white
+              : danger
+              ? p.red
               : selected
-              ? p.accent
+              ? p.selectedButtonForeground()
               : icon == 'done'
               ? p.green
               : icon == 'circle'
@@ -492,6 +608,211 @@ class IconButtonS extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class SpaceTitleBar extends StatelessWidget {
+  final List<Widget> children;
+  const SpaceTitleBar({super.key, required this.children});
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: spaceTitleBarHeight,
+    width: double.infinity,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(children: children),
+    ),
+  );
+}
+
+class SpaceEditorSection extends StatelessWidget {
+  final String? title, detail;
+  final List<Widget> children;
+  const SpaceEditorSection({
+    super.key,
+    this.title,
+    this.detail,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    return Glass(
+      blur: false,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title case final heading?)
+            Text(heading, style: textStyle(p, bold: true)),
+          if (detail case final description?) ...[
+            if (title != null) const SizedBox(height: 4),
+            Text(description, style: textStyle(p, size: 12, color: p.muted)),
+          ],
+          if (title != null || detail != null) const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class SpaceEditorRow extends StatelessWidget {
+  final List<Widget> children;
+  final bool selected;
+  const SpaceEditorRow({
+    super.key,
+    required this.children,
+    this.selected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) => Glass(
+    blur: false,
+    child: AnimatedContainer(
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 140),
+      curve: spaceCurve,
+      constraints: const BoxConstraints(minHeight: 56),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: selected ? Palette.of(context).hover : Colors.transparent,
+      child: Row(children: children),
+    ),
+  );
+}
+
+class SpaceCheckbox extends StatelessWidget {
+  final bool? value;
+  final String label;
+  final String? description;
+  final bool showLabel;
+  final VoidCallback? onPressed;
+
+  const SpaceCheckbox({
+    super.key,
+    required this.value,
+    required this.label,
+    this.description,
+    this.showLabel = true,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    final enabled = onPressed != null;
+    final color = !enabled
+        ? p.muted.withValues(alpha: .45)
+        : value == false
+        ? p.secondary
+        : p.accent;
+    final indicator = SizedBox.square(
+      dimension: 32,
+      child: Center(
+        child: AnimatedContainer(
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 140),
+          curve: spaceCurve,
+          width: 20,
+          height: 20,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: value == false
+                ? Colors.transparent
+                : color.withValues(alpha: .14),
+            border: Border.all(color: color),
+          ),
+          child: switch (value) {
+            true => SpaceIcon('check', size: 13, color: color),
+            null => SizedBox(
+              width: 8,
+              height: 2,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+            ),
+            false => null,
+          },
+        ),
+      ),
+    );
+    final control = Semantics(
+      container: true,
+      label: label,
+      hint: description,
+      checked: value ?? false,
+      mixed: value == null,
+      enabled: enabled,
+      onTap: onPressed,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          excludeFromSemantics: true,
+          splashFactory: NoSplash.splashFactory,
+          onTap: onPressed,
+          mouseCursor: enabled
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.basic,
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: p.hover,
+          focusColor: p.accent.withValues(alpha: .22),
+          highlightColor: p.accent.withValues(alpha: .16),
+          child: showLabel
+              ? ExcludeSemantics(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: description == null ? 48 : 56,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          indicator,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  label,
+                                  style: textStyle(
+                                    p,
+                                    color: enabled ? p.text : p.muted,
+                                  ),
+                                ),
+                                if (description != null)
+                                  Text(
+                                    description!,
+                                    style: textStyle(
+                                      p,
+                                      size: 12,
+                                      color: p.muted,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : indicator,
+        ),
+      ),
+    );
+    return showLabel
+        ? control
+        : Tooltip(message: label, excludeFromSemantics: true, child: control);
   }
 }
 
@@ -514,7 +835,14 @@ class CategoryLabel extends StatelessWidget {
   final String category;
   final String? name;
   final int? count;
-  const CategoryLabel(this.category, {super.key, this.count, this.name});
+  final bool selected;
+  const CategoryLabel(
+    this.category, {
+    super.key,
+    this.count,
+    this.name,
+    this.selected = false,
+  });
   @override
   Widget build(BuildContext c) {
     final p = Palette.of(c);
@@ -526,14 +854,22 @@ class CategoryLabel extends StatelessWidget {
           height: 7,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: p.category(category),
+            color: selected
+                ? p.selectedButtonForeground(p.category(category))
+                : p.category(category),
           ),
         ),
         const SizedBox(width: 4),
         Flexible(
           child: Text(
             '${name ?? categories[category] ?? category}${count == null ? '' : ' $count'}',
-            style: textStyle(p, size: 12, color: p.secondary),
+            style: textStyle(
+              p,
+              size: 12,
+              color: selected
+                  ? p.selectedButtonForeground(p.secondary)
+                  : p.secondary,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -548,50 +884,11 @@ class ThemeToggle extends StatelessWidget {
   final VoidCallback onToggle;
   const ThemeToggle({super.key, required this.dark, required this.onToggle});
   @override
-  Widget build(BuildContext c) {
-    final p = Palette.of(c);
-    return Semantics(
-      button: true,
-      label: dark ? '切换到明亮主题' : '切换到暗色主题',
-      child: Tooltip(
-        message: dark ? '切换到明亮主题' : '切换到暗色主题',
-        child: GestureDetector(
-          onTap: onToggle,
-          child: Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: p.hover.withValues(alpha: p.dark ? 0.104 : .052),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            foregroundDecoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: p.border),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final v in [false, true])
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: dark == v ? p.card : Colors.transparent,
-                    ),
-                    alignment: Alignment.center,
-                    child: SpaceIcon(
-                      v ? 'moon' : 'sun',
-                      size: 13,
-                      color: dark == v ? p.accent : p.secondary,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => IconButtonS.toolbar(
+    dark ? 'sun' : 'moon',
+    dark ? '切换到明亮主题' : '切换到暗色主题',
+    onPressed: onToggle,
+  );
 }
 
 class SpaceInput extends StatelessWidget {
@@ -681,12 +978,132 @@ class SpaceInput extends StatelessWidget {
   }
 }
 
-class SpaceSelect extends StatefulWidget {
+class SpacePickerField extends StatefulWidget {
+  final String label, text;
+  final String? icon;
+  final double? width;
+  final bool active, placeholder;
+  final Future<void> Function(BuildContext)? open;
+
+  const SpacePickerField({
+    super.key,
+    required this.label,
+    required this.text,
+    required this.open,
+    this.icon,
+    this.width,
+    this.active = false,
+    this.placeholder = false,
+  });
+
+  @override
+  State<SpacePickerField> createState() => _SpacePickerFieldState();
+}
+
+class _SpacePickerFieldState extends State<SpacePickerField> {
+  bool expanded = false;
+
+  Future<void> open() async {
+    if (expanded) return;
+    setState(() => expanded = true);
+    try {
+      await widget.open!(context);
+    } finally {
+      if (mounted) setState(() => expanded = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    final motion = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 140);
+    return SizedBox(
+      width: widget.width,
+      child: AnimatedContainer(
+        duration: motion,
+        curve: spaceCurve,
+        decoration: BoxDecoration(
+          color: widget.active
+              ? p.selectedButtonBackground()
+              : p.card.withValues(alpha: .50),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        foregroundDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: expanded ? p.accent : p.border),
+        ),
+        child: Semantics(
+          expanded: expanded,
+          value: widget.text,
+          child: SpaceButton(
+            tooltip: widget.label,
+            onPressed: widget.open == null ? null : open,
+            child: Row(
+              children: [
+                if (widget.icon case final icon?) ...[
+                  SpaceIcon(
+                    icon,
+                    size: 16,
+                    color: widget.active
+                        ? p.selectedButtonForeground()
+                        : p.accent,
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: Text(
+                    widget.text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle(
+                      p,
+                      size: 12,
+                      color: widget.active
+                          ? p.selectedButtonForeground()
+                          : widget.placeholder
+                          ? p.muted
+                          : p.text,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                AnimatedRotation(
+                  turns: expanded ? .5 : 0,
+                  duration: motion,
+                  curve: spaceCurve,
+                  child: SpaceIcon(
+                    'down',
+                    size: 12,
+                    color: widget.active
+                        ? p.selectedButtonForeground(p.secondary)
+                        : p.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Map<String, String> projectChoices(SpaceState state, {String? selected}) => {
+  '': '无项目',
+  for (final project in state.projects)
+    if (!project.disabled || project.id == selected)
+      project.id: '${project.name}${project.disabled ? '（已停用）' : ''}',
+};
+
+class SpaceSelect extends StatelessWidget {
   final String value, label;
   final Map<String, String> options;
   final ValueChanged<String> onChanged;
   final double? width;
   final bool active;
+
   const SpaceSelect({
     super.key,
     required this.value,
@@ -696,87 +1113,36 @@ class SpaceSelect extends StatefulWidget {
     this.width,
     this.active = false,
   });
-  @override
-  State<SpaceSelect> createState() => _SpaceSelectState();
-}
-
-class _SpaceSelectState extends State<SpaceSelect> {
-  bool expanded = false;
-  Future<void> open() async {
-    final box = context.findRenderObject() as RenderBox;
-    final origin = box.localToGlobal(Offset.zero);
-    setState(() => expanded = true);
-    final value = await showGeneralDialog<String>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '关闭${widget.label}',
-      barrierColor: Colors.transparent,
-      transitionDuration: const Duration(milliseconds: 120),
-      pageBuilder: (c, a, b) => _Options(
-        anchor: origin & box.size,
-        options: widget.options,
-        value: widget.value,
-      ),
-    );
-    if (!mounted) return;
-    setState(() => expanded = false);
-    if (value != null) widget.onChanged(value);
-  }
 
   @override
-  Widget build(BuildContext c) {
-    final p = Palette.of(c);
-    return SizedBox(
-      width: widget.width,
-      height: 40,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: widget.active
-              ? p.hover
-              : p.card.withValues(alpha: p.dark ? 0.46 : .5),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: expanded ? p.accent : p.border,
-            width: expanded ? 2 : 1,
-          ),
-        ),
-        child: SpaceButton(
-          tooltip: widget.label,
-          onPressed: open,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.options[widget.value] ?? widget.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyle(
-                    p,
-                    size: 12,
-                    color: widget.active ? p.accent : p.text,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              SpaceIcon('down', size: 10, color: p.muted),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SpacePickerField(
+    label: label,
+    text: options[value] ?? label,
+    width: width,
+    active: active,
+    placeholder: !options.containsKey(value),
+    open: options.isEmpty
+        ? null
+        : (anchor) async {
+            final box = anchor.findRenderObject() as RenderBox;
+            final result = await anchoredPopup<String>(
+              anchor,
+              _Options(options: options.entries.toList(), value: value),
+              width: math.max(180, box.size.width),
+              height: math.min(options.length * 40.0 + 16, 320),
+              constrainHeight: true,
+            );
+            if (anchor.mounted && result != null && result != value) {
+              onChanged(result);
+            }
+          },
+  );
 }
 
 class _Options extends StatefulWidget {
-  final Rect anchor;
-  final Map<String, String> options;
+  final List<MapEntry<String, String>> options;
   final String value;
-  const _Options({
-    required this.anchor,
-    required this.options,
-    required this.value,
-  });
+  const _Options({required this.options, required this.value});
   @override
   State<_Options> createState() => _OptionsState();
 }
@@ -784,15 +1150,29 @@ class _Options extends StatefulWidget {
 class _OptionsState extends State<_Options> {
   late int index;
   final scroll = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    index = math.max(0, widget.options.keys.toList().indexOf(widget.value));
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (scroll.hasClients) {
-        scroll.jumpTo((index * 40.0).clamp(0, scroll.position.maxScrollExtent));
-      }
-    });
+    index = math.max(
+      0,
+      widget.options.indexWhere((e) => e.key == widget.value),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => revealIndex());
+  }
+
+  void revealIndex() {
+    if (!mounted || !scroll.hasClients) return;
+    final start = index * 40.0 + 8;
+    final end = start + 36;
+    final position = scroll.position;
+    if (start < position.pixels) {
+      scroll.jumpTo(start.clamp(0, position.maxScrollExtent));
+    } else if (end > position.pixels + position.viewportDimension) {
+      scroll.jumpTo(
+        (end - position.viewportDimension).clamp(0, position.maxScrollExtent),
+      );
+    }
   }
 
   @override
@@ -801,113 +1181,93 @@ class _OptionsState extends State<_Options> {
     super.dispose();
   }
 
+  KeyEventResult key(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.escape) {
+      Navigator.pop(context);
+    } else if ((key == LogicalKeyboardKey.enter ||
+            key == LogicalKeyboardKey.space) &&
+        event is KeyDownEvent) {
+      Navigator.pop(context, widget.options[index].key);
+    } else {
+      final target = switch (key) {
+        LogicalKeyboardKey.arrowDown => index + 1,
+        LogicalKeyboardKey.arrowUp => index - 1,
+        LogicalKeyboardKey.home => 0,
+        LogicalKeyboardKey.end => widget.options.length - 1,
+        _ => null,
+      };
+      if (target == null) return KeyEventResult.ignored;
+      setState(() => index = target.clamp(0, widget.options.length - 1));
+      revealIndex();
+    }
+    return KeyEventResult.handled;
+  }
+
   @override
-  Widget build(BuildContext c) {
-    final p = Palette.of(c), screen = MediaQuery.sizeOf(c);
-    final h = math.min(widget.options.length * 40.0 + 12, 320.0);
-    final top = widget.anchor.bottom + 6 + h > screen.height
-        ? math.max(8.0, widget.anchor.top - h - 6)
-        : widget.anchor.bottom + 6;
-    return Stack(
-      children: [
-        Positioned(
-          left: widget.anchor.left.clamp(
-            8,
-            math.max(8, screen.width - widget.anchor.width - 8),
-          ),
-          top: top,
-          width: widget.anchor.width,
-          height: h,
-          child: Material(
-            type: MaterialType.transparency,
-            child: Focus(
-              autofocus: true,
-              onKeyEvent: (n, e) {
-                if (e is! KeyDownEvent) return KeyEventResult.ignored;
-                if (e.logicalKey == LogicalKeyboardKey.escape) {
-                  Navigator.pop(c);
-                  return KeyEventResult.handled;
-                }
-                if (e.logicalKey == LogicalKeyboardKey.enter) {
-                  Navigator.pop(c, widget.options.keys.elementAt(index));
-                  return KeyEventResult.handled;
-                }
-                final delta = e.logicalKey == LogicalKeyboardKey.arrowDown
-                    ? 1
-                    : e.logicalKey == LogicalKeyboardKey.arrowUp
-                    ? -1
-                    : 0;
-                if (delta == 0) return KeyEventResult.ignored;
-                setState(
-                  () => index = (index + delta).clamp(
-                    0,
-                    widget.options.length - 1,
-                  ),
-                );
-                scroll.animateTo(
-                  (index * 40.0).clamp(0, scroll.position.maxScrollExtent),
-                  duration: const Duration(milliseconds: 80),
-                  curve: Curves.easeOut,
-                );
-                return KeyEventResult.handled;
-              },
-              child: PopupSurface(
-                child: ListView.separated(
-                  controller: scroll,
-                  padding: const EdgeInsets.all(8),
-                  itemCount: widget.options.length,
-                  separatorBuilder: (_, i) => const SizedBox(height: 4),
-                  itemBuilder: (c, i) {
-                    final key = widget.options.keys.elementAt(i);
-                    return MouseRegion(
-                      onEnter: (_) => setState(() => index = i),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: index == i ? p.hover : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: SpaceButton(
-                          height: 36,
-                          onPressed: () => Navigator.pop(c, key),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 16,
-                                child: key == widget.value
-                                    ? SpaceIcon(
-                                        'check',
-                                        size: 11,
-                                        color: p.accent,
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  widget.options[key]!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: textStyle(
-                                    p,
-                                    size: 12,
-                                    color: key == widget.value
-                                        ? p.accent
-                                        : p.text,
-                                  ),
-                                ),
-                              ),
-                            ],
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    return Focus(
+      autofocus: true,
+      onKeyEvent: key,
+      child: PopupSurface(
+        child: ListView.separated(
+          controller: scroll,
+          padding: const EdgeInsets.all(8),
+          itemCount: widget.options.length,
+          separatorBuilder: (_, i) => const SizedBox(height: 4),
+          itemBuilder: (context, i) {
+            final option = widget.options[i];
+            final selected = option.key == widget.value;
+            return MouseRegion(
+              onEnter: (_) => setState(() => index = i),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: i == index ? p.hover : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SpaceButton(
+                  height: 36,
+                  selected: selected,
+                  onPressed: () => Navigator.pop(context, option.key),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        child: selected
+                            ? SpaceIcon(
+                                'check',
+                                size: 14,
+                                color: p.selectedButtonForeground(),
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          option.value,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textStyle(
+                            p,
+                            size: 12,
+                            color: selected
+                                ? p.selectedButtonForeground()
+                                : p.text,
                           ),
                         ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
-      ],
+      ),
     );
   }
 }
@@ -924,41 +1284,21 @@ class DateField extends StatelessWidget {
     this.allowsClear = true,
   });
   @override
-  Widget build(BuildContext c) {
-    final p = Palette.of(c);
-    return Glass(
-      blur: false,
-      child: SpaceButton(
-        tooltip: label,
-        onPressed: () async {
-          final d = await anchoredPopup<String>(
-            c,
-            DatePopover(value: value, allowsClear: allowsClear),
-            width: 304,
-            height: 376,
-          );
-          if (d != null) onChanged(d);
-        },
-        child: Row(
-          children: [
-            SpaceIcon('calendar', color: p.accent),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                value.isEmpty ? '未设置$label' : value,
-                style: textStyle(
-                  p,
-                  size: 14,
-                  color: value.isEmpty ? p.muted : p.text,
-                ),
-              ),
-            ),
-            const SpaceIcon('down', size: 10),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext c) => SpacePickerField(
+    label: label,
+    text: value.isEmpty ? '未设置$label' : value,
+    icon: 'calendar',
+    placeholder: value.isEmpty,
+    open: (anchor) async {
+      final date = await anchoredPopup<String>(
+        anchor,
+        DatePopover(value: value, allowsClear: allowsClear),
+        width: 304,
+        height: 376,
+      );
+      if (anchor.mounted && date != null) onChanged(date);
+    },
+  );
 }
 
 class DatePopover extends StatefulWidget {
@@ -1129,27 +1469,54 @@ Future<T?> anchoredPopup<T>(
   required double width,
   required double height,
   Color barrierColor = Colors.transparent,
+  bool constrainHeight = false,
 }) {
   final box = context.findRenderObject() as RenderBox;
   final anchor = box.localToGlobal(Offset.zero) & box.size;
   final screen = MediaQuery.sizeOf(context);
-  final left = anchor.left.clamp(8.0, math.max(8.0, screen.width - width - 8));
-  final top = anchor.bottom + height + 6 <= screen.height - 8
-      ? anchor.bottom + 6
-      : math.max(8.0, anchor.top - height - 6);
+  final popupWidth = math.min(width, math.max(1.0, screen.width - 16));
+  final left = anchor.left.clamp(
+    8.0,
+    math.max(8.0, screen.width - popupWidth - 8),
+  );
+  final below = math.max(0.0, screen.height - anchor.bottom - 16);
+  final above = math.max(0.0, anchor.top - 16);
+  final openBelow = height <= below || (constrainHeight && below >= above);
+  final popupHeight = constrainHeight
+      ? math.min(height, math.max(1.0, openBelow ? below : above))
+      : height;
+  final top = openBelow
+      ? anchor.bottom + 8
+      : math.max(8.0, anchor.top - popupHeight - 8);
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: true,
     barrierLabel: '关闭浮层',
     barrierColor: barrierColor,
-    transitionDuration: const Duration(milliseconds: 120),
+    transitionDuration: MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 120),
     pageBuilder: (c, a, b) => Stack(
       children: [
         Positioned(
           left: left.toDouble(),
           top: top,
-          width: width,
-          child: Material(type: MaterialType.transparency, child: child),
+          width: popupWidth,
+          height: constrainHeight ? popupHeight : null,
+          child: Material(
+            type: MaterialType.transparency,
+            child: Focus(
+              onKeyEvent: (node, event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  Navigator.pop(c);
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: child,
+            ),
+          ),
         ),
       ],
     ),
@@ -1257,85 +1624,52 @@ class SpaceMultiSelect extends StatelessWidget {
     this.width,
   });
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context) => SpacePickerField(
+    label: label,
     width: width,
-    child: Builder(
-      builder: (anchor) => SpaceButton(
-        tooltip: label,
-        selected: values.isNotEmpty,
-        onPressed: () => anchoredPopup(
-          anchor,
-          StatefulBuilder(
-            builder: (c, set) => Glass(
+    active: values.isNotEmpty,
+    text: values.isEmpty
+        ? '全部$label'
+        : values.length == 1
+        ? (options[values.first] ?? label)
+        : '$label · 已选${values.length}项',
+    open: (anchor) => anchoredPopup<void>(
+      anchor,
+      StatefulBuilder(
+        builder: (context, setPopupState) => Focus(
+          autofocus: true,
+          child: PopupSurface(
+            child: ListView(
               padding: const EdgeInsets.all(8),
-              child: Focus(
-                autofocus: true,
-                onKeyEvent: (_, event) {
-                  if (event is KeyDownEvent &&
-                      event.logicalKey == LogicalKeyboardKey.escape) {
-                    Navigator.pop(c);
-                    return KeyEventResult.handled;
-                  }
-                  return KeyEventResult.ignored;
-                },
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 344),
-                    child: ListView(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      children: [
-                        SpaceButton(
-                          onPressed: () {
-                            values.clear();
-                            onChanged();
-                            set(() {});
-                          },
-                          child: Text('全部$label'),
-                        ),
-                        for (final e in options.entries)
-                          CheckboxListTile(
-                            dense: true,
-                            title: Text(e.value),
-                            value: values.contains(e.key),
-                            onChanged: (_) {
-                              if (!values.remove(e.key)) {
-                                values.add(e.key);
-                              }
-                              onChanged();
-                              set(() {});
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
+              children: [
+                SpaceButton(
+                  height: 36,
+                  selected: values.isEmpty,
+                  onPressed: () {
+                    values.clear();
+                    onChanged();
+                    setPopupState(() {});
+                  },
+                  child: Text('全部$label'),
                 ),
-              ),
+                for (final entry in options.entries)
+                  SpaceCheckbox(
+                    label: entry.value,
+                    value: values.contains(entry.key),
+                    onPressed: () {
+                      if (!values.remove(entry.key)) values.add(entry.key);
+                      onChanged();
+                      setPopupState(() {});
+                    },
+                  ),
+              ],
             ),
           ),
-          width: 280,
-          height: (options.length * 48.0 + 64).clamp(112, 360),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Text(
-                values.isEmpty
-                    ? '全部$label'
-                    : values.length == 1
-                    ? (options[values.first] ?? label)
-                    : '$label · 已选${values.length}项',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const SpaceIcon('down', size: 9),
-          ],
         ),
       ),
+      width: 240,
+      height: math.min(options.length * 48.0 + 52, 360),
+      constrainHeight: true,
     ),
   );
 }

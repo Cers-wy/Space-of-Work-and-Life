@@ -1518,96 +1518,80 @@ class MonthField extends StatelessWidget {
   final ValueChanged<DateTime> onChanged;
   const MonthField({super.key, required this.value, required this.onChanged});
   @override
-  Widget build(BuildContext c) => Builder(
-    builder: (anchor) => SpaceButton(
-      tooltip: '选择年月',
-      onPressed: () async {
-        var year = value.year;
-        final result = await anchoredPopup<DateTime>(
-          anchor,
-          StatefulBuilder(
-            builder: (c, set) => Focus(
-              autofocus: true,
-              onKeyEvent: (_, event) {
-                if (event is KeyDownEvent &&
-                    event.logicalKey == LogicalKeyboardKey.escape) {
-                  Navigator.pop(c);
-                  return KeyEventResult.handled;
-                }
-                return KeyEventResult.ignored;
-              },
-              child: Glass(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        IconButtonS(
-                          'left',
-                          '上一年',
-                          onPressed: year > 1 ? () => set(() => year--) : null,
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              '$year 年',
-                              style: textStyle(Palette.of(c), bold: true),
-                            ),
+  Widget build(BuildContext c) => SpacePickerField(
+    label: '选择年月',
+    text: '${value.year}年${value.month}月',
+    icon: 'calendar',
+    open: (anchor) async {
+      var year = value.year;
+      final result = await anchoredPopup<DateTime>(
+        anchor,
+        StatefulBuilder(
+          builder: (c, set) => Focus(
+            autofocus: true,
+            onKeyEvent: (_, event) {
+              if (event is KeyDownEvent &&
+                  event.logicalKey == LogicalKeyboardKey.escape) {
+                Navigator.pop(c);
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            },
+            child: PopupSurface(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      IconButtonS(
+                        'left',
+                        '上一年',
+                        onPressed: year > 1 ? () => set(() => year--) : null,
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            '$year 年',
+                            style: textStyle(Palette.of(c), bold: true),
                           ),
                         ),
-                        IconButtonS(
-                          'right',
-                          '下一年',
-                          onPressed: year < 9998
-                              ? () => set(() => year++)
-                              : null,
-                        ),
+                      ),
+                      IconButtonS(
+                        'right',
+                        '下一年',
+                        onPressed: year < 9998 ? () => set(() => year++) : null,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  for (var row = 0; row < 4; row++)
+                    Row(
+                      children: [
+                        for (var col = 1; col <= 3; col++)
+                          Expanded(
+                            child: SpaceButton(
+                              selected:
+                                  year == value.year &&
+                                  row * 3 + col == value.month,
+                              onPressed: () => Navigator.pop(
+                                c,
+                                DateTime.utc(year, row * 3 + col),
+                              ),
+                              child: Text('${row * 3 + col}月'),
+                            ),
+                          ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    for (var row = 0; row < 4; row++)
-                      Row(
-                        children: [
-                          for (var col = 1; col <= 3; col++)
-                            Expanded(
-                              child: SpaceButton(
-                                selected:
-                                    year == value.year &&
-                                    row * 3 + col == value.month,
-                                onPressed: () => Navigator.pop(
-                                  c,
-                                  DateTime.utc(year, row * 3 + col),
-                                ),
-                                child: Text('${row * 3 + col}月'),
-                              ),
-                            ),
-                        ],
-                      ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
-          width: 280,
-          height: 256,
-        );
-        if (result != null) onChanged(result);
-      },
-      child: Row(
-        children: [
-          const SpaceIcon('calendar'),
-          const SizedBox(width: 8),
-          AnimatedSwitcher(
-            duration: MediaQuery.disableAnimationsOf(c)
-                ? Duration.zero
-                : const Duration(milliseconds: 200),
-            child: Text('${value.year}年${value.month}月', key: ValueKey(value)),
-          ),
-          const Spacer(),
-          const SpaceIcon('down', size: 9),
-        ],
-      ),
-    ),
+        ),
+        width: 280,
+        height: 256,
+      );
+      if (anchor.mounted && result != null) onChanged(result);
+    },
   );
 }

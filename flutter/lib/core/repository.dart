@@ -39,7 +39,107 @@ class SpaceRepository {
     return db;
   }
 
-  SpaceState readFile(String file) {
+  Database openInvoiceDatabase() {
+    if (!loaded || !File(path).existsSync()) {
+      throw StateError('Space 数据库尚未载入');
+    }
+    final db = _open(path);
+    try {
+      if (db.userVersion < 1 || db.userVersion > 5) {
+        throw StateError('不支持此 Space 数据库版本');
+      }
+      if (db.userVersion < 5) {
+        db.execute('BEGIN IMMEDIATE');
+        try {
+          if (db.userVersion == 4) {
+            _migrateInvoiceProjects(db);
+          } else if (db.userVersion < 4) {
+            _createInvoiceTables(db);
+          }
+          db.userVersion = 5;
+          db.execute('COMMIT');
+        } catch (_) {
+          db.execute('ROLLBACK');
+          rethrow;
+        }
+      }
+      return db;
+    } catch (_) {
+      db.close();
+      rethrow;
+    }
+  }
+
+  void _createInvoiceTables(Database db) {
+    db.execute('''
+CREATE TABLE invoices (
+id TEXT PRIMARY KEY, number TEXT NOT NULL DEFAULT '', issued TEXT NOT NULL DEFAULT '',
+seller TEXT NOT NULL DEFAULT '', spent TEXT NOT NULL DEFAULT '', purpose TEXT NOT NULL DEFAULT '',
+month TEXT NOT NULL DEFAULT '', project TEXT REFERENCES projects(id) DEFERRABLE INITIALLY DEFERRED,
+cents INTEGER, reimbursed INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE invoice_files (
+id TEXT PRIMARY KEY, invoice TEXT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+name TEXT NOT NULL, extension TEXT NOT NULL, original INTEGER NOT NULL
+);
+CREATE INDEX invoice_files_parent ON invoice_files(invoice);
+CREATE UNIQUE INDEX invoice_original ON invoice_files(invoice) WHERE original=1;
+CREATE INDEX invoice_project ON invoices(project);
+''');
+  }
+
+  void _migrateInvoiceProjects(Database db) {
+    final byName = {
+      for (final row in db.select('SELECT id,name FROM projects'))
+        normalizedName(row['name'] as String).toLowerCase():
+            row['id'] as String,
+    };
+    db.execute('''
+CREATE TEMP TABLE invoice_project_map (old_id TEXT PRIMARY KEY, project_id TEXT NOT NULL);
+DROP INDEX invoice_files_parent;
+DROP INDEX invoice_original;
+ALTER TABLE invoices RENAME TO old_invoices;
+ALTER TABLE invoice_files RENAME TO old_invoice_files;
+''');
+    var fallback = 1;
+    for (final row in db.select(
+      'SELECT id,name FROM invoice_projects ORDER BY rowid',
+    )) {
+      final oldID = row['id'] as String;
+      var name = normalizedName(row['name'] as String);
+      if (controls(name) || name.isEmpty || name.length > 60) {
+        do {
+          name = '旧报销项目 ${fallback++}';
+        } while (byName.containsKey(name.toLowerCase()));
+      }
+      final project = byName.putIfAbsent(name.toLowerCase(), () {
+        if (byName.length >= 10000) invalid('合并报销项目后项目数量超过限制');
+        final id = uid();
+        db.execute('INSERT INTO projects VALUES (?,?)', [id, name]);
+        return id;
+      });
+      db.execute('INSERT INTO invoice_project_map VALUES (?,?)', [
+        oldID,
+        project,
+      ]);
+    }
+    _createInvoiceTables(db);
+    db.execute('''
+INSERT INTO invoices
+SELECT i.id,i.number,i.issued,i.seller,i.spent,i.purpose,i.month,m.project_id,i.cents,i.reimbursed
+FROM old_invoices i LEFT JOIN invoice_project_map m ON i.project=m.old_id ORDER BY i.rowid;
+INSERT INTO invoice_files SELECT * FROM old_invoice_files ORDER BY rowid;
+DROP TABLE old_invoice_files;
+DROP TABLE old_invoices;
+DROP TABLE invoice_projects;
+DROP TABLE invoice_project_map;
+''');
+    db.execute("INSERT OR REPLACE INTO metadata VALUES('revision',?)", [uid()]);
+  }
+
+  SpaceState readFile(String file) => _readFile(file).$1;
+
+  (SpaceState, int) _readFile(String file) {
     if (!File(file).existsSync() ||
         File(file).lengthSync() > 64 * 1024 * 1024) {
       invalid('数据库不存在或超过64 MB');
@@ -56,7 +156,7 @@ class SpaceRepository {
     final db = _open(file, readOnly: true);
     try {
       final v = db.userVersion;
-      if (v < 1 || v > 3) invalid('不支持数据库格式版本 $v');
+      if (v < 1 || v > 5) invalid('不支持数据库格式版本 $v');
       if (db.select('PRAGMA quick_check').first.values.first != 'ok') {
         invalid('数据库校验失败，原文件已保留');
       }
@@ -111,7 +211,7 @@ class SpaceRepository {
           v < 3 && s.tasks.any((t) => t.richDescription != null)) {
         invalid('数据库版本与内容不一致');
       }
-      return s;
+      return (s, v);
     } finally {
       db.close();
     }
@@ -142,7 +242,7 @@ class SpaceRepository {
   Future<SpaceState> _loadDirect() async {
     try {
       if (File(path).existsSync()) {
-        final s = readFile(path);
+        final s = _readLocal();
         expectedRevision = s.revision;
         loaded = true;
         return s;
@@ -150,7 +250,7 @@ class SpaceRepository {
       final s = SpaceState(workspaceID: uid());
       return await _locked(() async {
         if (File(path).existsSync()) {
-          final existing = readFile(path);
+          final existing = _readLocal();
           expectedRevision = existing.revision;
           loaded = true;
           return existing;
@@ -161,6 +261,14 @@ class SpaceRepository {
       loaded = false;
       rethrow;
     }
+  }
+
+  SpaceState _readLocal() {
+    final (state, version) = _readFile(path);
+    if (version != 4) return state;
+    loaded = true;
+    openInvoiceDatabase().close();
+    return readFile(path);
   }
 
   String? _revision(Database db) =>
@@ -266,6 +374,13 @@ PRAGMA user_version=1;
           );
           for (final p in state.projects) {
             db.execute('INSERT INTO projects VALUES(?,?)', [p.id, p.name]);
+          }
+          if (db.userVersion >= 5) {
+            // Retained project IDs have already been reinserted in this transaction.
+            db.execute(
+              'UPDATE invoices SET project=NULL WHERE project IS NOT NULL '
+              'AND NOT EXISTS (SELECT 1 FROM projects WHERE id=invoices.project)',
+            );
           }
           final insert = db.prepare('INSERT INTO tasks VALUES(?,?,?,?)');
           try {

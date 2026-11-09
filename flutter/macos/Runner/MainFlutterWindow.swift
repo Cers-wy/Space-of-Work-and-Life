@@ -63,12 +63,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         result(nil)
       case "openFiles":
         let panel = SpaceFilePanels.open(sqliteOnly: a["sqliteOnly"] as? Bool ?? false,
-                                         multiple: a["multiple"] as? Bool ?? false)
+                                         multiple: a["multiple"] as? Bool ?? false,
+                                         title: a["title"] as? String, extensions: a["extensions"] as? [String] ?? [])
         panel.beginSheetModal(for: self) { response in result(response == .OK ? panel.urls.map(\.path) : []) }
       case "saveFile":
         let panel = SpaceFilePanels.save(name: a["name"] as? String ?? "Space备份.sqlite",
-                                         sqliteOnly: a["sqliteOnly"] as? Bool ?? false)
+                                         sqliteOnly: a["sqliteOnly"] as? Bool ?? false, title: a["title"] as? String)
         panel.beginSheetModal(for: self) { response in result(response == .OK ? panel.url?.path : nil) }
+      case "invoiceInspect", "invoicePreview", "invoiceRender", "invoiceWrite", "invoicePrint":
+        SpaceInvoicePDF.handle(call.method, a, result)
       case "reveal":
         if let path = a["path"] as? String { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)]) }; result(nil)
       case "preview":
@@ -117,12 +120,19 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   private func updateMenuState(_ state:[String:Any]) {
     let modal=state["modal"] as? Bool ?? false
     let loaded=state["loaded"] as? Bool ?? false
+    let area = state["area"] as? String ?? "tasks"
+    let taskActions: Set<String> = ["new", "statuses", "overview", "board", "list", "gantt", "calendar", "reload"]
     func update(_ menu:NSMenu) {
       for item in menu.items {
         if let action=item.representedObject as? String {
           item.isEnabled = !modal
           if action == "new" || action == "statuses" { item.isEnabled = loaded && !modal }
-          if action == "undo" { item.isEnabled = modal || (state["canUndo"] as? Bool ?? false) || NSApp.keyWindow?.firstResponder is NSTextView }
+          if action == "undo" { item.isEnabled = modal || (area == "tasks" && (state["canUndo"] as? Bool ?? false)) || NSApp.keyWindow?.firstResponder is NSTextView }
+          if taskActions.contains(action) && area != "tasks" { item.isEnabled = false }
+          if action == "search" {
+            item.isEnabled = !modal && area != "tools"
+            item.title = area == "invoices" ? "搜索发票" : "搜索任务"
+          }
           menuEnabled[action]=item.isEnabled
           if action == "nav" {item.title = (state["navCollapsed"] as? Bool ?? true) ? "展开导航":"收起导航"}
           if action == "overview" {item.title = (state["overviewCollapsed"] as? Bool ?? false) ? "展开概览":"收起概览"}

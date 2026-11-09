@@ -18,19 +18,25 @@ class DesktopHost {
   static Future<List<String>> openFiles({
     bool multiple = true,
     bool sqliteOnly = false,
+    String? title,
+    List<String> extensions = const [],
   }) async => List<String>.from(
     await channel.invokeMethod('openFiles', {
           'multiple': multiple,
           'sqliteOnly': sqliteOnly,
+          'title': ?title,
+          if (extensions.isNotEmpty) 'extensions': extensions,
         }) ??
         [],
   );
   static Future<String?> saveFile(
     String name, {
     bool sqliteOnly = false,
+    String? title,
   }) async => channel.invokeMethod<String>('saveFile', {
     'name': name,
     'sqliteOnly': sqliteOnly,
+    'title': ?title,
   });
   static Future<void> reveal(String path) async =>
       channel.invokeMethod('reveal', {'path': path});

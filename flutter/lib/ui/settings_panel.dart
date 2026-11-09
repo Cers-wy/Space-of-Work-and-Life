@@ -89,22 +89,10 @@ class _SettingsPanelState extends State<SettingsPanel>
 
   Color border(Palette p) =>
       p.blend(const Color(0xffe1e7f0), const Color(0xff313131));
-  Widget section(String title, List<Widget> children) {
-    final p = Palette.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(title, style: textStyle(p, bold: true)),
-          ),
-          ...children,
-        ],
-      ),
-    );
-  }
+  Widget section(String title, List<Widget> children) => Padding(
+    padding: const EdgeInsets.only(top: 16),
+    child: SpaceEditorSection(title: title, children: children),
+  );
 
   Widget row(String label, {String? detail, Widget? trailing}) {
     final p = Palette.of(context);
@@ -270,9 +258,21 @@ class _SettingsPanelState extends State<SettingsPanel>
                         ? 'moon'
                         : 'system',
                     size: 16,
+                    color: s.appearance == choice.$1
+                        ? p.selectedButtonForeground(p.secondary)
+                        : p.secondary,
                   ),
                   const SizedBox(width: 8),
-                  Text(choice.$2, style: textStyle(p, size: 12)),
+                  Text(
+                    choice.$2,
+                    style: textStyle(
+                      p,
+                      size: 12,
+                      color: s.appearance == choice.$1
+                          ? p.selectedButtonForeground(p.text)
+                          : p.text,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -675,12 +675,27 @@ class _SettingsPanelState extends State<SettingsPanel>
                     ? MainAxisAlignment.center
                     : MainAxisAlignment.start,
                 children: [
-                  SettingsIcon(categories[i].$1),
+                  SettingsIcon(
+                    categories[i].$1,
+                    size: 16,
+                    color: selected == i
+                        ? p.selectedButtonForeground(p.secondary)
+                        : p.secondary,
+                  ),
                   if (!compact) ...[
-                    const SizedBox(width: 12),
-                    Text(
-                      categories[i].$2,
-                      style: textStyle(p, color: p.secondary),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        categories[i].$2,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textStyle(
+                          p,
+                          color: selected == i
+                              ? p.selectedButtonForeground(p.secondary)
+                              : p.secondary,
+                        ),
+                      ),
                     ),
                   ],
                 ],
@@ -711,29 +726,20 @@ class _SettingsPanelState extends State<SettingsPanel>
       blur: false,
       child: Column(
         children: [
-          SizedBox(
+          SpaceTitleBar(
             key: const ValueKey('settings-titlebar'),
-            height: spaceTitleBarHeight,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Text('设置', style: textStyle(p, bold: true)),
-                  const SizedBox(width: 12),
-                  Text('Space', style: textStyle(p, size: 12, color: p.muted)),
-                  const Spacer(),
-                  SettingsAction(
-                    height: 32,
-                    quiet: true,
-                    key: const ValueKey('settings-close'),
-                    tooltip: '关闭设置',
-                    padding: const EdgeInsets.all(8),
-                    onPressed: () => Navigator.pop(context),
-                    child: const SettingsIcon('close', size: 16),
-                  ),
-                ],
+            children: [
+              Text('设置', style: textStyle(p, bold: true)),
+              const SizedBox(width: 12),
+              Text('Space', style: textStyle(p, size: 12, color: p.muted)),
+              const Spacer(),
+              IconButtonS.toolbar(
+                'x',
+                '关闭设置',
+                key: const ValueKey('settings-close'),
+                onPressed: () => Navigator.pop(context),
               ),
-            ),
+            ],
           ),
           Divider(height: 1, color: border(p)),
           Expanded(
@@ -754,14 +760,14 @@ class _SettingsPanelState extends State<SettingsPanel>
                         child: SingleChildScrollView(
                           key: const ValueKey('settings-scroll'),
                           controller: scroll,
-                          padding: EdgeInsets.all(compact ? 24 : 32),
+                          padding: EdgeInsets.all(compact ? 16 : 24),
                           child: FocusTraversalGroup(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
                                   categories[selected].$2,
-                                  style: textStyle(p, size: 20, bold: true),
+                                  style: textStyle(p, size: 16, bold: true),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(

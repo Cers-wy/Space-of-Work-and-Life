@@ -7,6 +7,8 @@ import 'core/models.dart';
 import 'core/repository.dart';
 import 'host.dart';
 
+enum SpaceArea { tasks, tools, invoices }
+
 class SpaceStore extends ChangeNotifier {
   final SpaceRepository repository;
   SpaceState state = SpaceState();
@@ -29,7 +31,15 @@ class SpaceStore extends ChangeNotifier {
   String today = dayString(beijingDay());
   Timer? _noticeTimer, _dayTimer;
   final searchRequested = ValueNotifier<int>(0);
+  SpaceArea area = SpaceArea.tasks;
   SpaceStore(this.repository);
+
+  void openArea(SpaceArea value) {
+    if (area == value) return;
+    area = value;
+    notifyListeners();
+  }
+
   bool? _systemDark, _temporaryDark;
   bool get systemDark =>
       _systemDark ??

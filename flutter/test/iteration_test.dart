@@ -306,8 +306,9 @@ void main() {
       );
       await t.sendKeyEvent(LogicalKeyboardKey.enter);
       await t.pumpAndSettle();
-      expect(find.text('隐藏滚动条'), findsOneWidget);
-      Navigator.of(t.element(find.text('隐藏滚动条'))).pop();
+      final titlebar = find.byKey(const ValueKey('settings-titlebar'));
+      expect(titlebar, findsOneWidget);
+      Navigator.of(t.element(titlebar)).pop();
       await t.pumpAndSettle();
       s.query.text = '不存在的测试任务';
       s.refreshQuery();
@@ -321,6 +322,8 @@ void main() {
   testWidgets('全局隐藏在现有弹窗中立即生效，关闭恢复滚动条', (t) async {
     await launch(t, 1380);
     final future = showSettings(t.element(find.byType(Workspace)), s);
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const ValueKey('settings-category-1')));
     await t.pumpAndSettle();
     expect(find.text('隐藏滚动条'), findsOneWidget);
     expect(find.byType(Scrollbar), findsWidgets);

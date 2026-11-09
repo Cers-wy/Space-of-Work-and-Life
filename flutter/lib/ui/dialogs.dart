@@ -27,7 +27,13 @@ Future<T?> sheet<T>(
   barrierDismissible: false,
   barrierLabel: '关闭面板',
   barrierColor: Colors.black.withValues(alpha: .18),
-  transitionDuration: const Duration(milliseconds: 200),
+  transitionDuration: MediaQuery.disableAnimationsOf(context)
+      ? Duration.zero
+      : const Duration(milliseconds: 200),
+  transitionBuilder: (_, animation, _, child) => FadeTransition(
+    opacity: animation.drive(CurveTween(curve: spaceCurve)),
+    child: child,
+  ),
   pageBuilder: (c, a, b) => Center(
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -66,18 +72,18 @@ Widget sheetFrame(
           blur: false,
           child: Column(
             children: [
-              SizedBox(
-                height: 48,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    children: [
-                      Text(title, style: textStyle(p, size: 16, bold: true)),
-                      const Spacer(),
-                      IconButtonS('x', '关闭$title', size: 24, onPressed: close),
-                    ],
+              SpaceTitleBar(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textStyle(p, bold: true),
+                    ),
                   ),
-                ),
+                  IconButtonS.toolbar('x', '关闭$title', onPressed: close),
+                ],
               ),
               Divider(height: 1, color: p.border),
               Expanded(child: body),
@@ -85,7 +91,7 @@ Widget sheetFrame(
               SizedBox(
                 height: 48,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(children: footer),
                 ),
               ),
@@ -536,311 +542,327 @@ class _TaskEditorState extends State<_TaskEditor> {
             ),
           ],
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                SpaceEditorSection(
                   children: [
-                    Text('任务标题 *', style: textStyle(p, bold: true)),
-                    const Spacer(),
-                    Text(
-                      '${title.text.length}/100',
-                      style: textStyle(p, size: 12, color: p.muted),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                SpaceInput(
-                  controller: title,
-                  hint: '下一步要做什么？',
-                  label: '任务标题',
-                  focusNode: titleFocus,
-                  invalid: titleError != null,
-                  autofocus: true,
-                ),
-                if (titleError != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    titleError!,
-                    style: textStyle(p, size: 12, color: p.red),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: field(
-                        c,
-                        '所属分类',
-                        SpaceSelect(
-                          value: draft.category,
-                          options: s.state.taskCategories,
-                          label: '所属分类',
-                          onChanged: (v) => setState(
-                            () => draft = draft.patch({'category': v}),
-                          ),
+                    Row(
+                      children: [
+                        Text('任务标题 *', style: textStyle(p, bold: true)),
+                        const Spacer(),
+                        Text(
+                          '${title.text.length}/100',
+                          style: textStyle(p, size: 12, color: p.muted),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: field(
-                        c,
-                        '任务状态',
-                        SpaceSelect(
-                          value: draft.status,
-                          options: {
-                            for (final status in s.state.statuses)
-                              if (!s.state.disabledStatuses.contains(status) ||
-                                  status == draft.status)
-                                status: statusName(status),
-                          },
-                          label: '任务状态',
-                          onChanged: (v) =>
-                              setState(() => draft = draft.moving(v)),
-                        ),
-                      ),
+                    const SizedBox(height: 8),
+                    SpaceInput(
+                      controller: title,
+                      hint: '下一步要做什么？',
+                      label: '任务标题',
+                      focusNode: titleFocus,
+                      invalid: titleError != null,
+                      autofocus: true,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: field(
-                        c,
-                        '优先级',
-                        SpaceSelect(
-                          value: draft.priority,
-                          options: {
-                            for (final e in priorities.entries)
-                              e.key: '${e.value}优先级',
-                          },
-                          label: '优先级',
-                          onChanged: (v) => setState(
-                            () => draft = draft.patch({'priority': v}),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                field(
-                  c,
-                  '项目 / 可选',
-                  Row(
-                    children: [
-                      Expanded(
-                        child: creatingProject
-                            ? SpaceInput(
-                                controller: project,
-                                hint: '输入项目名称，保存任务时一起新建',
-                                label: '新项目名称',
-                                onChanged: (_) => setState(() {}),
-                              )
-                            : SpaceSelect(
-                                value: draft.projectID ?? '',
-                                options: {
-                                  '': '无项目',
-                                  for (final project in s.state.projects)
-                                    if (!project.disabled ||
-                                        project.id == draft.projectID)
-                                      project.id:
-                                          '${project.name}${project.disabled ? '（已停用）' : ''}',
-                                },
-                                label: '所属项目',
-                                onChanged: (v) => setState(
-                                  () => draft = draft.patch({
-                                    'projectID': v.isEmpty ? null : v,
-                                  }),
-                                ),
-                              ),
-                      ),
-                      const SizedBox(width: 12),
-                      SpaceButton(
-                        onPressed: () => setState(() {
-                          creatingProject = !creatingProject;
-                          project.clear();
-                        }),
-                        child: Text(creatingProject ? '取消' : '新建'),
+                    if (titleError != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        titleError!,
+                        style: textStyle(p, size: 12, color: p.red),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: field(
-                        c,
-                        '开始日期 / 可选',
-                        DateField(
-                          value: draft.startDate ?? '',
-                          label: '开始日期',
-                          onChanged: (v) => setState(
-                            () => draft = draft.patch({
-                              'startDate': v.isEmpty ? null : v,
-                            }),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: field(
-                        c,
-                        '截止日期',
-                        DateField(
-                          value: draft.due,
-                          onChanged: (v) =>
-                              setState(() => draft = draft.patch({'due': v})),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                Row(
+                const SizedBox(height: 16),
+                SpaceEditorSection(
+                  title: '任务属性',
                   children: [
-                    Text('任务说明', style: textStyle(p, bold: true)),
-                    const Spacer(),
-                    Text(
-                      '${rich.document.toPlainText().length - 1}/5,000',
-                      style: textStyle(p, size: 12, color: p.muted),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  height: 192,
-                  decoration: BoxDecoration(
-                    color: p.card,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: p.border),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: q.QuillEditor.basic(
-                      controller: rich,
-                      focusNode: editorFocus,
-                      config: q.QuillEditorConfig(
-                        padding: const EdgeInsets.all(8),
-                        embedBuilders: [_ImageBuilder()],
-                        customStyles: q.DefaultStyles(
-                          paragraph: q.DefaultTextBlockStyle(
-                            textStyle(p),
-                            const q.HorizontalSpacing(0, 0),
-                            const q.VerticalSpacing(0, 0),
-                            const q.VerticalSpacing(0, 0),
-                            null,
-                          ),
-                        ),
-                        scrollable: true,
-                        autoFocus: false,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    SpaceButton(
-                      onPressed: upload,
-                      child: const Row(
-                        children: [
-                          SpaceIcon('clip'),
-                          SizedBox(width: 8),
-                          Text('上传附件'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '粘贴图片仅保存在任务说明中',
-                        style: textStyle(p, size: 12, color: p.muted),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '单个附件≤10 MB，每项任务≤20个、合计≤20 MB',
-                  style: textStyle(p, size: 12, color: p.muted),
-                ),
-                for (final a in draft.attachments) ...[
-                  const SizedBox(height: 8),
-                  Glass(
-                    blur: false,
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: () => previewAttachment(a),
-                          child: SizedBox(
-                            width: 96,
-                            height: 64,
-                            child:
-                                a.typeIdentifier == 'public.png' ||
-                                    a.typeIdentifier == 'public.jpeg'
-                                ? Image.memory(
-                                    a.data,
-                                    fit: BoxFit.contain,
-                                    cacheWidth: 192,
-                                    errorBuilder: (c, e, st) =>
-                                        const SpaceIcon('file', size: 32),
-                                  )
-                                : const Center(
-                                    child: SpaceIcon('file', size: 32),
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                a.name,
-                                style: textStyle(p, size: 12),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                          child: field(
+                            c,
+                            '所属分类',
+                            SpaceSelect(
+                              value: draft.category,
+                              options: s.state.taskCategories,
+                              label: '所属分类',
+                              onChanged: (v) => setState(
+                                () => draft = draft.patch({'category': v}),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${(a.data.length / 1024).toStringAsFixed(1)} KB',
-                                style: textStyle(p, size: 12, color: p.muted),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                        IconButtonS(
-                          'save',
-                          '另存附件',
-                          onPressed: () async {
-                            final path = await DesktopHost.saveFile(a.name);
-                            if (path != null) {
-                              await File(
-                                path,
-                              ).writeAsBytes(a.data, flush: true);
-                            }
-                          },
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: field(
+                            c,
+                            '任务状态',
+                            SpaceSelect(
+                              value: draft.status,
+                              options: {
+                                for (final status in s.state.statuses)
+                                  if (!s.state.disabledStatuses.contains(
+                                        status,
+                                      ) ||
+                                      status == draft.status)
+                                    status: statusName(status),
+                              },
+                              label: '任务状态',
+                              onChanged: (v) =>
+                                  setState(() => draft = draft.moving(v)),
+                            ),
+                          ),
                         ),
-                        IconButtonS(
-                          'x',
-                          '移除附件',
-                          onPressed: () => setState(
-                            () => draft = draft.patch({
-                              'attachments': draft.attachments
-                                  .where((x) => x.id != a.id)
-                                  .map((x) => x.toJson())
-                                  .toList(),
-                            }),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: field(
+                            c,
+                            '优先级',
+                            SpaceSelect(
+                              value: draft.priority,
+                              options: {
+                                for (final e in priorities.entries)
+                                  e.key: '${e.value}优先级',
+                              },
+                              label: '优先级',
+                              onChanged: (v) => setState(
+                                () => draft = draft.patch({'priority': v}),
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    field(
+                      c,
+                      '项目 / 可选',
+                      Row(
+                        children: [
+                          Expanded(
+                            child: creatingProject
+                                ? SpaceInput(
+                                    controller: project,
+                                    hint: '输入项目名称，保存任务时一起新建',
+                                    label: '新项目名称',
+                                    onChanged: (_) => setState(() {}),
+                                  )
+                                : SpaceSelect(
+                                    value: draft.projectID ?? '',
+                                    options: projectChoices(
+                                      s.state,
+                                      selected: draft.projectID,
+                                    ),
+                                    label: '所属项目',
+                                    onChanged: (v) => setState(
+                                      () => draft = draft.patch({
+                                        'projectID': v.isEmpty ? null : v,
+                                      }),
+                                    ),
+                                  ),
+                          ),
+                          const SizedBox(width: 12),
+                          SpaceButton(
+                            onPressed: () => setState(() {
+                              creatingProject = !creatingProject;
+                              project.clear();
+                            }),
+                            child: Text(creatingProject ? '取消' : '新建'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: field(
+                            c,
+                            '开始日期 / 可选',
+                            DateField(
+                              value: draft.startDate ?? '',
+                              label: '开始日期',
+                              onChanged: (v) => setState(
+                                () => draft = draft.patch({
+                                  'startDate': v.isEmpty ? null : v,
+                                }),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: field(
+                            c,
+                            '截止日期',
+                            DateField(
+                              value: draft.due,
+                              onChanged: (v) => setState(
+                                () => draft = draft.patch({'due': v}),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SpaceEditorSection(
+                  children: [
+                    Row(
+                      children: [
+                        Text('任务说明', style: textStyle(p, bold: true)),
+                        const Spacer(),
+                        Text(
+                          '${rich.document.toPlainText().length - 1}/5,000',
+                          style: textStyle(p, size: 12, color: p.muted),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 192,
+                      decoration: BoxDecoration(
+                        color: p.card,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: p.border),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: q.QuillEditor.basic(
+                          controller: rich,
+                          focusNode: editorFocus,
+                          config: q.QuillEditorConfig(
+                            padding: const EdgeInsets.all(8),
+                            embedBuilders: [_ImageBuilder()],
+                            customStyles: q.DefaultStyles(
+                              paragraph: q.DefaultTextBlockStyle(
+                                textStyle(p),
+                                const q.HorizontalSpacing(0, 0),
+                                const q.VerticalSpacing(0, 0),
+                                const q.VerticalSpacing(0, 0),
+                                null,
+                              ),
+                            ),
+                            scrollable: true,
+                            autoFocus: false,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        SpaceButton(
+                          onPressed: upload,
+                          child: const Row(
+                            children: [
+                              SpaceIcon('clip'),
+                              SizedBox(width: 8),
+                              Text('上传附件'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '粘贴图片仅保存在任务说明中',
+                            style: textStyle(p, size: 12, color: p.muted),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '单个附件≤10 MB，每项任务≤20个、合计≤20 MB',
+                      style: textStyle(p, size: 12, color: p.muted),
+                    ),
+                    for (final a in draft.attachments) ...[
+                      const SizedBox(height: 8),
+                      Glass(
+                        blur: false,
+                        padding: const EdgeInsets.all(8),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => previewAttachment(a),
+                              child: SizedBox(
+                                width: 96,
+                                height: 64,
+                                child:
+                                    a.typeIdentifier == 'public.png' ||
+                                        a.typeIdentifier == 'public.jpeg'
+                                    ? Image.memory(
+                                        a.data,
+                                        fit: BoxFit.contain,
+                                        cacheWidth: 192,
+                                        errorBuilder: (c, e, st) =>
+                                            const SpaceIcon('file', size: 32),
+                                      )
+                                    : const Center(
+                                        child: SpaceIcon('file', size: 32),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    a.name,
+                                    style: textStyle(p, size: 12),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${(a.data.length / 1024).toStringAsFixed(1)} KB',
+                                    style: textStyle(
+                                      p,
+                                      size: 12,
+                                      color: p.muted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButtonS(
+                              'save',
+                              '另存附件',
+                              onPressed: () async {
+                                final path = await DesktopHost.saveFile(a.name);
+                                if (path != null) {
+                                  await File(
+                                    path,
+                                  ).writeAsBytes(a.data, flush: true);
+                                }
+                              },
+                            ),
+                            IconButtonS(
+                              'x',
+                              '移除附件',
+                              onPressed: () => setState(
+                                () => draft = draft.patch({
+                                  'attachments': draft.attachments
+                                      .where((x) => x.id != a.id)
+                                      .map((x) => x.toJson())
+                                      .toList(),
+                                }),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
                 if (widget.existing) ...[
                   const SizedBox(height: 24),
                   for (final e in {
@@ -1088,12 +1110,15 @@ Future<void> showProjects(BuildContext c, SpaceStore s) async {
   s.modal = true;
   s.refreshQuery();
   try {
-    await sheet(c, _Projects(store: s), width: 640, height: 560);
+    await openProjectEditor(c, s);
   } finally {
     s.modal = false;
     s.refreshQuery();
   }
 }
+
+Future<void> openProjectEditor(BuildContext c, SpaceStore s) =>
+    sheet(c, _Projects(store: s), width: 640, height: 560);
 
 class _Projects extends StatefulWidget {
   final SpaceStore store;
@@ -1104,6 +1129,7 @@ class _Projects extends StatefulWidget {
 
 class _ProjectsState extends State<_Projects> {
   final name = TextEditingController();
+  final nameFocus = FocusNode();
   String? editing;
   SpaceStore get s => widget.store;
   @override
@@ -1120,78 +1146,85 @@ class _ProjectsState extends State<_Projects> {
   void dispose() {
     s.removeListener(changed);
     name.dispose();
+    nameFocus.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext c) {
     final p = Palette.of(c);
-    return sheetFrame(
-      c,
-      title: '项目管理',
-      close: () => Navigator.pop(c),
-      footer: [
-        const Spacer(),
-        SpaceButton(
-          primary: true,
-          height: 32,
-          onPressed: () => Navigator.pop(c),
-          child: const Text('完成'),
-        ),
-      ],
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '停用后保留现有任务，创建任务时不再显示该项目。',
-              style: textStyle(p, size: 12, color: p.secondary),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: SpaceInput(
-                    controller: name,
-                    label: '项目名称',
-                    hint: '项目名称，1至60字',
+    return PopScope(
+      canPop: !s.busy,
+      child: sheetFrame(
+        c,
+        title: '项目管理',
+        close: () {
+          if (!s.busy) Navigator.pop(c);
+        },
+        footer: [
+          const Spacer(),
+          SpaceButton(
+            primary: true,
+            height: 32,
+            onPressed: s.busy ? null : () => Navigator.pop(c),
+            child: const Text('完成'),
+          ),
+        ],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SpaceEditorSection(
+                detail: '项目供任务和报销共用。停用后保留已有归属，选择时隐藏。',
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SpaceInput(
+                          controller: name,
+                          focusNode: nameFocus,
+                          label: '项目名称',
+                          hint: '项目名称，1至60字',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      SpaceButton(
+                        primary: true,
+                        onPressed: s.busy
+                            ? null
+                            : () async {
+                                if (await s.saveProject(
+                                      name.text,
+                                      id: editing,
+                                    ) &&
+                                    mounted) {
+                                  setState(() {
+                                    name.clear();
+                                    editing = null;
+                                  });
+                                }
+                              },
+                        child: Text(editing == null ? '新建' : '保存名称'),
+                      ),
+                      if (editing != null)
+                        SpaceButton(
+                          onPressed: () => setState(() {
+                            editing = null;
+                            name.clear();
+                          }),
+                          child: const Text('取消'),
+                        ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                SpaceButton(
-                  primary: true,
-                  onPressed: s.busy
-                      ? null
-                      : () async {
-                          if (await s.saveProject(name.text, id: editing) &&
-                              mounted) {
-                            setState(() {
-                              name.clear();
-                              editing = null;
-                            });
-                          }
-                        },
-                  child: Text(editing == null ? '新建' : '保存名称'),
-                ),
-                if (editing != null)
-                  SpaceButton(
-                    onPressed: () => setState(() {
-                      editing = null;
-                      name.clear();
-                    }),
-                    child: const Text('取消'),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            if (s.state.projects.isEmpty)
-              Text('暂无项目，可在上方新建。', style: textStyle(p, color: p.muted)),
-            for (final project in s.state.projects) ...[
-              Glass(
-                blur: false,
-                padding: const EdgeInsets.all(12),
-                child: Row(
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (s.state.projects.isEmpty)
+                Text('暂无项目，可在上方新建。', style: textStyle(p, color: p.muted)),
+              for (final project in s.state.projects) ...[
+                SpaceEditorRow(
+                  selected: editing == project.id,
                   children: [
                     SpaceIcon(
                       'folder',
@@ -1220,10 +1253,13 @@ class _ProjectsState extends State<_Projects> {
                       '编辑项目名称：${project.name}',
                       onPressed: s.busy
                           ? null
-                          : () => setState(() {
-                              editing = project.id;
-                              name.text = project.name;
-                            }),
+                          : () {
+                              setState(() {
+                                editing = project.id;
+                                name.text = project.name;
+                              });
+                              nameFocus.requestFocus();
+                            },
                     ),
                     SpaceButton(
                       height: 32,
@@ -1241,7 +1277,7 @@ class _ProjectsState extends State<_Projects> {
                               if (await confirm(
                                 c,
                                 '删除项目',
-                                '删除“${project.name}”后，其任务将保留并设为无项目。删除后可撤销。',
+                                '删除“${project.name}”后，相关任务和发票会保留，项目归属将清空。',
                                 '删除项目',
                               )) {
                                 await s.deleteProject(project.id);
@@ -1257,12 +1293,12 @@ class _ProjectsState extends State<_Projects> {
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 8),
+                const SizedBox(height: 8),
+              ],
+              if (s.error != null)
+                Text(s.error!, style: textStyle(p, size: 12, color: p.red)),
             ],
-            if (s.error != null)
-              Text(s.error!, style: textStyle(p, size: 12, color: p.red)),
-          ],
+          ),
         ),
       ),
     );
@@ -1316,7 +1352,7 @@ class _StatusesState extends State<_Statuses> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Row(
               children: [
                 SpaceButton(
@@ -1350,206 +1386,180 @@ class _StatusesState extends State<_Statuses> {
                     )
                   : SingleChildScrollView(
                       key: const ValueKey('statuses'),
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '新增状态后，看板会自动增加一列。',
-                            style: textStyle(p, size: 12, color: p.secondary),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
+                          SpaceEditorSection(
+                            detail: '新增状态后，看板会自动增加一列。',
                             children: [
-                              Expanded(
-                                child: SpaceInput(
-                                  controller: name,
-                                  hint: '新状态名称，1至20字',
-                                  label: '新状态名称',
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              SpaceButton(
-                                primary: true,
-                                onPressed: () async {
-                                  await s.addStatus(name.text);
-                                  if (s.error == null) name.clear();
-                                },
-                                child: const Text('新增状态'),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: SpaceInput(
+                                      controller: name,
+                                      hint: '新状态名称，1至20字',
+                                      label: '新状态名称',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  SpaceButton(
+                                    primary: true,
+                                    onPressed: () async {
+                                      await s.addStatus(name.text);
+                                      if (s.error == null) name.clear();
+                                    },
+                                    child: const Text('新增状态'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           for (final status in s.state.statuses) ...[
-                            Glass(
-                              blur: false,
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 7,
-                                    height: 7,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: p.status(status),
-                                    ),
+                            SpaceEditorRow(
+                              children: [
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: p.status(status),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      statusName(status),
-                                      style: textStyle(p, bold: true),
-                                    ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    statusName(status),
+                                    style: textStyle(p, bold: true),
                                   ),
+                                ),
+                                Text(
+                                  '${s.state.tasks.where((t) => t.status == status).length} 项',
+                                  style: textStyle(p, size: 12, color: p.muted),
+                                ),
+                                const SizedBox(width: 12),
+                                if (builtins.contains(status))
                                   Text(
-                                    '${s.state.tasks.where((t) => t.status == status).length} 项',
+                                    '内置',
                                     style: textStyle(
                                       p,
                                       size: 12,
                                       color: p.muted,
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  if (builtins.contains(status))
-                                    Text(
-                                      '内置',
-                                      style: textStyle(
-                                        p,
-                                        size: 12,
-                                        color: p.muted,
-                                      ),
-                                    )
-                                  else ...[
-                                    SpaceButton(
-                                      height: 32,
-                                      onPressed: () => s.toggleStatus(status),
-                                      child: Text(
-                                        s.state.disabledStatuses.contains(
-                                              status,
-                                            )
-                                            ? '启用'
-                                            : '停用',
-                                      ),
+                                  )
+                                else ...[
+                                  SpaceButton(
+                                    height: 32,
+                                    onPressed: () => s.toggleStatus(status),
+                                    child: Text(
+                                      s.state.disabledStatuses.contains(status)
+                                          ? '启用'
+                                          : '停用',
                                     ),
-                                    const SizedBox(width: 8),
-                                    SpaceButton(
-                                      height: 32,
-                                      danger: true,
-                                      onPressed: () async {
-                                        String target = s.state.statuses
-                                            .firstWhere(
-                                              (x) =>
-                                                  x != status &&
-                                                  !s.state.disabledStatuses
-                                                      .contains(x),
-                                            );
-                                        final chosen = await showDialog<String>(
-                                          context: c,
-                                          builder: (c) => StatefulBuilder(
-                                            builder: (c, set) => Dialog(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              child: SizedBox(
-                                                width: 400,
-                                                child: Glass(
-                                                  padding: const EdgeInsets.all(
-                                                    24,
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        '迁移后删除${statusName(status)}',
-                                                        style: textStyle(
-                                                          p,
-                                                          size: 16,
-                                                          bold: true,
-                                                        ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  SpaceButton(
+                                    height: 32,
+                                    danger: true,
+                                    onPressed: () async {
+                                      String target = s.state.statuses
+                                          .firstWhere(
+                                            (x) =>
+                                                x != status &&
+                                                !s.state.disabledStatuses
+                                                    .contains(x),
+                                          );
+                                      final chosen = await showDialog<String>(
+                                        context: c,
+                                        builder: (c) => StatefulBuilder(
+                                          builder: (c, set) => Dialog(
+                                            backgroundColor: Colors.transparent,
+                                            child: SizedBox(
+                                              width: 400,
+                                              child: Glass(
+                                                padding: const EdgeInsets.all(
+                                                  24,
+                                                ),
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      '迁移后删除${statusName(status)}',
+                                                      style: textStyle(
+                                                        p,
+                                                        size: 16,
+                                                        bold: true,
                                                       ),
-                                                      const SizedBox(
-                                                        height: 16,
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    Text(
+                                                      '该状态的全部任务将迁移到所选状态，其他字段保留。',
+                                                      style: textStyle(
+                                                        p,
+                                                        size: 12,
                                                       ),
-                                                      Text(
-                                                        '该状态的全部任务将迁移到所选状态，其他字段保留。',
-                                                        style: textStyle(
-                                                          p,
-                                                          size: 12,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                        height: 16,
-                                                      ),
-                                                      SpaceSelect(
-                                                        value: target,
-                                                        options: {
-                                                          for (final v
-                                                              in s
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    SpaceSelect(
+                                                      value: target,
+                                                      options: {
+                                                        for (final v
+                                                            in s.state.statuses)
+                                                          if (v != status &&
+                                                              !s
                                                                   .state
-                                                                  .statuses)
-                                                            if (v != status &&
-                                                                !s
-                                                                    .state
-                                                                    .disabledStatuses
-                                                                    .contains(
-                                                                      v,
-                                                                    ))
-                                                              v: statusName(v),
-                                                        },
-                                                        label: '迁移目标',
-                                                        onChanged: (v) => set(
-                                                          () => target = v,
+                                                                  .disabledStatuses
+                                                                  .contains(v))
+                                                            v: statusName(v),
+                                                      },
+                                                      label: '迁移目标',
+                                                      onChanged: (v) =>
+                                                          set(() => target = v),
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      children: [
+                                                        SpaceButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(c),
+                                                          child: const Text(
+                                                            '取消',
+                                                          ),
                                                         ),
-                                                      ),
-                                                      const SizedBox(
-                                                        height: 16,
-                                                      ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          SpaceButton(
-                                                            onPressed: () =>
-                                                                Navigator.pop(
-                                                                  c,
-                                                                ),
-                                                            child: const Text(
-                                                              '取消',
-                                                            ),
+                                                        SpaceButton(
+                                                          primary: true,
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                c,
+                                                                target,
+                                                              ),
+                                                          child: const Text(
+                                                            '迁移并删除',
                                                           ),
-                                                          SpaceButton(
-                                                            primary: true,
-                                                            onPressed: () =>
-                                                                Navigator.pop(
-                                                                  c,
-                                                                  target,
-                                                                ),
-                                                            child: const Text(
-                                                              '迁移并删除',
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
                                           ),
-                                        );
-                                        if (chosen != null) {
-                                          await s.deleteStatus(status, chosen);
-                                        }
-                                      },
-                                      child: const Text('删除'),
-                                    ),
-                                  ],
+                                        ),
+                                      );
+                                      if (chosen != null) {
+                                        await s.deleteStatus(status, chosen);
+                                      }
+                                    },
+                                    child: const Text('删除'),
+                                  ),
                                 ],
-                              ),
+                              ],
                             ),
                             const SizedBox(height: 8),
                           ],
@@ -1752,10 +1762,12 @@ class _CategorySettings extends StatefulWidget {
 
 class _CategorySettingsState extends State<_CategorySettings> {
   final name = TextEditingController();
+  final nameFocus = FocusNode();
   String? editing;
   @override
   void dispose() {
     name.dispose();
+    nameFocus.dispose();
     super.dispose();
   }
 
@@ -1763,48 +1775,49 @@ class _CategorySettingsState extends State<_CategorySettings> {
   Widget build(BuildContext c) {
     final s = widget.store, p = Palette.of(c);
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '分类可自定义或改名，已有任务会保留所属分类。',
-            style: textStyle(p, size: 12, color: p.secondary),
-          ),
-          const SizedBox(height: 16),
-          Row(
+          SpaceEditorSection(
+            detail: '分类可自定义或改名，已有任务会保留所属分类。',
             children: [
-              Expanded(
-                child: SpaceInput(
-                  controller: name,
-                  label: '分类名称',
-                  hint: '分类名称，1至20字',
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: SpaceInput(
+                      controller: name,
+                      focusNode: nameFocus,
+                      label: '分类名称',
+                      hint: '分类名称，1至20字',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SpaceButton(
+                    primary: true,
+                    onPressed: s.busy
+                        ? null
+                        : () async {
+                            await s.saveCategory(name.text, id: editing);
+                            if (s.error == null && mounted) {
+                              setState(() {
+                                name.clear();
+                                editing = null;
+                              });
+                            }
+                          },
+                    child: Text(editing == null ? '新增分类' : '保存分类'),
+                  ),
+                  if (editing != null)
+                    SpaceButton(
+                      onPressed: () => setState(() {
+                        editing = null;
+                        name.clear();
+                      }),
+                      child: const Text('取消'),
+                    ),
+                ],
               ),
-              const SizedBox(width: 12),
-              SpaceButton(
-                primary: true,
-                onPressed: s.busy
-                    ? null
-                    : () async {
-                        await s.saveCategory(name.text, id: editing);
-                        if (s.error == null && mounted) {
-                          setState(() {
-                            name.clear();
-                            editing = null;
-                          });
-                        }
-                      },
-                child: Text(editing == null ? '新增分类' : '保存分类'),
-              ),
-              if (editing != null)
-                SpaceButton(
-                  onPressed: () => setState(() {
-                    editing = null;
-                    name.clear();
-                  }),
-                  child: const Text('取消'),
-                ),
             ],
           ),
           if (s.error != null)
@@ -1812,29 +1825,29 @@ class _CategorySettingsState extends State<_CategorySettings> {
               padding: const EdgeInsets.only(top: 8),
               child: Text(s.error!, style: textStyle(p, color: p.red)),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           for (final e in s.state.taskCategories.entries) ...[
-            Glass(
-              blur: false,
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(child: CategoryLabel(e.key, name: e.value)),
-                  Text(
-                    '${s.state.tasks.where((t) => t.category == e.key).length} 项',
-                    style: textStyle(p, size: 12, color: p.muted),
-                  ),
-                  const SizedBox(width: 12),
-                  SpaceButton(
-                    height: 32,
-                    onPressed: () => setState(() {
+            SpaceEditorRow(
+              selected: editing == e.key,
+              children: [
+                Expanded(child: CategoryLabel(e.key, name: e.value)),
+                Text(
+                  '${s.state.tasks.where((t) => t.category == e.key).length} 项',
+                  style: textStyle(p, size: 12, color: p.muted),
+                ),
+                const SizedBox(width: 12),
+                SpaceButton(
+                  height: 32,
+                  onPressed: () {
+                    setState(() {
                       editing = e.key;
                       name.text = e.value;
-                    }),
-                    child: const Text('编辑'),
-                  ),
-                ],
-              ),
+                    });
+                    nameFocus.requestFocus();
+                  },
+                  child: const Text('编辑'),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
           ],

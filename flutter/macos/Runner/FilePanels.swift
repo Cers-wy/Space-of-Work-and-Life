@@ -10,22 +10,24 @@ enum SpaceLanguage {
 }
 
 enum SpaceFilePanels {
-  static func open(sqliteOnly: Bool, multiple: Bool) -> NSOpenPanel {
+  static func open(sqliteOnly: Bool, multiple: Bool, title: String? = nil, extensions: [String] = []) -> NSOpenPanel {
     let panel = NSOpenPanel()
     panel.canChooseDirectories = false
     panel.canChooseFiles = true
     panel.allowsMultipleSelection = multiple
-    panel.title = sqliteOnly ? "导入SQLite备份" : "选择附件"
+    panel.title = title ?? (sqliteOnly ? "导入SQLite备份" : "选择附件")
     panel.prompt = sqliteOnly ? "导入" : "选择"
     if sqliteOnly {
       panel.allowedContentTypes = databaseTypes
+    } else if !extensions.isEmpty {
+      panel.allowedContentTypes = extensions.compactMap { UTType(filenameExtension: $0) }
     }
     return panel
   }
 
-  static func save(name: String, sqliteOnly: Bool) -> NSSavePanel {
+  static func save(name: String, sqliteOnly: Bool, title: String? = nil) -> NSSavePanel {
     let panel = NSSavePanel()
-    panel.title = sqliteOnly ? "导出SQLite备份" : "另存附件"
+    panel.title = title ?? (sqliteOnly ? "导出SQLite备份" : "另存附件")
     panel.nameFieldLabel = "存储为："
     panel.nameFieldStringValue = name
     panel.prompt = "保存"

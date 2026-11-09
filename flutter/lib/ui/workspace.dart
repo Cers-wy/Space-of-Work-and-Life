@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../store.dart';
 import 'theme.dart';
 import 'controls.dart';
 import 'dialogs.dart';
+import 'invoice_workspace.dart';
 import 'schedule.dart';
 
 final dragActive = ValueNotifier(false);
@@ -22,8 +24,12 @@ class Workspace extends StatefulWidget {
 
 class _WorkspaceState extends State<Workspace> {
   final search = TextEditingController(), searchFocus = FocusNode();
+  final invoiceFilterAnchor = GlobalKey();
   final filterAnchor = GlobalKey();
+  final viewSwitchKey = GlobalKey();
+  final taskTableScroll = ScrollController();
   final previewWidths = <String, double>{};
+  late final InvoiceSession invoices;
   SpaceStore get s => widget.store;
   late bool previousNavCollapsed;
   bool navMoving = false;
@@ -31,6 +37,7 @@ class _WorkspaceState extends State<Workspace> {
   @override
   void initState() {
     super.initState();
+    invoices = InvoiceSession(s.repository);
     s.searchRequested.addListener(requestSearch);
     previousNavCollapsed = s.navCollapsed;
     s.addListener(trackNavigation);
@@ -52,6 +59,11 @@ class _WorkspaceState extends State<Workspace> {
 
   void requestSearch() {
     if (s.modal) return;
+    if (s.area == SpaceArea.invoices) {
+      invoiceFilters();
+      return;
+    }
+    if (s.area != SpaceArea.tasks) return;
     if (s.overviewCollapsed) {
       filters();
     } else {
@@ -65,6 +77,8 @@ class _WorkspaceState extends State<Workspace> {
     s.removeListener(trackNavigation);
     search.dispose();
     searchFocus.dispose();
+    taskTableScroll.dispose();
+    invoices.dispose();
     super.dispose();
   }
 
@@ -74,6 +88,12 @@ class _WorkspaceState extends State<Workspace> {
     SpaceTask.create(status: status, due: due, projectID: s.query.projectID),
   );
   void filters() => showFilters(filterAnchor.currentContext ?? context, s);
+  void invoiceFilters() {
+    if (invoiceFilterAnchor.currentContext case final anchor?) {
+      showInvoiceFilters(anchor, s, invoices);
+    }
+  }
+
   KeyEventResult key(FocusNode n, KeyEvent e) {
     if (e is! KeyDownEvent || s.modal) return KeyEventResult.ignored;
     final focusContext = FocusManager.instance.primaryFocus?.context;
@@ -85,6 +105,17 @@ class _WorkspaceState extends State<Workspace> {
         HardwareKeyboard.instance.isMetaPressed ||
         HardwareKeyboard.instance.isControlPressed;
     final k = e.logicalKey;
+    if (s.area != SpaceArea.tasks) {
+      if (cmd && k == LogicalKeyboardKey.keyF && s.area == SpaceArea.invoices) {
+        invoiceFilters();
+        return KeyEventResult.handled;
+      }
+      if (cmd && k == LogicalKeyboardKey.comma) {
+        showSettings(context, s);
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    }
     if (editable) {
       if (cmd && k == LogicalKeyboardKey.keyF) {
         searchFocus.requestFocus();
@@ -145,67 +176,32 @@ class _WorkspaceState extends State<Workspace> {
               : box.maxWidth >= 1600
               ? 240.0
               : 224.0;
-          final workspaceContent = Column(
-            children: [
-              overview(box.maxWidth),
-              if (s.error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Glass(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            s.error!,
-                            style: textStyle(p, size: 12, color: p.red),
-                          ),
-                        ),
-                        SpaceButton(
-                          height: 32,
-                          onPressed: s.reload,
-                          child: const Text('重新载入'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: !s.loaded
-                    ? unavailable()
-                    : AnimatedSwitcher(
-                        duration: MediaQuery.of(context).disableAnimations
-                            ? const Duration(milliseconds: 200)
-                            : spaceDuration,
-                        switchInCurve: spaceCurve,
-                        transitionBuilder: (child, a) => FadeTransition(
-                          opacity: a,
-                          child: ScaleTransition(
-                            scale: Tween<double>(
-                              begin: .985,
-                              end: 1,
-                            ).animate(a),
-                            child: child,
-                          ),
-                        ),
-                        child: KeyedSubtree(
-                          key: ValueKey(s.view),
-                          child: BackdropGroup(
-                            child: RepaintBoundary(
-                              child: s.view == 'board'
-                                  ? board()
-                                  : s.view == 'list'
-                                  ? taskList()
-                                  : s.view == 'gantt'
-                                  ? GanttView(store: s)
-                                  : CalendarView(store: s),
-                            ),
-                          ),
-                        ),
-                      ),
+          final workspaceContent = TweenAnimationBuilder<double>(
+            key: ValueKey(s.area),
+            tween: Tween(begin: 0, end: 1),
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 220),
+            curve: spaceCurve,
+            builder: (context, opacity, child) =>
+                Opacity(opacity: opacity, child: child),
+            child: switch (s.area) {
+              SpaceArea.tasks => taskWorkspace(box, p),
+              SpaceArea.tools => InvoiceWorkspace(
+                key: const ValueKey('tools-area'),
+                store: s,
+                session: invoices,
+                showTools: true,
+                filterAnchor: invoiceFilterAnchor,
               ),
-            ],
+              SpaceArea.invoices => InvoiceWorkspace(
+                key: const ValueKey('invoice-area'),
+                store: s,
+                session: invoices,
+                showTools: false,
+                filterAnchor: invoiceFilterAnchor,
+              ),
+            },
           );
           // One persistent sidebar: the parent supplies its animated width.
           // Never cross-fade two complete glass surfaces or duplicate controls.
@@ -325,6 +321,67 @@ class _WorkspaceState extends State<Workspace> {
     );
   }
 
+  Widget taskWorkspace(BoxConstraints box, Palette p) => Column(
+    key: const ValueKey('tasks-area'),
+    children: [
+      overview(box),
+      if (s.error != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Glass(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    s.error!,
+                    style: textStyle(p, size: 12, color: p.red),
+                  ),
+                ),
+                SpaceButton(
+                  height: 32,
+                  onPressed: s.reload,
+                  child: const Text('重新载入'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      const SizedBox(height: 8),
+      Expanded(
+        child: !s.loaded
+            ? unavailable()
+            : AnimatedSwitcher(
+                duration: MediaQuery.of(context).disableAnimations
+                    ? Duration.zero
+                    : spaceDuration,
+                switchInCurve: spaceCurve,
+                transitionBuilder: (child, a) => FadeTransition(
+                  opacity: a,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: .985, end: 1).animate(a),
+                    child: child,
+                  ),
+                ),
+                child: KeyedSubtree(
+                  key: ValueKey(s.view),
+                  child: BackdropGroup(
+                    child: RepaintBoundary(
+                      child: s.view == 'board'
+                          ? board()
+                          : s.view == 'list'
+                          ? taskList()
+                          : s.view == 'gantt'
+                          ? GanttView(store: s)
+                          : CalendarView(store: s),
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    ],
+  );
+
   Widget sidebar(double expandedWidth, bool collapsed) {
     final p = Palette.of(context);
     const mark = RepaintBoundary(child: Mark(key: ValueKey('navigation-mark')));
@@ -334,11 +391,15 @@ class _WorkspaceState extends State<Workspace> {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: p.primary,
+          color: s.area == SpaceArea.tasks ? p.primary : p.hover,
           borderRadius: BorderRadius.circular(8),
         ),
         alignment: Alignment.center,
-        child: const SpaceIcon('grid', size: 16, color: Colors.white),
+        child: SpaceIcon(
+          'grid',
+          size: 16,
+          color: s.area == SpaceArea.tasks ? Colors.white : p.secondary,
+        ),
       ),
     );
     final settings = RepaintBoundary(
@@ -377,8 +438,77 @@ class _WorkspaceState extends State<Workspace> {
             excluding: collapsed,
             child: Opacity(opacity: progress, child: child),
           );
-          // Lay out labels at a fixed width. Only icon translations, label
-          // opacity and the outer clip change; text never wraps mid-animation.
+          Widget areaEntry(
+            SpaceArea area,
+            String icon,
+            String title,
+            double top,
+          ) {
+            final selected = s.area == area;
+            final isTasks = area == SpaceArea.tasks;
+            return Positioned(
+              left: 8 + 8 * progress,
+              width: bounds.maxWidth - 16 - 16 * progress,
+              top: top - 40 * (1 - progress),
+              child: SpaceButton(
+                key: ValueKey('navigation-${isTasks ? 'task' : area.name}'),
+                tooltip: isTasks ? '任务，${s.state.tasks.length}项任务' : title,
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                selected: selected,
+                showSelectedBackground: false,
+                onPressed: () {
+                  if (isTasks && selected) {
+                    s.resetQuery();
+                  } else {
+                    s.openArea(area);
+                  }
+                },
+                child: ClipRect(
+                  child: OverflowBox(
+                    alignment: Alignment.centerLeft,
+                    minWidth: expandedWidth - 48,
+                    maxWidth: expandedWidth - 48,
+                    child: Row(
+                      children: [
+                        if (isTasks)
+                          taskIcon
+                        else
+                          Container(
+                            width: 32,
+                            height: 32,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: selected ? p.primary : p.hover,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: SpaceIcon(
+                              icon,
+                              size: 16,
+                              color: selected ? Colors.white : p.secondary,
+                            ),
+                          ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: label(
+                            isTasks
+                                ? taskLabel
+                                : Text(
+                                    title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          // Labels keep a fixed layout width while the clickable area follows the sidebar.
           return OverflowBox(
             alignment: Alignment.topLeft,
             minWidth: expandedWidth,
@@ -396,37 +526,12 @@ class _WorkspaceState extends State<Workspace> {
                 ),
                 Positioned(left: 56, top: 16, child: label(brand)),
                 Positioned(left: 24, top: 80, child: label(heading)),
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  top: 104,
-                  child: Transform.translate(
-                    offset: Offset(-8 * (1 - progress), -40 * (1 - progress)),
-                    child: SpaceButton(
-                      key: const ValueKey('navigation-task'),
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      selected: !collapsed,
-                      onPressed: s.resetQuery,
-                      tooltip: '任务，${s.state.tasks.length}项任务',
-                      child: Row(
-                        children: [
-                          taskIcon,
-                          const SizedBox(width: 12),
-                          Expanded(child: label(taskLabel)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 16,
-                  bottom: 16,
-                  child: Transform.translate(
-                    offset: Offset(-2 * (1 - progress), 0),
-                    child: settings,
-                  ),
-                ),
+                areaEntry(SpaceArea.tasks, 'grid', '任务', 104),
+                if (Platform.isMacOS) ...[
+                  areaEntry(SpaceArea.tools, 'tools', '工具', 148),
+                  areaEntry(SpaceArea.invoices, 'invoice', '发票管理', 192),
+                ],
+                Positioned(left: 16, bottom: 16, child: settings),
               ],
             ),
           );
@@ -435,23 +540,53 @@ class _WorkspaceState extends State<Workspace> {
     );
   }
 
-  Widget overview(double windowWidth) {
-    final p = Palette.of(context);
+  Widget overview(BoxConstraints box) {
+    final content = s.overviewCollapsed
+        ? const SizedBox.shrink()
+        : ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: box.maxHeight * .5),
+            child: SingleChildScrollView(
+              child: overviewContent(
+                box.maxWidth,
+                compact: box.maxHeight < 720,
+              ),
+            ),
+          );
     return Glass(
-      padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            key: const ValueKey('workspace-titlebar'),
-            height: spaceTitleBarHeight,
-            child: Row(
+          taskTitleBar(),
+          if (MediaQuery.disableAnimationsOf(context))
+            content
+          else
+            AnimatedSize(
+              duration: spaceDuration,
+              curve: spaceCurve,
+              alignment: Alignment.topCenter,
+              clipBehavior: Clip.hardEdge,
+              child: content,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget taskTitleBar() {
+    final p = Palette.of(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final separateViews = box.maxWidth < 840;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SpaceTitleBar(
+              key: const ValueKey('workspace-titlebar'),
               children: [
-                IconButtonS(
+                IconButtonS.toolbar(
                   s.navCollapsed ? 'sidebar-open' : 'sidebar-close',
                   s.navCollapsed ? '展开导航' : '收起导航',
                   key: const ValueKey('navigation-toggle'),
-                  size: 32,
                   iconSize: 18,
                   onPressed: () =>
                       s.preference('navCollapsed', '${!s.navCollapsed}'),
@@ -493,7 +628,7 @@ class _WorkspaceState extends State<Workspace> {
                     width: 16,
                     key: ValueKey('category-filter-gap'),
                   ),
-                  IconButtonS(
+                  IconButtonS.toolbar(
                     'filter',
                     '筛选与排序',
                     key: filterAnchor,
@@ -501,9 +636,7 @@ class _WorkspaceState extends State<Workspace> {
                     onPressed: filters,
                   ),
                   const SizedBox(width: 8),
-                  viewSwitch(),
-                  const SizedBox(width: 8),
-                  IconButtonS(
+                  IconButtonS.toolbar(
                     'plus',
                     '新建任务（⌘N / N）',
                     primary: true,
@@ -511,33 +644,39 @@ class _WorkspaceState extends State<Workspace> {
                   ),
                   const SizedBox(width: 16),
                 ],
+                if (!separateViews) ...[
+                  viewSwitch(),
+                  const SizedBox(width: 16),
+                ],
                 ThemeToggle(dark: s.dark, onToggle: s.toggleTheme),
                 const SizedBox(width: 8),
-                IconButtonS(
+                IconButtonS.toolbar(
                   'project',
                   '项目管理',
-                  iconSize: 18,
                   onPressed: () => showProjects(context, s),
                 ),
                 const SizedBox(width: 8),
-                IconButtonS(
+                IconButtonS.toolbar(
                   'status',
                   '状态与分类管理',
-                  iconSize: 18,
                   onPressed: () => showStatuses(context, s),
                 ),
                 if (s.canUndo) ...[
                   const SizedBox(width: 8),
-                  IconButtonS('undo', '撤销最近一次更改（⌘Z）', onPressed: s.undo),
+                  IconButtonS.toolbar(
+                    'undo',
+                    '撤销最近一次更改（⌘Z）',
+                    onPressed: s.undo,
+                  ),
                 ],
                 const SizedBox(width: 8),
-                IconButtonS(
+                IconButtonS.toolbar(
                   'help',
                   '使用帮助',
                   onPressed: () => showHelp(context, s),
                 ),
                 const SizedBox(width: 8),
-                IconButtonS(
+                IconButtonS.toolbar(
                   s.overviewCollapsed ? 'down' : 'up',
                   s.overviewCollapsed ? '展开概览' : '收起概览',
                   onPressed: () => s.preference(
@@ -547,141 +686,114 @@ class _WorkspaceState extends State<Workspace> {
                 ),
               ],
             ),
-          ),
-          ClipRect(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: AnimatedSize(
-                duration: MediaQuery.of(context).disableAnimations
-                    ? const Duration(milliseconds: 200)
-                    : spaceDuration,
-                curve: spaceCurve,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: s.overviewCollapsed
-                      ? const SizedBox.shrink()
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const SizedBox(height: 24),
-                            if (windowWidth <= 1180) ...[
-                              Row(
-                                children: [
-                                  Expanded(child: heading()),
-                                  IconButtonS(
-                                    'plus',
-                                    '新建任务（⌘N / N）',
-                                    primary: true,
-                                    onPressed: s.loaded ? newTask : null,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              statistics(),
-                            ] else
-                              LayoutBuilder(
-                                builder: (c, b) => SizedBox(
-                                  height: 64,
-                                  child: Row(
-                                    children: [
-                                      Expanded(child: heading()),
-                                      const SizedBox(width: 24),
-                                      SizedBox(
-                                        width: math.max(
-                                          320,
-                                          (b.maxWidth - 64) * .60,
-                                        ),
-                                        child: statistics(),
-                                      ),
-                                      const SizedBox(width: 24),
-                                      IconButtonS(
-                                        'plus',
-                                        '新建任务（⌘N / N）',
-                                        primary: true,
-                                        onPressed: s.loaded ? newTask : null,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            const SizedBox(height: 24),
-                            Glass(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '任务',
-                                        style: textStyle(p, bold: true),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: p.hover,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          '${s.visible.length} 个任务',
-                                          style: textStyle(
-                                            p,
-                                            size: 12,
-                                            color: p.muted,
-                                          ),
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      viewSwitch(),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  LayoutBuilder(
-                                    builder: (c, b) {
-                                      final controls = filterControls();
-                                      final field = SpaceInput(
-                                        fontSize: 12,
-                                        controller: search,
-                                        focusNode: searchFocus,
-                                        hint: '搜索任务标题与说明',
-                                        icon: 'search',
-                                        label: '搜索任务',
-                                        onChanged: (v) {
-                                          s.query.text = v;
-                                          s.refreshQuery();
-                                        },
-                                      );
-                                      if (b.maxWidth < 740) {
-                                        return Column(
-                                          children: [
-                                            field,
-                                            const SizedBox(height: 12),
-                                            controls,
-                                          ],
-                                        );
-                                      }
-                                      return Row(
-                                        children: [
-                                          Expanded(child: field),
-                                          const SizedBox(width: 12),
-                                          controls,
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
+            if (separateViews) SpaceTitleBar(children: [viewSwitch()]),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget overviewContent(double windowWidth, {required bool compact}) {
+    final p = Palette.of(context);
+    final add = IconButtonS(
+      'plus',
+      '新建任务（⌘N / N）',
+      primary: true,
+      onPressed: s.loaded ? newTask : null,
+    );
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (compact)
+            Row(
+              children: [
+                Expanded(child: statistics()),
+                const SizedBox(width: 16),
+                add,
+              ],
+            )
+          else if (windowWidth <= 1180) ...[
+            Row(
+              children: [
+                Expanded(child: heading()),
+                add,
+              ],
+            ),
+            const SizedBox(height: 24),
+            statistics(),
+          ] else
+            LayoutBuilder(
+              builder: (c, b) => Row(
+                children: [
+                  Expanded(child: heading()),
+                  const SizedBox(width: 24),
+                  SizedBox(
+                    width: math.max(320, (b.maxWidth - 64) * .60),
+                    child: statistics(),
+                  ),
+                  const SizedBox(width: 24),
+                  add,
+                ],
               ),
+            ),
+          SizedBox(height: compact ? 12 : 24),
+          Glass(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text('任务', style: textStyle(p, bold: true)),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: p.hover,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${s.visible.length} 个任务',
+                        style: textStyle(p, size: 12, color: p.muted),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                LayoutBuilder(
+                  builder: (c, b) {
+                    final controls = filterControls(p);
+                    final field = SpaceInput(
+                      fontSize: 12,
+                      controller: search,
+                      focusNode: searchFocus,
+                      hint: '搜索任务标题与说明',
+                      icon: 'search',
+                      label: '搜索任务',
+                      onChanged: (v) {
+                        s.query.text = v;
+                        s.refreshQuery();
+                      },
+                    );
+                    if (b.maxWidth < 740) {
+                      return Column(
+                        children: [field, const SizedBox(height: 12), controls],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: field),
+                        const SizedBox(width: 12),
+                        controls,
+                      ],
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ],
@@ -738,24 +850,29 @@ class _WorkspaceState extends State<Workspace> {
           if (i > 0) const SizedBox(width: 8),
           Expanded(
             child: Container(
-              height: 64,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              constraints: const BoxConstraints(minHeight: 64),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: entries[i].$3.withValues(alpha: p.dark ? 0.12 : .08),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: p.border),
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     entries[i].$1,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: textStyle(p, size: 12, color: p.secondary),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     entries[i].$2.toString().padLeft(2, '0'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: textStyle(
                       p,
                       size: 24,
@@ -793,60 +910,38 @@ class _WorkspaceState extends State<Workspace> {
                 k,
                 name: s.state.taskCategories[k],
                 count: s.state.tasks.where((t) => t.category == k).length,
+                selected: s.query.categoryIDs.contains(k),
               ),
             ),
         ],
       ),
     ),
   );
-  Widget viewSwitch() {
-    final p = Palette.of(context);
-    return Container(
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        color: p.hover.withValues(alpha: p.dark ? 0.104 : .052),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      foregroundDecoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: p.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final (i, v) in [
-            'board',
-            'list',
-            'gantt',
-            'calendar',
-          ].indexed) ...[
-            if (i > 0) const SizedBox(width: 2),
-            Container(
-              decoration: BoxDecoration(
-                color: s.view == v ? p.card : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButtonS(
-                v,
-                {
-                  'board': '看板视图',
-                  'list': '列表视图',
-                  'gantt': '甘特图视图',
-                  'calendar': '日历视图',
-                }[v]!,
-                size: 32,
-                selected: s.view == v,
-                onPressed: () => s.preference('viewMode', v),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget filterControls() => Row(
+  Widget viewSwitch() => Row(
+    key: viewSwitchKey,
     mainAxisSize: MainAxisSize.min,
+    children: [
+      for (final (i, (mode, label)) in const [
+        ('board', '看板视图'),
+        ('list', '列表视图'),
+        ('gantt', '甘特图视图'),
+        ('calendar', '日历视图'),
+      ].indexed) ...[
+        if (i > 0) const SizedBox(width: 4),
+        IconButtonS.toolbar(
+          mode,
+          label,
+          selected: s.view == mode,
+          onPressed: () => s.preference('viewMode', mode),
+        ),
+      ],
+    ],
+  );
+
+  Widget filterControls(Palette p) => Wrap(
+    spacing: 8,
+    runSpacing: 4,
+    crossAxisAlignment: WrapCrossAlignment.center,
     children: [
       SpaceMultiSelect(
         values: s.query.statusIDs,
@@ -855,7 +950,6 @@ class _WorkspaceState extends State<Workspace> {
         width: 120,
         onChanged: s.refreshQuery,
       ),
-      const SizedBox(width: 8),
       SpaceMultiSelect(
         values: s.query.priorityIDs,
         options: priorities,
@@ -863,7 +957,6 @@ class _WorkspaceState extends State<Workspace> {
         width: 136,
         onChanged: s.refreshQuery,
       ),
-      const SizedBox(width: 8),
       SizedBox(
         key: filterAnchor,
         width: 40,
@@ -876,14 +969,20 @@ class _WorkspaceState extends State<Workspace> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SpaceIcon('filter', color: Palette.of(context).secondary),
+              SpaceIcon(
+                'filter',
+                color: p.selectedButtonForeground(p.secondary),
+              ),
               const SizedBox(width: 4),
-              SpaceIcon('down', size: 9, color: Palette.of(context).secondary),
+              SpaceIcon(
+                'down',
+                size: 9,
+                color: p.selectedButtonForeground(p.secondary),
+              ),
             ],
           ),
         ),
       ),
-      const SizedBox(width: 8),
       SpaceSelect(
         value: s.query.sort,
         options: const {
@@ -898,8 +997,7 @@ class _WorkspaceState extends State<Workspace> {
           s.refreshQuery();
         },
       ),
-      if (s.query.hasFilters) ...[
-        const SizedBox(width: 8),
+      if (s.query.hasFilters)
         SpaceButton(
           height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -909,7 +1007,6 @@ class _WorkspaceState extends State<Workspace> {
           },
           child: const Text('清除'),
         ),
-      ],
     ],
   );
   Widget board() {
@@ -941,7 +1038,6 @@ class _WorkspaceState extends State<Workspace> {
                 for (var i = 0; i < statuses.length; i++) ...[
                   if (i > 0) const SizedBox(width: 12),
                   TweenAnimationBuilder<double>(
-                    child: columns[statuses[i]],
                     tween: Tween(end: widths[statuses[i]]!),
                     duration:
                         MediaQuery.of(context).disableAnimations ||
@@ -1016,6 +1112,7 @@ class _WorkspaceState extends State<Workspace> {
                         ],
                       ),
                     ),
+                    child: columns[statuses[i]],
                   ),
                 ],
               ],
@@ -1225,20 +1322,56 @@ class _WorkspaceState extends State<Workspace> {
   }
 
   Widget taskList() {
-    final p = Palette.of(context);
     if (s.visible.isEmpty) return empty();
     return Glass(
-      child: Column(
-        children: [
-          Container(
-            height: 48,
-            color: p.hover,
-            padding: const EdgeInsets.only(left: 60, right: 16),
-            child: Row(
-              children: [
-                Expanded(
+      child: LayoutBuilder(
+        builder: (context, box) {
+          const minTableWidth = 656.0;
+          if (box.maxWidth >= minTableWidth) return taskTable();
+          return SingleChildScrollView(
+            controller: taskTableScroll,
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: minTableWidth,
+              height: box.maxHeight,
+              child: taskTable(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget taskTable() {
+    final p = Palette.of(context);
+    return Column(
+      children: [
+        Container(
+          constraints: const BoxConstraints(minHeight: 48),
+          color: p.hover,
+          padding: const EdgeInsets.fromLTRB(56, 8, 12, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '任务名称',
+                  style: textStyle(p, size: 12, bold: true, color: p.secondary),
+                ),
+              ),
+              for (final e in [
+                ('分类', 72.0),
+                ('状态', 96.0),
+                ('优先级', 56.0),
+                ('截止日期', 144.0),
+                ('', 32.0),
+              ]) ...[
+                const SizedBox(width: 16),
+                SizedBox(
+                  width: e.$2,
                   child: Text(
-                    '任务名称',
+                    e.$1,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: textStyle(
                       p,
                       size: 12,
@@ -1247,145 +1380,127 @@ class _WorkspaceState extends State<Workspace> {
                     ),
                   ),
                 ),
-                for (final e in [
-                  ('分类', 72.0),
-                  ('状态', 96.0),
-                  ('优先级', 56.0),
-                  ('截止日期', 144.0),
-                  ('', 24.0),
-                ]) ...[
-                  const SizedBox(width: 16),
-                  SizedBox(
-                    width: e.$2,
-                    child: Text(
-                      e.$1,
-                      style: textStyle(
-                        p,
-                        size: 12,
-                        bold: true,
-                        color: p.secondary,
+              ],
+            ],
+          ),
+        ),
+        Divider(height: 1, color: p.border),
+        Expanded(
+          child: ListView.builder(
+            itemCount: s.visible.length,
+            itemBuilder: (c, i) {
+              final t = s.visible[i];
+              final project = s.state.projectName(t.projectID);
+              return Container(
+                constraints: BoxConstraints(
+                  minHeight: t.description.isEmpty && project == null ? 48 : 56,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: p.card.withValues(alpha: p.dark ? 0.297 : .324),
+                  border: Border(bottom: BorderSide(color: p.border)),
+                ),
+                child: Row(
+                  children: [
+                    IconButtonS(
+                      t.status == 'done' ? 'done' : 'circle',
+                      t.status == 'done' ? '重新开启：${t.title}' : '完成：${t.title}',
+                      iconSize: 20,
+                      onPressed: () => s.moveTask(
+                        t.id,
+                        t.status == 'done' ? 'todo' : 'done',
                       ),
                     ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Divider(height: 1, color: p.border),
-          Expanded(
-            child: ListView.builder(
-              itemCount: s.visible.length,
-              itemBuilder: (c, i) {
-                final t = s.visible[i];
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: p.card.withValues(alpha: p.dark ? 0.297 : .324),
-                    border: Border(bottom: BorderSide(color: p.border)),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButtonS(
-                        t.status == 'done' ? 'done' : 'circle',
-                        t.status == 'done'
-                            ? '重新开启：${t.title}'
-                            : '完成：${t.title}',
-                        size: 28,
-                        iconSize: 20,
-                        onPressed: () => s.moveTask(
-                          t.id,
-                          t.status == 'done' ? 'todo' : 'done',
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => editTask(context, s, t, existing: true),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SpaceButton(
+                        height: null,
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        onPressed: () =>
+                            editTask(context, s, t, existing: true),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              t.title,
+                              style: textStyle(p, bold: true),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (t.description.isNotEmpty) ...[
+                              const SizedBox(height: 4),
                               Text(
-                                t.title,
-                                style: textStyle(p, bold: true),
-                                maxLines: 2,
+                                t.description,
+                                style: textStyle(
+                                  p,
+                                  size: 12,
+                                  color: p.secondary,
+                                ),
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              if (t.description.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  t.description,
-                                  style: textStyle(
-                                    p,
-                                    size: 12,
-                                    color: p.secondary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                              if (s.state.projectName(t.projectID) != null) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  s.state.projectName(t.projectID)!,
-                                  style: textStyle(
-                                    p,
-                                    size: 12,
-                                    color: p.purple,
-                                  ),
-                                ),
-                              ],
                             ],
-                          ),
+                            if (project != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                project,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textStyle(p, size: 12, color: p.purple),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      SizedBox(
-                        width: 72,
-                        child: CategoryLabel(
-                          t.category,
-                          name: s.state.taskCategories[t.category],
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      width: 72,
+                      child: CategoryLabel(
+                        t.category,
+                        name: s.state.taskCategories[t.category],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    SpaceSelect(
+                      width: 96,
+                      value: t.status,
+                      label: '任务状态',
+                      options: {
+                        for (final status in s.state.statuses)
+                          if (!s.state.disabledStatuses.contains(status) ||
+                              status == t.status)
+                            status: statusName(status),
+                      },
+                      onChanged: (v) => s.moveTask(t.id, v),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      width: 56,
+                      child: Text(
+                        priorities[t.priority]!,
+                        style: textStyle(
+                          p,
+                          size: 12,
+                          color: p.priority(t.priority),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      SpaceSelect(
-                        width: 96,
-                        value: t.status,
-                        label: '任务状态',
-                        options: {
-                          for (final status in s.state.statuses)
-                            if (!s.state.disabledStatuses.contains(status) ||
-                                status == t.status)
-                              status: statusName(status),
-                        },
-                        onChanged: (v) => s.moveTask(t.id, v),
-                      ),
-                      const SizedBox(width: 16),
-                      SizedBox(
-                        width: 56,
-                        child: Text(
-                          priorities[t.priority]!,
-                          style: textStyle(
-                            p,
-                            size: 12,
-                            color: p.priority(t.priority),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      SizedBox(
-                        width: 144,
-                        child: dueLabel(context, t, s.today),
-                      ),
-                      const SizedBox(width: 16),
-                      taskMenu(context, s, t),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(width: 144, child: dueLabel(context, t, s.today)),
+                    const SizedBox(width: 16),
+                    taskMenu(context, s, t, table: true),
+                  ],
+                ),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -1485,15 +1600,20 @@ Widget dueLabel(BuildContext c, SpaceTask t, String today) {
   );
 }
 
-Widget taskMenu(BuildContext context, SpaceStore s, SpaceTask t) => Builder(
+Widget taskMenu(
+  BuildContext context,
+  SpaceStore s,
+  SpaceTask t, {
+  bool table = false,
+}) => Builder(
   builder: (buttonContext) {
     return SizedBox(
-      width: 24,
-      height: 20,
+      width: table ? 32 : 24,
+      height: table ? 32 : 20,
       child: IconButtonS(
         'dots',
         '任务操作',
-        size: 20,
+        size: table ? 32 : 20,
         onPressed: () async {
           final p = Palette.of(buttonContext);
           final action = await anchoredPopup<String>(
@@ -1520,7 +1640,13 @@ Widget taskMenu(BuildContext context, SpaceStore s, SpaceTask t) => Builder(
                           alignment: Alignment.centerLeft,
                           child: Text(
                             '移至${statusName(status)}',
-                            style: textStyle(p, size: 12),
+                            style: textStyle(
+                              p,
+                              size: 12,
+                              color: status == t.status
+                                  ? p.selectedButtonForeground(p.text)
+                                  : p.text,
+                            ),
                           ),
                         ),
                       ),

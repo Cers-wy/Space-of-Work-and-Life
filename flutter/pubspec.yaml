@@ -1,7 +1,7 @@
 name: space_flutter
 description: Space desktop workspace, matching the native baseline.
 publish_to: none
-version: 2.1.0+13
+version: 2.2.0+14
 environment:
   sdk: '>=3.9.0 <4.0.0'
 dependencies:
@@ -17,6 +17,8 @@ dependencies:
   path: ^1.9.1
   unorm_dart: ^0.3.3
   flutter_quill: ^11.6.0
+  archive: ^3.6.1
+  desktop_drop: ^0.7.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

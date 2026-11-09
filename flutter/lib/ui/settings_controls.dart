@@ -74,8 +74,7 @@ class _SettingsActionState extends State<SettingsAction> {
   Widget build(BuildContext context) {
     final w = widget, p = Palette.of(context);
     final reduced = MediaQuery.disableAnimationsOf(context);
-    final selection = p.blend(
-      p.accent.withValues(alpha: .08),
+    final selection = p.selectedButtonBackground(
       Colors.white.withValues(alpha: .075),
     );
     final surface = w.selected
@@ -138,7 +137,12 @@ class _SettingsActionState extends State<SettingsAction> {
                   color: surface,
                   borderRadius: BorderRadius.circular(6),
                   border: focus
-                      ? Border.all(color: p.accent, width: 2)
+                      ? Border.all(
+                          color: w.selected
+                              ? p.selectedButtonForeground()
+                              : p.accent,
+                          width: 2,
+                        )
                       : w.quiet
                       ? null
                       : Border.all(color: outline),
@@ -146,7 +150,9 @@ class _SettingsActionState extends State<SettingsAction> {
                 child: DefaultTextStyle(
                   style: textStyle(
                     p,
-                    color: w.danger
+                    color: w.selected
+                        ? p.selectedButtonForeground(p.secondary)
+                        : w.danger
                         ? p.red
                         : w.navigation || w.quiet
                         ? p.secondary

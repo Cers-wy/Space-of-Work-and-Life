@@ -40,6 +40,10 @@ class Palette extends ThemeExtension<Palette> {
   );
   Color get primary => value(0x356bfa, 0x9333ea);
   Color get hover => accent.withValues(alpha: .08 + .08 * darkness);
+  Color selectedButtonBackground([Color? darkColor]) =>
+      blend(const Palette(false).primary, darkColor ?? hover);
+  Color selectedButtonForeground([Color? darkColor]) =>
+      blend(Colors.white, darkColor ?? accent);
   Color get popup => value(0xffffff, 0x27232e);
   Color get popupBorder => value(0xcbd6e5, 0x665572);
   Color category(String s) => s == 'work'
