@@ -129,17 +129,17 @@ class InvoiceWorkspace extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     return Glass(
-      child: !showTools && store.loaded
+      child: showTools
+          ? _ToolsWorkspace(store: store, session: session)
+          : store.loaded
           ? _Ledger(store: store, session: session, filterAnchor: filterAnchor)
           : Column(
               children: [
-                _InvoiceTitleBar(store: store, showTools: showTools),
+                _InvoiceTitleBar(store: store),
                 Expanded(
-                  child: showTools
-                      ? _Tools(store: store, session: session)
-                      : Center(
-                          child: Text('请先载入 Space 数据库', style: textStyle(p)),
-                        ),
+                  child: Center(
+                    child: Text('请先载入 Space 数据库', style: textStyle(p)),
+                  ),
                 ),
               ],
             ),
@@ -150,11 +150,13 @@ class InvoiceWorkspace extends StatelessWidget {
 class _InvoiceTitleBar extends StatelessWidget {
   final SpaceStore store;
   final bool showTools;
+  final VoidCallback? backToTools;
   final List<Widget> actions;
 
   const _InvoiceTitleBar({
     required this.store,
     this.showTools = false,
+    this.backToTools,
     this.actions = const [],
   });
 
@@ -180,9 +182,23 @@ class _InvoiceTitleBar extends StatelessWidget {
               color: p.muted,
             ),
             const SizedBox(width: 8),
+            if (backToTools != null) ...[
+              SpaceButton(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                onPressed: backToTools,
+                child: const Text('工具'),
+              ),
+              SpaceIcon('right', size: 12, color: p.muted),
+              const SizedBox(width: 8),
+            ],
             Expanded(
               child: Text(
-                showTools ? '工具' : '发票管理',
+                backToTools != null
+                    ? '发票合并'
+                    : showTools
+                    ? '工具'
+                    : '发票',
                 style: textStyle(p, bold: true),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -347,7 +363,7 @@ void _showInvoiceHelp(BuildContext anchor, SpaceStore store) {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('发票管理帮助', style: textStyle(p, size: 16, bold: true)),
+                Text('发票帮助', style: textStyle(p, size: 16, bold: true)),
                 const SizedBox(height: 12),
                 Text(
                   '将 PDF、JPG 或 PNG 拖入页面，或使用顶栏的导入图标选择文件。',
@@ -369,10 +385,48 @@ void _showInvoiceHelp(BuildContext anchor, SpaceStore store) {
   );
 }
 
-class _Tools extends StatelessWidget {
+class _ToolsWorkspace extends StatefulWidget {
   final SpaceStore store;
   final InvoiceSession session;
-  const _Tools({required this.store, required this.session});
+  const _ToolsWorkspace({required this.store, required this.session});
+
+  @override
+  State<_ToolsWorkspace> createState() => _ToolsWorkspaceState();
+}
+
+class _ToolsWorkspaceState extends State<_ToolsWorkspace> {
+  bool mergeOpen = false;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      _InvoiceTitleBar(
+        store: widget.store,
+        showTools: true,
+        backToTools: mergeOpen ? () => setState(() => mergeOpen = false) : null,
+      ),
+      Expanded(
+        child: TweenAnimationBuilder<double>(
+          key: ValueKey(mergeOpen),
+          tween: Tween(begin: 0, end: 1),
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 180),
+          curve: spaceCurve,
+          builder: (context, opacity, child) =>
+              Opacity(opacity: opacity, child: child),
+          child: mergeOpen
+              ? InvoiceMergeEditor(repo: widget.session.repo)
+              : _Tools(onOpenMerge: () => setState(() => mergeOpen = true)),
+        ),
+      ),
+    ],
+  );
+}
+
+class _Tools extends StatelessWidget {
+  final VoidCallback onOpenMerge;
+  const _Tools({required this.onOpenMerge});
 
   @override
   Widget build(BuildContext context) {
@@ -380,10 +434,6 @@ class _Tools extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        Text('工具', style: textStyle(p, size: 27, bold: true)),
-        const SizedBox(height: 6),
-        Text('集中处理工作中的常用文件', style: textStyle(p, color: p.muted)),
-        const SizedBox(height: 20),
         SizedBox(
           height: 312,
           child: Row(
@@ -423,11 +473,7 @@ class _Tools extends StatelessWidget {
                               'right',
                               '打开发票合并',
                               primary: true,
-                              onPressed: () => openInvoiceMerge(
-                                context,
-                                store,
-                                session.repo,
-                              ),
+                              onPressed: onOpenMerge,
                             ),
                           ],
                         ),
@@ -741,7 +787,7 @@ class _LedgerState extends State<_Ledger> {
                     Builder(
                       builder: (anchor) => IconButtonS.toolbar(
                         'help',
-                        '发票管理帮助',
+                        '发票帮助',
                         onPressed: () => _showInvoiceHelp(anchor, widget.store),
                       ),
                     ),

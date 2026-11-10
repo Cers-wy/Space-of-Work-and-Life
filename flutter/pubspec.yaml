@@ -3,7 +3,7 @@ description: Space desktop workspace, matching the native baseline.
 publish_to: none
 version: 2.2.0+14
 environment:
-  sdk: '>=3.9.0 <4.0.0'
+  sdk: '>=3.12.0 <4.0.0'
 dependencies:
   flutter:
     sdk: flutter
@@ -17,8 +17,11 @@ dependencies:
   path: ^1.9.1
   unorm_dart: ^0.3.3
   flutter_quill: ^11.6.0
-  archive: ^3.6.1
+  archive: ^4.6.0
   desktop_drop: ^0.7.0
+  image: ^4.12.0
+  pdf: ^3.13.1
+  printing: 5.15.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

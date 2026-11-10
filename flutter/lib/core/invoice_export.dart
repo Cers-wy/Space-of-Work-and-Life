@@ -100,7 +100,6 @@ Future<void> exportInvoiceSheet(
   }
   sheet.write('</sheetData></worksheet>');
   add('xl/worksheets/sheet1.xml', sheet.toString());
-  final bytes = ZipEncoder().encode(archive);
-  if (bytes == null) throw StateError('无法生成 Excel 文件');
+  final bytes = ZipEncoder().encodeBytes(archive);
   writeInvoiceOutput(destination, (path) => File(path).writeAsBytesSync(bytes));
 });

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../host.dart';
 import 'files.dart';
 import 'invoices.dart';
+import 'invoice_pdf_windows.dart';
 
 class InvoicePreview {
   final Uint8List bytes;
@@ -128,7 +129,7 @@ class InvoiceLayout {
 
 class InvoicePdf {
   static Future<T?> _call<T>(String method, Map<String, Object> args) async {
-    if (!Platform.isMacOS) throw StateError('当前 PDF 排版预览支持 macOS');
+    if (!Platform.isMacOS) throw StateError('当前平台不支持 PDF 排版预览');
     try {
       return await DesktopHost.channel.invokeMethod<T>(method, args);
     } on PlatformException catch (e) {
@@ -140,7 +141,10 @@ class InvoicePdf {
     String path, {
     required bool trim,
   }) async {
-    await Isolate.run(() => validateInvoiceFile(path));
+    final extension = await Isolate.run(() => validateInvoiceFile(path));
+    if (Platform.isWindows) {
+      return WindowsInvoicePdf.inspect(path, extension, trim: trim);
+    }
     final pages = await _call<List<Object?>>('invoiceInspect', {
       'path': path,
       'trim': trim,
@@ -163,6 +167,7 @@ class InvoicePdf {
       ((page as List)[i] as num).toDouble();
 
   static Future<InvoicePreview> preview(String path, int page) async {
+    if (Platform.isWindows) return WindowsInvoicePdf.preview(path, page);
     final r = (await _call<Map<Object?, Object?>>('invoicePreview', {
       'path': path,
       'page': page,
@@ -171,7 +176,9 @@ class InvoicePdf {
   }
 
   static Future<Uint8List> render(Map<String, Object> page) async =>
-      (await _call<Uint8List>('invoiceRender', {'sheet': page}))!;
+      Platform.isWindows
+      ? WindowsInvoicePdf.render(page)
+      : (await _call<Uint8List>('invoiceRender', {'sheet': page}))!;
 
   static Future<void> save(
     InvoiceRepository repo,
@@ -189,7 +196,14 @@ class InvoicePdf {
     }
     final staged = File(invoiceOutputStage(destination));
     try {
-      await _call<void>('invoiceWrite', {'path': staged.path, 'sheets': pages});
+      if (Platform.isWindows) {
+        await staged.writeAsBytes(await WindowsInvoicePdf.compose(pages));
+      } else {
+        await _call<void>('invoiceWrite', {
+          'path': staged.path,
+          'sheets': pages,
+        });
+      }
       await staged.rename(destination);
     } finally {
       if (await staged.exists()) await staged.delete();
@@ -200,6 +214,10 @@ class InvoicePdf {
     InvoiceLayout layout,
     List<Map<String, Object>> pages,
   ) async {
+    if (Platform.isWindows) {
+      await WindowsInvoicePdf.print(layout, pages);
+      return;
+    }
     final directory = await Directory.systemTemp.createTemp('space-print-');
     final path = '${directory.path}/发票合并.pdf';
     try {

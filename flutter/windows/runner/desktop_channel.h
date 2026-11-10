@@ -67,8 +67,28 @@ class SpaceDesktopChannel {
       if(SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&dialog)))){
         DWORD options=FOS_FILEMUSTEXIST|FOS_PATHMUSTEXIST|FOS_FORCEFILESYSTEM;
         if(boolean("multiple"))options|=FOS_ALLOWMULTISELECT;
-        dialog->SetOptions(options);dialog->SetTitle(L"选择文件");
+        dialog->SetOptions(options);
+        const auto title = wide(text("title"));
+        dialog->SetTitle(title.empty() ? L"选择文件" : title.c_str());
         if(boolean("sqliteOnly")){const COMDLG_FILTERSPEC filters[]={{L"SQLite 数据库",L"*.sqlite;*.sqlite3;*.db"}};dialog->SetFileTypes(1,filters);}
+        std::wstring pattern;
+        if (!boolean("sqliteOnly") && args) {
+          const auto extensions = args->find(V("extensions"));
+          if (extensions != args->end()) {
+            if (const auto* list = std::get_if<L>(&extensions->second)) {
+              for (const auto& entry : *list) {
+                if (const auto* extension = std::get_if<std::string>(&entry)) {
+                  if (!pattern.empty()) pattern += L";";
+                  pattern += L"*." + wide(*extension);
+                }
+              }
+            }
+          }
+          if (!pattern.empty()) {
+            const COMDLG_FILTERSPEC filters[] = {{L"支持的文件", pattern.c_str()}};
+            dialog->SetFileTypes(1, filters);
+          }
+        }
         if(SUCCEEDED(dialog->Show(window_))){IShellItemArray* items=nullptr;if(SUCCEEDED(dialog->GetResults(&items))){DWORD count=0;items->GetCount(&count);for(DWORD i=0;i<count;i++){IShellItem* item=nullptr;if(SUCCEEDED(items->GetItemAt(i,&item))){PWSTR path=nullptr;if(SUCCEEDED(item->GetDisplayName(SIGDN_FILESYSPATH,&path))){files.emplace_back(utf8(path));CoTaskMemFree(path);}item->Release();}}items->Release();}}
         dialog->Release();
       }result->Success(V(files));return;
@@ -77,6 +97,8 @@ class SpaceDesktopChannel {
       IFileSaveDialog* dialog=nullptr;std::string path;
       if(SUCCEEDED(CoCreateInstance(CLSID_FileSaveDialog,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&dialog)))){
         dialog->SetOptions(FOS_OVERWRITEPROMPT|FOS_FORCEFILESYSTEM|FOS_PATHMUSTEXIST);dialog->SetFileName(wide(text("name")).c_str());
+        const auto title = wide(text("title"));
+        if (!title.empty()) dialog->SetTitle(title.c_str());
         if(SUCCEEDED(dialog->Show(window_))){IShellItem* item=nullptr;if(SUCCEEDED(dialog->GetResult(&item))){PWSTR value=nullptr;if(SUCCEEDED(item->GetDisplayName(SIGDN_FILESYSPATH,&value))){path=utf8(value);CoTaskMemFree(value);}item->Release();}}dialog->Release();
       }if(path.empty())result->Success();else result->Success(V(path));return;
     }

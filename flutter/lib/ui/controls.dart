@@ -298,6 +298,11 @@ class _IconPainter extends CustomPainter {
           Offset(17, 18),
           Offset(17, 11),
         ]);
+      case 'pause':
+        line(7, 4, 7, 16);
+        line(13, 4, 13, 16);
+      case 'play':
+        path(const [Offset(6, 3), Offset(16, 10), Offset(6, 17), Offset(6, 3)]);
       case 'refresh':
         c.drawArc(
           const Rect.fromLTWH(3, 3, 14, 14),
@@ -422,12 +427,15 @@ class _IconPainter extends CustomPainter {
   bool shouldRepaint(_IconPainter o) => o.name != name || o.color != color;
 }
 
+const spaceFormControlHeight = 40.0;
+
 class SpaceButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onPressed;
   final String? tooltip;
-  final bool primary, selected, danger;
-  final bool showSelectedBackground;
+  final bool primary, selected, danger, subtle;
+  final bool _form;
+  final bool showSelectedBackground, showHoverBackground;
   final double? height;
   final double surfaceInset;
   final EdgeInsetsGeometry padding;
@@ -439,11 +447,31 @@ class SpaceButton extends StatefulWidget {
     this.primary = false,
     this.selected = false,
     this.showSelectedBackground = true,
+    this.showHoverBackground = true,
     this.danger = false,
+    this.subtle = false,
     this.height = 40,
     this.surfaceInset = 0,
     this.padding = const EdgeInsets.symmetric(horizontal: 12),
-  });
+  }) : _form = false;
+
+  SpaceButton.form(
+    String label, {
+    super.key,
+    this.onPressed,
+    this.tooltip,
+    this.primary = false,
+    this.danger = false,
+  }) : child = Text(label),
+       _form = true,
+       subtle = true,
+       selected = false,
+       showSelectedBackground = true,
+       showHoverBackground = true,
+       height = spaceFormControlHeight,
+       surfaceInset = 0,
+       padding = const EdgeInsets.symmetric(horizontal: 12);
+
   @override
   State<SpaceButton> createState() => _SpaceButtonState();
 }
@@ -454,22 +482,34 @@ class _SpaceButtonState extends State<SpaceButton> {
   Widget build(BuildContext context) {
     final w = widget, p = Palette.of(context);
     final filledSelection = w.selected && w.showSelectedBackground;
-    final background = w.primary
+    final highlighted = hover && w.showHoverBackground;
+    final hoverFill = w.danger ? p.red.withValues(alpha: .12) : p.hover;
+    final formFill = p.card.withValues(alpha: .50);
+    final background = w.subtle && (w.primary || filledSelection)
+        ? p.actionSurface(highlighted: highlighted)
+        : w.primary
         ? p.primary
         : filledSelection
         ? p.selectedButtonBackground()
-        : hover && !w.selected
-        ? p.hover
+        : w._form
+        ? (highlighted ? Color.alphaBlend(hoverFill, formFill) : formFill)
+        : highlighted
+        ? hoverFill
         : Colors.transparent;
-    final color = w.primary
-        ? Colors.white
-        : w.danger
+    final color = w.danger
         ? p.red
+        : w.subtle && (w.primary || filledSelection)
+        ? p.accentText
+        : w.primary
+        ? Colors.white
         : filledSelection
         ? p.selectedButtonForeground()
+        : w._form
+        ? p.text
         : w.selected
         ? p.accent
         : p.secondary;
+    final radius = BorderRadius.circular(8);
     Widget result = FocusableActionDetector(
       enabled: w.onPressed != null,
       onShowFocusHighlight: (v) => setState(() => focus = v),
@@ -506,20 +546,32 @@ class _SpaceButtonState extends State<SpaceButton> {
                 : 1,
             child: Padding(
               padding: EdgeInsets.all(w.surfaceInset),
-              child: Container(
+              child: AnimatedContainer(
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 120),
+                curve: spaceCurve,
                 height: w.height == null
                     ? null
                     : w.height! - 2 * w.surfaceInset,
+                constraints: w._form
+                    ? const BoxConstraints(minWidth: 72)
+                    : null,
                 padding: w.padding,
                 decoration: BoxDecoration(
                   color: background,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: radius,
+                  border: w.subtle && w.primary
+                      ? Border.all(color: p.actionBorder)
+                      : w._form
+                      ? Border.all(color: p.border)
+                      : null,
                 ),
                 foregroundDecoration: focus
                     ? BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: radius,
                         border: Border.all(
-                          color: filledSelection
+                          color: !w.subtle && filledSelection
                               ? p.selectedButtonForeground()
                               : p.accent,
                           width: 2,
@@ -527,7 +579,12 @@ class _SpaceButtonState extends State<SpaceButton> {
                       )
                     : null,
                 child: DefaultTextStyle(
-                  style: textStyle(p, bold: true, color: color),
+                  style: textStyle(
+                    p,
+                    size: w.subtle ? 13 : 14,
+                    bold: true,
+                    color: color,
+                  ),
                   child: IconTheme(
                     data: IconThemeData(color: color, size: 14),
                     child: Center(widthFactor: 1, child: w.child),
@@ -657,6 +714,26 @@ class SpaceEditorSection extends StatelessWidget {
       ),
     );
   }
+}
+
+class SpaceEditorFooter extends StatelessWidget {
+  final List<Widget> children;
+  const SpaceEditorFooter({super.key, required this.children});
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Divider(height: 1, color: Palette.of(context).border),
+      SizedBox(
+        height: 48,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(children: children),
+        ),
+      ),
+    ],
+  );
 }
 
 class SpaceEditorRow extends StatelessWidget {
@@ -920,7 +997,7 @@ class SpaceInput extends StatelessWidget {
   Widget build(BuildContext c) {
     final p = Palette.of(c);
     return SizedBox(
-      height: lines == 1 ? 40 : null,
+      height: lines == 1 ? spaceFormControlHeight : null,
       child: TextField(
         controller: controller,
         focusNode: focusNode,
@@ -936,7 +1013,7 @@ class SpaceInput extends StatelessWidget {
           isCollapsed: false,
           isDense: lines != 1,
           constraints: lines == 1
-              ? const BoxConstraints(minHeight: 40, maxHeight: 40)
+              ? const BoxConstraints.tightFor(height: spaceFormControlHeight)
               : null,
           hintText: hint,
           prefixIcon: icon == null
@@ -950,7 +1027,7 @@ class SpaceInput extends StatelessWidget {
                 ),
           prefixIconConstraints: const BoxConstraints(
             minWidth: 34,
-            minHeight: 40,
+            minHeight: spaceFormControlHeight,
           ),
           labelText: null,
           semanticCounterText: label,
@@ -1481,11 +1558,18 @@ Future<T?> anchoredPopup<T>(
   );
   final below = math.max(0.0, screen.height - anchor.bottom - 16);
   final above = math.max(0.0, anchor.top - 16);
+  // Some callers use the whole workspace when there is no button to anchor to.
+  final useViewport = constrainHeight && below == 0 && above == 0;
   final openBelow = height <= below || (constrainHeight && below >= above);
+  final available = useViewport
+      ? screen.height - 16
+      : (openBelow ? below : above);
   final popupHeight = constrainHeight
-      ? math.min(height, math.max(1.0, openBelow ? below : above))
+      ? math.min(height, math.max(1.0, available))
       : height;
-  final top = openBelow
+  final top = useViewport
+      ? 8.0
+      : openBelow
       ? anchor.bottom + 8
       : math.max(8.0, anchor.top - popupHeight - 8);
   return showGeneralDialog<T>(
@@ -1614,62 +1698,130 @@ class SpaceMultiSelect extends StatelessWidget {
   final Map<String, String> options;
   final String label;
   final double? width;
-  final VoidCallback onChanged;
+  final VoidCallback? onChanged;
+  final Future<bool> Function(Set<String>)? saveSelection;
   const SpaceMultiSelect({
     super.key,
     required this.values,
     required this.options,
     required this.label,
-    required this.onChanged,
+    required VoidCallback this.onChanged,
     this.width,
-  });
+  }) : saveSelection = null;
+
+  const SpaceMultiSelect.persistent({
+    super.key,
+    required this.values,
+    required this.options,
+    required this.label,
+    required Future<bool> Function(Set<String>) this.saveSelection,
+    this.width,
+  }) : onChanged = null;
+
+  bool get persistent => saveSelection != null;
+  bool get all => persistent ? values.length == options.length : values.isEmpty;
+
   @override
   Widget build(BuildContext context) => SpacePickerField(
     label: label,
     width: width,
-    active: values.isNotEmpty,
-    text: values.isEmpty
+    active: !all,
+    text: all
         ? '全部$label'
         : values.length == 1
         ? (options[values.first] ?? label)
         : '$label · 已选${values.length}项',
-    open: (anchor) => anchoredPopup<void>(
+    open: open,
+  );
+
+  Future<void> open(BuildContext anchor) async {
+    var selected = values;
+    var saving = false, saveFailed = false;
+    await anchoredPopup<void>(
       anchor,
       StatefulBuilder(
-        builder: (context, setPopupState) => Focus(
-          autofocus: true,
-          child: PopupSurface(
-            child: ListView(
-              padding: const EdgeInsets.all(8),
-              children: [
-                SpaceButton(
-                  height: 36,
-                  selected: values.isEmpty,
-                  onPressed: () {
-                    values.clear();
-                    onChanged();
-                    setPopupState(() {});
-                  },
-                  child: Text('全部$label'),
-                ),
-                for (final entry in options.entries)
-                  SpaceCheckbox(
-                    label: entry.value,
-                    value: values.contains(entry.key),
-                    onPressed: () {
-                      if (!values.remove(entry.key)) values.add(entry.key);
-                      onChanged();
-                      setPopupState(() {});
-                    },
+        builder: (context, setPopupState) {
+          Future<void> change(Set<String> next) async {
+            if (saving) return;
+            if (saveSelection case final save?) {
+              final previous = selected;
+              setPopupState(() {
+                selected = next;
+                saving = true;
+                saveFailed = false;
+              });
+              final saved = await save(next);
+              if (context.mounted) {
+                setPopupState(() {
+                  if (!saved) selected = previous;
+                  saving = false;
+                  saveFailed = !saved;
+                });
+              }
+            } else {
+              selected
+                ..clear()
+                ..addAll(next);
+              onChanged!();
+              setPopupState(() {});
+            }
+          }
+
+          return Focus(
+            autofocus: true,
+            child: PopupSurface(
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: [
+                  SpaceButton(
+                    height: 36,
+                    selected: persistent
+                        ? selected.length == options.length
+                        : selected.isEmpty,
+                    onPressed: saving
+                        ? null
+                        : () => change(persistent ? options.keys.toSet() : {}),
+                    child: Text('全部$label'),
                   ),
-              ],
+                  for (final entry in options.entries)
+                    SpaceCheckbox(
+                      label: entry.value,
+                      value: selected.contains(entry.key),
+                      description:
+                          persistent &&
+                              selected.length == 1 &&
+                              selected.contains(entry.key)
+                          ? '至少保留一列'
+                          : null,
+                      onPressed: saving
+                          ? null
+                          : () {
+                              final next = {...selected};
+                              if (!next.remove(entry.key)) next.add(entry.key);
+                              if (!persistent || next.isNotEmpty) change(next);
+                            },
+                    ),
+                  if (saveFailed)
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        '设置保存失败，请重试。',
+                        style: textStyle(
+                          Palette.of(context),
+                          size: 12,
+                          color: Palette.of(context).red,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
       width: 240,
       height: math.min(options.length * 48.0 + 52, 360),
       constrainHeight: true,
-    ),
-  );
+    );
+  }
 }

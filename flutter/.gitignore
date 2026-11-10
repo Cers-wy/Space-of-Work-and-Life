@@ -10,3 +10,5 @@ linux/flutter/ephemeral/
 .idea/
 *.iml
 *.tmp
+# Widget Preview related
+.widget_preview/

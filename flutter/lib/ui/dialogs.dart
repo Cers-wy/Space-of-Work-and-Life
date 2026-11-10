@@ -87,14 +87,7 @@ Widget sheetFrame(
               ),
               Divider(height: 1, color: p.border),
               Expanded(child: body),
-              Divider(height: 1, color: p.border),
-              SizedBox(
-                height: 48,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(children: footer),
-                ),
-              ),
+              SpaceEditorFooter(children: footer),
             ],
           ),
         ),
@@ -107,8 +100,9 @@ Future<bool> confirm(
   BuildContext context,
   String title,
   String message,
-  String action,
-) async =>
+  String action, {
+  bool destructive = false,
+}) async =>
     await showDialog<bool>(
       context: context,
       builder: (c) {
@@ -130,15 +124,16 @@ Future<bool> confirm(
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      SpaceButton(
+                      SpaceButton.form(
+                        '取消',
                         onPressed: () => Navigator.pop(c, false),
-                        child: const Text('取消'),
                       ),
-                      const SizedBox(width: 12),
-                      SpaceButton(
-                        primary: true,
+                      const SizedBox(width: 8),
+                      SpaceButton.form(
+                        action,
+                        primary: !destructive,
+                        danger: destructive,
                         onPressed: () => Navigator.pop(c, true),
-                        child: Text(action),
                       ),
                     ],
                   ),
@@ -271,7 +266,14 @@ class _TaskEditorState extends State<_TaskEditor> {
       creatingProject && project.text.isNotEmpty;
   Future<void> close() async {
     if (saving) return;
-    if (dirty && !await confirm(context, '放弃未保存的更改？', '当前输入和附件尚未保存。', '放弃更改')) {
+    if (dirty &&
+        !await confirm(
+          context,
+          '放弃未保存的更改？',
+          '当前输入和附件尚未保存。',
+          '放弃更改',
+          destructive: true,
+        )) {
       return;
     }
     if (mounted) Navigator.pop(context);
@@ -508,8 +510,8 @@ class _TaskEditorState extends State<_TaskEditor> {
           close: close,
           footer: [
             if (widget.existing)
-              SpaceButton(
-                height: 32,
+              SpaceButton.form(
+                '删除任务',
                 danger: true,
                 onPressed: saving
                     ? null
@@ -519,26 +521,21 @@ class _TaskEditorState extends State<_TaskEditor> {
                               '删除任务',
                               '确定删除“${widget.task.title}”？删除后可撤销。',
                               '删除任务',
+                              destructive: true,
                             ) &&
                             await s.deleteTask(draft.id) &&
                             c.mounted) {
                           Navigator.pop(c);
                         }
                       },
-                child: const Text('删除任务'),
               ),
             const Spacer(),
-            SpaceButton(
-              height: 32,
-              onPressed: saving ? null : close,
-              child: const Text('取消'),
-            ),
-            const SizedBox(width: 12),
-            SpaceButton(
-              height: 32,
+            SpaceButton.form('取消', onPressed: saving ? null : close),
+            const SizedBox(width: 8),
+            SpaceButton.form(
+              widget.existing ? '保存更改' : '创建任务',
               primary: true,
               onPressed: saving ? null : save,
-              child: Text(widget.existing ? '保存更改' : '创建任务'),
             ),
           ],
           body: SingleChildScrollView(
@@ -666,13 +663,16 @@ class _TaskEditorState extends State<_TaskEditor> {
                                     ),
                                   ),
                           ),
-                          const SizedBox(width: 12),
-                          SpaceButton(
-                            onPressed: () => setState(() {
-                              creatingProject = !creatingProject;
-                              project.clear();
-                            }),
-                            child: Text(creatingProject ? '取消' : '新建'),
+                          const SizedBox(width: 8),
+                          SpaceButton.form(
+                            creatingProject ? '取消' : '新建',
+                            tooltip: creatingProject ? '取消新建项目' : '新建项目',
+                            onPressed: saving
+                                ? null
+                                : () => setState(() {
+                                    creatingProject = !creatingProject;
+                                    if (!creatingProject) project.clear();
+                                  }),
                           ),
                         ],
                       ),
@@ -759,15 +759,9 @@ class _TaskEditorState extends State<_TaskEditor> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        SpaceButton(
-                          onPressed: upload,
-                          child: const Row(
-                            children: [
-                              SpaceIcon('clip'),
-                              SizedBox(width: 8),
-                              Text('上传附件'),
-                            ],
-                          ),
+                        SpaceButton.form(
+                          '上传附件',
+                          onPressed: saving ? null : upload,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -845,17 +839,19 @@ class _TaskEditorState extends State<_TaskEditor> {
                                 }
                               },
                             ),
-                            IconButtonS(
-                              'x',
+                            SpaceButton.form(
                               '移除附件',
-                              onPressed: () => setState(
-                                () => draft = draft.patch({
-                                  'attachments': draft.attachments
-                                      .where((x) => x.id != a.id)
-                                      .map((x) => x.toJson())
-                                      .toList(),
-                                }),
-                              ),
+                              danger: true,
+                              onPressed: saving
+                                  ? null
+                                  : () => setState(
+                                      () => draft = draft.patch({
+                                        'attachments': draft.attachments
+                                            .where((x) => x.id != a.id)
+                                            .map((x) => x.toJson())
+                                            .toList(),
+                                      }),
+                                    ),
                             ),
                           ],
                         ),
@@ -927,6 +923,7 @@ Future<void> showFilters(BuildContext c, SpaceStore s) async {
     _Filters(store: s),
     width: 384,
     height: 518,
+    constrainHeight: true,
     barrierColor: s.dark
         ? Colors.transparent
         : Colors.black.withValues(alpha: .18),
@@ -972,8 +969,7 @@ class _FiltersState extends State<_Filters> {
         children: [
           Text('筛选与排序', style: textStyle(p, size: 16, bold: true)),
           const SizedBox(height: 16),
-          SizedBox(
-            height: 400,
+          Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(4),
               child: Column(
@@ -992,6 +988,30 @@ class _FiltersState extends State<_Filters> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  if (s.view == 'board') ...[
+                    field(
+                      c,
+                      '看板列',
+                      SpaceMultiSelect.persistent(
+                        values: s.boardStatuses.toSet(),
+                        options: {
+                          for (final status in s.state.displayStatuses)
+                            status: statusName(status),
+                        },
+                        label: '看板列',
+                        saveSelection: s.setBoardColumns,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '至少保留一列。此设置只控制看板列的显示。',
+                        style: textStyle(p, size: 12, color: p.muted),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   for (final spec in [
                     (
                       '任务状态',
@@ -1163,11 +1183,10 @@ class _ProjectsState extends State<_Projects> {
         },
         footer: [
           const Spacer(),
-          SpaceButton(
+          SpaceButton.form(
+            '完成',
             primary: true,
-            height: 32,
             onPressed: s.busy ? null : () => Navigator.pop(c),
-            child: const Text('完成'),
           ),
         ],
         body: SingleChildScrollView(
@@ -1188,8 +1207,9 @@ class _ProjectsState extends State<_Projects> {
                           hint: '项目名称，1至60字',
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      SpaceButton(
+                      const SizedBox(width: 8),
+                      SpaceButton.form(
+                        editing == null ? '新建' : '保存名称',
                         primary: true,
                         onPressed: s.busy
                             ? null
@@ -1205,16 +1225,20 @@ class _ProjectsState extends State<_Projects> {
                                   });
                                 }
                               },
-                        child: Text(editing == null ? '新建' : '保存名称'),
                       ),
-                      if (editing != null)
-                        SpaceButton(
-                          onPressed: () => setState(() {
-                            editing = null;
-                            name.clear();
-                          }),
-                          child: const Text('取消'),
+                      if (editing != null) ...[
+                        const SizedBox(width: 8),
+                        SpaceButton.form(
+                          '取消',
+                          tooltip: '取消编辑项目',
+                          onPressed: s.busy
+                              ? null
+                              : () => setState(() {
+                                  editing = null;
+                                  name.clear();
+                                }),
                         ),
+                      ],
                     ],
                   ),
                 ],
@@ -1261,15 +1285,17 @@ class _ProjectsState extends State<_Projects> {
                               nameFocus.requestFocus();
                             },
                     ),
-                    SpaceButton(
-                      height: 32,
+                    IconButtonS(
+                      project.disabled ? 'play' : 'pause',
+                      '${project.disabled ? '启用' : '停用'}项目：${project.name}',
                       onPressed: s.busy
                           ? null
                           : () => s.toggleProject(project.id),
-                      child: Text(project.disabled ? '启用' : '停用'),
                     ),
-                    SpaceButton(
-                      height: 32,
+                    const SizedBox(width: 8),
+                    SpaceButton.form(
+                      '删除',
+                      tooltip: '删除项目：${project.name}',
                       danger: true,
                       onPressed: s.busy
                           ? null
@@ -1279,6 +1305,7 @@ class _ProjectsState extends State<_Projects> {
                                 '删除项目',
                                 '删除“${project.name}”后，相关任务和发票会保留，项目归属将清空。',
                                 '删除项目',
+                                destructive: true,
                               )) {
                                 await s.deleteProject(project.id);
                                 if (mounted && editing == project.id) {
@@ -1289,7 +1316,6 @@ class _ProjectsState extends State<_Projects> {
                                 }
                               }
                             },
-                      child: const Text('删除'),
                     ),
                   ],
                 ),
@@ -1342,31 +1368,44 @@ class _StatusesState extends State<_Statuses> {
       close: () => Navigator.pop(c),
       footer: [
         const Spacer(),
-        SpaceButton(
+        SpaceButton.form(
+          '完成',
           primary: true,
-          height: 32,
           onPressed: () => Navigator.pop(c),
-          child: const Text('完成'),
         ),
       ],
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Row(
-              children: [
-                SpaceButton(
-                  selected: !categoriesPage,
-                  onPressed: () => setState(() => categoriesPage = false),
-                  child: const Text('任务状态'),
-                ),
-                const SizedBox(width: 8),
-                SpaceButton(
-                  selected: categoriesPage,
-                  onPressed: () => setState(() => categoriesPage = true),
-                  child: const Text('任务分类'),
-                ),
-              ],
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: p.hover,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SpaceButton(
+                    height: 28,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    subtle: true,
+                    selected: !categoriesPage,
+                    onPressed: () => setState(() => categoriesPage = false),
+                    child: const Text('任务状态'),
+                  ),
+                  const SizedBox(width: 4),
+                  SpaceButton(
+                    height: 28,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    subtle: true,
+                    selected: categoriesPage,
+                    onPressed: () => setState(() => categoriesPage = true),
+                    child: const Text('任务分类'),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -1374,7 +1413,7 @@ class _StatusesState extends State<_Statuses> {
               layoutBuilder: (current, previous) => Stack(
                 fit: StackFit.expand,
                 alignment: Alignment.topLeft,
-                children: [...previous, if (current != null) current],
+                children: [...previous, ?current],
               ),
               duration: MediaQuery.disableAnimationsOf(c)
                   ? Duration.zero
@@ -1391,7 +1430,7 @@ class _StatusesState extends State<_Statuses> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SpaceEditorSection(
-                            detail: '新增状态后，看板会自动增加一列。',
+                            detail: '在看板的「筛选与排序」中可选择显示的状态列。',
                             children: [
                               Row(
                                 children: [
@@ -1402,14 +1441,18 @@ class _StatusesState extends State<_Statuses> {
                                       label: '新状态名称',
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  SpaceButton(
+                                  const SizedBox(width: 8),
+                                  SpaceButton.form(
+                                    '新增状态',
                                     primary: true,
-                                    onPressed: () async {
-                                      await s.addStatus(name.text);
-                                      if (s.error == null) name.clear();
-                                    },
-                                    child: const Text('新增状态'),
+                                    onPressed: s.busy
+                                        ? null
+                                        : () async {
+                                            await s.addStatus(name.text);
+                                            if (mounted && s.error == null) {
+                                              name.clear();
+                                            }
+                                          },
                                   ),
                                 ],
                               ),
@@ -1449,20 +1492,24 @@ class _StatusesState extends State<_Statuses> {
                                     ),
                                   )
                                 else ...[
-                                  SpaceButton(
-                                    height: 32,
-                                    onPressed: () => s.toggleStatus(status),
-                                    child: Text(
-                                      s.state.disabledStatuses.contains(status)
-                                          ? '启用'
-                                          : '停用',
-                                    ),
+                                  IconButtonS(
+                                    s.state.disabledStatuses.contains(status)
+                                        ? 'play'
+                                        : 'pause',
+                                    s.state.disabledStatuses.contains(status)
+                                        ? '启用状态：${statusName(status)}'
+                                        : '停用状态：${statusName(status)}',
+                                    onPressed: s.busy
+                                        ? null
+                                        : () => s.toggleStatus(status),
                                   ),
                                   const SizedBox(width: 8),
-                                  SpaceButton(
-                                    height: 32,
+                                  SpaceButton.form(
+                                    '删除',
+                                    tooltip: '删除状态：${statusName(status)}',
                                     danger: true,
                                     onPressed: () async {
+                                      if (s.busy) return;
                                       String target = s.state.statuses
                                           .firstWhere(
                                             (x) =>
@@ -1525,23 +1572,22 @@ class _StatusesState extends State<_Statuses> {
                                                       mainAxisAlignment:
                                                           MainAxisAlignment.end,
                                                       children: [
-                                                        SpaceButton(
+                                                        SpaceButton.form(
+                                                          '取消',
                                                           onPressed: () =>
                                                               Navigator.pop(c),
-                                                          child: const Text(
-                                                            '取消',
-                                                          ),
                                                         ),
-                                                        SpaceButton(
-                                                          primary: true,
+                                                        const SizedBox(
+                                                          width: 8,
+                                                        ),
+                                                        SpaceButton.form(
+                                                          '迁移并删除',
+                                                          danger: true,
                                                           onPressed: () =>
                                                               Navigator.pop(
                                                                 c,
                                                                 target,
                                                               ),
-                                                          child: const Text(
-                                                            '迁移并删除',
-                                                          ),
                                                         ),
                                                       ],
                                                     ),
@@ -1556,7 +1602,6 @@ class _StatusesState extends State<_Statuses> {
                                         await s.deleteStatus(status, chosen);
                                       }
                                     },
-                                    child: const Text('删除'),
                                   ),
                                 ],
                               ],
@@ -1792,8 +1837,9 @@ class _CategorySettingsState extends State<_CategorySettings> {
                       hint: '分类名称，1至20字',
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  SpaceButton(
+                  const SizedBox(width: 8),
+                  SpaceButton.form(
+                    editing == null ? '新增分类' : '保存分类',
                     primary: true,
                     onPressed: s.busy
                         ? null
@@ -1806,16 +1852,20 @@ class _CategorySettingsState extends State<_CategorySettings> {
                               });
                             }
                           },
-                    child: Text(editing == null ? '新增分类' : '保存分类'),
                   ),
-                  if (editing != null)
-                    SpaceButton(
-                      onPressed: () => setState(() {
-                        editing = null;
-                        name.clear();
-                      }),
-                      child: const Text('取消'),
+                  if (editing != null) ...[
+                    const SizedBox(width: 8),
+                    SpaceButton.form(
+                      '取消',
+                      tooltip: '取消编辑分类',
+                      onPressed: s.busy
+                          ? null
+                          : () => setState(() {
+                              editing = null;
+                              name.clear();
+                            }),
                     ),
+                  ],
                 ],
               ),
             ],
@@ -1835,9 +1885,9 @@ class _CategorySettingsState extends State<_CategorySettings> {
                   '${s.state.tasks.where((t) => t.category == e.key).length} 项',
                   style: textStyle(p, size: 12, color: p.muted),
                 ),
-                const SizedBox(width: 12),
-                SpaceButton(
-                  height: 32,
+                IconButtonS(
+                  'edit',
+                  '编辑分类：${e.value}',
                   onPressed: () {
                     setState(() {
                       editing = e.key;
@@ -1845,7 +1895,6 @@ class _CategorySettingsState extends State<_CategorySettings> {
                     });
                     nameFocus.requestFocus();
                   },
-                  child: const Text('编辑'),
                 ),
               ],
             ),

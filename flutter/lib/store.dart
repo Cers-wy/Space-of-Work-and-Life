@@ -93,6 +93,45 @@ class SpaceStore extends ChangeNotifier {
     return value != null && value.isFinite ? snapBoardRatio(value) : 1.0;
   }
 
+  /// Task statuses whose board column is shown. Board columns are a per-view
+  /// display choice, so an empty selection means "show every status".
+  Set<String> get boardColumns {
+    final raw = state.settings['boardColumns'];
+    if (raw == null || raw.isEmpty) return {};
+    try {
+      if (jsonDecode(raw) case final List values) {
+        return values
+            .whereType<String>()
+            .where(state.statuses.contains)
+            .toSet();
+      }
+    } on FormatException {
+      // A malformed preference falls back to all columns.
+    }
+    return {};
+  }
+
+  /// Board columns after applying the per-view status selection.
+  List<String> get boardStatuses {
+    final columns = boardColumns;
+    final statuses = state.displayStatuses;
+    if (columns.isEmpty) return statuses;
+    final selected = statuses.where(columns.contains).toList();
+    return selected.isEmpty ? statuses : selected;
+  }
+
+  /// Saves the visible board columns in status order. Selecting every status
+  /// clears the preference so the board follows status changes by default.
+  Future<bool> setBoardColumns(Set<String> columns) {
+    final ordered = [
+      for (final status in state.statuses)
+        if (columns.contains(status)) status,
+    ];
+    final everything =
+        ordered.isEmpty || state.displayStatuses.every(columns.contains);
+    return preferences({'boardColumns': everything ? '' : jsonEncode(ordered)});
+  }
+
   bool get overviewCollapsed => state.settings['overviewCollapsed'] == 'true';
   String get view =>
       [

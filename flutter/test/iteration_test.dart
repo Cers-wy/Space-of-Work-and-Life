@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math' show min, max;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -319,6 +320,39 @@ void main() {
       expect(t.takeException(), isNull);
     });
   }
+  testWidgets('导航选中图标悬停保持单层并保留按下反馈', (t) async {
+    await launch(t, 1020);
+    final button = find.byKey(const ValueKey('navigation-task'));
+    final icon = find.byKey(const ValueKey('navigation-task-icon'));
+    final surface = find
+        .descendant(of: button, matching: find.byType(AnimatedContainer))
+        .first;
+    final opacity = find
+        .descendant(of: button, matching: find.byType(Opacity))
+        .first;
+    final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer();
+    for (final appearance in ['light', 'dark', 'system']) {
+      await t.runAsync(() => s.preference('appearance', appearance));
+      for (final collapsed in [false, true]) {
+        await t.runAsync(() => s.preference('navCollapsed', '$collapsed'));
+        await t.pumpAndSettle();
+        final location = t.getCenter(icon);
+        await mouse.moveTo(location);
+        await t.pumpAndSettle();
+        final decoration =
+            t.widget<AnimatedContainer>(surface).decoration! as BoxDecoration;
+        expect(decoration.color, Colors.transparent);
+        expect(decoration.boxShadow, isNull);
+        await mouse.down(location);
+        await t.pump(const Duration(milliseconds: 120));
+        expect(t.widget<Opacity>(opacity).opacity, lessThan(1));
+        await mouse.up();
+        await t.pumpAndSettle();
+      }
+    }
+    await mouse.removePointer();
+  });
   testWidgets('全局隐藏在现有弹窗中立即生效，关闭恢复滚动条', (t) async {
     await launch(t, 1380);
     final future = showSettings(t.element(find.byType(Workspace)), s);
@@ -367,6 +401,93 @@ void main() {
     });
     await t.pumpAndSettle();
     expect(s.boardWidthRatio('todo'), 1);
+  });
+  test('看板列设置按状态保存、重启恢复，全选清除偏好', () async {
+    expect(s.boardColumns, isEmpty);
+    expect(s.boardStatuses, ['todo', 'doing', 'done']);
+    await s.setBoardColumns({'todo', 'done'});
+    expect(s.boardStatuses, ['todo', 'done']);
+    await s.reload();
+    expect(s.boardStatuses, ['todo', 'done']);
+    final reopened = SpaceStore(SpaceRepository(dir));
+    await reopened.initialize();
+    expect(reopened.boardStatuses, ['todo', 'done']);
+    await reopened.setBoardColumns({'todo', 'doing', 'done'});
+    expect(reopened.boardColumns, isEmpty);
+    expect(reopened.boardStatuses, ['todo', 'doing', 'done']);
+    await reopened.addStatus('待复核');
+    const custom = 'custom:待复核';
+    expect(reopened.boardStatuses, contains(custom));
+    await reopened.setBoardColumns({custom});
+    await reopened.toggleStatus(custom);
+    expect(reopened.boardStatuses, ['todo', 'doing', 'done']);
+    await reopened.toggleStatus(custom);
+    expect(reopened.boardStatuses, [custom]);
+    await reopened.deleteStatus(custom, 'todo');
+    expect(reopened.boardColumns, isEmpty, reason: '已删除状态从设置中清理');
+    reopened.dispose();
+  });
+  testWidgets('筛选浮层多选看板列，看板立即增减列且筛选条件不变', (t) async {
+    await t.runAsync(
+      () => s.preferences({'viewMode': 'board', 'overviewCollapsed': 'true'}),
+    );
+    await launch(t, 1380);
+    expect(find.byKey(const ValueKey('board-column-doing')), findsOneWidget);
+    await t.tap(
+      find.byWidgetPredicate((w) => w is IconButtonS && w.label == '筛选与排序'),
+    );
+    await t.pumpAndSettle();
+    expect(find.text('看板列'), findsOneWidget);
+    final columnField = find.byWidgetPredicate(
+      (w) => w is SpaceMultiSelect && w.label == '看板列',
+    );
+    expect(t.widget<SpaceMultiSelect>(columnField).values, {
+      'todo',
+      'doing',
+      'done',
+    });
+    await t.ensureVisible(columnField);
+    await t.pumpAndSettle();
+    await t.tap(columnField);
+    await t.pumpAndSettle();
+    final doingCheckbox = find.byWidgetPredicate(
+      (w) => w is SpaceCheckbox && w.label == '进行中',
+    );
+    expect(doingCheckbox, findsOneWidget);
+    expect(t.widget<SpaceCheckbox>(doingCheckbox).value, isTrue);
+    final ink = find.descendant(
+      of: doingCheckbox,
+      matching: find.byType(InkWell),
+    );
+    Focus.of(
+      t.element(find.byWidget(t.widget<InkWell>(ink).child!)),
+    ).requestFocus();
+    await t.pump();
+    await t.runAsync(() async {
+      await t.sendKeyEvent(LogicalKeyboardKey.space);
+      final deadline = DateTime.now().add(const Duration(seconds: 5));
+      while (s.busy && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    await t.pumpAndSettle();
+    expect(t.widget<SpaceCheckbox>(doingCheckbox).value, isFalse);
+    expect(s.boardColumns, {'todo', 'done'});
+    await t.sendKeyEvent(LogicalKeyboardKey.escape);
+    await t.pumpAndSettle();
+    await t.sendKeyEvent(LogicalKeyboardKey.escape);
+    await t.pumpAndSettle();
+    expect(find.byKey(const ValueKey('board-column-doing')), findsNothing);
+    expect(find.byKey(const ValueKey('board-column-todo')), findsOneWidget);
+    expect(s.query.hasFilters, isFalse);
+
+    await t.runAsync(() => s.preference('viewMode', 'list'));
+    await t.pumpAndSettle();
+    await t.tap(find.byTooltip('筛选与排序'));
+    await t.pumpAndSettle();
+    expect(columnField, findsNothing);
+    expect(s.query.hasFilters, isFalse);
+    expect(t.takeException(), isNull);
   });
   testWidgets('甘特双折角尺寸与全开、全关、无项目禁用状态', (t) async {
     await t.runAsync(() => s.preference('viewMode', 'gantt'));

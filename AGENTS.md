@@ -2,6 +2,8 @@
 
 本文件适用于本项目及全部子目录。以下要求是用户已确认的长期默认要求，后续代码修改必须主动执行，无需用户重复说明。
 
+接手继续开发时，先查阅 [Space 开发交接](DEVELOPMENT_HANDOFF.md)，再核对当前 Git 分支、提交和工作区状态。
+
 ## 文档分析预处理
 
 分析或理解用户提供的本地 PDF、DOCX、PPTX、HTML 或以文本内容为主的 XLSX 文件前，先调用 `markdown-first-document-analysis`，用 MarkItDown 生成 Markdown 工作副本后再阅读与分析。已是 Markdown、纯文本、代码文件，以及需要公式或单元格级准确性的表格任务不适用。转换后只读取与用户问题相关的章节；原始文件保持不变。

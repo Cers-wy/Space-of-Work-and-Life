@@ -18,24 +18,24 @@ Future<void> openInvoiceMerge(
   BuildContext context,
   SpaceStore store,
   InvoiceRepository repo, {
-  List<InvoiceEntry>? entries,
+  required List<InvoiceEntry> entries,
 }) => invoiceModal(
   store,
   () => sheet<void>(
     context,
-    _MergeEditor(repo: repo, entries: entries),
+    InvoiceMergeEditor(repo: repo, entries: entries),
     width: 1136,
     height: 750,
   ),
 );
 
-class _MergeEditor extends StatefulWidget {
+class InvoiceMergeEditor extends StatefulWidget {
   final InvoiceRepository repo;
   final List<InvoiceEntry>? entries;
-  const _MergeEditor({required this.repo, this.entries});
+  const InvoiceMergeEditor({super.key, required this.repo, this.entries});
 
   @override
-  State<_MergeEditor> createState() => _MergeEditorState();
+  State<InvoiceMergeEditor> createState() => _MergeEditorState();
 }
 
 typedef _MergeInput = ({
@@ -44,7 +44,7 @@ typedef _MergeInput = ({
   List<InvoiceFile> attachments,
 });
 
-class _MergeEditorState extends State<_MergeEditor> {
+class _MergeEditorState extends State<InvoiceMergeEditor> {
   final inputs = <_MergeInput>[];
   final sourcePages = <String, List<InvoiceSourcePage>>{};
   final attachmentPages = <String, List<InvoiceSourcePage>>{};
@@ -251,71 +251,81 @@ class _MergeEditorState extends State<_MergeEditor> {
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
+    final body = Column(
+      children: [
+        SizedBox(
+          height: 2,
+          child: reading || busy ? const LinearProgressIndicator() : null,
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(flex: 25, child: sources()),
+                const SizedBox(width: 12),
+                Expanded(flex: 47, child: paperPreview()),
+                const SizedBox(width: 12),
+                Expanded(flex: 28, child: settings()),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+    final footer = <Widget>[
+      Expanded(
+        child: Tooltip(
+          message: error ?? layoutError ?? '',
+          child: Text(
+            reading
+                ? '正在读取文件…'
+                : busy
+                ? '正在处理…'
+                : error ??
+                      layoutError ??
+                      feedback ??
+                      '${inputs.length} 个来源 · ${sheets.length} 页 A4',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: textStyle(
+              p,
+              size: 12,
+              color: error != null || layoutError != null ? p.red : p.muted,
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(width: 8),
+      IconButtonS(
+        'save',
+        '保存 PDF',
+        onPressed: ready ? () => output(print: false) : null,
+      ),
+      const SizedBox(width: 8),
+      IconButtonS(
+        'printer',
+        '打印',
+        primary: true,
+        onPressed: ready ? () => output(print: true) : null,
+      ),
+    ];
+    if (!fromLedger) {
+      return Column(
+        children: [
+          Expanded(child: body),
+          SpaceEditorFooter(children: footer),
+        ],
+      );
+    }
     return PopScope(
       canPop: canWork,
       child: sheetFrame(
         context,
-        title: fromLedger ? '勾选发票 · 合并打印' : '发票合并',
+        title: '勾选发票 · 合并打印',
         close: close,
-        body: Column(
-          children: [
-            SizedBox(
-              height: 2,
-              child: reading || busy ? const LinearProgressIndicator() : null,
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(flex: 25, child: sources()),
-                    const SizedBox(width: 12),
-                    Expanded(flex: 47, child: paperPreview()),
-                    const SizedBox(width: 12),
-                    Expanded(flex: 28, child: settings()),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        footer: [
-          Expanded(
-            child: Tooltip(
-              message: error ?? layoutError ?? '',
-              child: Text(
-                reading
-                    ? '正在读取文件…'
-                    : busy
-                    ? '正在处理…'
-                    : error ??
-                          layoutError ??
-                          feedback ??
-                          '${inputs.length} 个来源 · ${sheets.length} 页 A4',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: textStyle(
-                  p,
-                  size: 12,
-                  color: error != null || layoutError != null ? p.red : p.muted,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButtonS(
-            'save',
-            '保存 PDF',
-            onPressed: ready ? () => output(print: false) : null,
-          ),
-          const SizedBox(width: 8),
-          IconButtonS(
-            'printer',
-            '打印',
-            primary: true,
-            onPressed: ready ? () => output(print: true) : null,
-          ),
-        ],
+        body: body,
+        footer: footer,
       ),
     );
   }

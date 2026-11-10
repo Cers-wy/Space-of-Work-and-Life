@@ -561,7 +561,11 @@ void main() {
     await t.pumpAndSettle();
     expect(store.state.projects.single.name, '改名后的项目');
     await t.runAsync(() async {
-      await t.tap(find.text('停用'));
+      await t.tap(
+        find.byWidgetPredicate(
+          (w) => w is IconButtonS && w.label == '停用项目：改名后的项目',
+        ),
+      );
       await Future<void>.delayed(const Duration(milliseconds: 150));
     });
     await t.pumpAndSettle();

@@ -391,7 +391,7 @@ class _WorkspaceState extends State<Workspace> {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: s.area == SpaceArea.tasks ? p.primary : p.hover,
+          color: s.area == SpaceArea.tasks ? p.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         alignment: Alignment.center,
@@ -457,6 +457,7 @@ class _WorkspaceState extends State<Workspace> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 selected: selected,
                 showSelectedBackground: false,
+                showHoverBackground: !selected,
                 onPressed: () {
                   if (isTasks && selected) {
                     s.resetQuery();
@@ -479,7 +480,7 @@ class _WorkspaceState extends State<Workspace> {
                             height: 32,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: selected ? p.primary : p.hover,
+                              color: selected ? p.primary : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: SpaceIcon(
@@ -527,9 +528,9 @@ class _WorkspaceState extends State<Workspace> {
                 Positioned(left: 56, top: 16, child: label(brand)),
                 Positioned(left: 24, top: 80, child: label(heading)),
                 areaEntry(SpaceArea.tasks, 'grid', '任务', 104),
-                if (Platform.isMacOS) ...[
+                if (Platform.isMacOS || Platform.isWindows) ...[
                   areaEntry(SpaceArea.tools, 'tools', '工具', 148),
-                  areaEntry(SpaceArea.invoices, 'invoice', '发票管理', 192),
+                  areaEntry(SpaceArea.invoices, 'invoice', '发票', 192),
                 ],
                 Positioned(left: 16, bottom: 16, child: settings),
               ],
@@ -962,7 +963,7 @@ class _WorkspaceState extends State<Workspace> {
         width: 40,
         height: 40,
         child: SpaceButton(
-          tooltip: '分类与日期筛选',
+          tooltip: '筛选与排序',
           padding: EdgeInsets.zero,
           selected: true,
           onPressed: filters,
@@ -1010,12 +1011,10 @@ class _WorkspaceState extends State<Workspace> {
     ],
   );
   Widget board() {
-    final columns = {
-      for (final status in s.state.displayStatuses) status: column(status),
-    };
+    final statuses = s.boardStatuses;
+    final columns = {for (final status in statuses) status: column(status)};
     return LayoutBuilder(
       builder: (c, b) {
-        final statuses = s.state.displayStatuses;
         final width = math.max(
           280.0,
           (b.maxWidth - 12 * (statuses.length - 1)) / statuses.length,
@@ -1038,6 +1037,7 @@ class _WorkspaceState extends State<Workspace> {
                 for (var i = 0; i < statuses.length; i++) ...[
                   if (i > 0) const SizedBox(width: 12),
                   TweenAnimationBuilder<double>(
+                    key: ValueKey(statuses[i]),
                     tween: Tween(end: widths[statuses[i]]!),
                     duration:
                         MediaQuery.of(context).disableAnimations ||

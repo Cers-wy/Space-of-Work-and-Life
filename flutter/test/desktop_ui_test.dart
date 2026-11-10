@@ -245,6 +245,15 @@ void main() {
       ),
     );
     await t.tap(find.text('开发票'));
+    await t.runAsync(() async {
+      final deadline = DateTime.now().add(const Duration(seconds: 5));
+      final preview = find.byType(Image);
+      while (preview.evaluate().isEmpty && DateTime.now().isBefore(deadline)) {
+        await t.pump();
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(preview, findsOneWidget);
+    });
     await t.pumpAndSettle();
     final picker = find.byWidgetPredicate(
       (w) => w is SpaceSelect && w.label == '选择报销项目',

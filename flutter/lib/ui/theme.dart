@@ -40,6 +40,10 @@ class Palette extends ThemeExtension<Palette> {
   );
   Color get primary => value(0x356bfa, 0x9333ea);
   Color get hover => accent.withValues(alpha: .08 + .08 * darkness);
+  Color get accentText => value(0x2b5bd7, 0xd9bcff);
+  Color actionSurface({required bool highlighted}) =>
+      accent.withValues(alpha: (highlighted ? .18 : .10) + .05 * darkness);
+  Color get actionBorder => accent.withValues(alpha: .24 + .10 * darkness);
   Color selectedButtonBackground([Color? darkColor]) =>
       blend(const Palette(false).primary, darkColor ?? hover);
   Color selectedButtonForeground([Color? darkColor]) =>

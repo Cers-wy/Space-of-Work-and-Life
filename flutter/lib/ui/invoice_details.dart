@@ -96,8 +96,12 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
   late bool reimbursed = entry.info.reimbursed;
   bool busy = false, dirty = false, attachments = false;
   String? error, notice;
-  InvoiceFile? attachment;
+  String? attachmentId;
   InvoiceSession get session => widget.session;
+  int get attachmentIndex {
+    final index = entry.attachments.indexWhere((f) => f.id == attachmentId);
+    return index < 0 ? 0 : index;
+  }
 
   @override
   void dispose() {
@@ -109,7 +113,14 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
 
   Future<void> close() async {
     if (busy) return;
-    if (!dirty || await confirm(context, '放弃修改？', '还有尚未保存的发票信息。', '放弃修改')) {
+    if (!dirty ||
+        await confirm(
+          context,
+          '放弃修改？',
+          '还有尚未保存的发票信息。',
+          '放弃修改',
+          destructive: true,
+        )) {
       if (mounted) Navigator.pop(context);
     }
   }
@@ -181,7 +192,15 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
   });
 
   Future<void> remove() async {
-    if (!await confirm(context, '删除发票？', '将移除台账记录、原件和关联附件。', '删除发票')) return;
+    if (!await confirm(
+      context,
+      '删除发票？',
+      '将移除台账记录、原件和关联附件。',
+      '删除发票',
+      destructive: true,
+    )) {
+      return;
+    }
     if (!mounted) return;
     await act(() async {
       await session.repo.delete(widget.id);
@@ -207,14 +226,23 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
   });
 
   Future<void> removeAttachment(InvoiceFile f) async {
-    if (!await confirm(context, '删除附件？', f.name, '删除附件') || !mounted) return;
+    if (!await confirm(context, '删除附件？', f.name, '删除附件', destructive: true) ||
+        !mounted) {
+      return;
+    }
     await act(() async {
+      final index = attachmentIndex;
       await session.repo.removeAttachment(widget.id, f.id);
       await reload();
-      attachment = entry.attachments.firstOrNull;
+      final files = entry.attachments;
+      attachmentId = files.isEmpty
+          ? null
+          : files[index.clamp(0, files.length - 1)].id;
       notice = '已删除附件';
     });
   }
+
+  void showAttachment(String id) => setState(() => attachmentId = id);
 
   Future<void> download(InvoiceFile f) => act(() async {
     final target = await DesktopHost.saveFile(
@@ -229,8 +257,10 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
+    final files = entry.attachments;
+    final index = attachmentIndex;
     final displayed = attachments
-        ? attachment ?? entry.attachments.firstOrNull
+        ? (files.isEmpty ? null : files[index])
         : entry.original;
     return Focus(
       autofocus: true,
@@ -251,46 +281,70 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
           children: [
             SpaceEditorSection(
               children: [
-                Text(
-                  entry.original.name,
-                  style: textStyle(p, size: 16, bold: true),
-                ),
-                const SizedBox(height: 12),
                 Row(
                   children: [
                     IconButtonS(
                       'invoice',
                       '发票原件',
                       selected: !attachments,
-                      onPressed: () => setState(() => attachments = false),
+                      onPressed: busy
+                          ? null
+                          : () => setState(() => attachments = false),
                     ),
                     const SizedBox(width: 8),
                     IconButtonS(
                       'clip',
                       '关联附件（${entry.attachments.length}）',
                       selected: attachments,
-                      onPressed: () => setState(() => attachments = true),
+                      onPressed: busy
+                          ? null
+                          : () => setState(() => attachments = true),
                     ),
                     const Spacer(),
                     if (attachments)
-                      IconButtonS(
-                        'plus',
+                      SpaceButton.form(
                         '添加附件',
                         onPressed: busy ? null : addAttachments,
                       ),
                   ],
                 ),
-                if (attachments && entry.attachments.isNotEmpty) ...[
+                if (attachments && files.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  SpaceSelect(
-                    value: displayed!.id,
-                    label: '预览附件',
-                    options: {for (final f in entry.attachments) f.id: f.name},
-                    onChanged: (id) => setState(
-                      () => attachment = entry.attachments.firstWhere(
-                        (f) => f.id == id,
+                  Row(
+                    children: [
+                      IconButtonS(
+                        'left',
+                        '上一个附件',
+                        size: spaceFormControlHeight,
+                        onPressed: busy || index == 0
+                            ? null
+                            : () => showAttachment(files[index - 1].id),
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: IgnorePointer(
+                          ignoring: busy,
+                          child: ExcludeFocus(
+                            excluding: busy,
+                            child: SpaceSelect(
+                              value: files[index].id,
+                              label: '预览附件',
+                              options: {for (final f in files) f.id: f.name},
+                              onChanged: showAttachment,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      IconButtonS(
+                        'right',
+                        '下一个附件',
+                        size: spaceFormControlHeight,
+                        onPressed: busy || index + 1 == files.length
+                            ? null
+                            : () => showAttachment(files[index + 1].id),
+                      ),
+                    ],
                   ),
                 ],
                 const SizedBox(height: 8),
@@ -309,7 +363,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
                     children: [
                       IconButtonS(
                         'preview',
-                        '在速览中打开',
+                        Platform.isWindows ? '在系统应用中打开' : '在速览中打开',
                         onPressed: busy
                             ? null
                             : () => act(
@@ -324,8 +378,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
                       ),
                       const Spacer(),
                       if (attachments)
-                        IconButtonS(
-                          'trash',
+                        SpaceButton.form(
                           '删除附件',
                           danger: true,
                           onPressed: busy
@@ -387,6 +440,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
                           IconButtonS(
                             'project',
                             '管理共用项目',
+                            size: spaceFormControlHeight,
                             onPressed: busy
                                 ? null
                                 : () => act(() async {
@@ -423,11 +477,10 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
           ],
         ),
         footer: [
-          SpaceButton(
-            height: 32,
+          SpaceButton.form(
+            '删除发票',
             danger: true,
             onPressed: busy ? null : remove,
-            child: const Text('删除发票'),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -446,17 +499,12 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
             ),
           ),
           const SizedBox(width: 8),
-          SpaceButton(
-            height: 32,
-            onPressed: busy ? null : close,
-            child: const Text('取消'),
-          ),
+          SpaceButton.form('取消', onPressed: busy ? null : close),
           const SizedBox(width: 8),
-          SpaceButton(
-            height: 32,
+          SpaceButton.form(
+            '保存更改',
             primary: true,
             onPressed: busy || !dirty ? null : save,
-            child: const Text('保存更改'),
           ),
         ],
       ),
@@ -491,6 +539,8 @@ class _FilePreview extends StatefulWidget {
 
 class _FilePreviewState extends State<_FilePreview> {
   int page = 1;
+  // Decode from memory so Windows can delete or replace the previewed file.
+  late final imageBytes = File(widget.file.path).readAsBytes();
   late Future<InvoicePreview> preview = InvoicePdf.preview(
     widget.file.path,
     page,
@@ -502,12 +552,21 @@ class _FilePreviewState extends State<_FilePreview> {
     if (!widget.file.isPdf) {
       return SizedBox(
         height: 220,
-        child: Image.file(
-          File(widget.file.path),
-          cacheWidth: 900,
-          fit: BoxFit.contain,
-          errorBuilder: (_, error, stack) =>
-              const Center(child: Text('无法打开图片')),
+        child: FutureBuilder(
+          future: imageBytes,
+          builder: (context, state) {
+            if (state.connectionState != ConnectionState.done) {
+              return const Center(child: Text('正在加载图片…'));
+            }
+            if (!state.hasData) return const Center(child: Text('无法打开图片'));
+            return Image.memory(
+              state.data!,
+              cacheWidth: 900,
+              fit: BoxFit.contain,
+              errorBuilder: (_, error, stack) =>
+                  const Center(child: Text('无法打开图片')),
+            );
+          },
         ),
       );
     }

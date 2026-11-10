@@ -52,22 +52,40 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
+# Resolve the app bundle path before plugin configuration can fail and cache
+# the system installation directory.
+set(BUILD_BUNDLE_DIR "$<TARGET_FILE_DIR:${BINARY_NAME}>")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
+endif()
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
+set(PDFIUM_VERSION "8138" CACHE STRING "Pinned PDFium version for invoice rendering")
+# The printing plugin invokes another CMake project with -G but without -A.
+# Give that project the architecture chosen by Flutter on mixed-arch hosts.
+if(CMAKE_GENERATOR_PLATFORM)
+  set(space_previous_toolchain "$ENV{CMAKE_TOOLCHAIN_FILE}")
+  set(space_download_toolchain "${CMAKE_CURRENT_BINARY_DIR}/pdfium-platform.cmake")
+  file(WRITE "${space_download_toolchain}"
+    "set(CMAKE_GENERATOR_PLATFORM \"${CMAKE_GENERATOR_PLATFORM}\" CACHE STRING \"\" FORCE)\n")
+  set(ENV{CMAKE_TOOLCHAIN_FILE} "${space_download_toolchain}")
+endif()
 include(flutter/generated_plugins.cmake)
+if(CMAKE_GENERATOR_PLATFORM)
+  set(ENV{CMAKE_TOOLCHAIN_FILE} "${space_previous_toolchain}")
+endif()
+if(MSVC AND TARGET printing_plugin)
+  target_compile_options(printing_plugin PRIVATE /utf-8)
+endif()
 
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
 # run in place. This is done instead of making a separate bundle (as on Linux)
 # so that building and running from within Visual Studio will work.
-set(BUILD_BUNDLE_DIR "$<TARGET_FILE_DIR:${BINARY_NAME}>")
 # Make the "install" step default, as it's required to run.
 set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD 1)
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
-endif()
 
 set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
 set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
