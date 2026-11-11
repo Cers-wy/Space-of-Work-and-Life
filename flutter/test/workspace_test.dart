@@ -686,7 +686,7 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('任务说明 / 可选'), findsNothing);
       expect(find.text('支持图文混排'), findsNothing);
-      expect(find.text('新建'), findsOneWidget);
+      expect(find.text('搜索项目，或输入新名称'), findsOneWidget);
       await capture(t, '${dark ? 'dark' : 'light'}-compact-editor');
       await t.tap(
         find.byWidgetPredicate((w) => w is SpaceSelect && w.label == '所属分类'),
@@ -714,21 +714,12 @@ void main() {
     expect(find.text('请输入任务标题。'), findsOneWidget);
     expect(store.state.tasks.length, 9);
     expect(store.error, isNull);
-    final input = t.widget<SpaceInput>(
-      find.byWidgetPredicate((w) => w is SpaceInput && w.label == '任务标题'),
+    final titleField = find.byWidgetPredicate(
+      (w) =>
+          w is TextField && w.decoration?.hintText == '下一步要做什么？',
     );
-    expect(input.invalid, isTrue);
-    final decoration = find.descendant(
-      of: find.byWidgetPredicate((w) => w is SpaceInput && w.label == '任务标题'),
-      matching: find.byType(InputDecorator),
-    );
-    expect(t.getSize(decoration).height, 40);
-    final editable = find.descendant(
-      of: decoration,
-      matching: find.byType(EditableText),
-    );
-    expect(InputDecorator.containerOf(t.element(editable))!.size.height, 40);
-    expect(input.focusNode!.hasFocus, isTrue);
+    expect(titleField, findsOneWidget);
+    expect(t.widget<TextField>(titleField).focusNode!.hasFocus, isTrue);
     expect(t.takeException(), isNull);
   });
 }

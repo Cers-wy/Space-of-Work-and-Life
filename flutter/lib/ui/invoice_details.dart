@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -48,19 +50,27 @@ Future<void> showInvoiceDetails(
           ).chain(CurveTween(curve: spaceCurve)).animate(animation),
           child: child,
         ),
-    pageBuilder: (context, a, b) => Align(
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: SizedBox(
-          width: 548,
-          height: double.infinity,
-          child: Material(
-            type: MaterialType.transparency,
-            child: _InvoiceDetails(store: store, session: session, id: id),
+    pageBuilder: (context, a, b) => LayoutBuilder(
+      builder: (c, box) {
+        final wide = box.maxWidth >= 960;
+        final width = wide
+            ? math.min(1040.0, box.maxWidth - 32)
+            : math.min(548.0, box.maxWidth - 16);
+        return Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: SizedBox(
+              width: width,
+              height: double.infinity,
+              child: Material(
+                type: MaterialType.transparency,
+                child: _InvoiceDetails(store: store, session: session, id: id),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     ),
   ),
 );
@@ -87,13 +97,22 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     '票号': TextEditingController(text: entry.info.number),
     '开票日期': TextEditingController(text: entry.info.issued),
     '销售方': TextEditingController(text: entry.info.seller),
+    '销售方税号': TextEditingController(text: entry.info.sellerTax),
+    '购买方': TextEditingController(text: entry.info.buyer),
+    '购买方税号': TextEditingController(text: entry.info.buyerTax),
     '金额': TextEditingController(text: entry.info.amount),
+    '税额': TextEditingController(text: entry.info.tax),
+    '未税金额': TextEditingController(text: entry.info.net),
     '消费时间': TextEditingController(text: entry.info.spent),
     '用途': TextEditingController(text: entry.info.purpose),
     '报销月份': TextEditingController(text: entry.info.month),
   };
   late String project = entry.info.project;
   late bool reimbursed = entry.info.reimbursed;
+  late bool monthAuto =
+      entry.info.month.isEmpty ||
+      (entry.info.spent.length >= 7 &&
+          entry.info.month == entry.info.spent.substring(0, 7));
   bool busy = false, dirty = false, attachments = false;
   String? error, notice;
   String? attachmentId;
@@ -164,21 +183,30 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     return v;
   }
 
-  Future<void> save() => act(() async {
-    final text = value('金额');
+  int? amountCents(String key) {
+    final text = value(key);
+    if (text.isEmpty) return null;
     final amount = double.tryParse(text);
-    if (text.isNotEmpty &&
-        (!RegExp(r'^-?\d{1,12}(\.\d{1,2})?$').hasMatch(text) ||
-            amount == null)) {
-      throw StateError('请输入有效金额，最多保留两位小数');
+    if (!RegExp(r'^-?\d{1,12}(\.\d{1,2})?$').hasMatch(text) ||
+        amount == null) {
+      throw StateError('请输入有效$key，最多保留两位小数');
     }
+    return (amount * 100).round();
+  }
+
+  Future<void> save() => act(() async {
     await session.repo.save(
       widget.id,
       InvoiceInfo(
         number: value('票号'),
         issued: date('开票日期'),
         seller: value('销售方'),
-        cents: amount == null ? null : (amount * 100).round(),
+        sellerTax: value('销售方税号'),
+        buyer: value('购买方'),
+        buyerTax: value('购买方税号'),
+        cents: amountCents('金额'),
+        taxCents: amountCents('税额'),
+        netCents: amountCents('未税金额'),
         spent: date('消费时间'),
         purpose: value('用途'),
         month: date('报销月份', month: true),
@@ -254,6 +282,370 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     notice = '文件已保存';
   });
 
+  void wheelAttachments(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent || !attachments) return;
+    final files = entry.attachments;
+    if (files.length < 2) return;
+    final index = attachmentIndex;
+    final next = event.scrollDelta.dy > 0 ? index + 1 : index - 1;
+    if (next >= 0 && next < files.length) showAttachment(files[next].id);
+  }
+
+  Widget _countBadge(Palette p, int count) => Container(
+    constraints: const BoxConstraints(minWidth: 16),
+    height: 16,
+    padding: const EdgeInsets.symmetric(horizontal: 4),
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: p.accent,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: p.panel, width: 1.5),
+    ),
+    child: Text(
+      '$count',
+      style: textStyle(
+        p,
+        size: 10,
+        color: Colors.white,
+      ),
+    ),
+  );
+
+  Widget _previewPane(
+    Palette p,
+    List<InvoiceFile> files,
+    int index,
+    InvoiceFile? displayed, {
+    required bool scroll,
+  }) {
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            IconButtonS(
+              'invoice',
+              '发票原件',
+              selected: !attachments,
+              soft: true,
+              onPressed: busy ? null : () => setState(() => attachments = false),
+            ),
+            const SizedBox(width: 4),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                IconButtonS(
+                  'clip',
+                  '关联附件（${files.length}）',
+                  selected: attachments,
+                  soft: true,
+                  onPressed: busy ? null : () => setState(() => attachments = true),
+                ),
+                if (files.isNotEmpty)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: IgnorePointer(child: _countBadge(p, files.length)),
+                  ),
+              ],
+            ),
+            const Spacer(),
+            if (attachments)
+              IconButtonS(
+                'plus',
+                '添加附件',
+                onPressed: busy ? null : addAttachments,
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (displayed == null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 28),
+            child: Column(
+              children: [
+                SpaceIcon('clip', size: 22, color: p.muted),
+                const SizedBox(height: 8),
+                Text(
+                  '可添加关联行程单或报销凭证',
+                  style: textStyle(p, size: 12, color: p.muted),
+                ),
+                const SizedBox(height: 8),
+                SpaceTextButton(
+                  '添加附件',
+                  icon: 'plus',
+                  onPressed: busy ? null : addAttachments,
+                ),
+              ],
+            ),
+          )
+        else ...[
+          Listener(
+            onPointerSignal: wheelAttachments,
+            child: _FilePreview(key: ValueKey(displayed.id), file: displayed),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              IconButtonS(
+                'preview',
+                Platform.isWindows ? '在系统应用中打开' : '在速览中打开',
+                onPressed: busy
+                    ? null
+                    : () => act(() => DesktopHost.preview(displayed.path)),
+              ),
+              const SizedBox(width: 8),
+              IconButtonS(
+                'save',
+                attachments ? '下载附件' : '下载原件',
+                onPressed: busy ? null : () => download(displayed),
+              ),
+              const Spacer(),
+              if (attachments)
+                IconButtonS(
+                  'trash',
+                  '删除附件',
+                  danger: true,
+                  onPressed: busy ? null : () => removeAttachment(displayed),
+                ),
+            ],
+          ),
+          if (attachments && files.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 52,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: files.length,
+                      separatorBuilder: (_, i) => const SizedBox(width: 6),
+                      itemBuilder: (c, i) {
+                        final current = i == index;
+                        return Tooltip(
+                          message: files[i].name,
+                          child: GestureDetector(
+                            onTap: busy
+                                ? null
+                                : () => showAttachment(files[i].id),
+                            child: AnimatedContainer(
+                              duration: MediaQuery.disableAnimationsOf(context)
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 120),
+                              width: 44,
+                              decoration: BoxDecoration(
+                                color: current
+                                    ? p.accent.withValues(alpha: .12)
+                                    : p.card.withValues(alpha: .5),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: current ? p.accent : p.border,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${i + 1}',
+                                  style: textStyle(
+                                    p,
+                                    size: 12,
+                                    color: current ? p.accent : p.secondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${index + 1} / ${files.length}',
+                  style: textStyle(p, size: 11, color: p.muted),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ],
+    );
+    if (!scroll) return content;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: content,
+    );
+  }
+
+  Widget _label(Palette p, String text) => Text(
+    text,
+    maxLines: 2,
+    style: textStyle(p, size: 11.5, color: p.muted),
+  );
+
+  Widget _row(Palette p, String label, Widget value) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 3),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(width: 112, child: _label(p, label)),
+        Expanded(child: value),
+      ],
+    ),
+  );
+
+  Widget _heading(Palette p, String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text,
+      style: textStyle(p, size: 11, bold: true, color: p.muted),
+    ),
+  );
+
+  Widget _amountCell(Palette p, String label, String value, {bool strong = false}) => Expanded(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(label, style: textStyle(p, size: 11, color: p.muted)),
+        const SizedBox(height: 2),
+        Text(
+          value.isEmpty ? '—' : value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: textStyle(
+            p,
+            size: strong ? 15 : 13,
+            bold: strong,
+            color: value.isEmpty ? p.muted : (strong ? p.text : p.secondary),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _amounts(Palette p) => Container(
+    padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+    decoration: BoxDecoration(
+      color: p.card.withValues(alpha: p.dark ? .30 : .42),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: p.border),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('金额', style: textStyle(p, size: 11, color: p.muted)),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            _amountCell(p, '总金额', value('金额'), strong: true),
+            const SizedBox(width: 12),
+            _amountCell(p, '税额', value('税额')),
+            const SizedBox(width: 12),
+            _amountCell(p, '未税金额', value('未税金额')),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  Widget _formPane(Palette p, {required bool scroll}) {
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _heading(p, '票面信息'),
+        _row(p, '发票号码', input('票号')),
+        _row(p, '开票日期', input('开票日期')),
+        _row(p, '销售方', input('销售方')),
+        _row(p, '销售方社会信用代码', input('销售方税号')),
+        _row(p, '购买方', input('购买方')),
+        _row(p, '购买方社会信用代码', input('购买方税号')),
+        const SizedBox(height: 8),
+        _amounts(p),
+        const SizedBox(height: 14),
+        _heading(p, '报销信息'),
+        _row(
+          p,
+          '报销项目',
+          Row(
+            children: [
+              Expanded(
+                child: SpaceSelect(
+                  value: project,
+                  label: '选择报销项目',
+                  options: projectChoices(
+                    widget.store.state,
+                    selected: project,
+                  ),
+                  onChanged: (v) => setState(() {
+                    project = v;
+                    dirty = true;
+                  }),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButtonS(
+                'project',
+                '管理共用项目',
+                size: spaceFormControlHeight,
+                onPressed: busy
+                    ? null
+                    : () => act(() async {
+                        await openProjectEditor(context, widget.store);
+                        if (!mounted) return;
+                        await reload();
+                        if (!session.projects.containsKey(project)) {
+                          project = '';
+                        }
+                      }),
+              ),
+            ],
+          ),
+        ),
+        _row(
+          p,
+          '报销月份',
+          Row(
+            children: [
+              Expanded(child: input('报销月份')),
+              if (monthAuto) ...[
+                const SizedBox(width: 8),
+                Text(
+                  '随消费日期',
+                  style: textStyle(p, size: 10, color: p.muted),
+                ),
+              ],
+            ],
+          ),
+        ),
+        _row(p, '消费时间', input('消费时间')),
+        _row(
+          p,
+          '是否报销',
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SpaceCheckbox(
+              label: '已报销',
+              value: reimbursed,
+              onPressed: busy
+                  ? null
+                  : () => setState(() {
+                      reimbursed = !reimbursed;
+                      dirty = true;
+                    }),
+            ),
+          ),
+        ),
+        _row(p, '用途', input('用途')),
+      ],
+    );
+    if (!scroll) return content;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: content,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
@@ -265,267 +657,116 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     return Focus(
       autofocus: true,
       onKeyEvent: (_, event) {
-        if (event is KeyDownEvent &&
-            event.logicalKey == LogicalKeyboardKey.escape) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+        if (event.logicalKey == LogicalKeyboardKey.escape) {
           close();
+          return KeyEventResult.handled;
+        }
+        if (attachments &&
+            files.length > 1 &&
+            (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+                event.logicalKey == LogicalKeyboardKey.arrowRight)) {
+          final next =
+              index +
+              (event.logicalKey == LogicalKeyboardKey.arrowRight ? 1 : -1);
+          if (next >= 0 && next < files.length) {
+            showAttachment(files[next].id);
+          }
           return KeyEventResult.handled;
         }
         return KeyEventResult.ignored;
       },
-      child: sheetFrame(
-        context,
-        title: '发票详情',
-        close: close,
-        body: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            SpaceEditorSection(
-              children: [
-                Row(
-                  children: [
-                    IconButtonS(
-                      'invoice',
-                      '发票原件',
-                      selected: !attachments,
-                      onPressed: busy
-                          ? null
-                          : () => setState(() => attachments = false),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButtonS(
-                      'clip',
-                      '关联附件（${entry.attachments.length}）',
-                      selected: attachments,
-                      onPressed: busy
-                          ? null
-                          : () => setState(() => attachments = true),
-                    ),
-                    const Spacer(),
-                    if (attachments)
-                      SpaceButton.form(
-                        '添加附件',
-                        onPressed: busy ? null : addAttachments,
-                      ),
-                  ],
-                ),
-                if (attachments && files.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Row(
+      child: LayoutBuilder(
+        builder: (c, box) {
+          final wide = box.maxWidth >= 960;
+          return sheetFrame(
+            context,
+            title: '发票详情',
+            close: close,
+            body: wide
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      IconButtonS(
-                        'left',
-                        '上一个附件',
-                        size: spaceFormControlHeight,
-                        onPressed: busy || index == 0
-                            ? null
-                            : () => showAttachment(files[index - 1].id),
-                      ),
-                      const SizedBox(width: 4),
                       Expanded(
-                        child: IgnorePointer(
-                          ignoring: busy,
-                          child: ExcludeFocus(
-                            excluding: busy,
-                            child: SpaceSelect(
-                              value: files[index].id,
-                              label: '预览附件',
-                              options: {for (final f in files) f.id: f.name},
-                              onChanged: showAttachment,
-                            ),
-                          ),
+                        flex: 11,
+                        child: _previewPane(
+                          p,
+                          files,
+                          index,
+                          displayed,
+                          scroll: true,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      IconButtonS(
-                        'right',
-                        '下一个附件',
-                        size: spaceFormControlHeight,
-                        onPressed: busy || index + 1 == files.length
-                            ? null
-                            : () => showAttachment(files[index + 1].id),
+                      VerticalDivider(width: 1, color: p.border),
+                      Expanded(
+                        flex: 10,
+                        child: _formPane(p, scroll: true),
                       ),
                     ],
-                  ),
-                ],
-                const SizedBox(height: 8),
-                if (displayed == null)
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(
-                      '可添加关联行程单或报销凭证',
-                      style: textStyle(p, color: p.muted),
-                    ),
                   )
-                else ...[
-                  _FilePreview(key: ValueKey(displayed.id), file: displayed),
-                  const SizedBox(height: 8),
-                  Row(
+                : ListView(
+                    padding: const EdgeInsets.all(16),
                     children: [
-                      IconButtonS(
-                        'preview',
-                        Platform.isWindows ? '在系统应用中打开' : '在速览中打开',
-                        onPressed: busy
-                            ? null
-                            : () => act(
-                                () => DesktopHost.preview(displayed.path),
-                              ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButtonS(
-                        'save',
-                        attachments ? '下载附件' : '下载原件',
-                        onPressed: busy ? null : () => download(displayed),
-                      ),
-                      const Spacer(),
-                      if (attachments)
-                        SpaceButton.form(
-                          '删除附件',
-                          danger: true,
-                          onPressed: busy
-                              ? null
-                              : () => removeAttachment(displayed),
-                        ),
+                      _previewPane(p, files, index, displayed, scroll: false),
+                      const SizedBox(height: 16),
+                      _formPane(p, scroll: false),
                     ],
                   ),
-                ],
-              ],
-            ),
-            const SizedBox(height: 16),
-            SpaceEditorSection(
-              title: '发票信息',
-              detail: '填写票面信息与报销信息。',
-              children: [
-                IgnorePointer(
-                  ignoring: busy,
-                  child: Column(
-                    children: [
-                      for (final pair in [
-                        ('票号', '开票日期'),
-                        ('销售方', '金额'),
-                        ('消费时间', '报销月份'),
-                      ]) ...[
-                        Row(
-                          children: [
-                            Expanded(child: input(pair.$1)),
-                            const SizedBox(width: 12),
-                            Expanded(child: input(pair.$2)),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      input('用途'),
-                      const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: field(
-                              context,
-                              '报销项目',
-                              SpaceSelect(
-                                value: project,
-                                label: '选择报销项目',
-                                options: projectChoices(
-                                  widget.store.state,
-                                  selected: project,
-                                ),
-                                onChanged: (v) => setState(() {
-                                  project = v;
-                                  dirty = true;
-                                }),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButtonS(
-                            'project',
-                            '管理共用项目',
-                            size: spaceFormControlHeight,
-                            onPressed: busy
-                                ? null
-                                : () => act(() async {
-                                    await openProjectEditor(
-                                      context,
-                                      widget.store,
-                                    );
-                                    if (!mounted) return;
-                                    await reload();
-                                    if (!session.projects.containsKey(
-                                      project,
-                                    )) {
-                                      project = '';
-                                    }
-                                  }),
-                          ),
-                        ],
-                      ),
-                      SpaceCheckbox(
-                        label: '已报销',
-                        value: reimbursed,
-                        onPressed: busy
-                            ? null
-                            : () => setState(() {
-                                reimbursed = !reimbursed;
-                                dirty = true;
-                              }),
-                      ),
-                    ],
+            footer: [
+              IconButtonS(
+                'trash',
+                '删除发票',
+                danger: true,
+                onPressed: busy ? null : remove,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Tooltip(
+                  message: error ?? notice ?? '',
+                  child: Text(
+                    busy ? '正在处理…' : error ?? notice ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle(
+                      p,
+                      size: 12,
+                      color: error == null ? p.muted : p.red,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        footer: [
-          SpaceButton.form(
-            '删除发票',
-            danger: true,
-            onPressed: busy ? null : remove,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Tooltip(
-              message: error ?? notice ?? '',
-              child: Text(
-                busy ? '正在处理…' : error ?? notice ?? '',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: textStyle(
-                  p,
-                  size: 12,
-                  color: error == null ? p.muted : p.red,
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          SpaceButton.form('取消', onPressed: busy ? null : close),
-          const SizedBox(width: 8),
-          SpaceButton.form(
-            '保存更改',
-            primary: true,
-            onPressed: busy || !dirty ? null : save,
-          ),
-        ],
+              const SizedBox(width: 8),
+              SpaceTextButton('取消', onPressed: busy ? null : close),
+              const SizedBox(width: 8),
+              SpaceTextButton(
+                '保存更改',
+                primary: true,
+                onPressed: busy || !dirty ? null : save,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget input(String key) => field(
-    context,
-    key,
-    SpaceInput(
-      controller: inputs[key]!,
-      label: key,
-      hint: key.endsWith('日期') || key.endsWith('时间')
-          ? 'YYYY-MM-DD'
-          : key.endsWith('月份')
-          ? 'YYYY-MM'
-          : '',
-      onChanged: (_) {
-        if (!dirty) setState(() => dirty = true);
-      },
-    ),
+  Widget input(String key) => SpaceInput(
+    controller: inputs[key]!,
+    label: key,
+    height: 32,
+    fontSize: 12,
+    hint: key.endsWith('日期') || key.endsWith('时间')
+        ? 'YYYY-MM-DD'
+        : key.endsWith('月份')
+        ? 'YYYY-MM'
+        : '',
+    onChanged: (v) {
+      if (key == '消费时间' && monthAuto && v.length >= 7) {
+        inputs['报销月份']!.text = v.substring(0, 7);
+      }
+      if (key == '报销月份') monthAuto = false;
+      if (!dirty) setState(() => dirty = true);
+    },
   );
 }
 

@@ -41,7 +41,7 @@ void main() {
     await t.pumpAndSettle();
   }
 
-  test('列宽四档、上下限、旧设置与重启恢复', () async {
+  test('列宽连续比例、上下限、旧设置与重启恢复', () async {
     expect(s.hideScrollbars, false);
     expect(s.boardWidthRatio('todo'), 1);
     for (final value in boardWidthRatios) {
@@ -51,7 +51,7 @@ void main() {
     }
     expect(snapBoardRatio(-2), .5);
     expect(snapBoardRatio(9), 1);
-    expect(snapBoardRatio(.68), 2 / 3);
+    expect(snapBoardRatio(.68), .68);
     await s.preferences({'hideScrollbars': 'true', 'boardWidth.todo': 'NaN'});
     final reopened = SpaceStore(SpaceRepository(dir));
     await reopened.initialize();
@@ -489,31 +489,34 @@ void main() {
     expect(s.query.hasFilters, isFalse);
     expect(t.takeException(), isNull);
   });
-  testWidgets('甘特双折角尺寸与全开、全关、无项目禁用状态', (t) async {
+  testWidgets('甘特收起展开为单按钮并随状态切换图标', (t) async {
     await t.runAsync(() => s.preference('viewMode', 'gantt'));
     await launch(t, 1380);
-    final expand = find.byWidgetPredicate(
-      (w) => w is IconButtonS && w.label == '展开全部项目',
+    IconButtonS button() => t.widget<IconButtonS>(
+      find.byWidgetPredicate(
+        (w) =>
+            w is IconButtonS &&
+            (w.label == '展开全部项目' ||
+                w.label == '收起全部项目' ||
+                w.label == '暂无可展开或收起的项目'),
+      ),
     );
-    final collapse = find.byWidgetPredicate(
-      (w) => w is IconButtonS && w.label == '收起全部项目',
-    );
-    expect(t.widget<IconButtonS>(expand).icon, 'expand-all');
-    expect(t.widget<IconButtonS>(expand).iconSize, 20);
-    expect(t.getSize(expand), const Size(40, 40));
-    expect(t.widget<IconButtonS>(expand).onPressed, isNull);
-    await t.tap(collapse);
+    expect(button().icon, 'collapse-tree');
+    expect(button().label, '收起全部项目');
+    expect(t.getSize(find.byTooltip('收起全部项目')), const Size(32, 32));
+    expect(button().onPressed, isNotNull);
+    await t.tap(find.byTooltip('收起全部项目'));
     await t.pumpAndSettle();
-    expect(t.widget<IconButtonS>(collapse).onPressed, isNull);
-    expect(t.widget<IconButtonS>(expand).onPressed, isNotNull);
-    await t.tap(expand);
+    expect(button().icon, 'expand-tree');
+    expect(button().label, '展开全部项目');
+    await t.tap(find.byTooltip('展开全部项目'));
     await t.pumpAndSettle();
-    expect(t.widget<IconButtonS>(expand).onPressed, isNull);
+    expect(button().icon, 'collapse-tree');
     s.query.text = 'no-synthetic-match';
     s.refreshQuery();
     await t.pumpAndSettle();
-    expect(t.widget<IconButtonS>(expand).onPressed, isNull);
-    expect(t.widget<IconButtonS>(collapse).onPressed, isNull);
+    expect(button().label, '暂无可展开或收起的项目');
+    expect(button().onPressed, isNull);
   });
   testWidgets('隐藏开关覆盖四视图和任务编辑的嵌套滚动区域', (t) async {
     await launch(t, 1020);

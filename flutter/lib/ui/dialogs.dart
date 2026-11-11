@@ -167,7 +167,7 @@ Future<void> editTask(
       c,
       _TaskEditor(store: s, task: task, existing: existing),
       width: 640,
-      height: 680,
+      height: 720,
     );
   } finally {
     s.modal = false;
@@ -193,11 +193,15 @@ class _TaskEditorState extends State<_TaskEditor> {
   late TextEditingController title;
   final project = TextEditingController(),
       editorFocus = FocusNode(),
+      projectFocus = FocusNode(),
       titleFocus = FocusNode();
+  final projectLink = LayerLink();
+  OverlayEntry? projectOverlay;
+  String initialProjectName = '';
   String? titleError;
   late q.QuillController rich;
   late Delta initialDelta;
-  bool creatingProject = false, saving = false, richFailed = false;
+  bool saving = false, richFailed = false;
   String? error;
   SpaceStore get s => widget.store;
   @override
@@ -205,6 +209,20 @@ class _TaskEditorState extends State<_TaskEditor> {
     super.initState();
     draft = widget.task;
     title = TextEditingController(text: draft.title);
+    final currentProject = s.state.projects
+        .where((x) => x.id == draft.projectID)
+        .firstOrNull;
+    project.text = currentProject?.name ?? '';
+    initialProjectName = project.text.trim();
+    projectFocus.addListener(() {
+      if (projectFocus.hasFocus) {
+        showProjectSuggest();
+      } else {
+        Future<void>.delayed(const Duration(milliseconds: 120), () {
+          if (mounted && !projectFocus.hasFocus) hideProjectSuggest();
+        });
+      }
+    });
     List<Map<String, dynamic>> ops = [];
     try {
       final runs = draft.richDescription == null
@@ -263,7 +281,7 @@ class _TaskEditorState extends State<_TaskEditor> {
       (!identical(draft, widget.task) &&
           jsonEncode(draft.toJson()) != jsonEncode(widget.task.toJson())) ||
       richDirty ||
-      creatingProject && project.text.isNotEmpty;
+      project.text.trim() != initialProjectName;
   Future<void> close() async {
     if (saving) return;
     if (dirty &&
@@ -451,10 +469,16 @@ class _TaskEditorState extends State<_TaskEditor> {
         setState(() => titleError = '任务说明最多 5,000 字。');
         return;
       }
+      final projectName = project.text.trim();
+      if (projectName.length > 60 || controls(projectName)) {
+        setState(() => titleError = '项目名称须为1至60字且无控制字符。');
+        return;
+      }
+      final naming = projectName.isEmpty ? null : projectName;
       final ok = await s.saveTask(
-        result,
+        result.patch({'projectID': naming == null ? null : draft.projectID}),
         initial: widget.existing ? widget.task : null,
-        projectName: creatingProject ? project.text : null,
+        projectName: naming,
       );
       if (ok && mounted) {
         Navigator.pop(context);
@@ -473,14 +497,391 @@ class _TaskEditorState extends State<_TaskEditor> {
     DesktopHost.channel
         .invokeMethod("dirty", {"dirty": false})
         .catchError((_) => null);
+    hideProjectSuggest();
     title.removeListener(changed);
     rich.removeListener(changed);
     title.dispose();
     project.dispose();
     rich.dispose();
     editorFocus.dispose();
+    projectFocus.dispose();
     titleFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> removeTask() async {
+    if (await confirm(
+          context,
+          '删除任务',
+          '确定删除“${widget.task.title}”？删除后可撤销。',
+          '删除任务',
+          destructive: true,
+        ) &&
+        await s.deleteTask(draft.id) &&
+        mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  void format(q.Attribute attribute) {
+    if (rich.readOnly) return;
+    final active = rich.getSelectionStyle().attributes.containsKey(
+      attribute.key,
+    );
+    rich.formatSelection(
+      active ? q.Attribute.clone(attribute, null) : attribute,
+    );
+    setState(() {});
+  }
+
+  void showProjectSuggest() {
+    if (projectOverlay != null || !mounted) return;
+    final overlay = Overlay.of(context, rootOverlay: true);
+    projectOverlay = OverlayEntry(
+      builder: (c) => CompositedTransformFollower(
+        link: projectLink,
+        showWhenUnlinked: false,
+        offset: const Offset(0, spaceFormControlHeight + 6),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: _projectPanel(Palette.of(c)),
+        ),
+      ),
+    );
+    overlay.insert(projectOverlay!);
+  }
+
+  void hideProjectSuggest() {
+    projectOverlay?.remove();
+    projectOverlay?.dispose();
+    projectOverlay = null;
+  }
+
+  void pickProject(String name) {
+    project.text = name;
+    project.selection = TextSelection.collapsed(offset: name.length);
+    hideProjectSuggest();
+    changed();
+    titleFocus.requestFocus();
+  }
+
+  void chooseFirstProject() {
+    final query = project.text.trim().toLowerCase();
+    final hit = s.state.projects
+        .where(
+          (x) =>
+              !x.disabled &&
+              (query.isEmpty || x.name.toLowerCase().contains(query)),
+        )
+        .firstOrNull;
+    if (hit != null) pickProject(hit.name);
+  }
+
+  Widget _projectPanel(Palette p) {
+    final query = project.text.trim().toLowerCase();
+    final matches = s.state.projects
+        .where(
+          (x) =>
+              !x.disabled &&
+              (query.isEmpty || x.name.toLowerCase().contains(query)),
+        )
+        .take(6)
+        .toList();
+    final exact = s.state.projects.any((x) => x.name.toLowerCase() == query);
+    final disabled = s.state.projects.any(
+      (x) => x.disabled && x.name.toLowerCase() == query,
+    );
+    final rows = <Widget>[
+      for (final item in matches)
+        SpaceButton(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          onPressed: () => pickProject(item.name),
+          child: Row(
+            children: [
+              SpaceIcon('project', size: 13, color: p.muted),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyle(p, size: 12),
+                ),
+              ),
+              if (item.id == draft.projectID)
+                SpaceIcon('check', size: 13, color: p.accent),
+            ],
+          ),
+        ),
+      if (query.isNotEmpty && !exact)
+        SpaceButton(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          onPressed: () => pickProject(project.text.trim()),
+          child: Row(
+            children: [
+              SpaceIcon('plus', size: 13, color: p.accent),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '新建项目「${project.text.trim()}」',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyle(p, size: 12, color: p.accentText),
+                ),
+              ),
+            ],
+          ),
+        ),
+      if (disabled)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+          child: Text(
+            '同名项目已停用，请先在项目管理中启用',
+            style: textStyle(p, size: 11, color: p.amber),
+          ),
+        ),
+      if (rowsEmptyHint(query, exact, disabled, matches))
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+          child: Text(
+            '还没有项目，输入名称即可随任务新建',
+            style: textStyle(p, size: 11, color: p.muted),
+          ),
+        ),
+    ];
+    return SizedBox(
+      width: 320,
+      child: Material(
+        type: MaterialType.transparency,
+        child: PopupSurface(
+          padding: const EdgeInsets.all(6),
+          child: Column(mainAxisSize: MainAxisSize.min, children: rows),
+        ),
+      ),
+    );
+  }
+
+  bool rowsEmptyHint(
+    String query,
+    bool exact,
+    bool disabled,
+    List<Project> matches,
+  ) => matches.isEmpty && (query.isEmpty || exact || disabled);
+
+  Widget _richToolbar(Palette p) {
+    Widget toggle(
+      String label,
+      String text,
+      q.Attribute attribute, {
+      bool italic = false,
+    }) {
+      final active = rich.getSelectionStyle().attributes.containsKey(
+        attribute.key,
+      );
+      return SpaceButton(
+        height: 26,
+        soft: true,
+        selected: active,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tooltip: label,
+        onPressed: saving || rich.readOnly ? null : () => format(attribute),
+        child: Text(
+          text,
+          style: textStyle(
+            p,
+            size: 12,
+            bold: true,
+            color: active ? p.accent : p.secondary,
+          ).copyWith(fontStyle: italic ? FontStyle.italic : null),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        toggle('加粗', 'B', q.Attribute.bold),
+        const SizedBox(width: 2),
+        toggle('斜体', 'I', q.Attribute.italic, italic: true),
+        const SizedBox(width: 2),
+        SpaceButton(
+          height: 26,
+          soft: true,
+          selected: rich.getSelectionStyle().attributes.containsKey(
+            q.Attribute.ul.key,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          tooltip: '项目符号列表',
+          onPressed: saving || rich.readOnly
+              ? null
+              : () => format(q.Attribute.ul),
+          child: SpaceIcon('list', size: 13, color: p.secondary),
+        ),
+      ],
+    );
+  }
+
+  Widget _attrField(Palette p, String label, Widget child) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: textStyle(p, size: 11, color: p.muted),
+      ),
+      const SizedBox(height: 6),
+      child,
+    ],
+  );
+
+  Widget _attrRow(Palette p, Widget left, Widget right) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(child: left),
+      const SizedBox(width: 12),
+      Expanded(child: right),
+    ],
+  );
+
+  Widget _attributes(Palette p) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      _attrRow(
+        p,
+        _attrField(
+          p,
+          '状态',
+          SpaceSelect(
+            value: draft.status,
+            options: {
+              for (final status in s.state.statuses)
+                if (!s.state.disabledStatuses.contains(status) ||
+                    status == draft.status)
+                  status: statusName(status),
+            },
+            label: '任务状态',
+            onChanged: (v) => setState(() => draft = draft.moving(v)),
+          ),
+        ),
+        _attrField(
+          p,
+          '优先级',
+          SpaceSelect(
+            value: draft.priority,
+            options: {
+              for (final e in priorities.entries) e.key: '${e.value}优先级',
+            },
+            label: '优先级',
+            onChanged: (v) =>
+                setState(() => draft = draft.patch({'priority': v})),
+          ),
+        ),
+      ),
+      const SizedBox(height: 12),
+      _attrRow(
+        p,
+        _attrField(
+          p,
+          '分类',
+          SpaceSelect(
+            value: draft.category,
+            options: s.state.taskCategories,
+            label: '所属分类',
+            onChanged: (v) =>
+                setState(() => draft = draft.patch({'category': v})),
+          ),
+        ),
+        _attrField(p, '项目', projectField(p)),
+      ),
+      const SizedBox(height: 12),
+      _attrRow(
+        p,
+        _attrField(
+          p,
+          '开始',
+          DateField(
+            value: draft.startDate ?? '',
+            label: '开始日期',
+            onChanged: (v) => setState(
+              () => draft = draft.patch({'startDate': v.isEmpty ? null : v}),
+            ),
+          ),
+        ),
+        _attrField(
+          p,
+          '截止',
+          DateField(
+            value: draft.due,
+            label: '截止日期',
+            onChanged: (v) => setState(() => draft = draft.patch({'due': v})),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  Widget projectField(Palette p) => CompositedTransformTarget(
+    link: projectLink,
+    child: Container(
+      height: spaceFormControlHeight,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: p.card.withValues(alpha: .55),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: projectOverlay == null
+              ? p.border
+              : p.accent.withValues(alpha: .55),
+        ),
+      ),
+      child: Row(
+        children: [
+          SpaceIcon('search', size: 13, color: p.muted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: TextField(
+              controller: project,
+              focusNode: projectFocus,
+              style: textStyle(p, size: 12),
+              decoration: InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                hintText: '搜索项目，或输入新名称',
+                hintStyle: textStyle(p, size: 12, color: p.muted),
+              ),
+              onChanged: (_) {
+                setState(() {});
+                projectOverlay?.markNeedsBuild();
+              },
+              onSubmitted: (_) => chooseFirstProject(),
+            ),
+          ),
+          if (project.text.isNotEmpty)
+            IconButtonS(
+              'x',
+              '清除项目',
+              size: 20,
+              iconSize: 10,
+              onPressed: () {
+                project.clear();
+                setState(() {});
+                projectOverlay?.markNeedsBuild();
+              },
+            ),
+        ],
+      ),
+    ),
+  );
+
+  String _stamp(String value) {
+    final text = validTime(
+      value,
+    ).toUtc().add(const Duration(hours: 8)).toString();
+    return text.length >= 16 ? text.substring(0, 16) : text;
   }
 
   @override
@@ -510,386 +911,231 @@ class _TaskEditorState extends State<_TaskEditor> {
           close: close,
           footer: [
             if (widget.existing)
-              SpaceButton.form(
+              SpaceTextButton(
                 '删除任务',
+                icon: 'trash',
                 danger: true,
-                onPressed: saving
-                    ? null
-                    : () async {
-                        if (await confirm(
-                              c,
-                              '删除任务',
-                              '确定删除“${widget.task.title}”？删除后可撤销。',
-                              '删除任务',
-                              destructive: true,
-                            ) &&
-                            await s.deleteTask(draft.id) &&
-                            c.mounted) {
-                          Navigator.pop(c);
-                        }
-                      },
+                onPressed: saving ? null : removeTask,
               ),
             const Spacer(),
-            SpaceButton.form('取消', onPressed: saving ? null : close),
+            SpaceTextButton('取消', onPressed: saving ? null : close),
             const SizedBox(width: 8),
-            SpaceButton.form(
+            SpaceTextButton(
               widget.existing ? '保存更改' : '创建任务',
               primary: true,
               onPressed: saving ? null : save,
             ),
           ],
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SpaceEditorSection(
+                TextField(
+                  controller: title,
+                  focusNode: titleFocus,
+                  autofocus: true,
+                  maxLines: 1,
+                  style: textStyle(p, size: 19, bold: true),
+                  decoration: InputDecoration(
+                    hintText: '下一步要做什么？',
+                    hintStyle: textStyle(
+                      p,
+                      size: 19,
+                      bold: true,
+                      color: p.muted.withValues(alpha: .55),
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Text('任务标题 *', style: textStyle(p, bold: true)),
-                        const Spacer(),
-                        Text(
-                          '${title.text.length}/100',
-                          style: textStyle(p, size: 12, color: p.muted),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    SpaceInput(
-                      controller: title,
-                      hint: '下一步要做什么？',
-                      label: '任务标题',
-                      focusNode: titleFocus,
-                      invalid: titleError != null,
-                      autofocus: true,
-                    ),
-                    if (titleError != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        titleError!,
-                        style: textStyle(p, size: 12, color: p.red),
+                    Text(
+                      titleError ?? '必填 · 最多 100 字',
+                      style: textStyle(
+                        p,
+                        size: 11,
+                        color: titleError == null ? p.muted : p.red,
                       ),
-                    ],
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${title.text.length}/100',
+                      style: textStyle(p, size: 11, color: p.muted),
+                    ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                Divider(height: 1, color: p.border),
+                const SizedBox(height: 12),
+                Text('任务属性', style: textStyle(p, size: 13, bold: true)),
+                const SizedBox(height: 8),
+                _attributes(p),
                 const SizedBox(height: 16),
-                SpaceEditorSection(
-                  title: '任务属性',
+                Row(
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: field(
-                            c,
-                            '所属分类',
-                            SpaceSelect(
-                              value: draft.category,
-                              options: s.state.taskCategories,
-                              label: '所属分类',
-                              onChanged: (v) => setState(
-                                () => draft = draft.patch({'category': v}),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: field(
-                            c,
-                            '任务状态',
-                            SpaceSelect(
-                              value: draft.status,
-                              options: {
-                                for (final status in s.state.statuses)
-                                  if (!s.state.disabledStatuses.contains(
-                                        status,
-                                      ) ||
-                                      status == draft.status)
-                                    status: statusName(status),
-                              },
-                              label: '任务状态',
-                              onChanged: (v) =>
-                                  setState(() => draft = draft.moving(v)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: field(
-                            c,
-                            '优先级',
-                            SpaceSelect(
-                              value: draft.priority,
-                              options: {
-                                for (final e in priorities.entries)
-                                  e.key: '${e.value}优先级',
-                              },
-                              label: '优先级',
-                              onChanged: (v) => setState(
-                                () => draft = draft.patch({'priority': v}),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text('任务说明', style: textStyle(p, size: 13, bold: true)),
+                    const Spacer(),
+                    Text(
+                      '${(rich.document.toPlainText().length - 1).clamp(0, 5000)}/5,000',
+                      style: textStyle(p, size: 11, color: p.muted),
                     ),
-                    const SizedBox(height: 12),
-                    field(
-                      c,
-                      '项目 / 可选',
-                      Row(
-                        children: [
-                          Expanded(
-                            child: creatingProject
-                                ? SpaceInput(
-                                    controller: project,
-                                    hint: '输入项目名称，保存任务时一起新建',
-                                    label: '新项目名称',
-                                    onChanged: (_) => setState(() {}),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _richToolbar(p),
+                const SizedBox(height: 8),
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: p.card.withValues(alpha: .55),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: p.border),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: q.QuillEditor.basic(
+                      controller: rich,
+                      focusNode: editorFocus,
+                      config: q.QuillEditorConfig(
+                        padding: const EdgeInsets.all(8),
+                        embedBuilders: [_ImageBuilder()],
+                        customStyles: q.DefaultStyles(
+                          paragraph: q.DefaultTextBlockStyle(
+                            textStyle(p),
+                            const q.HorizontalSpacing(0, 0),
+                            const q.VerticalSpacing(0, 0),
+                            const q.VerticalSpacing(0, 0),
+                            null,
+                          ),
+                        ),
+                        scrollable: true,
+                        autoFocus: false,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    SpaceTextButton(
+                      '上传附件',
+                      icon: 'plus',
+                      onPressed: saving ? null : upload,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '粘贴图片仅保存在任务说明中',
+                        style: textStyle(p, size: 11, color: p.muted),
+                      ),
+                    ),
+                  ],
+                ),
+                if (draft.attachments.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    '单个附件≤10 MB，每项任务≤20个、合计≤20 MB',
+                    style: textStyle(p, size: 11, color: p.muted),
+                  ),
+                ],
+                for (final a in draft.attachments) ...[
+                  const SizedBox(height: 8),
+                  Glass(
+                    blur: false,
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => previewAttachment(a),
+                          child: SizedBox(
+                            width: 96,
+                            height: 64,
+                            child:
+                                a.typeIdentifier == 'public.png' ||
+                                    a.typeIdentifier == 'public.jpeg'
+                                ? Image.memory(
+                                    a.data,
+                                    fit: BoxFit.contain,
+                                    cacheWidth: 192,
+                                    errorBuilder: (c, e, st) =>
+                                        const SpaceIcon('file', size: 32),
                                   )
-                                : SpaceSelect(
-                                    value: draft.projectID ?? '',
-                                    options: projectChoices(
-                                      s.state,
-                                      selected: draft.projectID,
-                                    ),
-                                    label: '所属项目',
-                                    onChanged: (v) => setState(
-                                      () => draft = draft.patch({
-                                        'projectID': v.isEmpty ? null : v,
-                                      }),
-                                    ),
+                                : const Center(
+                                    child: SpaceIcon('file', size: 32),
                                   ),
                           ),
-                          const SizedBox(width: 8),
-                          SpaceButton.form(
-                            creatingProject ? '取消' : '新建',
-                            tooltip: creatingProject ? '取消新建项目' : '新建项目',
-                            onPressed: saving
-                                ? null
-                                : () => setState(() {
-                                    creatingProject = !creatingProject;
-                                    if (!creatingProject) project.clear();
-                                  }),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: field(
-                            c,
-                            '开始日期 / 可选',
-                            DateField(
-                              value: draft.startDate ?? '',
-                              label: '开始日期',
-                              onChanged: (v) => setState(
-                                () => draft = draft.patch({
-                                  'startDate': v.isEmpty ? null : v,
-                                }),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: field(
-                            c,
-                            '截止日期',
-                            DateField(
-                              value: draft.due,
-                              onChanged: (v) => setState(
-                                () => draft = draft.patch({'due': v}),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SpaceEditorSection(
-                  children: [
-                    Row(
-                      children: [
-                        Text('任务说明', style: textStyle(p, bold: true)),
-                        const Spacer(),
-                        Text(
-                          '${rich.document.toPlainText().length - 1}/5,000',
-                          style: textStyle(p, size: 12, color: p.muted),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      height: 192,
-                      decoration: BoxDecoration(
-                        color: p.card,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: p.border),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: q.QuillEditor.basic(
-                          controller: rich,
-                          focusNode: editorFocus,
-                          config: q.QuillEditorConfig(
-                            padding: const EdgeInsets.all(8),
-                            embedBuilders: [_ImageBuilder()],
-                            customStyles: q.DefaultStyles(
-                              paragraph: q.DefaultTextBlockStyle(
-                                textStyle(p),
-                                const q.HorizontalSpacing(0, 0),
-                                const q.VerticalSpacing(0, 0),
-                                const q.VerticalSpacing(0, 0),
-                                null,
-                              ),
-                            ),
-                            scrollable: true,
-                            autoFocus: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        SpaceButton.form(
-                          '上传附件',
-                          onPressed: saving ? null : upload,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            '粘贴图片仅保存在任务说明中',
-                            style: textStyle(p, size: 12, color: p.muted),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                a.name,
+                                style: textStyle(p, size: 12),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${(a.data.length / 1024).toStringAsFixed(1)} KB',
+                                style: textStyle(p, size: 12, color: p.muted),
+                              ),
+                            ],
                           ),
+                        ),
+                        IconButtonS(
+                          'save',
+                          '另存附件',
+                          onPressed: () async {
+                            final path = await DesktopHost.saveFile(a.name);
+                            if (path != null) {
+                              await File(
+                                path,
+                              ).writeAsBytes(a.data, flush: true);
+                            }
+                          },
+                        ),
+                        SpaceTextButton(
+                          '移除附件',
+                          icon: 'trash',
+                          danger: true,
+                          onPressed: saving
+                              ? null
+                              : () => setState(
+                                  () => draft = draft.patch({
+                                    'attachments': draft.attachments
+                                        .where((x) => x.id != a.id)
+                                        .map((x) => x.toJson())
+                                        .toList(),
+                                  }),
+                                ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '单个附件≤10 MB，每项任务≤20个、合计≤20 MB',
-                      style: textStyle(p, size: 12, color: p.muted),
-                    ),
-                    for (final a in draft.attachments) ...[
-                      const SizedBox(height: 8),
-                      Glass(
-                        blur: false,
-                        padding: const EdgeInsets.all(8),
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () => previewAttachment(a),
-                              child: SizedBox(
-                                width: 96,
-                                height: 64,
-                                child:
-                                    a.typeIdentifier == 'public.png' ||
-                                        a.typeIdentifier == 'public.jpeg'
-                                    ? Image.memory(
-                                        a.data,
-                                        fit: BoxFit.contain,
-                                        cacheWidth: 192,
-                                        errorBuilder: (c, e, st) =>
-                                            const SpaceIcon('file', size: 32),
-                                      )
-                                    : const Center(
-                                        child: SpaceIcon('file', size: 32),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    a.name,
-                                    style: textStyle(p, size: 12),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${(a.data.length / 1024).toStringAsFixed(1)} KB',
-                                    style: textStyle(
-                                      p,
-                                      size: 12,
-                                      color: p.muted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButtonS(
-                              'save',
-                              '另存附件',
-                              onPressed: () async {
-                                final path = await DesktopHost.saveFile(a.name);
-                                if (path != null) {
-                                  await File(
-                                    path,
-                                  ).writeAsBytes(a.data, flush: true);
-                                }
-                              },
-                            ),
-                            SpaceButton.form(
-                              '移除附件',
-                              danger: true,
-                              onPressed: saving
-                                  ? null
-                                  : () => setState(
-                                      () => draft = draft.patch({
-                                        'attachments': draft.attachments
-                                            .where((x) => x.id != a.id)
-                                            .map((x) => x.toJson())
-                                            .toList(),
-                                      }),
-                                    ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                if (widget.existing) ...[
-                  const SizedBox(height: 24),
-                  for (final e in {
-                    '创建时间': draft.createdAt,
-                    '最近更新': draft.updatedAt,
-                    if (draft.completedAt != null) '完成时间': draft.completedAt!,
-                  }.entries)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Text(
-                            e.key,
-                            style: textStyle(p, size: 12, color: p.muted),
-                          ),
-                          const Spacer(),
-                          Text(
-                            validTime(e.value)
-                                .toUtc()
-                                .add(const Duration(hours: 8))
-                                .toString()
-                                .substring(0, 19),
-                            style: textStyle(p, size: 12, color: p.secondary),
-                          ),
-                        ],
-                      ),
-                    ),
+                  ),
                 ],
+                const SizedBox(height: 16),
                 if (error != null) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(error!, style: textStyle(p, size: 12, color: p.red)),
+                ],
+                if (widget.existing) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    [
+                      '创建 ${_stamp(draft.createdAt)}',
+                      '更新 ${_stamp(draft.updatedAt)}',
+                      if (draft.completedAt != null)
+                        '完成 ${_stamp(draft.completedAt!)}',
+                    ].join('   ·   '),
+                    maxLines: 2,
+                    style: textStyle(p, size: 11, color: p.muted),
+                  ),
                 ],
               ],
             ),

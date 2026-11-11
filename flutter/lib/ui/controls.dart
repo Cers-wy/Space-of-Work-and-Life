@@ -75,6 +75,18 @@ class _IconPainter extends CustomPainter {
         p.strokeWidth = 1.5;
         path(const [Offset(5, 9), Offset(10, 4), Offset(15, 9)]);
         path(const [Offset(5, 15), Offset(10, 10), Offset(15, 15)]);
+      case 'collapse-tree':
+        // 收平为列表：三个圆点接三条等长横线。
+        for (final y in [5.0, 10.0, 15.0]) {
+          c.drawCircle(Offset(4.6, y), 1.75, p..style = PaintingStyle.fill);
+          p.style = PaintingStyle.stroke;
+          line(9.4, y, 16.6, y);
+        }
+      case 'expand-tree':
+        // 展开层级：起点逐条右移，右端对齐。
+        line(3.4, 5, 17, 5);
+        line(6.8, 10, 17, 10);
+        line(10.2, 15, 17, 15);
       case 'check':
         path(const [Offset(4, 10), Offset(8, 14), Offset(16, 5)]);
       case 'circle':
@@ -435,6 +447,9 @@ class SpaceButton extends StatefulWidget {
   final String? tooltip;
   final bool primary, selected, danger, subtle;
   final bool _form;
+
+  /// 选中态只用淡色底与强调色文字，不使用整块实底。
+  final bool soft;
   final bool showSelectedBackground, showHoverBackground;
   final double? height;
   final double surfaceInset;
@@ -446,6 +461,7 @@ class SpaceButton extends StatefulWidget {
     this.tooltip,
     this.primary = false,
     this.selected = false,
+    this.soft = false,
     this.showSelectedBackground = true,
     this.showHoverBackground = true,
     this.danger = false,
@@ -465,6 +481,7 @@ class SpaceButton extends StatefulWidget {
   }) : child = Text(label),
        _form = true,
        subtle = true,
+       soft = false,
        selected = false,
        showSelectedBackground = true,
        showHoverBackground = true,
@@ -481,7 +498,8 @@ class _SpaceButtonState extends State<SpaceButton> {
   @override
   Widget build(BuildContext context) {
     final w = widget, p = Palette.of(context);
-    final filledSelection = w.selected && w.showSelectedBackground;
+    final filledSelection = w.selected && w.showSelectedBackground && !w.soft;
+    final softSelection = w.selected && w.soft;
     final highlighted = hover && w.showHoverBackground;
     final hoverFill = w.danger ? p.red.withValues(alpha: .12) : p.hover;
     final formFill = p.card.withValues(alpha: .50);
@@ -489,6 +507,8 @@ class _SpaceButtonState extends State<SpaceButton> {
         ? p.actionSurface(highlighted: highlighted)
         : w.primary
         ? p.primary
+        : softSelection
+        ? p.accent.withValues(alpha: highlighted ? .17 : .10)
         : filledSelection
         ? p.selectedButtonBackground()
         : w._form
@@ -502,6 +522,8 @@ class _SpaceButtonState extends State<SpaceButton> {
         ? p.accentText
         : w.primary
         ? Colors.white
+        : softSelection
+        ? p.accent
         : filledSelection
         ? p.selectedButtonForeground()
         : w._form
@@ -561,10 +583,23 @@ class _SpaceButtonState extends State<SpaceButton> {
                 decoration: BoxDecoration(
                   color: background,
                   borderRadius: radius,
+                  boxShadow: softSelection
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: p.dark ? .22 : .07,
+                            ),
+                            blurRadius: 6,
+                            offset: const Offset(0, 1),
+                          ),
+                        ]
+                      : null,
                   border: w.subtle && w.primary
                       ? Border.all(color: p.actionBorder)
                       : w._form
                       ? Border.all(color: p.border)
+                      : softSelection
+                      ? Border.all(color: p.accent.withValues(alpha: .16))
                       : null,
                 ),
                 foregroundDecoration: focus
@@ -582,7 +617,7 @@ class _SpaceButtonState extends State<SpaceButton> {
                   style: textStyle(
                     p,
                     size: w.subtle ? 13 : 14,
-                    bold: true,
+                    bold: !softSelection,
                     color: color,
                   ),
                   child: IconTheme(
@@ -604,7 +639,7 @@ class _SpaceButtonState extends State<SpaceButton> {
 class IconButtonS extends StatelessWidget {
   final String icon, label;
   final VoidCallback? onPressed;
-  final bool primary, selected, danger;
+  final bool primary, selected, danger, soft;
   final double size, iconSize;
   final double _surfaceInset;
   const IconButtonS(
@@ -614,6 +649,7 @@ class IconButtonS extends StatelessWidget {
     this.onPressed,
     this.primary = false,
     this.selected = false,
+    this.soft = false,
     this.danger = false,
     this.size = 32,
     this.iconSize = 16,
@@ -626,6 +662,7 @@ class IconButtonS extends StatelessWidget {
     this.onPressed,
     this.primary = false,
     this.selected = false,
+    this.soft = false,
     this.danger = false,
     this.iconSize = 14,
   }) : size = 32,
@@ -642,6 +679,7 @@ class IconButtonS extends StatelessWidget {
         onPressed: onPressed,
         primary: primary,
         selected: selected,
+        soft: soft,
         danger: danger,
         height: size,
         surfaceInset: _surfaceInset,
@@ -655,6 +693,8 @@ class IconButtonS extends StatelessWidget {
               ? Colors.white
               : danger
               ? p.red
+              : selected && soft
+              ? p.accent
               : selected
               ? p.selectedButtonForeground()
               : icon == 'done'
@@ -662,6 +702,166 @@ class IconButtonS extends StatelessWidget {
               : icon == 'circle'
               ? p.muted.withValues(alpha: .65)
               : p.secondary,
+        ),
+      ),
+    );
+  }
+}
+
+/// 文字按钮：默认透明底，仅靠前景色表达层级，悬停加 12% 淡底。
+/// 不使用实底、渐变或投影，主操作只换颜色不换字重。
+class SpaceTextButton extends StatefulWidget {
+  final String label;
+  final String? icon;
+  final VoidCallback? onPressed;
+  final bool primary, danger;
+  final double height;
+  const SpaceTextButton(
+    this.label, {
+    super.key,
+    this.icon,
+    this.onPressed,
+    this.primary = false,
+    this.danger = false,
+    this.height = 28,
+  });
+
+  @override
+  State<SpaceTextButton> createState() => _SpaceTextButtonState();
+}
+
+class _SpaceTextButtonState extends State<SpaceTextButton> {
+  bool hover = false, focused = false;
+
+  @override
+  Widget build(BuildContext c) {
+    final p = Palette.of(c);
+    final enabled = widget.onPressed != null;
+    final tint = widget.danger ? p.red : p.accent;
+    final color = !enabled
+        ? p.muted.withValues(alpha: .54)
+        : widget.danger
+        ? p.red
+        : widget.primary
+        ? p.accentText
+        : p.secondary;
+    final radius = BorderRadius.circular(7);
+    return FocusableActionDetector(
+      enabled: enabled,
+      onShowFocusHighlight: (v) => setState(() => focused = v),
+      onShowHoverHighlight: (v) => setState(() => hover = v),
+      mouseCursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onPressed?.call();
+            return null;
+          },
+        ),
+      },
+      child: Semantics(
+        button: true,
+        label: widget.label,
+        enabled: enabled,
+        onTap: widget.onPressed,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: true,
+          onTap: widget.onPressed,
+          child: AnimatedContainer(
+            duration: MediaQuery.disableAnimationsOf(c)
+                ? Duration.zero
+                : const Duration(milliseconds: 120),
+            curve: spaceCurve,
+            height: widget.height,
+            padding: const EdgeInsets.symmetric(horizontal: 11),
+            decoration: BoxDecoration(
+              color: enabled && hover
+                  ? tint.withValues(alpha: .12)
+                  : Colors.transparent,
+              borderRadius: radius,
+              border: focused ? Border.all(color: p.accent, width: 2) : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.icon != null) ...[
+                  SpaceIcon(widget.icon!, size: 14, color: color),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  widget.label,
+                  style: textStyle(p, size: 13, color: color),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 日／周／月等分段控件。两处视图共用同一规格，选中项用强调色与字重表达。
+class SpaceSegmented extends StatelessWidget {
+  final Map<String, String> options;
+  final String value;
+  final ValueChanged<String> onChanged;
+  final String label;
+  const SpaceSegmented({
+    super.key,
+    required this.options,
+    required this.value,
+    required this.onChanged,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext c) {
+    final p = Palette.of(c);
+    return Semantics(
+      container: true,
+      label: label,
+      child: Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          color: p.hover,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final e in options.entries) ...[
+              if (e.key != options.keys.first) const SizedBox(width: 2),
+              Builder(
+                builder: (c) {
+                  final selected = value == e.key;
+                  return Semantics(
+                    button: true,
+                    selected: selected,
+                    label: '${e.value}刻度',
+                    child: SpaceButton(
+                      height: 28,
+                      selected: selected,
+                      soft: true,
+                      tooltip: '${e.value}刻度',
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      onPressed: () => onChanged(e.key),
+                      child: Text(
+                        e.value,
+                        style: textStyle(
+                          p,
+                          size: 12,
+                          bold: selected,
+                          color: selected ? p.accent : p.secondary,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -974,6 +1174,7 @@ class SpaceInput extends StatelessWidget {
   final String? icon;
   final bool autofocus, obscure, invalid;
   final double fontSize;
+  final double? height;
   final int lines;
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
@@ -988,6 +1189,7 @@ class SpaceInput extends StatelessWidget {
     this.obscure = false,
     this.invalid = false,
     this.fontSize = 14,
+    this.height,
     this.lines = 1,
     this.onChanged,
     this.focusNode,
@@ -996,8 +1198,9 @@ class SpaceInput extends StatelessWidget {
   @override
   Widget build(BuildContext c) {
     final p = Palette.of(c);
+    final fieldHeight = height ?? spaceFormControlHeight;
     return SizedBox(
-      height: lines == 1 ? spaceFormControlHeight : null,
+      height: lines == 1 ? fieldHeight : null,
       child: TextField(
         controller: controller,
         focusNode: focusNode,
@@ -1013,7 +1216,7 @@ class SpaceInput extends StatelessWidget {
           isCollapsed: false,
           isDense: lines != 1,
           constraints: lines == 1
-              ? const BoxConstraints.tightFor(height: spaceFormControlHeight)
+              ? BoxConstraints.tightFor(height: fieldHeight)
               : null,
           hintText: hint,
           prefixIcon: icon == null
@@ -1025,9 +1228,9 @@ class SpaceInput extends StatelessWidget {
                     child: SpaceIcon(icon!, size: 14, color: p.muted),
                   ),
                 ),
-          prefixIconConstraints: const BoxConstraints(
+          prefixIconConstraints: BoxConstraints(
             minWidth: 34,
-            minHeight: spaceFormControlHeight,
+            minHeight: fieldHeight,
           ),
           labelText: null,
           semanticCounterText: label,
@@ -1626,71 +1829,78 @@ class BoardResizeHandle extends StatefulWidget {
 
 class _BoardResizeHandleState extends State<BoardResizeHandle> {
   bool hover = false, dragging = false;
-  String get label => widget.ratio == .5
-      ? '1/2'
-      : widget.ratio == 2 / 3
-      ? '2/3'
-      : widget.ratio == .75
-      ? '3/4'
-      : widget.ratio == 1
-      ? '1/1'
-      : '${(widget.ratio * 100).round()}%';
+  String get label => '${(widget.ratio * 100).round()}%';
   @override
-  Widget build(BuildContext c) => MouseRegion(
-    cursor: SystemMouseCursors.resizeLeftRight,
-    onEnter: (_) => setState(() => hover = true),
-    onExit: (_) => setState(() => hover = false),
-    child: Tooltip(
-      message: '拖动调整列宽 · $label · 双击恢复1/1',
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        dragStartBehavior: DragStartBehavior.down,
-        onDoubleTap: widget.onReset,
-        onHorizontalDragStart: (_) {
-          setState(() => dragging = true);
-          widget.onStart();
-        },
-        onHorizontalDragUpdate: (d) => widget.onUpdate(d.delta.dx),
-        onHorizontalDragEnd: (_) {
-          setState(() => dragging = false);
-          widget.onEnd();
-        },
-        onHorizontalDragCancel: () {
-          setState(() => dragging = false);
-          widget.onCancel();
-        },
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Center(
-              child: Container(
-                width: 2,
-                color: hover || dragging
-                    ? Palette.of(c).accent
-                    : Colors.transparent,
-              ),
-            ),
-            if (dragging)
+  Widget build(BuildContext c) {
+    final p = Palette.of(c);
+    return MouseRegion(
+      cursor: SystemMouseCursors.resizeLeftRight,
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: Tooltip(
+        message: '拖动调整列宽 · $label · 双击恢复 100%',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          dragStartBehavior: DragStartBehavior.down,
+          onDoubleTap: widget.onReset,
+          onHorizontalDragStart: (_) {
+            setState(() => dragging = true);
+            widget.onStart();
+          },
+          onHorizontalDragUpdate: (d) => widget.onUpdate(d.delta.dx),
+          onHorizontalDragEnd: (_) {
+            setState(() => dragging = false);
+            widget.onEnd();
+          },
+          onHorizontalDragCancel: () {
+            setState(() => dragging = false);
+            widget.onCancel();
+          },
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // 仅列头高度内的 1 像素竖线，指针离开即消失。
               Positioned(
-                right: 8,
-                top: 48,
-                child: Material(
-                  color: Palette.of(c).canvas,
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Text(
-                      label,
-                      style: textStyle(Palette.of(c), size: 12),
+                right: 3,
+                top: 0,
+                bottom: 0,
+                width: 2,
+                child: ColoredBox(
+                  color: hover || dragging ? p.accent : Colors.transparent,
+                ),
+              ),
+              if (dragging)
+                Positioned(
+                  right: 12,
+                  top: 24,
+                  child: IgnorePointer(
+                    child: Material(
+                      color: p.popup,
+                      borderRadius: BorderRadius.circular(6),
+                      elevation: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: p.popupBorder),
+                        ),
+                        child: Text(
+                          label,
+                          style: textStyle(p, size: 11, color: p.text),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class SpaceMultiSelect extends StatelessWidget {

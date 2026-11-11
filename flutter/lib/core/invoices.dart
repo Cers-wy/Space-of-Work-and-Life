@@ -21,7 +21,8 @@ class InvoiceFile {
 
 class InvoiceInfo {
   final String number, issued, seller, spent, purpose, month, project;
-  final int? cents;
+  final String buyer, sellerTax, buyerTax;
+  final int? cents, taxCents, netCents;
   final bool reimbursed;
 
   const InvoiceInfo({
@@ -32,11 +33,20 @@ class InvoiceInfo {
     this.purpose = '',
     this.month = '',
     this.project = '',
+    this.buyer = '',
+    this.sellerTax = '',
+    this.buyerTax = '',
     this.cents,
+    this.taxCents,
+    this.netCents,
     this.reimbursed = false,
   });
 
   String get amount => cents == null ? '' : (cents! / 100).toStringAsFixed(2);
+  String get tax =>
+      taxCents == null ? '' : (taxCents! / 100).toStringAsFixed(2);
+  String get net =>
+      netCents == null ? '' : (netCents! / 100).toStringAsFixed(2);
 
   List<Object?> get values => [
     number,
@@ -48,6 +58,11 @@ class InvoiceInfo {
     project,
     cents,
     reimbursed ? 1 : 0,
+    buyer,
+    sellerTax,
+    buyerTax,
+    taxCents,
+    netCents,
   ];
 }
 
@@ -141,6 +156,11 @@ class InvoiceRepository {
                 project: row['project'] as String? ?? '',
                 cents: row['cents'] as int?,
                 reimbursed: row['reimbursed'] == 1,
+                buyer: row['buyer'] as String? ?? '',
+                sellerTax: row['seller_tax'] as String? ?? '',
+                buyerTax: row['buyer_tax'] as String? ?? '',
+                taxCents: row['tax_cents'] as int?,
+                netCents: row['net_cents'] as int?,
               ),
             ),
         ],
@@ -205,7 +225,8 @@ class InvoiceRepository {
       if (info.project.isEmpty) values[6] = null;
       db.execute(
         '''
-      UPDATE invoices SET number=?,issued=?,seller=?,spent=?,purpose=?,month=?,project=?,cents=?,reimbursed=?
+      UPDATE invoices SET number=?,issued=?,seller=?,spent=?,purpose=?,month=?,project=?,cents=?,reimbursed=?,
+        buyer=?,seller_tax=?,buyer_tax=?,tax_cents=?,net_cents=?
       WHERE id=?
     ''',
         [...values, id],

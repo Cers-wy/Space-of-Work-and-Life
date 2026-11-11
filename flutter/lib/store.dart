@@ -88,9 +88,10 @@ class SpaceStore extends ChangeNotifier {
       ? state.settings['navCollapsed'] == 'true'
       : true;
   bool get hideScrollbars => state.settings['hideScrollbars'] == 'true';
+  /// 列宽使用连续比例，仅限制在 50%–100%，不再吸附档位。
   double boardWidthRatio(String status) {
     final value = double.tryParse(state.settings['boardWidth.$status'] ?? '');
-    return value != null && value.isFinite ? snapBoardRatio(value) : 1.0;
+    return value != null && value.isFinite ? clampBoardRatio(value) : 1.0;
   }
 
   /// Task statuses whose board column is shown. Board columns are a per-view
@@ -627,7 +628,9 @@ SpaceState demoState({int count = 9}) {
   );
 }
 
+/// 旧版本写入的 1/2、2/3、3/4 档位按普通数值读取，不再吸附回档位。
 const boardWidthRatios = [0.5, 2 / 3, 0.75, 1.0];
-double snapBoardRatio(double value) => boardWidthRatios.reduce(
-  (a, b) => (value - a).abs() <= (value - b).abs() ? a : b,
-);
+double clampBoardRatio(double value) => value.clamp(.5, 1.0);
+
+/// 兼容旧调用：只做范围限制，保留连续比例。
+double snapBoardRatio(double value) => clampBoardRatio(value);

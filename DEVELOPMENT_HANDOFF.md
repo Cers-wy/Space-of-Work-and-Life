@@ -1,20 +1,29 @@
 # Space 开发交接
 
-更新日期为 2026-11-10。2.2.0（14）的安装包采用本地分发。后续开发从正式源码继续。
+更新日期为 2026-11-11。2.3.0（15）为界面与交互优化版本，macOS 安装包已在本地产出，Windows 包因构建环境无法访问虚拟机尚未产出。
 
 ## 当前源码
 
 | 项目 | 值 |
 | --- | --- |
-| 开发分支 | `codex/space-2.2.0-dev` |
-| 开发检查点 | `v2.2.0-dev.1` |
-| 检查点提交 | `bca892adb8f56e552dbb514169eb4e3f4dc3b4a8` |
-| Flutter 应用版本 | `2.2.0+14`，定义在 [pubspec.yaml](flutter/pubspec.yaml) |
-| 上一公开版本 | `v2.1.0` 对应提交 `a0125c87` |
+| 开发分支 | `codex/space-2.3.0-ui-refinement` |
+| Flutter 应用版本 | `2.3.0+15`，定义在 [pubspec.yaml](flutter/pubspec.yaml) |
+| 上一版本 | `2.2.0+14`，提交 `541151ff` |
 
 开始前用 `git status --short --branch` 和 `git log -1 --oneline --decorate` 核对当前状态。项目约束见 [AGENTS.md](AGENTS.md)。
 
 ## 已完成
+
+### 2.3.0 界面与交互优化
+
+- 任务编辑器重排：标题、任务属性、任务说明、附件自上而下分区，纵向间距统一为 4 的倍数。属性改为两列三行栅格（状态与优先级、分类与项目、开始与截止），标签与控件对齐，所有输入控件同为 40 逻辑像素高。弹窗高度由 680 调到 720，说明区固定 200，默认窗口下六项属性、说明与上传附件均在一屏内。
+- 任务详情底部把创建、更新、完成时间合成一行紧凑说明，替代原来的三行右对齐列表；底部操作是「删除任务 / 取消 / 保存更改」，新建为「取消 / 创建任务」。
+- 看板列宽改为连续比例，范围 50%–100%，拖动标题栏右侧 8 像素区域调整，双击恢复 100%，拖动时显示百分比气泡；按住 Option 或 Shift 配合左右方向键可按 8 或 32 像素微调。
+- 按钮体系新增文字按钮 `SpaceTextButton` 与淡色选中态 `SpaceButton(soft: true)`、`IconButtonS(soft: true)`。视图切换、筛选与新建不再常驻实心蓝底，仅保留淡色底加强调色文字。
+- 甘特图与日历的「收起 / 展开」合并为单个按钮，图标随状态在 `collapse-tree` 与 `expand-tree` 之间切换并给出提示。日 / 周 / 月改为共用分段控件 `SpaceSegmented`。
+- 发票详情改为宽屏两栏：左侧原件与附件预览（缩略图横向排列、滚轮与左右方向键切换、附件计数），右侧表单按发票号码、开票日期、销售方及其社会信用代码、购买方及其社会信用代码、金额区（总金额 / 税额 / 未税金额）、报销项目、报销月份、消费时间、是否报销、用途排列。报销月份随消费时间自动推导，手动修改后不再覆盖。窄窗回退为单列。
+
+玻璃材质、模糊、透明度、配色、线性图标与既有动效未做改动，`theme.dart` 本轮无修改。
 
 - macOS 和 Windows 主导航均提供工具和发票入口。工具页提供 PDF 发票合并。发票台账支持导入 PDF 和图片、查看和编辑台账信息、管理附件、搜索筛选、批量勾选及按字段导出 Excel。
 - 发票合并支持 A4 横纵向、每页 1 至 4 张、毫米边距和裁剪虚线。台账可把选中的发票送入合并，并可将附件单独分页加入。macOS 使用原生 PDF 实现。Windows 使用随应用分发的 PDFium 渲染票面，合并 PDF 以图像嵌入票面和附件，打印调用系统对话框。
@@ -58,6 +67,15 @@ Windows 构建通过 CMake 获取固定版本的 PDFium。便携包须保留全�
 - 最后一轮标题栏图标与浅色选中配色调整后，79 项相关测试通过，并检查了浅色和深色截图。这两组数字来自不同阶段。随后保存检查点并更新应用版本号。
 - 上一轮看板和导航调整的 macOS 全量自动化回归 148 项通过。Debug 构建使用 `AppIconDev`，启动后从独立目录载入 9 条演示任务，SQLite 完整性检查通过。
 - 2.2.0 本轮按用户指令执行双平台功能验证，跳过性能测试。新安装包仅保存在本地，GitHub 同步源码。
+
+### 2.3.0 本轮状态
+
+- macOS 全量自动化回归 148 项通过（`flutter test`），`dart analyze lib` 无新增问题，仅保留 flutter_quill 实验成员与既有 `curly_braces_in_flow_control_structures` 提示。
+- 界面复核使用测试内截图（`verification/screenshots/`），已检查 1380×860 与 1020×640 两种窗口下的浅色和深色任务编辑器，确认无裁切、无溢出。
+- macOS 2.3.0 安装包取自同一份源码：`flutter assemble` 产出通用（arm64 + x86_64）AOT 快照后替换应用包内 `App.framework`，Info.plist 版本改为 2.3.0（15），本地临时签名通过 `codesign --verify --deep --strict`，启动后进程稳定运行。DMG 与 ZIP 均通过完整性校验。
+- 未完成：Windows 2.3.0 免安装包。本轮构建环境无法访问 UTM 虚拟机，`utmctl` 返回 133，`~/Library/Containers/com.utmapp.UTM` 报 `Operation not permitted`（缺少完全磁盘访问权限）。需要在具备该权限的终端重新执行 `work/space220-release/windows-build.cmd` 与 `windows-deliver.sh`（把路径与版本号改成 2.3.0），或为当前 Agent 授予完全磁盘访问权限后重试。
+- 性能：本轮改动为布局与控件样式，未新增持续性动画或高频刷新，按规范沿用既有结果，未重复性能测试。
+- 2.3.0 安装包仅保存在本地 `output/Space-2.3.0/`，GitHub 仅同步源码与校验文件。
 - macOS 和 Windows 覆盖 110 项功能用例。图片预览修复后，两端发票相关用例复测通过。Windows 11 ARM64 虚拟机运行 x64 构建，使用合成票据验证 PDF 预览、裁边、A4 横纵向导出、附件独立分页、原件路径保护及系统 A4 打印对话框。macOS DMG 和 Windows ZIP 解压或挂载后均在隔离数据目录启动。
 
 复查台账和桌面界面时，可在 `flutter` 目录运行 `flutter test test/invoices_test.dart test/desktop_ui_test.dart`。主题和设置的回归测试位于 [settings_test.dart](flutter/test/settings_test.dart)。

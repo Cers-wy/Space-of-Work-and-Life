@@ -45,18 +45,20 @@ class SpaceRepository {
     }
     final db = _open(path);
     try {
-      if (db.userVersion < 1 || db.userVersion > 5) {
+      if (db.userVersion < 1 || db.userVersion > 6) {
         throw StateError('不支持此 Space 数据库版本');
       }
-      if (db.userVersion < 5) {
+      if (db.userVersion < 6) {
         db.execute('BEGIN IMMEDIATE');
         try {
-          if (db.userVersion == 4) {
-            _migrateInvoiceProjects(db);
-          } else if (db.userVersion < 4) {
+          final from = db.userVersion;
+          if (from < 4) {
             _createInvoiceTables(db);
+          } else if (from == 4) {
+            _migrateInvoiceProjects(db);
           }
-          db.userVersion = 5;
+          _addInvoiceFields(db);
+          db.userVersion = 6;
           db.execute('COMMIT');
         } catch (_) {
           db.execute('ROLLBACK');
@@ -68,6 +70,25 @@ class SpaceRepository {
       db.close();
       rethrow;
     }
+  }
+
+  /// v6 补充购销方、税号与税额字段，旧记录保持空值。
+  void _addInvoiceFields(Database db) {
+    final columns = {
+      for (final row in db.select('PRAGMA table_info(invoices)'))
+        row['name'] as String,
+    };
+    void add(String name, String definition) {
+      if (!columns.contains(name)) {
+        db.execute('ALTER TABLE invoices ADD COLUMN $name $definition');
+      }
+    }
+
+    add('buyer', "TEXT NOT NULL DEFAULT ''");
+    add('seller_tax', "TEXT NOT NULL DEFAULT ''");
+    add('buyer_tax', "TEXT NOT NULL DEFAULT ''");
+    add('tax_cents', 'INTEGER');
+    add('net_cents', 'INTEGER');
   }
 
   void _createInvoiceTables(Database db) {
@@ -156,7 +177,7 @@ DROP TABLE invoice_project_map;
     final db = _open(file, readOnly: true);
     try {
       final v = db.userVersion;
-      if (v < 1 || v > 5) invalid('不支持数据库格式版本 $v');
+      if (v < 1 || v > 6) invalid('不支持数据库格式版本 $v');
       if (db.select('PRAGMA quick_check').first.values.first != 'ok') {
         invalid('数据库校验失败，原文件已保留');
       }

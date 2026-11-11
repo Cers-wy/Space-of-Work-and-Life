@@ -41,6 +41,11 @@ void main() {
         spent: '2026-10-31',
         month: '2026-11',
         purpose: '会议 & 接送',
+        sellerTax: '91310115MA1H8YQ23K',
+        buyer: '杭州云枢科技有限公司',
+        buyerTax: '91330106MA2GX8K73B',
+        taxCents: 700,
+        netCents: 11645,
         cents: 12345,
         project: project,
         reimbursed: true,
@@ -61,13 +66,16 @@ void main() {
     final record = ledger.entries.single;
     expect(record.info.reimbursed, isTrue);
     expect(record.info.amount, '123.45');
+    expect(record.info.tax, '7.00');
+    expect(record.info.net, '116.45');
+    expect(record.info.buyerTax, '91330106MA2GX8K73B');
     expect(record.info.project, project);
     expect(ledger.projects[record.info.project], '客户出差');
     final attached = record.attachments.single;
 
     final db = sqlite3.open(space.path, mode: OpenMode.readOnly);
     try {
-      expect(db.userVersion, 5);
+      expect(db.userVersion, 6);
       expect(db.select('SELECT count(*) AS n FROM invoices').single['n'], 1);
       expect(db.select('PRAGMA foreign_key_check'), isEmpty);
     } finally {
@@ -173,7 +181,7 @@ PRAGMA user_version=4;
     );
     final check = sqlite3.open(space.path, mode: OpenMode.readOnly);
     try {
-      expect(check.userVersion, 5);
+      expect(check.userVersion, 6);
       expect(check.select('PRAGMA foreign_key_check'), isEmpty);
     } finally {
       check.close();

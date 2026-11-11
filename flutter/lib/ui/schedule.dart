@@ -145,44 +145,37 @@ class _GanttViewState extends State<GanttView> {
             child: Row(
               children: [
                 const Spacer(),
-                IconButtonS(
-                  'expand-all',
-                  '展开全部项目',
-                  size: 40,
-                  iconSize: 20,
-                  onPressed:
-                      groups.isEmpty ||
-                          groups.every((g) => !collapsed.contains(g.id))
-                      ? null
-                      : () => setState(collapsed.clear),
+                Builder(
+                  builder: (c) {
+                    final expanded =
+                        groups.isNotEmpty &&
+                        groups.every((g) => !collapsed.contains(g.id));
+                    return IconButtonS(
+                      expanded ? 'collapse-tree' : 'expand-tree',
+                      groups.isEmpty
+                          ? '暂无可展开或收起的项目'
+                          : expanded
+                          ? '收起全部项目'
+                          : '展开全部项目',
+                      onPressed: groups.isEmpty
+                          ? null
+                          : () => setState(() {
+                              if (expanded) {
+                                collapsed.addAll(groups.map((g) => g.id));
+                              } else {
+                                collapsed.clear();
+                              }
+                            }),
+                    );
+                  },
                 ),
                 const SizedBox(width: 12),
-                IconButtonS(
-                  'collapse-all',
-                  '收起全部项目',
-                  size: 40,
-                  iconSize: 20,
-                  onPressed:
-                      groups.isEmpty ||
-                          groups.every((g) => collapsed.contains(g.id))
-                      ? null
-                      : () => setState(
-                          () => collapsed.addAll(groups.map((g) => g.id)),
-                        ),
+                SpaceSegmented(
+                  options: const {'day': '日', 'week': '周', 'month': '月'},
+                  value: mode,
+                  label: '甘特图刻度',
+                  onChanged: (v) => s.preference('ganttMode', v),
                 ),
-                const SizedBox(width: 12),
-                for (final entry in const {
-                  'day': '日',
-                  'week': '周',
-                  'month': '月',
-                }.entries)
-                  SpaceButton(
-                    height: 32,
-                    selected: mode == entry.key,
-                    tooltip: '${entry.value}刻度',
-                    onPressed: () => s.preference('ganttMode', entry.key),
-                    child: Text(entry.value),
-                  ),
                 const SizedBox(width: 12),
                 IconButtonS('left', '上个月', onPressed: () => moveMonth(-1)),
                 SizedBox(
@@ -1027,45 +1020,14 @@ class _CalendarViewState extends State<CalendarView> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: p.hover,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      for (final e in {
-                        'day': '日',
-                        'week': '周',
-                        'month': '月',
-                      }.entries) ...[
-                        if (e.key != 'day') const SizedBox(width: 2),
-                        SizedBox(
-                          width: 40,
-                          child: SpaceButton(
-                            height: 32,
-                            padding: EdgeInsets.zero,
-                            primary: s.calendarMode == e.key,
-                            onPressed: () {
-                              setState(() => anchor = selected);
-                              s.preference('calendarMode', e.key);
-                            },
-                            child: Text(
-                              e.value,
-                              style: textStyle(
-                                p,
-                                bold: true,
-                                color: s.calendarMode == e.key
-                                    ? Colors.white
-                                    : p.secondary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                SpaceSegmented(
+                  options: const {'day': '日', 'week': '周', 'month': '月'},
+                  value: s.calendarMode,
+                  label: '日历刻度',
+                  onChanged: (v) {
+                    setState(() => anchor = selected);
+                    s.preference('calendarMode', v);
+                  },
                 ),
               ],
             ),

@@ -633,14 +633,12 @@ class _WorkspaceState extends State<Workspace> {
                     'filter',
                     '筛选与排序',
                     key: filterAnchor,
-                    selected: true,
                     onPressed: filters,
                   ),
                   const SizedBox(width: 8),
                   IconButtonS.toolbar(
                     'plus',
                     '新建任务（⌘N / N）',
-                    primary: true,
                     onPressed: s.loaded ? newTask : null,
                   ),
                   const SizedBox(width: 16),
@@ -933,6 +931,7 @@ class _WorkspaceState extends State<Workspace> {
           mode,
           label,
           selected: s.view == mode,
+          soft: true,
           onPressed: () => s.preference('viewMode', mode),
         ),
       ],
@@ -965,21 +964,13 @@ class _WorkspaceState extends State<Workspace> {
         child: SpaceButton(
           tooltip: '筛选与排序',
           padding: EdgeInsets.zero,
-          selected: true,
           onPressed: filters,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SpaceIcon(
-                'filter',
-                color: p.selectedButtonForeground(p.secondary),
-              ),
+              SpaceIcon('filter', color: p.secondary),
               const SizedBox(width: 4),
-              SpaceIcon(
-                'down',
-                size: 9,
-                color: p.selectedButtonForeground(p.secondary),
-              ),
+              SpaceIcon('down', size: 9, color: p.secondary),
             ],
           ),
         ),
@@ -1012,13 +1003,16 @@ class _WorkspaceState extends State<Workspace> {
   );
   Widget board() {
     final statuses = s.boardStatuses;
-    final columns = {for (final status in statuses) status: column(status)};
     return LayoutBuilder(
       builder: (c, b) {
         final width = math.max(
           280.0,
           (b.maxWidth - 12 * (statuses.length - 1)) / statuses.length,
         );
+        final columns = {
+          for (final status in statuses)
+            status: column(status, baseWidth: width),
+        };
         final widths = {
           for (final status in statuses)
             status:
@@ -1051,12 +1045,13 @@ class _WorkspaceState extends State<Workspace> {
                       width: animatedWidth,
                       height: b.maxHeight - (total > b.maxWidth ? 16 : 0),
                       child: Stack(
+                        clipBehavior: Clip.none,
                         children: [
                           Positioned.fill(child: content!),
                           Positioned(
                             right: 0,
                             top: 0,
-                            bottom: 0,
+                            height: 44,
                             width: 8,
                             child: BoardResizeHandle(
                               key: ValueKey('board-resize-${statuses[i]}'),
@@ -1073,7 +1068,7 @@ class _WorkspaceState extends State<Workspace> {
                               }),
                               onEnd: () async {
                                 dragActive.value = false;
-                                final ratio = snapBoardRatio(
+                                final ratio = clampBoardRatio(
                                   previewWidths[statuses[i]] ??
                                       s.boardWidthRatio(statuses[i]),
                                 );
@@ -1082,7 +1077,7 @@ class _WorkspaceState extends State<Workspace> {
                                 );
                                 await s.preference(
                                   'boardWidth.${statuses[i]}',
-                                  '$ratio',
+                                  ratio.toStringAsFixed(4),
                                 );
                                 if (mounted) {
                                   setState(
@@ -1123,7 +1118,21 @@ class _WorkspaceState extends State<Workspace> {
     );
   }
 
-  Widget column(String status) {
+  /// 列宽的键盘等效操作：Option + 左右方向键每次 8 像素，按住 Shift 为 32。
+  Future<void> nudgeWidth(
+    String status,
+    double baseWidth,
+    int direction,
+    bool coarse,
+  ) async {
+    final ratio = clampBoardRatio(
+      s.boardWidthRatio(status) + direction * (coarse ? 32 : 8) / baseWidth,
+    );
+    await s.preference('boardWidth.$status', ratio.toStringAsFixed(4));
+    if (mounted) setState(() => previewWidths.remove(status));
+  }
+
+  Widget column(String status, {double baseWidth = 320}) {
     final p = Palette.of(context);
     final tasks = s.grouped[status] ?? [];
     final disabled = s.state.disabledStatuses.contains(status);
@@ -1143,16 +1152,40 @@ class _WorkspaceState extends State<Workspace> {
               DragTarget<_StatusDrag>(
                 onAcceptWithDetails: (d) =>
                     s.reorderStatus(d.data.status, status),
-                builder: (c, candidates, rejected) => Container(
-                  height: 44,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  color: candidates.isNotEmpty
-                      ? p.hover
-                      : p.status(status).withValues(alpha: p.dark ? 0.07 : .05),
-                  child: Row(
+                builder: (c, candidates, rejected) => CallbackShortcuts(
+                  bindings: {
+                    const SingleActivator(
+                      LogicalKeyboardKey.arrowLeft,
+                      alt: true,
+                    ): () => nudgeWidth(
+                      status,
+                      baseWidth,
+                      -1,
+                      HardwareKeyboard.instance.isShiftPressed,
+                    ),
+                    const SingleActivator(
+                      LogicalKeyboardKey.arrowRight,
+                      alt: true,
+                    ): () => nudgeWidth(
+                      status,
+                      baseWidth,
+                      1,
+                      HardwareKeyboard.instance.isShiftPressed,
+                    ),
+                  },
+                  child: Focus(
+                    child: Container(
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      color: candidates.isNotEmpty
+                          ? p.hover
+                          : p
+                                .status(status)
+                                .withValues(alpha: p.dark ? 0.07 : .05),
+                      child: Row(
                     children: [
                       Draggable<_StatusDrag>(
                         data: _StatusDrag(status),
@@ -1215,7 +1248,9 @@ class _WorkspaceState extends State<Workspace> {
                             ? null
                             : () => newTask(status: status),
                       ),
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
