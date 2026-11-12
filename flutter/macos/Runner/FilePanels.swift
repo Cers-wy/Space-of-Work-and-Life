@@ -20,7 +20,10 @@ enum SpaceFilePanels {
     if sqliteOnly {
       panel.allowedContentTypes = databaseTypes
     } else if !extensions.isEmpty {
-      panel.allowedContentTypes = extensions.compactMap { UTType(filenameExtension: $0) }
+      // 备份包使用自定义扩展名，需要动态类型，否则面板会隐藏这些文件。
+      panel.allowedContentTypes = extensions.compactMap {
+        UTType(filenameExtension: $0, conformingTo: .data)
+      }
     }
     return panel
   }

@@ -346,18 +346,18 @@ class _SettingsPanelState extends State<SettingsPanel>
         section('本地备份', [
           row(
             '导出备份',
-            detail: '保存为 SQLite 文件',
+            detail: '含发票原件与附件的 .spacepack 备份包',
             trailing: button(
               '导出',
               enabled
                   ? () => action(() async {
                       final path = await DesktopHost.saveFile(
-                        'Space备份.sqlite',
-                        sqliteOnly: true,
+                        'Space备份.spacepack',
+                        title: '导出备份包',
                       );
                       if (path != null) {
-                        await s.repository.exportSQLite(path);
-                        s.message('SQLite备份已导出');
+                        await s.repository.exportPack(path);
+                        s.message('备份包已导出，含数据库与发票附件');
                       }
                     })
                   : null,
@@ -366,7 +366,7 @@ class _SettingsPanelState extends State<SettingsPanel>
           ),
           row(
             '导入备份',
-            detail: '校验文件内容后，再确认替换当前数据',
+            detail: '支持 .spacepack 与旧版 SQLite 备份，确认后再替换',
             trailing: button(
               '选择文件',
               enabled ? () => importBackup(context, s) : null,
@@ -412,7 +412,8 @@ class _SettingsPanelState extends State<SettingsPanel>
         ]),
         const SizedBox(height: 16),
         Text(
-          '导入前自动备份。导出的 SQLite 文件包含本机连接配置，请妥善保存。',
+          '导入前自动备份。备份包与 SQLite 备份都含本机连接配置，请妥善保存；'
+          '备份包体积随发票附件数量增加。',
           style: textStyle(p, size: 12, color: p.muted),
         ),
       ],

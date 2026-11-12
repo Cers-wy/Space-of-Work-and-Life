@@ -52,15 +52,17 @@ Future<void> showInvoiceDetails(
         ),
     pageBuilder: (context, a, b) => LayoutBuilder(
       builder: (c, box) {
-        final wide = box.maxWidth >= 960;
-        final width = wide
-            ? math.min(1040.0, box.maxWidth - 32)
-            : math.min(548.0, box.maxWidth - 16);
+        // 面板宽度演进：780 → 390（收窄一半）→ 520（在 390 上再增加 1/3），
+        // 窄窗口仍按可用宽度自适应。
+        const targetWidth = 520.0;
+        final inset = box.maxWidth >= 760 ? 32.0 : 16.0;
+        final width = math.min(targetWidth, box.maxWidth - inset);
         return Align(
           alignment: Alignment.centerRight,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: SizedBox(
+              key: const ValueKey('invoice-details-sheet'),
               width: width,
               height: double.infinity,
               child: Material(
@@ -103,7 +105,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     '金额': TextEditingController(text: entry.info.amount),
     '税额': TextEditingController(text: entry.info.tax),
     '未税金额': TextEditingController(text: entry.info.net),
-    '消费时间': TextEditingController(text: entry.info.spent),
+    '消费日期': TextEditingController(text: entry.info.spent),
     '用途': TextEditingController(text: entry.info.purpose),
     '报销月份': TextEditingController(text: entry.info.month),
   };
@@ -113,14 +115,26 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
       entry.info.month.isEmpty ||
       (entry.info.spent.length >= 7 &&
           entry.info.month == entry.info.spent.substring(0, 7));
-  bool busy = false, dirty = false, attachments = false;
+  bool busy = false, dirty = false;
   String? error, notice;
-  String? attachmentId;
+
+  /// 当前预览的文件；为空表示发票原件。
+  String? selectedId;
   InvoiceSession get session => widget.session;
-  int get attachmentIndex {
-    final index = entry.attachments.indexWhere((f) => f.id == attachmentId);
+
+  /// 原件在前、附件在后的展示顺序。
+  List<InvoiceFile> get files => [entry.original, ...entry.attachments];
+  int get fileIndex {
+    final index = files.indexWhere((f) => f.id == selectedId);
     return index < 0 ? 0 : index;
   }
+
+  InvoiceFile get displayed {
+    final index = fileIndex;
+    return index == 0 ? entry.original : entry.attachments[index - 1];
+  }
+
+  bool get attachmentSelected => displayed.id != entry.original.id;
 
   @override
   void dispose() {
@@ -163,6 +177,10 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     await session.refresh();
     session.update(() {});
     entry = session.ledger!.entries.firstWhere((e) => e.id == widget.id);
+    if (selectedId != null &&
+        !entry.attachments.any((f) => f.id == selectedId)) {
+      selectedId = null;
+    }
   }
 
   String value(String key) => inputs[key]!.text.trim();
@@ -187,8 +205,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     final text = value(key);
     if (text.isEmpty) return null;
     final amount = double.tryParse(text);
-    if (!RegExp(r'^-?\d{1,12}(\.\d{1,2})?$').hasMatch(text) ||
-        amount == null) {
+    if (!RegExp(r'^-?\d{1,12}(\.\d{1,2})?$').hasMatch(text) || amount == null) {
       throw StateError('请输入有效$key，最多保留两位小数');
     }
     return (amount * 100).round();
@@ -207,7 +224,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
         cents: amountCents('金额'),
         taxCents: amountCents('税额'),
         netCents: amountCents('未税金额'),
-        spent: date('消费时间'),
+        spent: date('消费日期'),
         purpose: value('用途'),
         month: date('报销月份', month: true),
         project: project,
@@ -259,18 +276,14 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
       return;
     }
     await act(() async {
-      final index = attachmentIndex;
       await session.repo.removeAttachment(widget.id, f.id);
       await reload();
-      final files = entry.attachments;
-      attachmentId = files.isEmpty
-          ? null
-          : files[index.clamp(0, files.length - 1)].id;
+      selectedId = null;
       notice = '已删除附件';
     });
   }
 
-  void showAttachment(String id) => setState(() => attachmentId = id);
+  void selectFile(String id) => setState(() => selectedId = id);
 
   Future<void> download(InvoiceFile f) => act(() async {
     final target = await DesktopHost.saveFile(
@@ -282,217 +295,191 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     notice = '文件已保存';
   });
 
-  void wheelAttachments(PointerSignalEvent event) {
-    if (event is! PointerScrollEvent || !attachments) return;
-    final files = entry.attachments;
-    if (files.length < 2) return;
-    final index = attachmentIndex;
-    final next = event.scrollDelta.dy > 0 ? index + 1 : index - 1;
-    if (next >= 0 && next < files.length) showAttachment(files[next].id);
+  Future<void> openPreview(InvoiceFile f) =>
+      act(() => DesktopHost.preview(f.path));
+
+  /// 触控板与惯性滚轮会连发信号，节流避免一次滚动跳过多个文件。
+  DateTime? lastWheel;
+
+  void wheelFiles(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent || files.length < 2) return;
+    final now = DateTime.now();
+    final last = lastWheel;
+    if (last != null &&
+        now.difference(last) < const Duration(milliseconds: 160)) {
+      return;
+    }
+    final next = fileIndex + (event.scrollDelta.dy > 0 ? 1 : -1);
+    if (next < 0 || next >= files.length) return;
+    lastWheel = now;
+    selectFile(files[next].id);
   }
 
-  Widget _countBadge(Palette p, int count) => Container(
-    constraints: const BoxConstraints(minWidth: 16),
-    height: 16,
-    padding: const EdgeInsets.symmetric(horizontal: 4),
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: p.accent,
-      borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: p.panel, width: 1.5),
-    ),
-    child: Text(
-      '$count',
-      style: textStyle(
-        p,
-        size: 10,
-        color: Colors.white,
+  /// 原件与附件共用一个入口，数量合计显示在标题旁，不逐个展开标签页。
+  Widget _fileHeader(Palette p, List<InvoiceFile> files) => Row(
+    children: [
+      SpaceIcon('invoice', size: 15, color: p.accent),
+      const SizedBox(width: 8),
+      Text(
+        '发票与附件',
+        style: textStyle(p, size: 12.5, bold: true, color: p.secondary),
+      ),
+      const SizedBox(width: 8),
+      _fileCount(p, files.length),
+      const Spacer(),
+      if (files.length > 1) ...[
+        IconButtonS(
+          'left',
+          '上一个文件（预览区滚轮也可切换）',
+          size: 28,
+          iconSize: 14,
+          onPressed: busy || fileIndex == 0
+              ? null
+              : () => selectFile(files[fileIndex - 1].id),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            '${fileIndex + 1} / ${files.length}',
+            style: textStyle(p, size: 11, color: p.muted),
+          ),
+        ),
+        IconButtonS(
+          'right',
+          '下一个文件（预览区滚轮也可切换）',
+          size: 28,
+          iconSize: 14,
+          onPressed: busy || fileIndex >= files.length - 1
+              ? null
+              : () => selectFile(files[fileIndex + 1].id),
+        ),
+        const SizedBox(width: 4),
+      ],
+      IconButtonS('plus', '添加附件', onPressed: busy ? null : addAttachments),
+    ],
+  );
+
+  Widget _fileCount(Palette p, int count) => Tooltip(
+    message: '1 张发票原件 · ${count - 1} 个附件，共 $count 个文件',
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: p.card.withValues(alpha: p.dark ? .28 : .50),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: p.border),
+      ),
+      child: Text(
+        '共 $count 个',
+        style: textStyle(p, size: 10.5, color: p.muted),
       ),
     ),
   );
 
-  Widget _previewPane(
-    Palette p,
-    List<InvoiceFile> files,
-    int index,
-    InvoiceFile? displayed, {
-    required bool scroll,
-  }) {
-    final content = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            IconButtonS(
-              'invoice',
-              '发票原件',
-              selected: !attachments,
-              soft: true,
-              onPressed: busy ? null : () => setState(() => attachments = false),
-            ),
-            const SizedBox(width: 4),
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                IconButtonS(
-                  'clip',
-                  '关联附件（${files.length}）',
-                  selected: attachments,
-                  soft: true,
-                  onPressed: busy ? null : () => setState(() => attachments = true),
+  Widget _previewCard(Palette p, InvoiceFile file, {required double height}) =>
+      Tooltip(
+        message: files.length > 1
+            ? '滚轮切换文件 · 点击在${Platform.isWindows ? '系统应用中' : '速览中'}打开'
+            : '点击在${Platform.isWindows ? '系统应用中' : '速览中'}预览',
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: busy ? null : () => openPreview(file),
+            child: Listener(
+              onPointerSignal: wheelFiles,
+              child: Container(
+                key: const ValueKey('invoice-file-preview'),
+                height: height,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: p.card.withValues(alpha: p.dark ? .28 : .38),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: p.border),
                 ),
-                if (files.isNotEmpty)
-                  Positioned(
-                    right: -2,
-                    top: -2,
-                    child: IgnorePointer(child: _countBadge(p, files.length)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: _FilePreview(
+                    key: ValueKey('invoice-preview-${file.id}'),
+                    file: file,
                   ),
-              ],
-            ),
-            const Spacer(),
-            if (attachments)
-              IconButtonS(
-                'plus',
-                '添加附件',
-                onPressed: busy ? null : addAttachments,
+                ),
               ),
-          ],
+            ),
+          ),
         ),
-        const SizedBox(height: 10),
-        if (displayed == null)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 28),
-            child: Column(
-              children: [
-                SpaceIcon('clip', size: 22, color: p.muted),
-                const SizedBox(height: 8),
-                Text(
-                  '可添加关联行程单或报销凭证',
-                  style: textStyle(p, size: 12, color: p.muted),
-                ),
-                const SizedBox(height: 8),
-                SpaceTextButton(
-                  '添加附件',
-                  icon: 'plus',
-                  onPressed: busy ? null : addAttachments,
-                ),
-              ],
-            ),
-          )
-        else ...[
-          Listener(
-            onPointerSignal: wheelAttachments,
-            child: _FilePreview(key: ValueKey(displayed.id), file: displayed),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              IconButtonS(
-                'preview',
-                Platform.isWindows ? '在系统应用中打开' : '在速览中打开',
-                onPressed: busy
-                    ? null
-                    : () => act(() => DesktopHost.preview(displayed.path)),
-              ),
-              const SizedBox(width: 8),
-              IconButtonS(
-                'save',
-                attachments ? '下载附件' : '下载原件',
-                onPressed: busy ? null : () => download(displayed),
-              ),
-              const Spacer(),
-              if (attachments)
-                IconButtonS(
-                  'trash',
-                  '删除附件',
-                  danger: true,
-                  onPressed: busy ? null : () => removeAttachment(displayed),
-                ),
-            ],
-          ),
-          if (attachments && files.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 52,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: files.length,
-                      separatorBuilder: (_, i) => const SizedBox(width: 6),
-                      itemBuilder: (c, i) {
-                        final current = i == index;
-                        return Tooltip(
-                          message: files[i].name,
-                          child: GestureDetector(
-                            onTap: busy
-                                ? null
-                                : () => showAttachment(files[i].id),
-                            child: AnimatedContainer(
-                              duration: MediaQuery.disableAnimationsOf(context)
-                                  ? Duration.zero
-                                  : const Duration(milliseconds: 120),
-                              width: 44,
-                              decoration: BoxDecoration(
-                                color: current
-                                    ? p.accent.withValues(alpha: .12)
-                                    : p.card.withValues(alpha: .5),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: current ? p.accent : p.border,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${i + 1}',
-                                  style: textStyle(
-                                    p,
-                                    size: 12,
-                                    color: current ? p.accent : p.secondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${index + 1} / ${files.length}',
-                  style: textStyle(p, size: 11, color: p.muted),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ],
-    );
-    if (!scroll) return content;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      child: content,
-    );
-  }
+      );
 
-  Widget _label(Palette p, String text) => Text(
-    text,
-    maxLines: 2,
-    style: textStyle(p, size: 11.5, color: p.muted),
+  Widget _previewActions(Palette p, InvoiceFile file) => Row(
+    children: [
+      IconButtonS(
+        'preview',
+        Platform.isWindows ? '在系统应用中打开' : '在速览中打开',
+        onPressed: busy ? null : () => openPreview(file),
+      ),
+      const SizedBox(width: 8),
+      IconButtonS(
+        'save',
+        attachmentSelected ? '下载附件' : '下载原件',
+        onPressed: busy ? null : () => download(file),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Text(
+          files.length > 1
+              ? '${fileIndex + 1} / ${files.length} · ${file.name}'
+              : file.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: textStyle(p, size: 11, color: p.muted),
+        ),
+      ),
+      if (attachmentSelected)
+        IconButtonS(
+          'trash',
+          '删除附件',
+          danger: true,
+          onPressed: busy ? null : () => removeAttachment(file),
+        ),
+    ],
   );
 
-  Widget _row(Palette p, String label, Widget value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 3),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(width: 112, child: _label(p, label)),
-        Expanded(child: value),
+  /// 字段标签统一放在控件上方。
+  Widget _field(Palette p, String label, Widget child, {String? note}) =>
+      Column(
+        key: ValueKey('invoice-field-$label'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyle(p, size: 11, color: p.muted),
+                ),
+              ),
+              if (note != null) ...[
+                const SizedBox(width: 4),
+                Text(note, style: textStyle(p, size: 10, color: p.muted)),
+              ],
+            ],
+          ),
+          const SizedBox(height: 4),
+          child,
+        ],
+      );
+
+  /// 一行两个字段，窄窗口由调用方改为逐行排列。
+  Widget _fieldRow(List<Widget> fields) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      for (var i = 0; i < fields.length; i++) ...[
+        if (i > 0) const SizedBox(width: 12),
+        Expanded(child: fields[i]),
       ],
-    ),
+    ],
   );
 
   Widget _heading(Palette p, String text) => Padding(
@@ -503,7 +490,12 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     ),
   );
 
-  Widget _amountCell(Palette p, String label, String value, {bool strong = false}) => Expanded(
+  Widget _amountCell(
+    Palette p,
+    String label,
+    String value, {
+    bool strong = false,
+  }) => Expanded(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -549,111 +541,106 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     ),
   );
 
-  Widget _formPane(Palette p, {required bool scroll}) {
-    final content = Column(
+  Widget _formPane(Palette p, {required bool twoColumns}) {
+    Widget field(String label, Widget child, {String? note}) =>
+        _field(p, label, child, note: note);
+    Widget row(List<Widget> cells) => twoColumns
+        ? _fieldRow(cells)
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < cells.length; i++) ...[
+                if (i > 0) const SizedBox(height: 12),
+                cells[i],
+              ],
+            ],
+          );
+    Widget gap(double height) => SizedBox(height: height);
+
+    Widget projectField() => Row(
+      children: [
+        Expanded(
+          child: SpaceSelect(
+            value: project,
+            label: '选择报销项目',
+            options: projectChoices(widget.store.state, selected: project),
+            onChanged: (v) => setState(() {
+              project = v;
+              dirty = true;
+            }),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButtonS(
+          'project',
+          '管理共用项目',
+          size: spaceFormControlHeight,
+          onPressed: busy
+              ? null
+              : () => act(() async {
+                  await openProjectEditor(context, widget.store);
+                  if (!mounted) return;
+                  await reload();
+                  if (!session.projects.containsKey(project)) {
+                    project = '';
+                  }
+                }),
+        ),
+      ],
+    );
+
+    /// 标记已报销只用圆形复选框与文字标签，不加输入框式底色描边；
+    /// dense 让它与同行输入控件同为 32 逻辑像素高。
+    Widget reimbursedField() => SpaceCheckbox(
+      key: const ValueKey('invoice-reimbursed-control'),
+      label: '已报销',
+      value: reimbursed,
+      dense: true,
+      onPressed: busy
+          ? null
+          : () => setState(() {
+              reimbursed = !reimbursed;
+              dirty = true;
+            }),
+    );
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _heading(p, '票面信息'),
-        _row(p, '发票号码', input('票号')),
-        _row(p, '开票日期', input('开票日期')),
-        _row(p, '销售方', input('销售方')),
-        _row(p, '销售方社会信用代码', input('销售方税号')),
-        _row(p, '购买方', input('购买方')),
-        _row(p, '购买方社会信用代码', input('购买方税号')),
-        const SizedBox(height: 8),
+        row([field('发票号码', input('票号')), field('开票日期', input('开票日期'))]),
+        gap(12),
+        row([field('销售方', input('销售方')), field('销售方社会信用代码', input('销售方税号'))]),
+        gap(12),
+        row([field('购买方', input('购买方')), field('购买方社会信用代码', input('购买方税号'))]),
+        gap(12),
         _amounts(p),
-        const SizedBox(height: 14),
+        gap(16),
         _heading(p, '报销信息'),
-        _row(
-          p,
-          '报销项目',
-          Row(
-            children: [
-              Expanded(
-                child: SpaceSelect(
-                  value: project,
-                  label: '选择报销项目',
-                  options: projectChoices(
-                    widget.store.state,
-                    selected: project,
-                  ),
-                  onChanged: (v) => setState(() {
-                    project = v;
-                    dirty = true;
-                  }),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButtonS(
-                'project',
-                '管理共用项目',
-                size: spaceFormControlHeight,
-                onPressed: busy
-                    ? null
-                    : () => act(() async {
-                        await openProjectEditor(context, widget.store);
-                        if (!mounted) return;
-                        await reload();
-                        if (!session.projects.containsKey(project)) {
-                          project = '';
-                        }
-                      }),
-              ),
-            ],
-          ),
-        ),
-        _row(
-          p,
-          '报销月份',
-          Row(
-            children: [
-              Expanded(child: input('报销月份')),
-              if (monthAuto) ...[
-                const SizedBox(width: 8),
-                Text(
-                  '随消费日期',
-                  style: textStyle(p, size: 10, color: p.muted),
-                ),
-              ],
-            ],
-          ),
-        ),
-        _row(p, '消费时间', input('消费时间')),
-        _row(
-          p,
-          '是否报销',
-          Align(
-            alignment: Alignment.centerLeft,
-            child: SpaceCheckbox(
-              label: '已报销',
-              value: reimbursed,
-              onPressed: busy
-                  ? null
-                  : () => setState(() {
-                      reimbursed = !reimbursed;
-                      dirty = true;
-                    }),
-            ),
-          ),
-        ),
-        _row(p, '用途', input('用途')),
+        // 报销月份随消费日期推导，两个日期字段放在报销项目上方。
+        row([
+          field('报销月份', input('报销月份'), note: monthAuto ? '随消费日期' : null),
+          field('消费日期', input('消费日期')),
+        ]),
+        gap(12),
+        // 报销项目与报销月份同为半宽，右侧是标记已报销的复选框。
+        row([
+          field('报销项目', projectField()),
+          field('是否报销', reimbursedField()),
+        ]),
+        gap(12),
+        // 最后一行是占满整行的用途描述。
+        row([field('用途', input('用途'))]),
       ],
-    );
-    if (!scroll) return content;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      child: content,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
-    final files = entry.attachments;
-    final index = attachmentIndex;
-    final displayed = attachments
-        ? (files.isEmpty ? null : files[index])
-        : entry.original;
+    final current = files;
+    final file = displayed;
     return Focus(
       autofocus: true,
       onKeyEvent: (_, event) {
@@ -662,15 +649,14 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
           close();
           return KeyEventResult.handled;
         }
-        if (attachments &&
-            files.length > 1 &&
+        if (current.length > 1 &&
             (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
                 event.logicalKey == LogicalKeyboardKey.arrowRight)) {
           final next =
-              index +
+              fileIndex +
               (event.logicalKey == LogicalKeyboardKey.arrowRight ? 1 : -1);
-          if (next >= 0 && next < files.length) {
-            showAttachment(files[next].id);
+          if (next >= 0 && next < current.length) {
+            selectFile(current[next].id);
           }
           return KeyEventResult.handled;
         }
@@ -678,40 +664,41 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
       },
       child: LayoutBuilder(
         builder: (c, box) {
-          final wide = box.maxWidth >= 960;
+          final twoColumns = box.maxWidth >= 340;
+          // 预览高度随窗口自适应；表单单独滚动，滚轮落在预览区只切换文件。
+          final wanted = math.min(268.0, math.max(180.0, box.maxHeight * .38));
+          final previewHeight = (wanted / 4).round() * 4.0;
           return sheetFrame(
             context,
             title: '发票详情',
             close: close,
-            body: wide
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        flex: 11,
-                        child: _previewPane(
-                          p,
-                          files,
-                          index,
-                          displayed,
-                          scroll: true,
-                        ),
-                      ),
-                      VerticalDivider(width: 1, color: p.border),
-                      Expanded(
-                        flex: 10,
-                        child: _formPane(p, scroll: true),
-                      ),
-                    ],
-                  )
-                : ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _previewPane(p, files, index, displayed, scroll: false),
-                      const SizedBox(height: 16),
-                      _formPane(p, scroll: false),
-                    ],
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: _fileHeader(p, current),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _previewCard(p, file, height: previewHeight),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _previewActions(p, file),
+                ),
+                const SizedBox(height: 12),
+                Divider(height: 1, color: p.border),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                    child: _formPane(p, twoColumns: twoColumns),
                   ),
+                ),
+              ],
+            ),
             footer: [
               IconButtonS(
                 'trash',
@@ -761,7 +748,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
         ? 'YYYY-MM'
         : '',
     onChanged: (v) {
-      if (key == '消费时间' && monthAuto && v.length >= 7) {
+      if (key == '消费日期' && monthAuto && v.length >= 7) {
         inputs['报销月份']!.text = v.substring(0, 7);
       }
       if (key == '报销月份') monthAuto = false;
@@ -791,24 +778,23 @@ class _FilePreviewState extends State<_FilePreview> {
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     if (!widget.file.isPdf) {
-      return SizedBox(
-        height: 220,
-        child: FutureBuilder(
-          future: imageBytes,
-          builder: (context, state) {
-            if (state.connectionState != ConnectionState.done) {
-              return const Center(child: Text('正在加载图片…'));
-            }
-            if (!state.hasData) return const Center(child: Text('无法打开图片'));
-            return Image.memory(
+      return FutureBuilder(
+        future: imageBytes,
+        builder: (context, state) {
+          if (state.connectionState != ConnectionState.done) {
+            return const Center(child: Text('正在加载图片…'));
+          }
+          if (!state.hasData) return const Center(child: Text('无法打开图片'));
+          return SizedBox.expand(
+            child: Image.memory(
               state.data!,
               cacheWidth: 900,
               fit: BoxFit.contain,
               errorBuilder: (_, error, stack) =>
                   const Center(child: Text('无法打开图片')),
-            );
-          },
-        ),
+            ),
+          );
+        },
       );
     }
     return FutureBuilder<InvoicePreview>(
@@ -817,8 +803,7 @@ class _FilePreviewState extends State<_FilePreview> {
         final result = state.data;
         return Column(
           children: [
-            SizedBox(
-              height: 220,
+            Expanded(
               child: state.connectionState != ConnectionState.done
                   ? const Center(child: CircularProgressIndicator())
                   : result == null

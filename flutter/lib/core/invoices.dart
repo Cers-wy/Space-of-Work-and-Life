@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
@@ -85,6 +86,36 @@ class InvoiceImportResult {
   final int count;
   final List<String> errors;
   const InvoiceImportResult(this.count, this.errors);
+}
+
+/// 云端同步用的一条附件记录：文件、内容摘要与字节数。
+class InvoiceSyncFile {
+  final InvoiceFile file;
+  final String sha256;
+  final int bytes;
+  const InvoiceSyncFile(this.file, this.sha256, this.bytes);
+  String get extension =>
+      p.extension(file.path).toLowerCase().replaceFirst('.', '');
+}
+
+/// 备份或云端快照中的附件记录，只保留恢复所需的元数据。
+class InvoiceSnapshotFile {
+  final String id, name, extension, sha256;
+  final int bytes;
+  const InvoiceSnapshotFile(
+    this.id,
+    this.name,
+    this.extension,
+    this.sha256,
+    this.bytes,
+  );
+}
+
+class InvoiceSnapshot {
+  final int invoices;
+  final List<InvoiceSnapshotFile> files;
+  const InvoiceSnapshot(this.invoices, this.files);
+  static const empty = InvoiceSnapshot(0, []);
 }
 
 /// Invoice records use the existing Space database. The original files are
@@ -284,6 +315,97 @@ class InvoiceRepository {
         );
       });
 
+  /// 同步清单：补齐缺失的内容摘要与字节数，只统计实际存在的文件。
+  Future<List<InvoiceSyncFile>> syncManifest() => Isolate.run(
+    () => _database((db) {
+      final entries = <InvoiceSyncFile>[];
+      for (final row in db.select(
+        'SELECT * FROM invoice_files ORDER BY rowid',
+      )) {
+        final file = _file(row);
+        final handle = File(file.path);
+        if (!handle.existsSync()) continue;
+        final length = handle.lengthSync();
+        var digest = row['sha256'] as String?;
+        if (digest == null || digest.length != 64 || row['bytes'] != length) {
+          digest = _fileDigest(handle);
+          db.execute('UPDATE invoice_files SET sha256=?,bytes=? WHERE id=?', [
+            digest,
+            length,
+            file.id,
+          ]);
+        }
+        entries.add(InvoiceSyncFile(file, digest, length));
+      }
+      return entries;
+    }),
+  );
+
+  /// 本地附件已有的摘要，恢复时只下载缺失或内容不同的文件。
+  Future<Map<String, String>> localFileDigests() => Isolate.run(
+    () => _database(
+      (db) => {
+        for (final row in db.select('SELECT id,sha256 FROM invoice_files'))
+          row['id'] as String: (row['sha256'] as String?) ?? '',
+      },
+    ),
+  );
+
+  /// 写入从云端恢复的附件：先写临时文件再改名，避免留下半截文件。
+  Future<void> writeSyncedFile(String id, String extension, List<int> bytes) =>
+      Isolate.run(() {
+        Directory(_files).createSync(recursive: true);
+        protectPath(root, directory: true);
+        protectPath(_files, directory: true);
+        final target = p.join(_files, '$id.$extension');
+        final staged = p.join(_files, '.$id.sync');
+        File(staged).writeAsBytesSync(bytes, flush: true);
+        File(staged).renameSync(target);
+        protectPath(target);
+      });
+
+  /// 读取备份包或云端快照中的发票数量与附件清单。
+  Future<InvoiceSnapshot> readSnapshot(String snapshot) => Isolate.run(() {
+    final source = File(snapshot);
+    if (!source.existsSync()) return InvoiceSnapshot.empty;
+    try {
+      final handle = source.openSync();
+      final List<int> header;
+      try {
+        header = handle.readSync(16);
+      } finally {
+        handle.closeSync();
+      }
+      if (String.fromCharCodes(header) != 'SQLite format 3\u0000') {
+        return InvoiceSnapshot.empty;
+      }
+    } on FileSystemException {
+      return InvoiceSnapshot.empty;
+    }
+    final db = sqlite3.open(snapshot, mode: OpenMode.readOnly);
+    try {
+      if (db.userVersion < 4) return InvoiceSnapshot.empty;
+      final invoices =
+          db.select('SELECT COUNT(*) AS n FROM invoices').first['n'] as int;
+      if (db.userVersion < 7) return InvoiceSnapshot(invoices, const []);
+      return InvoiceSnapshot(invoices, [
+        for (final row in db.select(
+          'SELECT id,name,extension,sha256,bytes FROM invoice_files ORDER BY rowid',
+        ))
+          if ((row['sha256'] as String?)?.isNotEmpty == true)
+            InvoiceSnapshotFile(
+              row['id'] as String,
+              row['name'] as String,
+              row['extension'] as String,
+              row['sha256'] as String,
+              (row['bytes'] as int?) ?? 0,
+            ),
+      ]);
+    } finally {
+      db.close();
+    }
+  });
+
   void checkDestination(String destination) {
     final data = fileIdentity(space.directory.path);
     final target = fileIdentity(destination);
@@ -298,6 +420,34 @@ String invoiceError(Object error) => switch (error) {
   FileSystemException() => error.message,
   _ => error.toString(),
 };
+
+/// 流式计算文件摘要，避免把 32 MB 的发票整块读进内存。
+String _fileDigest(File file) {
+  final sink = _DigestSink();
+  final input = sha256.startChunkedConversion(sink);
+  final stream = file.openSync();
+  try {
+    while (true) {
+      final chunk = stream.readSync(256 * 1024);
+      if (chunk.isEmpty) break;
+      input.add(chunk);
+    }
+  } finally {
+    stream.closeSync();
+  }
+  input.close();
+  final digest = sink.value;
+  if (digest == null) throw StateError('无法计算文件摘要');
+  return digest.toString();
+}
+
+class _DigestSink implements Sink<Digest> {
+  Digest? value;
+  @override
+  void add(Digest data) => value = data;
+  @override
+  void close() {}
+}
 
 String validateInvoiceFile(String path, {bool pdfOnly = false}) {
   final extension = p.extension(path).toLowerCase().replaceFirst('.', '');

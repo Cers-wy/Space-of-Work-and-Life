@@ -1,9 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
+import 'package:archive/archive_io.dart';
+import 'package:path/path.dart' as p;
 import 'files.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'models.dart';
+
+/// 解包后的备份：临时目录中的数据库快照，以及其中的附件数量。
+class UnpackedBackup {
+  final String directory, database;
+  final int files;
+  const UnpackedBackup(this.directory, this.database, this.files);
+  String get attachments => p.join(directory, 'invoices', 'files');
+}
 
 class SpaceRepository {
   final Directory directory;
@@ -45,30 +56,49 @@ class SpaceRepository {
     }
     final db = _open(path);
     try {
-      if (db.userVersion < 1 || db.userVersion > 6) {
+      if (db.userVersion < 1 || db.userVersion > 7) {
         throw StateError('不支持此 Space 数据库版本');
       }
-      if (db.userVersion < 6) {
-        db.execute('BEGIN IMMEDIATE');
-        try {
-          final from = db.userVersion;
-          if (from < 4) {
-            _createInvoiceTables(db);
-          } else if (from == 4) {
-            _migrateInvoiceProjects(db);
-          }
-          _addInvoiceFields(db);
-          db.userVersion = 6;
-          db.execute('COMMIT');
-        } catch (_) {
-          db.execute('ROLLBACK');
-          rethrow;
-        }
-      }
+      _upgradeInvoiceSchema(db);
       return db;
     } catch (_) {
       db.close();
       rethrow;
+    }
+  }
+
+  /// v5 起发票使用共用项目表；v6 补充购销方与税额；v7 记录附件摘要与大小。
+  void _upgradeInvoiceSchema(Database db) {
+    if (db.userVersion >= 7 || db.userVersion < 1) return;
+    db.execute('BEGIN IMMEDIATE');
+    try {
+      final from = db.userVersion;
+      if (from < 4) {
+        _createInvoiceTables(db);
+      } else if (from == 4) {
+        _migrateInvoiceProjects(db);
+      }
+      _addInvoiceFields(db);
+      _addInvoiceFileColumns(db);
+      db.userVersion = 7;
+      db.execute('COMMIT');
+    } catch (_) {
+      db.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  /// v7 只缓存内容摘要与字节数，便于云端同步增量比对，不影响票面字段。
+  void _addInvoiceFileColumns(Database db) {
+    final columns = {
+      for (final row in db.select('PRAGMA table_info(invoice_files)'))
+        row['name'] as String,
+    };
+    if (!columns.contains('sha256')) {
+      db.execute('ALTER TABLE invoice_files ADD COLUMN sha256 TEXT');
+    }
+    if (!columns.contains('bytes')) {
+      db.execute('ALTER TABLE invoice_files ADD COLUMN bytes INTEGER');
     }
   }
 
@@ -177,7 +207,7 @@ DROP TABLE invoice_project_map;
     final db = _open(file, readOnly: true);
     try {
       final v = db.userVersion;
-      if (v < 1 || v > 6) invalid('不支持数据库格式版本 $v');
+      if (v < 1 || v > 7) invalid('不支持数据库格式版本 $v');
       if (db.select('PRAGMA quick_check').first.values.first != 'ok') {
         invalid('数据库校验失败，原文件已保留');
       }
@@ -484,6 +514,223 @@ PRAGMA user_version=1;
         db.close();
       }
     });
+  }
+
+  /// 用云端快照中的发票表替换本地台账，返回替换的发票数量。
+  /// 附件文件本身由调用方按摘要另行恢复。
+  Future<int> importInvoiceLedger(String snapshot) async {
+    final directoryPath = directory.path;
+    final result = await Isolate.run<({int rows, String revision})>(
+      () => SpaceRepository(Directory(directoryPath))._importLedger(snapshot),
+    );
+    expectedRevision = result.revision;
+    loaded = true;
+    return result.rows;
+  }
+
+  ({int rows, String revision}) _importLedger(String snapshot) {
+    if (!File(snapshot).existsSync()) invalid('云端备份文件不存在');
+    final Database source;
+    try {
+      source = _open(snapshot);
+    } on SqliteException {
+      // 早期备份只包含任务数据，不含发票台账。
+      return (rows: 0, revision: expectedRevision ?? '');
+    }
+    Database? target;
+    try {
+      if (source.userVersion < 4) {
+        return (rows: 0, revision: expectedRevision ?? '');
+      }
+      _upgradeInvoiceSchema(source);
+      final rows = source
+          .select('SELECT * FROM invoices ORDER BY rowid')
+          .toList();
+      final files = source
+          .select('SELECT * FROM invoice_files ORDER BY rowid')
+          .toList();
+      target = _open(path);
+      _upgradeInvoiceSchema(target);
+      final projects = {
+        for (final row in target.select('SELECT id FROM projects'))
+          row['id'] as String,
+      };
+      final revision = uid();
+      target.execute('BEGIN IMMEDIATE');
+      try {
+        target.execute('DELETE FROM invoice_files; DELETE FROM invoices;');
+        for (final row in rows) {
+          final project = row['project'] as String?;
+          target.execute(
+            'INSERT INTO invoices(id,number,issued,seller,spent,purpose,month,'
+            'project,cents,reimbursed,buyer,seller_tax,buyer_tax,tax_cents,net_cents) '
+            'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            [
+              row['id'],
+              row['number'] ?? '',
+              row['issued'] ?? '',
+              row['seller'] ?? '',
+              row['spent'] ?? '',
+              row['purpose'] ?? '',
+              row['month'] ?? '',
+              project != null && projects.contains(project) ? project : null,
+              row['cents'],
+              row['reimbursed'] ?? 0,
+              row['buyer'] ?? '',
+              row['seller_tax'] ?? '',
+              row['buyer_tax'] ?? '',
+              row['tax_cents'],
+              row['net_cents'],
+            ],
+          );
+        }
+        for (final row in files) {
+          target.execute(
+            'INSERT INTO invoice_files(id,invoice,name,extension,original,sha256,bytes) '
+            'VALUES(?,?,?,?,?,?,?)',
+            [
+              row['id'],
+              row['invoice'],
+              row['name'],
+              row['extension'],
+              row['original'],
+              row['sha256'],
+              row['bytes'],
+            ],
+          );
+        }
+        target.execute("INSERT OR REPLACE INTO metadata VALUES('revision',?)", [
+          revision,
+        ]);
+        target.execute('COMMIT');
+      } catch (_) {
+        target.execute('ROLLBACK');
+        rethrow;
+      }
+      return (rows: rows.length, revision: revision);
+    } finally {
+      source.close();
+      target?.close();
+    }
+  }
+
+  /// 导出备份包：数据库 + 发票原件与附件，按 zip 结构写成 .spacepack。
+  Future<void> exportPack(String target) async {
+    final directoryPath = directory.path, revision = expectedRevision;
+    await Isolate.run(() async {
+      final worker = SpaceRepository(Directory(directoryPath))
+        ..loaded = true
+        ..expectedRevision = revision;
+      await worker._exportPackDirect(target);
+    });
+  }
+
+  Future<void> _exportPackDirect(String target) async {
+    final absolute = fileIdentity(target);
+    if (absolute == fileIdentity(path) || absolute == fileIdentity(previous)) {
+      invalid('不能覆盖活动库或上一份备份');
+    }
+    final temp = Directory.systemTemp.createTempSync('space-pack-');
+    try {
+      final database = p.join(temp.path, 'space.sqlite');
+      await exportSQLite(database);
+      final encoder = ZipFileEncoder()..create(target);
+      try {
+        encoder.addFileSync(File(database), 'space.sqlite');
+        final files = Directory(p.join(directory.path, 'invoices', 'files'));
+        if (files.existsSync()) {
+          for (final entity in files.listSync(followLinks: false)) {
+            if (entity is! File) continue;
+            final name = p.basename(entity.path);
+            if (name.startsWith('.')) continue;
+            encoder.addFileSync(entity, 'invoices/files/$name');
+          }
+        }
+      } finally {
+        encoder.closeSync();
+      }
+      protectPath(target);
+    } catch (_) {
+      if (File(target).existsSync()) File(target).deleteSync();
+      rethrow;
+    } finally {
+      if (temp.existsSync()) temp.deleteSync(recursive: true);
+    }
+  }
+
+  /// 解包备份到临时目录。旧版 .sqlite 备份同样可用，只是不含附件。
+  Future<UnpackedBackup> unpackBackup(String source) => Isolate.run(() {
+    final file = File(source);
+    if (!file.existsSync()) invalid('备份文件不存在');
+    if (file.lengthSync() > 8 * 1024 * 1024 * 1024) invalid('备份文件过大');
+    final temp = Directory.systemTemp.createTempSync('space-unpack-');
+    final database = p.join(temp.path, 'space.sqlite');
+    var files = 0;
+    try {
+      final handle = file.openSync();
+      final Uint8List header;
+      try {
+        header = handle.readSync(4);
+      } finally {
+        handle.closeSync();
+      }
+      final zip = header.length >= 2 && header[0] == 0x50 && header[1] == 0x4B;
+      if (!zip) {
+        file.copySync(database);
+        return UnpackedBackup(temp.path, database, 0);
+      }
+      final archive = ZipDecoder().decodeStream(InputFileStream(source));
+      for (final entry in archive) {
+        final name = entry.name.replaceAll('\\', '/');
+        if (name != 'space.sqlite' && !name.startsWith('invoices/files/')) {
+          continue;
+        }
+        if (name.split('/').contains('..')) continue;
+        final target = File(p.join(temp.path, name));
+        target.parent.createSync(recursive: true);
+        final output = OutputFileStream(target.path);
+        try {
+          entry.writeContent(output);
+        } finally {
+          output.close();
+        }
+        if (name != 'space.sqlite') files++;
+      }
+      if (!File(database).existsSync()) invalid('备份包缺少数据库');
+      return UnpackedBackup(temp.path, database, files);
+    } catch (_) {
+      if (temp.existsSync()) temp.deleteSync(recursive: true);
+      rethrow;
+    }
+  });
+
+  /// 把备份包中的附件写回数据目录，已存在同名文件直接覆盖为备份内容。
+  Future<int> restorePackFiles(UnpackedBackup pack) => Isolate.run(() {
+    final source = Directory(pack.attachments);
+    if (!source.existsSync()) return 0;
+    final target = Directory(p.join(directory.path, 'invoices', 'files'));
+    target.createSync(recursive: true);
+    protectPath(directory.path, directory: true);
+    protectPath(target.path, directory: true);
+    var count = 0;
+    for (final entity in source.listSync(followLinks: false)) {
+      if (entity is! File) continue;
+      final name = p.basename(entity.path);
+      if (name.startsWith('.') || name.contains('/') || name.contains('\\')) {
+        continue;
+      }
+      final staged = p.join(target.path, '.$name.restore');
+      entity.copySync(staged);
+      File(staged).renameSync(p.join(target.path, name));
+      protectPath(p.join(target.path, name));
+      count++;
+    }
+    return count;
+  });
+
+  Future<void> cleanupBackup(UnpackedBackup pack) async {
+    final directory = Directory(pack.directory);
+    if (directory.existsSync()) directory.deleteSync(recursive: true);
   }
 
   Future<SpaceState> recover(SpaceState state) async {

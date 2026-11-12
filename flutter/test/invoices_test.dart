@@ -7,6 +7,7 @@ import 'package:space_flutter/core/invoice_pdf.dart';
 import 'package:space_flutter/core/invoices.dart';
 import 'package:space_flutter/core/models.dart';
 import 'package:space_flutter/core/repository.dart';
+import 'package:space_flutter/ui/invoice_merge.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 void main() {
@@ -75,7 +76,7 @@ void main() {
 
     final db = sqlite3.open(space.path, mode: OpenMode.readOnly);
     try {
-      expect(db.userVersion, 6);
+      expect(db.userVersion, 7);
       expect(db.select('SELECT count(*) AS n FROM invoices').single['n'], 1);
       expect(db.select('PRAGMA foreign_key_check'), isEmpty);
     } finally {
@@ -181,7 +182,7 @@ PRAGMA user_version=4;
     );
     final check = sqlite3.open(space.path, mode: OpenMode.readOnly);
     try {
-      expect(check.userVersion, 6);
+      expect(check.userVersion, 7);
       expect(check.select('PRAGMA foreign_key_check'), isEmpty);
     } finally {
       check.close();
@@ -216,10 +217,23 @@ PRAGMA user_version=4;
         );
         final slots = sheets.first['slots']! as List<Map<String, Object>>;
         expect(slots.length, capacity);
-        final rect = slots.first['rect']! as List<double>;
+        // 2.3.1 起票面在可用区垂直居中，不再顶格贴住上边距。
+        final pt = InvoiceLayout.pointPerMillimeter;
+        var upper = -double.infinity;
+        var lower = double.infinity;
+        for (final slot in slots) {
+          final r = slot['rect']! as List<double>;
+          if (r[1] + r[3] > upper) upper = r[1] + r[3];
+          if (r[1] < lower) lower = r[1];
+        }
+        final usableTop = layout.height - 7 * pt;
+        final usableBottom = 11 * pt;
+        expect(upper, lessThanOrEqualTo(usableTop + 0.001));
+        expect(lower, greaterThanOrEqualTo(usableBottom - 0.001));
         expect(
-          rect[1] + rect[3],
-          closeTo(layout.height - 7 * InvoiceLayout.pointPerMillimeter, 0.001),
+          (usableTop - upper) - (lower - usableBottom),
+          closeTo(0, 0.01),
+          reason: '整页票面应在可用区垂直居中',
         );
         expect(
           (sheets.first['lines']! as List).length,
@@ -236,5 +250,34 @@ PRAGMA user_version=4;
       () => const InvoiceLayout(top: 400).arrange(invoices, []),
       throwsStateError,
     );
+    final spaced = const InvoiceLayout(
+      gap: 10,
+    ).arrange([sample, sample], []).first;
+    final cells = spaced['slots']! as List<Map<String, Object>>;
+    final upperCell = cells[0]['rect']! as List<double>;
+    final lowerCell = cells[1]['rect']! as List<double>;
+    expect(
+      upperCell[1] - (lowerCell[1] + lowerCell[3]),
+      closeTo(10 * InvoiceLayout.pointPerMillimeter, 0.001),
+      reason: '相邻两票之间应保留设定的票间距',
+    );
+  });
+
+  test('一式两份把每张票面连续排两次，每页两张同票', () {
+    InvoiceSourcePage page(String path) =>
+        (path: path, page: 1, x: 20.0, y: 70.0, width: 200.0, height: 80.0);
+    final sources = [page('/a.pdf'), page('/b.pdf')];
+    final doubled = duplicateForDoubleCopy(sources, true);
+    expect(doubled.length, 4);
+    expect(doubled[0].path, doubled[1].path);
+    expect(doubled[2].path, doubled[3].path);
+    expect(duplicateForDoubleCopy(sources, false), sources);
+    final sheets = const InvoiceLayout(perPage: 2).arrange(doubled, []);
+    expect(sheets.length, 2);
+    for (final sheet in sheets) {
+      final slots = sheet['slots']! as List<Map<String, Object>>;
+      expect(slots.length, 2);
+      expect(slots[0]['path'], slots[1]['path']);
+    }
   });
 }

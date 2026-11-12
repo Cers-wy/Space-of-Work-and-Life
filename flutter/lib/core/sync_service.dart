@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import '../host.dart';
 import '../store.dart';
+import 'invoices.dart';
 import 'models.dart';
 import 'sync.dart';
 
@@ -237,6 +238,99 @@ class GitHubAPI {
     if (sha != SyncCodec.gitBlob(bytes)) invalid('GitHub上传返回的摘要不一致');
     return sha as String;
   }
+
+  /// 发票原件与附件放在快照同级的 files 目录，按内容摘要命名。
+  String get filesDirectory {
+    final slash = config.path.lastIndexOf('/');
+    return slash < 0 ? 'files' : '${config.path.substring(0, slash)}/files';
+  }
+
+  String contentPathFor(String relative) =>
+      '$root/contents/${relative.split('/').map(Uri.encodeComponent).join('/')}';
+
+  /// 云端已有的附件文件名（`<sha256>.space`）。
+  Future<Set<String>> remoteFiles() async {
+    final response = await request(
+      'GET',
+      '$root/git/trees/${Uri.encodeComponent(config.branch)}',
+      query: {'recursive': '1'},
+      allow404: true,
+    );
+    if (response.status == 404) return {};
+    final tree = jsonBody(response.bytes)['tree'];
+    if (tree is! List) return {};
+    final prefix = '$filesDirectory/';
+    return {
+      for (final entry in tree)
+        if (entry is Map &&
+            entry['type'] == 'blob' &&
+            entry['path'] is String &&
+            (entry['path'] as String).startsWith(prefix) &&
+            !(entry['path'] as String).substring(prefix.length).contains('/'))
+          (entry['path'] as String).substring(prefix.length),
+    };
+  }
+
+  Future<void> uploadFile(String name, Uint8List bytes) async {
+    final path = contentPathFor('$filesDirectory/$name');
+    final existing = await request(
+      'GET',
+      path,
+      query: {'ref': config.branch},
+      allow404: true,
+    );
+    String? sha;
+    if (existing.status != 404) {
+      final value = jsonBody(existing.bytes)['sha'];
+      if (value is String && RegExp(r'^[0-9a-fA-F]{40}$').hasMatch(value)) {
+        sha = value;
+      }
+    }
+    final result = jsonBody(
+      (await request(
+        'PUT',
+        path,
+        body: {
+          'message': 'Encrypted Space attachment',
+          'branch': config.branch,
+          'content': base64Encode(bytes),
+          'sha': ?sha,
+        },
+      )).bytes,
+    );
+    final content = result['content'];
+    if (content is! Map || content['sha'] != SyncCodec.gitBlob(bytes)) {
+      invalid('附件上传返回的摘要不一致');
+    }
+  }
+
+  Future<Uint8List> downloadFile(String name) async {
+    final response = await request(
+      'GET',
+      contentPathFor('$filesDirectory/$name'),
+      query: {'ref': config.branch},
+      allow404: true,
+    );
+    if (response.status == 404) invalid('云端缺少附件文件');
+    final body = jsonBody(response.bytes),
+        sha = body['sha'],
+        size = body['size'];
+    if (sha is! String ||
+        size is! int ||
+        size <= 0 ||
+        size > 40 * 1024 * 1024) {
+      invalid('云端附件元数据无效');
+    }
+    final bytes = (await request(
+      'GET',
+      '$root/git/blobs/${Uri.encodeComponent(sha)}',
+      raw: true,
+    )).bytes;
+    if (bytes.length != size || SyncCodec.gitBlob(bytes) != sha) {
+      invalid('云端附件摘要不匹配');
+    }
+    return bytes;
+  }
 }
 
 final _services = Expando<SyncService>();
@@ -246,7 +340,17 @@ SyncService syncFor(SpaceStore store) =>
 class PendingGitHub {
   final SpaceState backup;
   final String sha, local;
-  PendingGitHub(this.backup, this.sha, this.local);
+
+  /// 已校验的快照文件，恢复发票台账与附件时继续使用。
+  final String snapshot;
+  final InvoiceSnapshot invoices;
+  PendingGitHub(
+    this.backup,
+    this.sha,
+    this.local,
+    this.snapshot,
+    this.invoices,
+  );
 }
 
 class SyncService extends ChangeNotifier {
@@ -256,6 +360,10 @@ class SyncService extends ChangeNotifier {
   bool busy = false, hasToken = false, hasKey = false, initialized = false;
   DateTime? lastSyncedAt;
   String message = '填写仓库地址、Token和恢复密钥后即可同步';
+
+  /// 附件传输进度，按“已完成/总数”显示，空闲时清空。
+  String progress = '';
+  int fileDone = 0, fileTotal = 0;
   PendingGitHub? pending;
   SyncService(
     this.store, {
@@ -382,49 +490,75 @@ class SyncService extends ChangeNotifier {
       return;
     }
     busy = true;
-    pending = null;
+    fileDone = fileTotal = 0;
+    progress = '';
+    _discardPending();
     message = download ? '正在下载并校验云端数据…' : '正在同步数据到云端…';
     notifyListeners();
     try {
       _readSettings();
       final api = apiFactory(config, token);
       final key = recoveryKey;
+      final invoices = InvoiceRepository(store.repository);
       await api.validate();
       final meta = await api.metadata();
       if (download) {
         if (meta == null) invalid('云端尚无备份');
         final local = SyncCodec.fingerprint(store.state);
-        final incoming = await SyncCodec.githubOpen(
-          await api.download(meta),
-          key,
-        );
+        final bytes = await api.download(meta);
+        final snapshot = _pendingSnapshotPath();
+        late SpaceState incoming;
+        if (SyncCodec.isDatabasePackage(bytes)) {
+          final database = await SyncCodec.databaseOpen(bytes, key);
+          await File(snapshot).writeAsBytes(database, flush: true);
+          incoming = await store.repository.readExternal(snapshot);
+        } else {
+          // 旧版备份只含状态 JSON，没有发票台账与附件。
+          incoming = await SyncCodec.githubOpen(bytes, key);
+        }
         if (SyncCodec.fingerprint(store.state) != local) {
           invalid('下载期间本地数据发生变化，请重试');
         }
-        pending = PendingGitHub(incoming, meta.sha, local);
-        message = '云端数据已校验，确认后恢复';
+        final summary = await invoices.readSnapshot(snapshot);
+        pending = PendingGitHub(incoming, meta.sha, local, snapshot, summary);
+        message = summary.files.isEmpty
+            ? '云端数据已校验，确认后恢复（该备份不含附件文件）'
+            : '云端数据已校验：${summary.invoices} 张发票、${summary.files.length} 个文件';
       } else {
         // Verify the existing encryption key and use GitHub's SHA precondition to prevent races.
         if (meta != null) {
-          await SyncCodec.githubOpen(await api.download(meta), key);
+          final existing = await api.download(meta);
+          if (SyncCodec.isDatabasePackage(existing)) {
+            await SyncCodec.databaseOpen(existing, key);
+          } else {
+            await SyncCodec.githubOpen(existing, key);
+          }
         }
+        final fileKey = await SyncCodec.fileKey(key);
+        final filesNote = await _uploadFiles(api, invoices, fileKey);
         final snapshotFile = File(
           '${store.repository.directory.path}/.github-snapshot-${uid()}.sqlite',
         );
         late SpaceState snapshot;
+        late Uint8List database;
         try {
           await store.repository.exportSQLite(snapshotFile.path);
+          database = await snapshotFile.readAsBytes();
           snapshot = await store.repository.readExternal(snapshotFile.path);
         } finally {
           if (snapshotFile.existsSync()) snapshotFile.deleteSync();
         }
-        await api.upload(await SyncCodec.githubSeal(snapshot, key), meta?.sha);
+        message = '正在上传任务与发票台账…';
+        notifyListeners();
+        await api.upload(
+          await SyncCodec.databaseSeal(database, key),
+          meta?.sha,
+        );
         await _synced();
+        fileDone = fileTotal = 0;
+        progress = '';
         message =
-            SyncCodec.fingerprint(store.state) ==
-                SyncCodec.fingerprint(snapshot)
-            ? '数据已同步到云端'
-            : '本次快照已上传，本地仍有后续更改待同步';
+            '${SyncCodec.fingerprint(store.state) == SyncCodec.fingerprint(snapshot) ? '数据已同步到云端' : '本次快照已上传，本地仍有后续更改待同步'}$filesNote';
       }
     } catch (e) {
       message = e is APIError ? e.message : SpaceStore.readable(e);
@@ -434,18 +568,105 @@ class SyncService extends ChangeNotifier {
     }
   }
 
+  /// 逐个上传缺失的发票文件，内容未变化时直接跳过。
+  Future<String> _uploadFiles(
+    GitHubAPI api,
+    InvoiceRepository invoices,
+    List<int> fileKey,
+  ) async {
+    final manifest = await invoices.syncManifest();
+    if (manifest.isEmpty) return '';
+    final remote = await api.remoteFiles();
+    final missing = [
+      for (final entry in manifest)
+        if (!remote.contains('${entry.sha256}.space')) entry,
+    ];
+    if (missing.isEmpty) return '，${manifest.length} 个附件均已在云端';
+    fileTotal = missing.length;
+    fileDone = 0;
+    for (final entry in missing) {
+      final bytes = File(entry.file.path).readAsBytesSync();
+      if (sha256.convert(bytes).toString() != entry.sha256) {
+        invalid('${entry.file.name} 在同步过程中发生变化，请重试');
+      }
+      await api.uploadFile(
+        '${entry.sha256}.space',
+        await SyncCodec.fileSeal(bytes, fileKey),
+      );
+      fileDone++;
+      progress = '正在上传附件 $fileDone/$fileTotal';
+      message = progress;
+      notifyListeners();
+    }
+    return '，已上传 $fileDone 个附件';
+  }
+
+  /// 下载本机缺失的发票文件，逐个校验摘要后写入数据目录。
+  Future<String> _restoreFiles(
+    GitHubAPI api,
+    InvoiceRepository invoices,
+    PendingGitHub value,
+    List<int> fileKey,
+  ) async {
+    final refs = value.invoices.files;
+    if (refs.isEmpty) return '';
+    final local = await invoices.localFileDigests();
+    final missing = [
+      for (final ref in refs)
+        if (local[ref.id] != ref.sha256) ref,
+    ];
+    if (missing.isEmpty) return '，${refs.length} 个附件已在本机';
+    fileTotal = missing.length;
+    fileDone = 0;
+    for (final ref in missing) {
+      final sealed = await api.downloadFile('${ref.sha256}.space');
+      final bytes = await SyncCodec.fileOpen(sealed, fileKey);
+      if (sha256.convert(bytes).toString() != ref.sha256) {
+        invalid('${ref.name} 校验失败，已停止恢复');
+      }
+      await invoices.writeSyncedFile(ref.id, ref.extension, bytes);
+      fileDone++;
+      progress = '正在恢复附件 $fileDone/$fileTotal';
+      message = progress;
+      notifyListeners();
+    }
+    return '，并恢复 $fileDone 个附件';
+  }
+
+  String _pendingSnapshotPath() =>
+      '${store.repository.directory.path}/.github-incoming-${uid()}.sqlite';
+
+  void _discardPending() {
+    final value = pending;
+    pending = null;
+    if (value == null) return;
+    try {
+      final file = File(value.snapshot);
+      if (file.existsSync()) file.deleteSync();
+    } on FileSystemException {
+      // A leftover snapshot is harmless and gets replaced on the next restore.
+    }
+  }
+
   Future<void> restoreGitHub() async {
     final value = pending;
     if (value == null || busy) return;
     if (SyncCodec.fingerprint(store.state) != value.local) {
-      pending = null;
+      _discardPending();
       message = '确认期间本地数据已变化，已停止恢复';
       notifyListeners();
       return;
     }
     busy = true;
+    fileDone = fileTotal = 0;
     notifyListeners();
     try {
+      final api = apiFactory(config, token);
+      final fileKey = await SyncCodec.fileKey(recoveryKey);
+      final invoices = InvoiceRepository(store.repository);
+      final filesNote = await _restoreFiles(api, invoices, value, fileKey);
+      message = '正在恢复任务与发票台账…';
+      notifyListeners();
       if (await store.commit(
         value.backup.copy(
           settings: {
@@ -456,14 +677,20 @@ class SyncService extends ChangeNotifier {
         ),
         '云端数据已恢复',
       )) {
-        pending = null;
+        final count = value.snapshot.isEmpty
+            ? 0
+            : await store.repository.importInvoiceLedger(value.snapshot);
+        _discardPending();
         await _synced();
-        message = '已备份本地并恢复云端数据';
+        fileDone = fileTotal = 0;
+        progress = '';
+        message =
+            '已备份本地并恢复云端数据：${value.backup.tasks.length} 项任务、$count 张发票$filesNote';
       } else {
         message = store.error ?? '恢复失败，请重试';
       }
     } catch (e) {
-      message = SpaceStore.readable(e);
+      message = e is APIError ? e.message : SpaceStore.readable(e);
     } finally {
       busy = false;
       notifyListeners();
@@ -471,7 +698,7 @@ class SyncService extends ChangeNotifier {
   }
 
   void cancelPending() {
-    pending = null;
+    _discardPending();
     message = '已取消恢复，本地数据保持不变';
     notifyListeners();
   }

@@ -89,7 +89,7 @@ class _GitHubSettingsState extends State<GitHubSettings> {
           !await confirm(
             context,
             '同步数据到云端',
-            '将本机完整任务数据上传到此私有仓库，替换当前云端备份。确认继续？',
+            '将本机任务、发票台账、发票原件与附件上传到此私有仓库，替换当前云端备份。确认继续？',
             '同步到云端',
           )) {
         return;
@@ -101,10 +101,14 @@ class _GitHubSettingsState extends State<GitHubSettings> {
       }
       if (download && sync.pending != null && mounted) {
         final backup = sync.pending!.backup;
+        final invoices = sync.pending!.invoices;
         if (await confirm(
           context,
           '恢复云端数据',
-          '已校验 ${backup.tasks.length} 项任务、${backup.projects.length} 个项目和 ${backup.statuses.length} 个状态。恢复前先备份本地；本机外观和连接配置保留。',
+          '已校验 ${backup.tasks.length} 项任务、${backup.projects.length} 个项目和 '
+              '${invoices.invoices} 张发票。'
+              '${invoices.files.isEmpty ? '该备份不含附件文件。' : '将同时下载 ${invoices.files.length} 个发票与附件文件。'}'
+              '恢复前先备份本地；本机外观与连接配置保留，本地台账将改为云端内容。',
           '备份并恢复',
         )) {
           final previousRestore = sync.lastSyncedAt;
@@ -290,6 +294,13 @@ class _GitHubSettingsState extends State<GitHubSettings> {
                 style: textStyle(p, size: 12, color: p.muted),
               ),
             ),
+            const SizedBox(height: 8),
+            indented(
+              Text(
+                '发票原件与附件随同步加密上传，按内容摘要逐个续传，换机恢复时自动校验。',
+                style: textStyle(p, size: 12, color: p.muted),
+              ),
+            ),
             if (date != null) ...[
               const SizedBox(height: 8),
               indented(
@@ -340,7 +351,8 @@ class _GitHubSettingsState extends State<GitHubSettings> {
                         key: const ValueKey('sync-help'),
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
-                          '云端只保存加密任务数据，恢复时需使用相同密钥。恢复前会先备份当前本地任务库。',
+                          '云端保存加密的任务、发票台账与附件文件，恢复时需使用相同密钥。'
+                          '恢复前会先备份当前本地任务库及台账；本地多出的发票记录会被云端内容替换，磁盘上的附件文件保留。',
                           style: textStyle(p, size: 12, color: p.muted),
                         ),
                       )

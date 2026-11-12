@@ -985,92 +985,91 @@ class _LedgerState extends State<_Ledger> {
                       itemBuilder: (context, index) {
                         final entry = items[index], info = entry.info;
                         final checked = session.selected.contains(entry.id);
-                        return AnimatedContainer(
+                        return _LedgerRowTint(
                           key: ValueKey(entry.id),
-                          duration: motion,
-                          curve: spaceCurve,
-                          constraints: const BoxConstraints(minHeight: 56),
-                          decoration: BoxDecoration(
-                            color: checked
-                                ? Color.alphaBlend(p.hover, rowColor)
-                                : rowColor,
-                            border: Border(bottom: BorderSide(color: p.border)),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          child: Row(
-                            children: [
-                              SpaceCheckbox(
-                                label: '选择 ${entry.original.name}',
-                                value: checked,
-                                showLabel: false,
-                                onPressed: session.busy
-                                    ? null
-                                    : () => session.update(() {
-                                        if (checked) {
-                                          session.selected.remove(entry.id);
-                                        } else {
-                                          session.selected.add(entry.id);
-                                        }
-                                      }),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: SpaceButton(
-                                  tooltip: '查看发票详情',
-                                  height: null,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 4,
-                                  ),
+                          selected: checked,
+                          base: rowColor,
+                          motion: motion,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              children: [
+                                SpaceCheckbox(
+                                  label: '选择 ${entry.original.name}',
+                                  value: checked,
+                                  showLabel: false,
                                   onPressed: session.busy
                                       ? null
-                                      : () => showInvoiceDetails(
-                                          context,
-                                          widget.store,
-                                          session,
-                                          entry.id,
-                                        ),
-                                  child: _columns([
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          entry.original.name,
-                                          maxLines: info.number.isEmpty ? 2 : 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: textStyle(p, bold: true),
-                                        ),
-                                        if (info.number.isNotEmpty) ...[
-                                          const SizedBox(height: 4),
-                                          _textCell(info.number),
-                                        ],
-                                      ],
-                                    ),
-                                    _textCell(info.spent),
-                                    _textCell(info.purpose),
-                                    _textCell(
-                                      info.amount,
-                                      align: TextAlign.right,
-                                    ),
-                                    _textCell(info.month),
-                                    _textCell(
-                                      session.projects[info.project] ?? '',
-                                      color: p.purple,
-                                    ),
-                                    _textCell(
-                                      info.reimbursed ? '已报销' : '未报销',
-                                      color: info.reimbursed
-                                          ? p.green
-                                          : p.secondary,
-                                    ),
-                                  ]),
+                                      : () => session.update(() {
+                                          if (checked) {
+                                            session.selected.remove(entry.id);
+                                          } else {
+                                            session.selected.add(entry.id);
+                                          }
+                                        }),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: SpaceButton(
+                                    tooltip: '查看发票详情',
+                                    height: null,
+                                    showHoverBackground: false,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
+                                    onPressed: session.busy
+                                        ? null
+                                        : () => showInvoiceDetails(
+                                            context,
+                                            widget.store,
+                                            session,
+                                            entry.id,
+                                          ),
+                                    child: _columns([
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            entry.original.name,
+                                            maxLines: info.number.isEmpty
+                                                ? 2
+                                                : 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: textStyle(p, bold: true),
+                                          ),
+                                          if (info.number.isNotEmpty) ...[
+                                            const SizedBox(height: 4),
+                                            _textCell(info.number),
+                                          ],
+                                        ],
+                                      ),
+                                      _textCell(info.spent),
+                                      _textCell(info.purpose),
+                                      _textCell(
+                                        info.amount,
+                                        align: TextAlign.right,
+                                      ),
+                                      _textCell(info.month),
+                                      _textCell(
+                                        session.projects[info.project] ?? '',
+                                        color: p.purple,
+                                      ),
+                                      _textCell(
+                                        info.reimbursed ? '已报销' : '未报销',
+                                        color: info.reimbursed
+                                            ? p.green
+                                            : p.secondary,
+                                      ),
+                                    ]),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -1114,6 +1113,55 @@ class _LedgerState extends State<_Ledger> {
         size: 12,
         bold: header,
         color: value.isEmpty ? p.muted : color ?? p.secondary,
+      ),
+    );
+  }
+}
+
+/// 发票台账整行底色：选中与悬停都由整行容器铺满，内部内容不再单独着色。
+class _LedgerRowTint extends StatefulWidget {
+  final bool selected;
+  final Color base;
+  final Duration motion;
+  final Widget child;
+  const _LedgerRowTint({
+    super.key,
+    required this.selected,
+    required this.base,
+    required this.motion,
+    required this.child,
+  });
+
+  @override
+  State<_LedgerRowTint> createState() => _LedgerRowTintState();
+}
+
+class _LedgerRowTintState extends State<_LedgerRowTint> {
+  bool hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    final fill = widget.selected
+        ? Color.alphaBlend(
+            p.accent.withValues(alpha: p.dark ? .22 : .13),
+            widget.base,
+          )
+        : hover
+        ? Color.alphaBlend(p.hover, widget.base)
+        : widget.base;
+    return MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: AnimatedContainer(
+        duration: widget.motion,
+        curve: spaceCurve,
+        constraints: const BoxConstraints(minHeight: 56),
+        decoration: BoxDecoration(
+          color: fill,
+          border: Border(bottom: BorderSide(color: p.border)),
+        ),
+        child: widget.child,
       ),
     );
   }

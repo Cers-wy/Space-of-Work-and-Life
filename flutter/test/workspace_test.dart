@@ -715,8 +715,7 @@ void main() {
     expect(store.state.tasks.length, 9);
     expect(store.error, isNull);
     final titleField = find.byWidgetPredicate(
-      (w) =>
-          w is TextField && w.decoration?.hintText == '下一步要做什么？',
+      (w) => w is TextField && w.decoration?.hintText == '下一步要做什么？',
     );
     expect(titleField, findsOneWidget);
     expect(t.widget<TextField>(titleField).focusNode!.hasFocus, isTrue);

@@ -13,8 +13,14 @@ class DesktopHost {
   static Future<String?> openFile({
     bool multiple = false,
     bool sqliteOnly = false,
-  }) async =>
-      (await openFiles(multiple: multiple, sqliteOnly: sqliteOnly)).firstOrNull;
+    String? title,
+    List<String> extensions = const [],
+  }) async => (await openFiles(
+    multiple: multiple,
+    sqliteOnly: sqliteOnly,
+    title: title,
+    extensions: extensions,
+  )).firstOrNull;
   static Future<List<String>> openFiles({
     bool multiple = true,
     bool sqliteOnly = false,

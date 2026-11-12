@@ -1872,17 +1872,39 @@ class _StatusesState extends State<_Statuses> {
 
 Future<void> importBackup(BuildContext c, SpaceStore s) async {
   try {
-    final path = await DesktopHost.openFile(sqliteOnly: true);
+    final path = await DesktopHost.openFile(
+      title: '导入 Space 备份',
+      extensions: const ['spacepack', 'sqlite', 'sqlite3', 'db'],
+    );
     if (path == null) return;
-    final incoming = await s.readBackup(path);
-    if (c.mounted &&
-        await confirm(
-          c,
-          '导入SQLite',
-          '已校验 ${incoming.tasks.length} 项任务、${incoming.projects.length} 个项目和 ${incoming.statuses.length} 个状态。确认替换当前任务库？当前数据会先保留备份。',
-          '替换并恢复',
-        )) {
-      await s.applyBackup(incoming);
+    final pack = await s.repository.unpackBackup(path);
+    try {
+      final incoming = await s.readBackup(pack.database);
+      if (!c.mounted) return;
+      final detail = pack.files == 0
+          ? '该备份不含发票附件。'
+          : '包含 ${pack.files} 个发票原件与附件文件。';
+      if (await confirm(
+            c,
+            '导入备份',
+            '已校验 ${incoming.tasks.length} 项任务、${incoming.projects.length} 个项目和 '
+                '${incoming.statuses.length} 个状态。$detail确认替换当前任务库与发票台账？'
+                '当前数据会先保留备份。',
+            '替换并恢复',
+          ) &&
+          c.mounted) {
+        if (await s.applyBackup(incoming)) {
+          final invoices = await s.repository.importInvoiceLedger(
+            pack.database,
+          );
+          final files = await s.repository.restorePackFiles(pack);
+          if (files > 0 || invoices > 0) {
+            s.message('备份已恢复：$invoices 张发票、$files 个附件文件');
+          }
+        }
+      }
+    } finally {
+      await s.repository.cleanupBackup(pack);
     }
   } catch (e) {
     s.error = SpaceStore.readable(e);

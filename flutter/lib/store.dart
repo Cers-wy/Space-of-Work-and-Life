@@ -88,6 +88,7 @@ class SpaceStore extends ChangeNotifier {
       ? state.settings['navCollapsed'] == 'true'
       : true;
   bool get hideScrollbars => state.settings['hideScrollbars'] == 'true';
+
   /// 列宽使用连续比例，仅限制在 50%–100%，不再吸附档位。
   double boardWidthRatio(String status) {
     final value = double.tryParse(state.settings['boardWidth.$status'] ?? '');

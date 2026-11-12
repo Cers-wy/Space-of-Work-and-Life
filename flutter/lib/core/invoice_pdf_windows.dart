@@ -118,10 +118,9 @@ class WindowsInvoicePdf {
   static image.Image _picture(Uint8List bytes) {
     final decoded = image.decodeImage(bytes);
     if (decoded == null) throw StateError('无法打开图片');
-    return image.bakeOrientation(decoded).convert(
-      format: image.Format.uint8,
-      numChannels: 4,
-    );
+    return image
+        .bakeOrientation(decoded)
+        .convert(format: image.Format.uint8, numChannels: 4);
   }
 
   static (double, double, double, double) _bounds(
@@ -129,24 +128,40 @@ class WindowsInvoicePdf {
     double width,
     double height,
   ) {
-    var left = raster.width, top = raster.height, right = -1, bottom = -1;
+    final w = raster.width, h = raster.height;
+    // 逐行、逐列投影：零星噪点和极细的页脚小字不参与边界，避免把大片空白算进票面。
+    final rowHits = List<int>.filled(h, 0);
+    final colHits = List<int>.filled(w, 0);
     for (final pixel in raster) {
-      if (pixel.r < 246 || pixel.g < 246 || pixel.b < 246) {
-        left = math.min(left, pixel.x);
-        top = math.min(top, pixel.y);
-        right = math.max(right, pixel.x);
-        bottom = math.max(bottom, pixel.y);
+      if (pixel.r < 242 || pixel.g < 242 || pixel.b < 242) {
+        rowHits[pixel.y] += 1;
+        colHits[pixel.x] += 1;
       }
     }
-    if (right < 0) return (0, 0, width, height);
-    final xScale = width / raster.width, yScale = height / raster.height;
-    final x = math.max(0.0, left * xScale - 4);
-    final y = math.max(0.0, height - (bottom + 1) * yScale - 4);
+    final rowFloor = math.max(2, w ~/ 100);
+    final colFloor = math.max(2, h ~/ 100);
+    int? firstRow, lastRow, firstCol, lastCol;
+    for (var y = 0; y < h; y++) {
+      if (rowHits[y] >= rowFloor) {
+        firstRow ??= y;
+        lastRow = y;
+      }
+    }
+    for (var x = 0; x < w; x++) {
+      if (colHits[x] >= colFloor) {
+        firstCol ??= x;
+        lastCol = x;
+      }
+    }
+    if (firstRow == null || firstCol == null) return (0, 0, width, height);
+    final xScale = width / w, yScale = height / h;
+    final x = math.max(0.0, firstCol * xScale - 2);
+    final y = math.max(0.0, height - (lastRow! + 1) * yScale - 2);
     return (
       x,
       y,
-      math.min(width, (right + 1) * xScale + 4) - x,
-      math.min(height, height - top * yScale + 4) - y,
+      math.min(width, (lastCol! + 1) * xScale + 2) - x,
+      math.min(height, height - firstRow * yScale + 2) - y,
     );
   }
 

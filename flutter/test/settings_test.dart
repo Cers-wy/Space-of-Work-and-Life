@@ -183,6 +183,7 @@ void main() {
     expect(api.uploads, 1);
     await store.commit(store.state.copy(tasks: []), '清空合成数据');
     await sync.transfer(download: true);
+    expect(sync.pending, isNotNull, reason: sync.message);
     expect(sync.pending!.backup.tasks.length, 9);
     await sync.restoreGitHub();
     expect(SyncCodec.fingerprint(store.state), fingerprint);
@@ -366,12 +367,15 @@ void main() {
     await t.tap(find.widgetWithText(SettingsAction, '选择文件'));
     await t.pumpAndSettle();
     expect(calls.singleWhere((c) => c.method == 'saveFile').arguments, {
-      'name': 'Space备份.sqlite',
-      'sqliteOnly': true,
+      'name': 'Space备份.spacepack',
+      'sqliteOnly': false,
+      'title': '导出备份包',
     });
     expect(calls.singleWhere((c) => c.method == 'openFiles').arguments, {
       'multiple': false,
-      'sqliteOnly': true,
+      'sqliteOnly': false,
+      'title': '导入 Space 备份',
+      'extensions': ['spacepack', 'sqlite', 'sqlite3', 'db'],
     });
     expect(
       await t.runAsync(() => File(store.repository.path).readAsBytes()),

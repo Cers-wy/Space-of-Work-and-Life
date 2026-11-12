@@ -28,16 +28,17 @@ class InvoiceLayout {
   static const pointPerMillimeter = 72 / 25.4;
   final bool landscape, cutLines;
   final int perPage;
-  final double top, right, bottom, left;
+  final double top, right, bottom, left, gap;
 
   const InvoiceLayout({
     this.landscape = false,
     this.cutLines = true,
     this.perPage = 2,
-    this.top = 0,
-    this.right = 0,
-    this.bottom = 0,
-    this.left = 0,
+    this.top = 5,
+    this.right = 5,
+    this.bottom = 5,
+    this.left = 5,
+    this.gap = 10,
   });
 
   double get width => (landscape ? 297 : 210) * pointPerMillimeter;
@@ -52,11 +53,12 @@ class InvoiceLayout {
         bottomPt = bottom * pointPerMillimeter;
     final usableW = width - (left + right) * pointPerMillimeter;
     final usableH = height - (top + bottom) * pointPerMillimeter;
-    if ([top, right, bottom, left].any((v) => !v.isFinite || v < 0) ||
+    if ([top, right, bottom, left, gap].any((v) => !v.isFinite || v < 0) ||
         usableW < 10 * pointPerMillimeter ||
         usableH < 10 * pointPerMillimeter) {
-      throw StateError('边距需为非负数字，纸张至少保留 10 × 10 mm 的排版区域');
+      throw StateError('边距与票间距需为非负数字，纸张至少保留 10 × 10 mm 的排版区域');
     }
+    final gapPt = gap * pointPerMillimeter;
     final columns = perPage == 4
         ? 2
         : landscape
@@ -68,53 +70,84 @@ class InvoiceLayout {
         ? 1
         : perPage;
 
+    // 按「满格」计算槽位，末页发票数量不足时沿用同样大小，避免跨页尺寸跳变。
+    final slotW = (usableW - (columns - 1) * gapPt) / columns;
+    final slotH = (usableH - (rows - 1) * gapPt) / rows;
+    if (slotW < 10 * pointPerMillimeter || slotH < 10 * pointPerMillimeter) {
+      throw StateError('票间距或边距过大，当前纸张放不下这么多发票');
+    }
+
     Map<String, Object> sheet(
       List<InvoiceSourcePage> sources, {
       bool attachment = false,
     }) {
       final cols = attachment ? 1 : columns;
-      final rowCount = attachment ? 1 : rows;
-      final slotW = usableW / cols;
-      final slotH = usableH / rowCount;
+      final cellW = attachment ? usableW : slotW;
+      final cellH = attachment ? usableH : slotH;
+      // 同一页统一比例：所有发票按最小可用比例缩放，保持字号与票面一致。
+      var scale = double.infinity;
+      for (final s in sources) {
+        scale = math.min(scale, math.min(cellW / s.width, cellH / s.height));
+      }
+      if (!scale.isFinite || scale <= 0) scale = 1;
+      final usedRows = (sources.length + cols - 1) ~/ cols;
+      final heights = <double>[];
+      for (var r = 0; r < usedRows; r++) {
+        var rowHeight = 0.0;
+        for (var c = 0; c < cols; c++) {
+          final i = r * cols + c;
+          if (i < sources.length) {
+            rowHeight = math.max(rowHeight, sources[i].height * scale);
+          }
+        }
+        heights.add(rowHeight);
+      }
+      final contentH =
+          heights.fold<double>(0, (a, b) => a + b) +
+          math.max(0, usedRows - 1) * gapPt;
+      // 内容整体在可用区域内垂直居中，余量平均分给上下两侧。
+      var cursor = bottomPt + (usableH + contentH) / 2;
+      final startTop = cursor;
       final slots = <Map<String, Object>>[];
-      for (var i = 0; i < sources.length; i++) {
-        final s = sources[i];
-        final scale = math.min(slotW / s.width, slotH / s.height);
-        final w = s.width * scale, h = s.height * scale;
-        slots.add({
-          'path': s.path,
-          'page': s.page,
-          'crop': [s.x, s.y, s.width, s.height],
-          'rect': [
-            leftPt + i % cols * slotW + (slotW - w) / 2,
-            bottomPt + (rowCount - i ~/ cols) * slotH - h,
-            w,
-            h,
-          ],
-        });
+      for (var r = 0; r < usedRows; r++) {
+        final rowBottom = cursor - heights[r];
+        for (var c = 0; c < cols; c++) {
+          final i = r * cols + c;
+          if (i >= sources.length) continue;
+          final s = sources[i];
+          final w = s.width * scale, h = s.height * scale;
+          slots.add({
+            'path': s.path,
+            'page': s.page,
+            'crop': [s.x, s.y, s.width, s.height],
+            'rect': [
+              leftPt + c * (slotW + gapPt) + (cellW - w) / 2,
+              rowBottom + (heights[r] - h) / 2,
+              w,
+              h,
+            ],
+          });
+        }
+        cursor = rowBottom - gapPt;
+      }
+      final lines = <List<double>>[];
+      if (cutLines && !attachment && sources.length > 1) {
+        // 虚线落在相邻两张票之间的空白中线上，便于对折裁剪。
+        var y = startTop;
+        for (var r = 0; r < usedRows - 1; r++) {
+          y -= heights[r] + gapPt / 2;
+          lines.add([leftPt, y, leftPt + usableW, y]);
+        }
+        for (var c = 1; c < cols; c++) {
+          final x = leftPt + c * (slotW + gapPt) - gapPt / 2;
+          lines.add([x, bottomPt, x, bottomPt + usableH]);
+        }
       }
       return {
         'width': width,
         'height': height,
         'slots': slots,
-        'lines': [
-          if (cutLines && !attachment) ...[
-            for (var i = 1; i < cols; i++)
-              [
-                leftPt + i * slotW,
-                bottomPt,
-                leftPt + i * slotW,
-                bottomPt + usableH,
-              ],
-            for (var i = 1; i < rowCount; i++)
-              [
-                leftPt,
-                bottomPt + i * slotH,
-                leftPt + usableW,
-                bottomPt + i * slotH,
-              ],
-          ],
-        ],
+        'lines': lines,
       };
     }
 

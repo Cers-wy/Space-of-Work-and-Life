@@ -90,6 +90,90 @@ class SyncCodec {
   }
 
   static final passphraseHeader = utf8.encode('SPACE-GITHUB-2\n');
+
+  /// 自 2.3.1 起云端直接保存加密数据库，任务与发票台账一次还原。
+  /// 旧版 `SPACE-GITHUB-1/2` 备份仍按状态 JSON 读取。
+  static final databaseHeader = utf8.encode('SPACE-GITHUB-3\n');
+  static bool isDatabasePackage(List<int> bytes) =>
+      bytes.length > databaseHeader.length &&
+      utf8.decode(
+            bytes.take(databaseHeader.length).toList(),
+            allowMalformed: true,
+          ) ==
+          utf8.decode(databaseHeader);
+
+  static Future<Uint8List> databaseSeal(List<int> database, String key) async {
+    validateGitHubKey(key);
+    final legacy = _legacyKey(key);
+    // 数据库包恒用独立魔术头，避免与旧版状态 JSON 信封混淆；
+    // 是否带 16 字节盐由密钥形态决定（Base64 旧密钥不加盐）。
+    final salt = legacy == null
+        ? List.generate(16, (_) => Random.secure().nextInt(256))
+        : <int>[];
+    final prefix = [...databaseHeader, ...salt];
+    final bytes = Uint8List.fromList([
+      ...prefix,
+      ...await _seal(
+        database,
+        legacy ?? await _passphraseKey(key, salt),
+        aad: prefix,
+      ),
+    ]);
+    if (bytes.length > 96 * 1024 * 1024) invalid('云端数据库备份超过96 MB');
+    return bytes;
+  }
+
+  static Future<Uint8List> databaseOpen(List<int> bytes, String key) async {
+    if (!isDatabasePackage(bytes)) invalid('不是有效的云端数据库备份');
+    final legacy = _legacyKey(key);
+    final offset = databaseHeader.length + (legacy == null ? 16 : 0);
+    if (bytes.length < offset + 28) invalid('云端备份不完整');
+    final secret =
+        legacy ??
+        await _passphraseKey(key, bytes.sublist(databaseHeader.length, offset));
+    return _open(bytes.sublist(offset), secret, aad: bytes.sublist(0, offset));
+  }
+
+  /// 发票原件与附件使用独立加密包，可与数据库快照分开上传、校验与续传。
+  static final fileHeader = utf8.encode('SPACE-FILE-1\n');
+  static final List<int> fileSalt = sha256
+      .convert(utf8.encode('Space encrypted attachment v1'))
+      .bytes
+      .sublist(0, 16);
+  static final _fileKeys = <String, List<int>>{};
+
+  /// 同一恢复密钥只做一次 PBKDF2，之后按文件复用，避免逐个文件重复派生。
+  static Future<List<int>> fileKey(String value) async {
+    final key = value.trim();
+    final cached = _fileKeys[key];
+    if (cached != null) return cached;
+    final legacy = _legacyKey(key);
+    final derived = legacy ?? await _passphraseKey(key, fileSalt);
+    if (_fileKeys.length > 4) _fileKeys.clear();
+    _fileKeys[key] = derived;
+    return derived;
+  }
+
+  static Future<Uint8List> fileSeal(List<int> bytes, List<int> key) async {
+    if (bytes.isEmpty || bytes.length > 32 * 1024 * 1024) {
+      invalid('附件为空或超过32 MB');
+    }
+    return Uint8List.fromList([
+      ...fileHeader,
+      ...await _seal(bytes, key, aad: fileHeader),
+    ]);
+  }
+
+  static Future<Uint8List> fileOpen(List<int> bytes, List<int> key) async {
+    if (bytes.length < fileHeader.length + 28) invalid('加密附件不完整');
+    final magic = utf8.decode(
+      bytes.take(fileHeader.length).toList(),
+      allowMalformed: true,
+    );
+    if (magic != utf8.decode(fileHeader)) invalid('不是有效的加密附件');
+    return _open(bytes.sublist(fileHeader.length), key, aad: fileHeader);
+  }
+
   static Future<Uint8List> githubSeal(SpaceState state, String key) async {
     validateGitHubKey(key);
     final legacy = _legacyKey(key);

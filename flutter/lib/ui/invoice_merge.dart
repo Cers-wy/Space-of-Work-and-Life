@@ -41,18 +41,30 @@ class InvoiceMergeEditor extends StatefulWidget {
 typedef _MergeInput = ({
   String path,
   String name,
+  String issued,
   List<InvoiceFile> attachments,
 });
+
+/// 一式两份：每个票面连续出现两次，配合每页 2 张即可得到同页两联。
+List<InvoiceSourcePage> duplicateForDoubleCopy(
+  List<InvoiceSourcePage> sources,
+  bool enabled,
+) => [
+  for (final s in sources) ...[s, if (enabled) s],
+];
 
 class _MergeEditorState extends State<InvoiceMergeEditor> {
   final inputs = <_MergeInput>[];
   final sourcePages = <String, List<InvoiceSourcePage>>{};
   final attachmentPages = <String, List<InvoiceSourcePage>>{};
-  final margin = [for (var i = 0; i < 4; i++) TextEditingController(text: '0')];
+  final margin = [for (var i = 0; i < 4; i++) TextEditingController(text: '5')];
+  final gap = TextEditingController(text: '10');
   List<Map<String, Object>> sheets = [];
   bool busy = false, reading = false, dragging = false, landscape = false;
-  bool cutLines = true, includeAttachments = false;
+  bool cutLines = true, includeAttachments = false, doubleCopy = false;
+  String sortBy = 'default';
   int perPage = 2, current = 0, previewRevision = 0;
+  int? perPageBeforeDouble;
   String? error, feedback, layoutError, previewError;
   Uint8List? preview;
   Timer? timer;
@@ -61,7 +73,32 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
   bool get canWork => !busy && !reading;
   bool get ready => canWork && sheets.isNotEmpty && layoutError == null;
   bool get hasAttachments => inputs.any((f) => f.attachments.isNotEmpty);
+
+  /// 排序同时作用于来源列表与合并后的票面顺序。
+  List<_MergeInput> get orderedInputs {
+    final list = [...inputs];
+    if (sortBy == 'date') {
+      list.sort((a, b) {
+        final x = a.issued.isEmpty ? '9999-99-99' : a.issued;
+        final y = b.issued.isEmpty ? '9999-99-99' : b.issued;
+        final byDate = x.compareTo(y);
+        return byDate != 0 ? byDate : a.name.compareTo(b.name);
+      });
+    } else if (sortBy == 'name') {
+      list.sort((a, b) => a.name.compareTo(b.name));
+    }
+    return list;
+  }
+
+  int get sourceCount =>
+      orderedInputs.fold(0, (n, f) => n + (sourcePages[f.path]?.length ?? 1));
+
+  String get perPageLabel => doubleCopy ? '2 张（一式两份）' : '$perPage 张';
+
+  String get summary =>
+      '$sourceCount 张发票 · 每页 $perPageLabel · ${sheets.length} 张 A4';
   double _margin(int i) => double.tryParse(margin[i].text.trim()) ?? double.nan;
+  double get _gap => double.tryParse(gap.text.trim()) ?? double.nan;
   InvoiceLayout get layout => InvoiceLayout(
     landscape: landscape,
     cutLines: cutLines,
@@ -70,6 +107,7 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
     right: _margin(1),
     bottom: _margin(2),
     left: _margin(3),
+    gap: _gap,
   );
 
   @override
@@ -81,6 +119,7 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
           (e) => (
             path: e.original.path,
             name: e.original.name,
+            issued: e.info.issued,
             attachments: e.attachments,
           ),
         ),
@@ -97,6 +136,7 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
     for (final m in margin) {
       m.dispose();
     }
+    gap.dispose();
     super.dispose();
   }
 
@@ -130,6 +170,7 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
       inputs.add((
         path: path,
         name: Uri.file(path).pathSegments.last,
+        issued: '',
         attachments: const [],
       ));
     }
@@ -186,10 +227,13 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
               .any((a) => !attachmentPages.containsKey(a.path))) {
         throw StateError('有附件无法读取。可关闭打印附件，或返回台账检查附件');
       }
+      final ordered = orderedInputs;
       sheets = layout.arrange(
-        inputs.expand((f) => sourcePages[f.path]!).toList(),
+        duplicateForDoubleCopy([
+          for (final f in ordered) ...sourcePages[f.path]!,
+        ], doubleCopy),
         includeAttachments
-            ? inputs
+            ? ordered
                   .expand((f) => f.attachments)
                   .expand((a) => attachmentPages[a.path]!)
                   .toList()
@@ -282,10 +326,7 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
                 ? '正在读取文件…'
                 : busy
                 ? '正在处理…'
-                : error ??
-                      layoutError ??
-                      feedback ??
-                      '${inputs.length} 个来源 · ${sheets.length} 页 A4',
+                : error ?? layoutError ?? feedback ?? summary,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: textStyle(
@@ -367,9 +408,9 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(8),
-                    itemCount: inputs.length,
+                    itemCount: orderedInputs.length,
                     itemBuilder: (context, index) {
-                      final f = inputs[index];
+                      final f = orderedInputs[index];
                       return Container(
                         constraints: const BoxConstraints(minHeight: 48),
                         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -402,7 +443,9 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
                               onPressed: !canWork
                                   ? null
                                   : () => setState(() {
-                                      inputs.removeAt(index);
+                                      inputs.removeWhere(
+                                        (item) => item.path == f.path,
+                                      );
                                       error = feedback = null;
                                       arrange();
                                     }),
@@ -513,6 +556,79 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
     schedulePreview();
   });
 
+  /// 排版方式用网格示意直接选择，横向与纵向的槽位方向随纸张方向变化。
+  Widget _layoutButton(Palette p, int count) {
+    final selected = perPage == count;
+    final columns = count == 4 ? 2 : (landscape ? count : 1);
+    final rows = count == 4 ? 2 : (landscape ? 1 : count);
+    final color = selected ? p.accent : p.secondary;
+    return Expanded(
+      child: SpaceButton(
+        key: ValueKey('merge-layout-$count'),
+        height: 64,
+        soft: true,
+        selected: selected,
+        tooltip: doubleCopy ? '一式两份固定每页 2 张' : '$count 张 / 页',
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        onPressed: doubleCopy || !canWork
+            ? null
+            : () => setState(() {
+                perPage = count;
+                arrange();
+              }),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 42,
+              height: 28,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: p.card.withValues(alpha: p.dark ? .30 : .60),
+                borderRadius: BorderRadius.circular(3),
+                border: Border.all(color: selected ? p.accent : p.border),
+              ),
+              child: Column(
+                children: [
+                  for (var r = 0; r < rows; r++) ...[
+                    if (r > 0) const SizedBox(height: 2),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          for (var c = 0; c < columns; c++) ...[
+                            if (c > 0) const SizedBox(width: 2),
+                            Expanded(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: color.withValues(alpha: .16),
+                                  border: Border.all(color: color, width: 1),
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '$count 张',
+              style: textStyle(
+                p,
+                size: 10,
+                color: selected ? p.accent : p.muted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget settings() {
     final p = Palette.of(context);
     return Glass(
@@ -524,6 +640,8 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
           padding: const EdgeInsets.all(12),
           children: [
             Text('排版设置', style: textStyle(p, bold: true)),
+            const SizedBox(height: 4),
+            Text(summary, style: textStyle(p, size: 11, color: p.muted)),
             const SizedBox(height: 10),
             field(
               context,
@@ -539,15 +657,30 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
               ),
             ),
             const SizedBox(height: 10),
+            Text('排版方式', style: textStyle(p, bold: true)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                for (var count = 1; count <= 4; count++) ...[
+                  if (count > 1) const SizedBox(width: 8),
+                  _layoutButton(p, count),
+                ],
+              ],
+            ),
+            const SizedBox(height: 10),
             field(
               context,
-              '每页发票数',
+              '排序设置',
               SpaceSelect(
-                value: '$perPage',
-                label: '每页发票数',
-                options: {for (var i = 1; i <= 4; i++) '$i': '$i 张 / 页'},
+                value: sortBy,
+                label: '排序设置',
+                options: const {
+                  'default': '按添加顺序',
+                  'date': '按开票日期',
+                  'name': '按文件名',
+                },
                 onChanged: (v) => setState(() {
-                  perPage = int.parse(v);
+                  sortBy = v;
                   arrange();
                 }),
               ),
@@ -579,10 +712,39 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
               ),
               const SizedBox(height: 6),
             ],
+            field(
+              context,
+              '票间距（mm）',
+              SpaceInput(
+                controller: gap,
+                label: '票间距',
+                onChanged: (_) => setState(arrange),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SpaceCheckbox(
+              label: '一式两份',
+              description: '一张 A4 纸打印两张相同发票',
+              value: doubleCopy,
+              onPressed: !canWork
+                  ? null
+                  : () => setState(() {
+                      doubleCopy = !doubleCopy;
+                      if (doubleCopy) {
+                        perPageBeforeDouble = perPage;
+                        perPage = 2;
+                        cutLines = true;
+                      } else {
+                        perPage = perPageBeforeDouble ?? 2;
+                      }
+                      arrange();
+                    }),
+            ),
             SpaceCheckbox(
               label: '显示裁剪虚线',
+              description: doubleCopy ? '一式两份时自动显示' : null,
               value: cutLines,
-              onPressed: !canWork
+              onPressed: doubleCopy || !canWork
                   ? null
                   : () => setState(() {
                       cutLines = !cutLines;

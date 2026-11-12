@@ -750,7 +750,9 @@ class _SpaceTextButtonState extends State<SpaceTextButton> {
       enabled: enabled,
       onShowFocusHighlight: (v) => setState(() => focused = v),
       onShowHoverHighlight: (v) => setState(() => hover = v),
-      mouseCursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      mouseCursor: enabled
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       actions: {
         ActivateIntent: CallbackAction<ActivateIntent>(
           onInvoke: (_) {
@@ -789,10 +791,7 @@ class _SpaceTextButtonState extends State<SpaceTextButton> {
                   SpaceIcon(widget.icon!, size: 14, color: color),
                   const SizedBox(width: 6),
                 ],
-                Text(
-                  widget.label,
-                  style: textStyle(p, size: 13, color: color),
-                ),
+                Text(widget.label, style: textStyle(p, size: 13, color: color)),
               ],
             ),
           ),
@@ -966,6 +965,10 @@ class SpaceCheckbox extends StatelessWidget {
   final String label;
   final String? description;
   final bool showLabel;
+
+  /// 表单内联布局：把最小高度收到与单行输入控件一致，去掉上下留白。
+  /// 列表、弹窗等原有用法保持默认的宽松尺寸。
+  final bool dense;
   final VoidCallback? onPressed;
 
   const SpaceCheckbox({
@@ -974,6 +977,7 @@ class SpaceCheckbox extends StatelessWidget {
     required this.label,
     this.description,
     this.showLabel = true,
+    this.dense = false,
     this.onPressed,
   });
 
@@ -1046,10 +1050,14 @@ class SpaceCheckbox extends StatelessWidget {
               ? ExcludeSemantics(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: description == null ? 48 : 56,
+                      minHeight: dense
+                          ? 32
+                          : description == null
+                          ? 48
+                          : 56,
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      padding: EdgeInsets.symmetric(vertical: dense ? 0 : 4),
                       child: Row(
                         children: [
                           indicator,
@@ -1063,6 +1071,7 @@ class SpaceCheckbox extends StatelessWidget {
                                   label,
                                   style: textStyle(
                                     p,
+                                    size: dense ? 12 : 14,
                                     color: enabled ? p.text : p.muted,
                                   ),
                                 ),
@@ -1859,14 +1868,22 @@ class _BoardResizeHandleState extends State<BoardResizeHandle> {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // 仅列头高度内的 1 像素竖线，指针离开即消失。
+              // 提示线贴合列标题栏右边界，按 8 像素圆角同样收边。
               Positioned(
-                right: 3,
+                right: 0,
                 top: 0,
                 bottom: 0,
-                width: 2,
-                child: ColoredBox(
-                  color: hover || dragging ? p.accent : Colors.transparent,
+                width: 3,
+                child: IgnorePointer(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.horizontal(
+                      right: Radius.circular(8),
+                    ),
+                    child: ColoredBox(
+                      key: const ValueKey('board-resize-line'),
+                      color: hover || dragging ? p.accent : Colors.transparent,
+                    ),
+                  ),
                 ),
               ),
               if (dragging)

@@ -236,23 +236,34 @@ enum SpaceInvoicePDF {
     if case .image = page { return page.box }
     let (context, scale) = try raster(page.box, limit: 560) { page.draw(in: $0) }
     guard let bytes = context.data?.assumingMemoryBound(to: UInt8.self) else { return page.box }
-    var minX = context.width, minY = context.height, maxX = -1, maxY = -1
-    for row in 0..<context.height {
+    let width = context.width, height = context.height
+    // 先用逐行、逐列投影找出真实票面：零星噪点、极细的页脚小字不参与边界计算，
+    // 否则会像整页排版那样把大片空白算进发票高度，票面被压小。
+    var rowHits = [Int](repeating: 0, count: height)
+    var colHits = [Int](repeating: 0, count: width)
+    for row in 0..<height {
       let pixels = bytes + row * context.bytesPerRow
-      for x in 0..<context.width {
+      for x in 0..<width {
         let p = pixels + x * 4
-        if p[0] < 246 || p[1] < 246 || p[2] < 246 {
-          minX = min(minX, x)
-          maxX = max(maxX, x)
-          minY = min(minY, row)
-          maxY = max(maxY, row)
+        if p[0] < 242 || p[1] < 242 || p[2] < 242 {
+          rowHits[row] += 1
+          colHits[x] += 1
         }
       }
     }
-    guard maxX >= minX, maxY >= minY else { return page.box }
-    let bounds = CGRect(x: CGFloat(minX) / scale, y: CGFloat(context.height - maxY - 1) / scale,
-                        width: CGFloat(maxX - minX + 1) / scale, height: CGFloat(maxY - minY + 1) / scale)
-    return page.box.intersection(bounds.insetBy(dx: -4, dy: -4))
+    let rowFloor = max(2, width / 100)
+    let colFloor = max(2, height / 100)
+    let rows = (0..<height).filter { rowHits[$0] >= rowFloor }
+    let columns = (0..<width).filter { colHits[$0] >= colFloor }
+    guard let firstRow = rows.first, let lastRow = rows.last,
+          let firstColumn = columns.first, let lastColumn = columns.last else {
+      return page.box
+    }
+    let bounds = CGRect(x: CGFloat(firstColumn) / scale,
+                        y: CGFloat(height - lastRow - 1) / scale,
+                        width: CGFloat(lastColumn - firstColumn + 1) / scale,
+                        height: CGFloat(lastRow - firstRow + 1) / scale)
+    return page.box.intersection(bounds.insetBy(dx: -2, dy: -2))
   }
 
   private static func printPDF(_ a: [String: Any]) throws {

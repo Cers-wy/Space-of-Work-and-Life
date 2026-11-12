@@ -888,6 +888,7 @@ class _WorkspaceState extends State<Workspace> {
     );
   }
 
+  /// 标题栏分类标签只用来快速筛选，始终保持常态外观，不显示选中态。
   Widget categoryCounts() => ConstrainedBox(
     constraints: const BoxConstraints(maxWidth: 280),
     child: SingleChildScrollView(
@@ -897,10 +898,12 @@ class _WorkspaceState extends State<Workspace> {
         children: [
           for (final k in s.state.taskCategories.keys)
             SpaceButton(
+              key: ValueKey('category-quick-$k'),
               height: 24,
               padding: const EdgeInsets.all(4),
-              selected: s.query.categoryIDs.contains(k),
-              tooltip: '快速筛选${s.state.taskCategories[k]}',
+              tooltip:
+                  '快速筛选${s.state.taskCategories[k]}'
+                  '${s.query.categoryIDs.contains(k) ? '（已筛选）' : ''}',
               onPressed: () {
                 if (!s.query.categoryIDs.remove(k)) s.query.categoryIDs.add(k);
                 s.refreshQuery();
@@ -909,7 +912,6 @@ class _WorkspaceState extends State<Workspace> {
                 k,
                 name: s.state.taskCategories[k],
                 count: s.state.tasks.where((t) => t.category == k).length,
-                selected: s.query.categoryIDs.contains(k),
               ),
             ),
         ],
@@ -1186,68 +1188,70 @@ class _WorkspaceState extends State<Workspace> {
                                 .status(status)
                                 .withValues(alpha: p.dark ? 0.07 : .05),
                       child: Row(
-                    children: [
-                      Draggable<_StatusDrag>(
-                        data: _StatusDrag(status),
-                        feedback: Material(
-                          color: Colors.transparent,
-                          child: Glass(
-                            padding: const EdgeInsets.all(12),
-                            child: Text(
-                              statusName(status),
-                              style: textStyle(p, bold: true),
+                        children: [
+                          Draggable<_StatusDrag>(
+                            data: _StatusDrag(status),
+                            feedback: Material(
+                              color: Colors.transparent,
+                              child: Glass(
+                                padding: const EdgeInsets.all(12),
+                                child: Text(
+                                  statusName(status),
+                                  style: textStyle(p, bold: true),
+                                ),
+                              ),
+                            ),
+                            child: Tooltip(
+                              message: '拖动排序：${statusName(status)}',
+                              child: const SizedBox(
+                                width: 24,
+                                height: 28,
+                                child: Center(
+                                  child: SpaceIcon('menu', size: 12),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        child: Tooltip(
-                          message: '拖动排序：${statusName(status)}',
-                          child: const SizedBox(
-                            width: 24,
-                            height: 28,
-                            child: Center(child: SpaceIcon('menu', size: 12)),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: p.status(status),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Tooltip(
-                          message:
-                              '${statusName(status)}${disabled ? ' · 已停用' : ''}',
-                          child: Text(
-                            '${statusName(status)}${disabled ? ' · 已停用' : ''}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: textStyle(
-                              p,
-                              size: 12,
-                              bold: true,
-                              color: disabled ? p.amber : null,
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: p.status(status),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${tasks.length}',
-                        style: textStyle(p, size: 12, color: p.muted),
-                      ),
-                      IconButtonS(
-                        'plus',
-                        '在${statusName(status)}中新建任务',
-                        size: 28,
-                        onPressed: disabled
-                            ? null
-                            : () => newTask(status: status),
-                      ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Tooltip(
+                              message:
+                                  '${statusName(status)}${disabled ? ' · 已停用' : ''}',
+                              child: Text(
+                                '${statusName(status)}${disabled ? ' · 已停用' : ''}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textStyle(
+                                  p,
+                                  size: 12,
+                                  bold: true,
+                                  color: disabled ? p.amber : null,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${tasks.length}',
+                            style: textStyle(p, size: 12, color: p.muted),
+                          ),
+                          IconButtonS(
+                            'plus',
+                            '在${statusName(status)}中新建任务',
+                            size: 28,
+                            onPressed: disabled
+                                ? null
+                                : () => newTask(status: status),
+                          ),
                         ],
                       ),
                     ),

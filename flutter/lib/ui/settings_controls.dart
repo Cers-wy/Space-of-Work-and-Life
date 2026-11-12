@@ -166,12 +166,13 @@ class _SettingsActionState extends State<SettingsAction> {
         ),
       ),
     );
-    if (w.tooltip != null)
+    if (w.tooltip != null) {
       button = Tooltip(
         message: w.tooltip!,
         excludeFromSemantics: true,
         child: button,
       );
+    }
     return button;
   }
 }
