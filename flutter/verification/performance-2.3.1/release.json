@@ -1,0 +1,32 @@
+{
+  "release": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.1",
+  "tag": "v2.3.1",
+  "targetCommit": "d66bd91bf605ddd36af6c9a6ed610e4b88e38d58",
+  "publishedMacOSAssets": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 282,
+      "digest": "sha256:6057e3f816618b65fd4867525d17c0d73c56a79a0cad88142b5504ceaafb9d48",
+      "download": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.1/SHA256SUMS.txt"
+    },
+    {
+      "name": "Space-2.3.1-macOS-arm64.dmg",
+      "size": 34247767,
+      "digest": "sha256:9316b0a147e90c40dc650fa18915b5fc04aca05b41e25ee7f9c61fc7ceb1747b",
+      "download": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.1/Space-2.3.1-macOS-arm64.dmg"
+    },
+    {
+      "name": "Space-2.3.1-macOS-arm64.zip",
+      "size": 30706419,
+      "digest": "sha256:ba75236fa3099b90710dccd7727fd4c2c1ed10ceeb37e8361870aebab60d1ce8",
+      "download": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.1/Space-2.3.1-macOS-arm64.zip"
+    }
+  ],
+  "anonymousDownloadHEAD": 200,
+  "windowsPublication": "manual by user; not uploaded",
+  "oldReleaseRecordsPreserved": true,
+  "supersededAssetsRemoved": [
+    "Space-2.2.0-macOS-arm64.dmg",
+    "Space-2.2.0-Windows-x64-Portable.zip"
+  ]
+}

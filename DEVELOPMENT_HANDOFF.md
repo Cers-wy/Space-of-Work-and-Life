@@ -4,10 +4,11 @@
 
 ## 当前状态与唯一源码
 
-- 后续只在本项目根目录下的 `flutter/` 迭代，最终分支为 `main`。版本和提交以 `git status --short --branch`、`git log -1 --oneline` 为准。应用运行代码提交为 `43884e7b`，后续交付提交只增加探针、验收记录及文档，不改变两端包的应用代码。
-- Git远端：`https://github.com/Cers-wy/Space-of-Work-and-Life.git`。本轮将2.3.1快进合入main，删除已经合并的2.3.0、2.3.1开发分支；正常提交历史与历史标签保留，不强制推送或重写历史。
+- 后续只在本项目根目录下的 `flutter/` 迭代，当前唯一分支为 `main`。版本和提交以 `git status --short --branch`、`git log -1 --oneline` 为准。应用运行代码提交为 `43884e7b`，后续交付提交只增加探针、验收记录及文档，不改变两端包的应用代码。
+- Git远端：`https://github.com/Cers-wy/Space-of-Work-and-Life.git`。本轮已将2.3.1快进合入main，删除已经合并的2.3.0、2.3.1开发分支；正常提交历史与历史标签保留，不强制推送或重写历史。
 - 本地分发文件统一放 `downloads/`，仅保留最新macOS DMG、ZIP及Windows完整便携ZIP；校验见 [SHA256SUMS.txt](downloads/SHA256SUMS.txt)。安装包使用Release资产分发，不提交二进制到Git历史。
 - macOS正式包采用 `lib/main.dart` 构建，无演示/性能探针入口；已做ZIP CRC、DMG校验、临时签名深度验证及挂载后隔离启动。签名为ad-hoc，未经Developer ID公证。
+- [v2.3.1 Release](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.1) 已发布macOS DMG、ZIP和SHA256，服务端哈希与本地一致，三个匿名下载链接均返回200。旧2.2.0资产已替换，历史Release记录保留。标签指向 `d66bd91b`；其后main只追加发布核验和清理记录。
 - Windows构建来源：GitHub Actions [43157693057](https://github.com/Cers-wy/Space-of-Work-and-Life/actions/runs/43157693057)，提交 `43884e7bb4b24f2c9359bfbd47a886f0ac3f92d2`，Release x64。完整ZIP的SHA256、CRC、x64 PE、PDFium及运行库结构已核验；用户Windows实机测试与手动发布待完成。
 
 ## 本轮实现及用户确认
@@ -51,7 +52,7 @@ PUB_CACHE="$space_sdk/pub-cache" "$space_sdk/flutter/bin/flutter" run -d macos \
 
 运行测试时清除HTTP_PROXY/HTTPS_PROXY/ALL_PROXY及小写对应变量，避免flutter_tester WebSocket受代理干扰。性能探针用法见性能报告；探针包绝不能发给用户，测后重建生产入口。
 
-Windows安装Flutter3.47.9与Visual Studio C++桌面开发工具，参考 `.github/workflows/windows-build.yml`；工作流仅构建并保存artifact，不自动发布Release。用户拿完整ZIP解压运行Space.exe，测试时选隔离数据，验证两张票据的预览、裁边、二维码/印章、单张靠上、双张间距、100票输出、系统打印及资源回收。Windows尚未验证是本轮用户明确安排，不是已通过事项。
+Windows安装Flutter3.47.9与Visual Studio C++桌面开发工具，参考 `.github/workflows/windows-build.yml`；工作流仅构建并保存artifact，不自动发布Release。用户拿完整ZIP解压运行Space.exe，测试时选隔离数据，验证两张票据的预览、裁边、二维码/印章、单张靠上、双张间距、100票输出、系统打印及资源回收。Windows尚未验证是本轮用户明确安排，不是已通过事项。用户验收通过后，可将本地 `downloads/Space-2.3.1-Windows-x64.zip` 手动加到同一v2.3.1 Release；现有SHA256文件已包含其哈希，再补充Windows验收记录和下载入口。不要拿旧Windows包替代。
 
 ## 源码入口
 

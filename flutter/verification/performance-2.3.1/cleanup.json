@@ -37,6 +37,11 @@
   ],
   "legacyDataPreserved": "local-data-backups/legacy-2.1.0-data",
   "latestPackages": "downloads only",
-  "sourceCheckout": "one checkout at repository root; main after merge",
-  "temporaryPerfAndPackageStaging": "removed after final checks"
+  "sourceCheckout": "one checkout at repository root, branch main",
+  "temporaryPerfAndPackageStaging": "removed; reusable probe and sanitized reports retained",
+  "remoteMergedBranchesDeleted": [
+    "codex/space-2.3.0-ui-refinement",
+    "codex/space-2.3.1"
+  ],
+  "buildCachesRemoved": true
 }
