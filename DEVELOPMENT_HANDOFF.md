@@ -8,18 +8,18 @@
 | --- | --- |
 | 当前开发分支 | `codex/space-2.3.1`，已提交并推送到 `origin` |
 | Flutter 应用版本 | `2.3.1+16`，定义在 [pubspec.yaml](flutter/pubspec.yaml) |
-| 基线提交 | `8f35145f` = 2.3.0+15，远端 tag `v2.3.0` |
+| 基线提交 | `8f35145f` = 2.3.0+15，远端 `origin/codex/space-2.3.0-ui-refinement` |
 | 正式版 | 远端 `main` = 2.2.0+14（`541151ff`）；本地不再保留正式版分支 |
 
-本机只保留 `codex/space-2.3.1` 这一个开发分支和一个检出目录。本地 `main`、`codex/space-2.2.0-dev`、`codex/space-2.3.0-ui-refinement` 及本地 `v2.3.0` tag 均已删除；远端旧开发分支 `origin/codex/space-2.3.0-ui-refinement` 已清理，远端只保留一个开发分支。需要正式版时从 Git 拉取：
+本机只保留 `codex/space-2.3.1` 这一个开发分支和一个检出目录。本地 `main`、`codex/space-2.2.0-dev`、`codex/space-2.3.0-ui-refinement` 及本地 `v2.3.0` tag 均已删除。2.3.1 源码已推送到 `origin/codex/space-2.3.1`；远端旧开发分支 `origin/codex/space-2.3.0-ui-refinement` 因 GitHub 连接间歇性中断尚未清理，正好作为 2.3.0 正式版源码的拉取来源。需要正式版时从 Git 拉取：
 
 ```sh
 git fetch origin
-git checkout -b main origin/main        # 2.2.0 正式版
-git fetch origin tag v2.3.0 && git checkout v2.3.0   # 2.3.0 源码
+git checkout -b main origin/main                                 # 2.2.0 正式版
+git checkout -b space230 origin/codex/space-2.3.0-ui-refinement  # 2.3.0 源码
 ```
 
-`origin/main` 与 `v2.3.0` tag 保留在远端，可随时恢复。开始前用 `git status --short --branch` 和 `git log -1 --oneline --decorate` 核对当前状态。
+`origin/main` 与旧 2.3.0 分支保留在远端，可随时恢复。开始前用 `git status --short --branch` 和 `git log -1 --oneline --decorate` 核对当前状态。
 
 ## 2.3.1 已完成的功能改进
 
@@ -71,7 +71,7 @@ git fetch origin tag v2.3.0 && git checkout v2.3.0   # 2.3.0 源码
 
 - 上述全部功能改进的代码实现，包含 macOS 与 Windows 两端平台相关代码；版本号 `2.3.1+16`。
 - 发票详情「报销信息」布局经用户审核通过；浅色/深色与窄窗口截图验收通过（截图在 `flutter/verification/screenshots/2.3.1/`，该目录被 `.gitignore` 忽略，不随 Git 同步）。
-- 代码同步：全部源码改动已提交到 `codex/space-2.3.1` 并推送到 GitHub；本地只保留该开发分支，正式版本地引用已删除（可从 Git 拉取）。
+- 代码同步：全部源码改动已提交到 `codex/space-2.3.1`（`8bc9facf`）并成功推送到 GitHub；本地只保留该开发分支，正式版本地引用已删除（可从 Git 拉取）。
 - 同步前的基本自检（上一轮预览阶段）：`dart analyze lib test` 无新增问题，相关 12 项 `flutter test` 通过。本机代理变量会干扰 `flutter_tester` 的 WebSocket，运行测试需临时清除 `HTTP_PROXY` 等变量。
 
 ### 未做（本轮按用户要求跳过）
@@ -80,7 +80,8 @@ git fetch origin tag v2.3.0 && git checkout v2.3.0   # 2.3.0 源码
 - 未产出 2.3.1 的 macOS DMG/ZIP 与 Windows 免安装 ZIP；`downloads/` 与 `output/` 中的分发包仍是 2.3.0 及更早版本，SHA256 校验文件与下载入口未更新。2.3.0 的 Windows 免安装包仍未补齐（构建环境无法访问 UTM 虚拟机）。
 - 未把 2.3.1 合并或发布到 `main`；`main` 仍是 2.2.0 正式版，2.3.1 仍是开发分支。
 - 功能上仍未实现：自动/定时同步、冲突自动合并、Windows 原生（C++）代码改动；台账列头「消费时间」未全局改为「消费日期」。
-- 本地未跟踪的 `flutter/.vscode/`（IDE 调试配置）与 `.workbuddy/`（会话数据）未纳入 Git 同步；`output/Space-2.2.0/`、`output/Space-2.3.0/` 安装包是本地副本，未删除。
+- 本地未跟踪的 `flutter/.vscode/`（IDE 调试配置）与 `.workbuddy/`（会话数据）未纳入 Git 同步；`output/Space-2.2.0/`、`output/Space-2.3.0/` 安装包是本地副本（未上传 GitHub Release），未删除。
+- 远端整理待补做：GitHub 连接间歇性中断（TLS 握手被关闭），`v2.3.0` tag 未推送、远端旧开发分支 `origin/codex/space-2.3.0-ui-refinement` 未删除、`git fetch --prune` 未执行。源码分支本身已推送成功；网络恢复后补做即可，不影响代码同步。
 
 ## 本地调试
 
