@@ -37,9 +37,9 @@ abstract final class NativeInvoicePdf {
       final api =
           Platform.isMacOS && Platform.environment.containsKey('FLUTTER_TEST')
           ? pdfium.getPdfium(
-              modulePath: File(
-                'build/native_assets/macos/libpdfium.dylib',
-              ).absolute.path,
+              modulePath: File('build/native_assets/macos/libpdfium.dylib')
+                  .absolute
+                  .path,
             )
           : pdfium.pdfiumBindings;
       if (pdfium.PdfiumProcessGate.claimInit()) api.FPDF_InitLibrary();
@@ -260,6 +260,26 @@ class _Engine {
     double width,
     double height,
     int limit,
+  ) => withRaster(
+    page,
+    width,
+    height,
+    limit,
+    (pixels, w, h) => image.Image.fromBytes(
+      width: w,
+      height: h,
+      bytes: pixels.buffer,
+      numChannels: 4,
+      order: image.ChannelOrder.bgra,
+    ),
+  );
+
+  T withRaster<T>(
+    pdfium.FPDF_PAGE page,
+    double width,
+    double height,
+    int limit,
+    T Function(Uint8List, int, int) use,
   ) {
     final scale = limit / math.max(width, height);
     final w = math.max(1, (width * scale).round());
@@ -286,13 +306,7 @@ class _Engine {
           0,
           pdfium.FPDF_ANNOT,
         );
-        return image.Image.fromBytes(
-          width: w,
-          height: h,
-          bytes: pixels.asTypedList(w * h * 4).buffer,
-          numChannels: 4,
-          order: image.ChannelOrder.bgra,
-        );
+        return use(pixels.asTypedList(w * h * 4), w, h);
       } finally {
         api.FPDFBitmap_Destroy(bitmap);
       }
@@ -305,31 +319,39 @@ class _Engine {
     pdfium.FPDF_PAGE page,
     double width,
     double height,
-  ) {
-    final rasterImage = raster(page, width, height, 1800);
-    var left = rasterImage.width,
-        top = rasterImage.height,
-        right = -1,
-        bottom = -1;
-    // Keep ALL visible marks, including fine issuer/footer text. The renderer
-    // already excludes anything outside the original effective visible page.
-    for (final pixel in rasterImage) {
-      if (pixel.r < 242 || pixel.g < 242 || pixel.b < 242) {
-        left = math.min(left, pixel.x);
-        right = math.max(right, pixel.x);
-        top = math.min(top, pixel.y);
-        bottom = math.max(bottom, pixel.y);
+  ) => withRaster(page, width, height, 900, (pixels, w, h) {
+    var left = w, top = h, right = -1, bottom = -1;
+    // Crop detection needs ~0.2mm precision, not print-resolution pixels.
+    // Scan native BGRA bytes directly: no second RGBA bitmap or Pixel objects.
+    // Keep every visible mark, including fine issuer text, plus 0.5mm padding.
+    for (var y = 0; y < h; y++) {
+      var offset = y * w * 4;
+      for (var x = 0; x < w; x++, offset += 4) {
+        if (pixels[offset] < 242 ||
+            pixels[offset + 1] < 242 ||
+            pixels[offset + 2] < 242) {
+          if (x < left) {
+            left = x;
+          }
+          if (x > right) {
+            right = x;
+          }
+          if (y < top) {
+            top = y;
+          }
+          bottom = y;
+        }
       }
     }
     if (right < left || bottom < top) return [0, 0, width, height];
     const padding = .5 * InvoiceLayout.pointPerMillimeter;
-    final sx = width / rasterImage.width, sy = height / rasterImage.height;
+    final sx = width / w, sy = height / h;
     final x = math.max(0.0, left * sx - padding);
     final y = math.max(0.0, height - (bottom + 1) * sy - padding);
     final r = math.min(width, (right + 1) * sx + padding);
     final t = math.min(height, height - top * sy + padding);
     return [x, y, r - x, t - y];
-  }
+  });
 
   T withSheets<T>(
     List<Map<String, Object>> sheets,
