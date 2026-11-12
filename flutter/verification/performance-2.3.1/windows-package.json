@@ -1,0 +1,19 @@
+{
+  "source": {
+    "version": "2.3.1+16",
+    "testedOnUserWindows": false,
+    "source": "43884e7bb4b24f2c9359bfbd47a886f0ac3f92d2",
+    "build": "Release x64"
+  },
+  "artifactId": 13916447865,
+  "workflowRun": 43157693057,
+  "sha256": "525613d4ffc7a63bb708bc9311c8ab7037fe38226f41e2c882a732c8bb9ba849",
+  "checks": [
+    "ZIP CRC",
+    "CI SHA256",
+    "Space.exe PE x64",
+    "pdfium.dll present",
+    "no sqlite/spacepack/pem/key"
+  ],
+  "runtimeTest": "pending user Windows test"
+}

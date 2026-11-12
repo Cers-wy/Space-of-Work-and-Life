@@ -1,0 +1,23 @@
+{
+  "version": "2.3.1+16",
+  "applicationSource": "43884e7bb4b24f2c9359bfbd47a886f0ac3f92d2",
+  "flutterTests": {
+    "passed": 163,
+    "failed": 0
+  },
+  "analysis": {
+    "newIssues": 0,
+    "existingQuillExperimentalWarnings": 3
+  },
+  "productionBuild": {
+    "platform": "macos",
+    "entry": "lib/main.dart",
+    "mode": "Release",
+    "passed": true
+  },
+  "windowsBuild": {
+    "workflowRun": 43157693057,
+    "passed": true,
+    "runtimeTest": "user pending"
+  }
+}

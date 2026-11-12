@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-12",
+  "removedObsoleteGeneratedDirectories": [
+    "work/flutter-qa",
+    "work/tmp-home",
+    "work/.DS_Store",
+    "work/invoice-merge-verification",
+    "work/markdown",
+    "work/space-settings-redesign",
+    "work/space210",
+    "work/utm-bridge",
+    "work/space-2.1.0-design",
+    "work/fake-home",
+    "work/space-icon-design",
+    "work/space230-release",
+    "work/space220-release",
+    "output/invoice-merge-analysis-2.3.1",
+    "output/.DS_Store",
+    "output/space-invoice-merge-ui",
+    "output/space-settings-redesign",
+    "output/space-desktop-ui-comparison",
+    "output/Space-2.3.0",
+    "output/invoice-ledger-prototype",
+    "output/space-tools-exploration",
+    "output/space-ui-refinement",
+    "output/Space-2.2.0",
+    "output/space-2.1.0-design",
+    "output/space-tools-hub-ui"
+  ],
+  "protected": [
+    ".workbuddy",
+    "flutter/.vscode",
+    "local-data-backups",
+    "work/flutter-sdk-bootstrap",
+    "Git commit history",
+    "valid verification baselines"
+  ],
+  "legacyDataPreserved": "local-data-backups/legacy-2.1.0-data",
+  "latestPackages": "downloads only",
+  "sourceCheckout": "one checkout at repository root; main after merge",
+  "temporaryPerfAndPackageStaging": "removed after final checks"
+}
