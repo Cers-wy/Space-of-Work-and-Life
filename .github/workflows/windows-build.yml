@@ -1,0 +1,60 @@
+name: Windows portable build
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'codex/space-2.3.1']
+    paths:
+      - 'flutter/lib/**'
+      - 'flutter/windows/**'
+      - 'flutter/assets/**'
+      - 'flutter/pubspec.*'
+      - '.github/workflows/windows-build.yml'
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - name: Build the production entry point
+        working-directory: flutter
+        shell: pwsh
+        run: |
+          flutter --version
+          flutter pub get --enforce-lockfile
+          flutter build windows --release --target lib/main.dart
+          if ($LASTEXITCODE -ne 0) { throw 'Windows compilation failed' }
+      - name: Package complete portable directory
+        shell: pwsh
+        run: |
+          $version = ((Get-Content flutter/pubspec.yaml | Select-String '^version:').ToString().Split(':')[1]).Trim()
+          $releaseVersion = $version.Split('+')[0]
+          $name = "Space-$releaseVersion-Windows-x64"
+          $stage = Join-Path $env:RUNNER_TEMP $name
+          New-Item -ItemType Directory $stage | Out-Null
+          Copy-Item flutter/build/windows/x64/runner/Release/* $stage -Recurse
+          Copy-Item flutter/THIRD_PARTY_NOTICES.txt $stage
+          Copy-Item flutter/INSTALL-Windows.md (Join-Path $stage '使用说明.md')
+          $vc = Get-ChildItem 'C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Redist/MSVC' -Filter Microsoft.VC143.CRT -Directory -Recurse | Where-Object FullName -Match 'x64' | Select-Object -First 1
+          if ($null -eq $vc) { throw 'Visual C++ portable runtime missing' }
+          Copy-Item ($vc.FullName + '/*.dll') $stage
+          if (!(Test-Path (Join-Path $stage 'Space.exe'))) { throw 'Space.exe missing' }
+          if (!(Test-Path (Join-Path $stage 'pdfium.dll'))) { throw 'PDFium missing' }
+          New-Item -ItemType Directory artifacts | Out-Null
+          $zip = Join-Path (Get-Location) "artifacts/$name.zip"
+          Compress-Archive -Path $stage -DestinationPath $zip
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+          "$hash  $name.zip" | Set-Content artifacts/SHA256SUMS.txt -Encoding utf8
+          @{ version=$version; source=$env:GITHUB_SHA; build='Release x64'; testedOnUserWindows=$false } | ConvertTo-Json | Set-Content artifacts/build-info.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-portable
+          path: artifacts/*
+          compression-level: 0
+          retention-days: 30
