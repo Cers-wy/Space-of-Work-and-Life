@@ -57,11 +57,14 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
   final inputs = <_MergeInput>[];
   final sourcePages = <String, List<InvoiceSourcePage>>{};
   final attachmentPages = <String, List<InvoiceSourcePage>>{};
-  final margin = [for (var i = 0; i < 4; i++) TextEditingController(text: '5')];
+  final margin = [
+    for (var i = 0; i < 4; i++) TextEditingController(text: '10'),
+  ];
   final gap = TextEditingController(text: '10');
   List<Map<String, Object>> sheets = [];
   bool busy = false, reading = false, dragging = false, landscape = false;
   bool cutLines = true, includeAttachments = false, doubleCopy = false;
+  bool autoGap = true;
   String sortBy = 'default';
   int perPage = 2, current = 0, previewRevision = 0;
   int? perPageBeforeDouble;
@@ -107,8 +110,18 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
     right: _margin(1),
     bottom: _margin(2),
     left: _margin(3),
-    gap: _gap,
+    gap: autoGap ? 10 : _gap,
+    autoGap: autoGap,
   );
+
+  String get gapHint {
+    if (sheets.isEmpty || current >= sheets.length) return '单张从上边距开始排列';
+    final pt = (sheets[current]['rowGap'] as double?) ?? 0;
+    if (sheets[current]['attachment'] == true) return '附件独立整页排列';
+    if (pt <= 0) return '单行从上边距开始排列';
+    if (!autoGap) return '按指定间距排列，剩余空间留在下方';
+    return '实际票间距约 ${(pt / InvoiceLayout.pointPerMillimeter).toStringAsFixed(1)} mm，上下均衡排列';
+  }
 
   @override
   void initState() {
@@ -216,7 +229,6 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
   }
 
   void arrange() {
-    sheets = [];
     try {
       if (inputs.any((f) => !sourcePages.containsKey(f.path))) {
         throw StateError('请移除无法读取的发票，或重试');
@@ -242,6 +254,7 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
       layoutError = null;
     } catch (e) {
       layoutError = invoiceError(e);
+      return; // Keep the last valid preview; output is disabled by layoutError.
     }
     current = sheets.isEmpty ? 0 : current.clamp(0, sheets.length - 1);
     schedulePreview();
@@ -629,6 +642,32 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
     );
   }
 
+  Widget manualGapField() {
+    final child = autoGap
+        ? const SizedBox.shrink()
+        : Column(
+            children: [
+              const SizedBox(height: 8),
+              field(
+                context,
+                '指定间距（mm）',
+                SpaceInput(
+                  controller: gap,
+                  label: '票间距',
+                  onChanged: (_) => setState(arrange),
+                ),
+              ),
+            ],
+          );
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: child,
+    );
+  }
+
   Widget settings() {
     final p = Palette.of(context);
     return Glass(
@@ -714,13 +753,20 @@ class _MergeEditorState extends State<InvoiceMergeEditor> {
             ],
             field(
               context,
-              '票间距（mm）',
-              SpaceInput(
-                controller: gap,
-                label: '票间距',
-                onChanged: (_) => setState(arrange),
+              '票间距',
+              SpaceSelect(
+                value: autoGap ? 'auto' : 'fixed',
+                label: '票间距模式',
+                options: const {'auto': '自动分配', 'fixed': '指定间距'},
+                onChanged: (v) => setState(() {
+                  autoGap = v == 'auto';
+                  arrange();
+                }),
               ),
             ),
+            manualGapField(),
+            const SizedBox(height: 8),
+            Text(gapHint, style: textStyle(p, size: 12, color: p.muted)),
             const SizedBox(height: 8),
             SpaceCheckbox(
               label: '一式两份',

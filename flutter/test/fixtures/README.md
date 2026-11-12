@@ -1,5 +1,13 @@
 # 合成互通样本
 
+## 发票 PDF 回归样本（2.3.1）
+
+`invoice-predictor-crop.pdf` 是人为构造的1页PDF，包含PNG predictor 15的RGB方格图、透明红色图块、16位RGB小图、细字开票人和有效裁剪区域外的页脚。MediaBox为A4，CropBox为非零起点且超出MediaBox，用于防止票面坐标和图片重编码问题回归。`invoice-rotations.pdf` 复用同一合成票面，依次为0/90/180/270°四页。图形和文字不来自用户发票，不含企业、金额、纳税人识别号或真实二维码数据。
+
+验证命令：`flutter test test/invoice_pdf_engine_test.dart test/invoices_test.dart`。首次运行会由固定的 `pdfium_flutter 0.4.1` 依赖下载PDFium；运行时不需要Python。
+
+以下为原有协议互通夹具说明。
+
 这些样本由本仓库原生 OrbitCore 1.6.0 build10 和 AppKit 生成，全部是人为构造的示例，没有读取用户任务库。样本中的恢复密钥和 SP 码是公开的固定测试数据，**绝不能用于真实备份**。
 
 | 文件 | 用途 |

@@ -61,7 +61,9 @@ endif()
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
-set(PDFIUM_VERSION "8138" CACHE STRING "Pinned PDFium version for invoice rendering")
+# Match pdfium_flutter/pdfium_dart 0.4.1 so printing and the shared engine load
+# the same PDFium DLL. FORCE also updates existing 2.3.1 build caches.
+set(PDFIUM_VERSION "8125" CACHE STRING "Pinned PDFium version for invoice rendering" FORCE)
 # The printing plugin invokes another CMake project with -G but without -A.
 # Give that project the architecture chosen by Flutter on mixed-arch hosts.
 if(CMAKE_GENERATOR_PLATFORM)

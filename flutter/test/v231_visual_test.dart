@@ -76,9 +76,8 @@ void main() {
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
       final out = Directory('verification/screenshots/2.3.1');
       await out.create(recursive: true);
-      await File(
-        '${out.path}/$name.png',
-      ).writeAsBytes(data!.buffer.asUint8List());
+      await File('${out.path}/$name.png')
+          .writeAsBytes(data!.buffer.asUint8List());
       image.dispose();
     });
   }
@@ -397,6 +396,15 @@ void main() {
       final reimbursedControl = find.byKey(
         const ValueKey('invoice-reimbursed-control'),
       );
+      final projectControl = find.byWidgetPredicate(
+        (w) => w is SpaceSelect && w.label == '选择报销项目',
+      );
+      expect(
+        t.getCenter(reimbursedControl).dy,
+        closeTo(t.getCenter(projectControl).dy, .01),
+        reason: '已报销中线与同行项目选择框中线对齐，不能只比较32高输入框',
+      );
+      expect(projectBox.height, closeTo(reimbursedBox.height, .01));
       final purposeInput = find.descendant(
         of: purpose,
         matching: find.byType(TextField),
@@ -534,6 +542,34 @@ void main() {
     expect(doubleCopy, findsOneWidget);
     await capture(t, 'invoice-merge-settings-light');
 
+    final gapMode = find.byWidgetPredicate(
+      (w) => w is SpaceSelect && w.label == '票间距模式',
+    );
+    expect(t.widget<SpaceSelect>(gapMode).value, 'auto');
+    await t.ensureVisible(gapMode);
+    await t.tap(gapMode);
+    await t.pumpAndSettle();
+    await t.tap(find.text('指定间距').last);
+    await t.pumpAndSettle();
+    final gapInput = find.byWidgetPredicate(
+      (w) => w is SpaceInput && w.label == '票间距',
+    );
+    expect(gapInput, findsOneWidget);
+    await t.ensureVisible(gapInput);
+    await t.enterText(
+      find.descendant(of: gapInput, matching: find.byType(TextField)),
+      '7',
+    );
+    await t.pumpAndSettle();
+    await capture(t, 'invoice-merge-manual-gap-light');
+    await t.ensureVisible(gapMode);
+    await t.tap(gapMode);
+    await t.pumpAndSettle();
+    await t.tap(find.text('自动分配').last);
+    await t.pumpAndSettle();
+    expect(gapInput, findsNothing);
+
+    await t.ensureVisible(doubleCopy);
     await t.tap(doubleCopy);
     await t.pumpAndSettle();
     expect(t.widget<SpaceCheckbox>(doubleCopy).value, isTrue);
@@ -549,6 +585,11 @@ void main() {
     await t.runAsync(() => store.preferences({'dark': 'true'}));
     await t.pumpAndSettle();
     await capture(t, 'invoice-merge-double-dark');
+    await t.runAsync(() => store.preferences({'appearance': 'system'}));
+    t.view.physicalSize = const Size(1020, 640);
+    await t.pumpAndSettle();
+    await t.ensureVisible(gapMode);
+    await capture(t, 'invoice-merge-gap-compact-system');
     expect(t.takeException(), isNull);
   });
 }

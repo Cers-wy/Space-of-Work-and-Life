@@ -591,18 +591,24 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     );
 
     /// 标记已报销只用圆形复选框与文字标签，不加输入框式底色描边；
-    /// dense 让它与同行输入控件同为 32 逻辑像素高。
-    Widget reimbursedField() => SpaceCheckbox(
-      key: const ValueKey('invoice-reimbursed-control'),
-      label: '已报销',
-      value: reimbursed,
-      dense: true,
-      onPressed: busy
-          ? null
-          : () => setState(() {
-              reimbursed = !reimbursed;
-              dirty = true;
-            }),
+    /// 项目选择框高 40，紧凑勾选控件高 32；同高区域内居中，避免中线偏上。
+    Widget reimbursedField() => SizedBox(
+      height: spaceFormControlHeight,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: SpaceCheckbox(
+          key: const ValueKey('invoice-reimbursed-control'),
+          label: '已报销',
+          value: reimbursed,
+          dense: true,
+          onPressed: busy
+              ? null
+              : () => setState(() {
+                  reimbursed = !reimbursed;
+                  dirty = true;
+                }),
+        ),
+      ),
     );
 
     return Column(
@@ -625,10 +631,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
         ]),
         gap(12),
         // 报销项目与报销月份同为半宽，右侧是标记已报销的复选框。
-        row([
-          field('报销项目', projectField()),
-          field('是否报销', reimbursedField()),
-        ]),
+        row([field('报销项目', projectField()), field('是否报销', reimbursedField())]),
         gap(12),
         // 最后一行是占满整行的用途描述。
         row([field('用途', input('用途'))]),

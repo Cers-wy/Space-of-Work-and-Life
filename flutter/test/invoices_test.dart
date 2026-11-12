@@ -217,24 +217,21 @@ PRAGMA user_version=4;
         );
         final slots = sheets.first['slots']! as List<Map<String, Object>>;
         expect(slots.length, capacity);
-        // 2.3.1 起票面在可用区垂直居中，不再顶格贴住上边距。
         final pt = InvoiceLayout.pointPerMillimeter;
-        var upper = -double.infinity;
-        var lower = double.infinity;
-        for (final slot in slots) {
-          final r = slot['rect']! as List<double>;
-          if (r[1] + r[3] > upper) upper = r[1] + r[3];
-          if (r[1] < lower) lower = r[1];
-        }
+        final rects = slots.map((s) => s['rect']! as List<double>).toList();
+        final upper = rects
+            .map((r) => r[1] + r[3])
+            .reduce((a, b) => a > b ? a : b);
+        final lower = rects.map((r) => r[1]).reduce((a, b) => a < b ? a : b);
         final usableTop = layout.height - 7 * pt;
         final usableBottom = 11 * pt;
-        expect(upper, lessThanOrEqualTo(usableTop + 0.001));
-        expect(lower, greaterThanOrEqualTo(usableBottom - 0.001));
-        expect(
-          (usableTop - upper) - (lower - usableBottom),
-          closeTo(0, 0.01),
-          reason: '整页票面应在可用区垂直居中',
-        );
+        expect(upper, closeTo(usableTop, .01), reason: '首行始终靠上');
+        final multiRow = capacity == 4 || !landscape && capacity > 1;
+        if (multiRow) {
+          expect(lower, closeTo(usableBottom, .01), reason: '自动间距末行靠下');
+        } else {
+          expect(lower, greaterThanOrEqualTo(usableBottom - .01));
+        }
         expect(
           (sheets.first['lines']! as List).length,
           capacity == 4 ? 2 : capacity - 1,
@@ -252,6 +249,7 @@ PRAGMA user_version=4;
     );
     final spaced = const InvoiceLayout(
       gap: 10,
+      autoGap: false,
     ).arrange([sample, sample], []).first;
     final cells = spaced['slots']! as List<Map<String, Object>>;
     final upperCell = cells[0]['rect']! as List<double>;
@@ -261,6 +259,89 @@ PRAGMA user_version=4;
       closeTo(10 * InvoiceLayout.pointPerMillimeter, 0.001),
       reason: '相邻两票之间应保留设定的票间距',
     );
+  });
+
+  test('双张上下均衡、单张及末页保持尺寸，手动间距不被扩大', () {
+    const pt = InvoiceLayout.pointPerMillimeter;
+    const sample = (
+      path: '/invoice.pdf',
+      page: 1,
+      x: 0.0,
+      y: 0.0,
+      width: 575.106558958641,
+      height: 374.3821456692914,
+    );
+    const layout = InvoiceLayout();
+    final sheets = layout.arrange([sample, sample, sample], []);
+    final slots = sheets.first['slots']! as List<Map<String, Object>>;
+    final first = slots[0]['rect']! as List<double>;
+    final second = slots[1]['rect']! as List<double>;
+    final last =
+        (sheets.last['slots']! as List<Map<String, Object>>).single['rect'];
+    expect(first[0] / pt, closeTo(10, .001));
+    expect(first[2] / pt, closeTo(190, .001));
+    expect(first[3] / pt, closeTo(123.686, .001));
+    expect(second[1] / pt, closeTo(10, .001));
+    expect((sheets.first['rowGap']! as double) / pt, closeTo(29.628, .001));
+    expect(
+      (sheets.first['lines']! as List<List<double>>).single[1] / pt,
+      closeTo(148.5, .001),
+    );
+    expect(last, first, reason: '末页单张尺寸与顶部位置均不变');
+    expect(sheets.last['lines'], isEmpty);
+
+    final fixed = const InvoiceLayout(
+      autoGap: false,
+      gap: 7,
+    ).arrange([sample, sample], []).single;
+    final fixedRects = (fixed['slots']! as List<Map<String, Object>>)
+        .map((s) => s['rect']! as List<double>)
+        .toList();
+    expect(
+      (fixedRects[0][1] - fixedRects[1][1] - fixedRects[1][3]) / pt,
+      closeTo(7, .001),
+    );
+  });
+
+  test('混合宽高比跨页不跳尺寸，同行顶部对齐，三行裁剪线各在间隙中点', () {
+    const a = (
+      path: '/a.pdf',
+      page: 1,
+      x: 0.0,
+      y: 0.0,
+      width: 200.0,
+      height: 80.0,
+    );
+    const b = (
+      path: '/b.pdf',
+      page: 1,
+      x: 0.0,
+      y: 0.0,
+      width: 200.0,
+      height: 300.0,
+    );
+    final pages = const InvoiceLayout().arrange([a, b, a], []);
+    final first =
+        (pages.first['slots']! as List<Map<String, Object>>).first['rect'];
+    final last =
+        (pages.last['slots']! as List<Map<String, Object>>).single['rect'];
+    expect(last, first);
+    final grid = const InvoiceLayout(perPage: 4).arrange([a, b, a], []).first;
+    final rects = (grid['slots']! as List<Map<String, Object>>)
+        .map((s) => s['rect']! as List<double>)
+        .toList();
+    expect(rects[0][1] + rects[0][3], closeTo(rects[1][1] + rects[1][3], .001));
+    final thirds = const InvoiceLayout(perPage: 3).arrange([a, a, a], []).first;
+    final rows = (thirds['slots']! as List<Map<String, Object>>)
+        .map((s) => s['rect']! as List<double>)
+        .toList();
+    final lines = thirds['lines']! as List<List<double>>;
+    for (var i = 0; i < 2; i++) {
+      expect(
+        lines[i][1],
+        closeTo((rows[i][1] + rows[i + 1][1] + rows[i + 1][3]) / 2, .001),
+      );
+    }
   });
 
   test('一式两份把每张票面连续排两次，每页两张同票', () {

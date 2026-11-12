@@ -1,13 +1,14 @@
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
 
 import '../host.dart';
 import 'files.dart';
 import 'invoices.dart';
-import 'invoice_pdf_windows.dart';
+import 'invoice_pdf_engine.dart';
 
 class InvoicePreview {
   final Uint8List bytes;
@@ -26,7 +27,7 @@ typedef InvoiceSourcePage = ({
 
 class InvoiceLayout {
   static const pointPerMillimeter = 72 / 25.4;
-  final bool landscape, cutLines;
+  final bool landscape, cutLines, autoGap;
   final int perPage;
   final double top, right, bottom, left, gap;
 
@@ -34,11 +35,12 @@ class InvoiceLayout {
     this.landscape = false,
     this.cutLines = true,
     this.perPage = 2,
-    this.top = 5,
-    this.right = 5,
-    this.bottom = 5,
-    this.left = 5,
+    this.top = 10,
+    this.right = 10,
+    this.bottom = 10,
+    this.left = 10,
     this.gap = 10,
+    this.autoGap = true,
   });
 
   double get width => (landscape ? 297 : 210) * pointPerMillimeter;
@@ -49,6 +51,13 @@ class InvoiceLayout {
     List<InvoiceSourcePage> attachments,
   ) {
     if (perPage < 1 || perPage > 4) throw StateError('请选择每页 1–4 张发票');
+    for (final s in [...invoices, ...attachments]) {
+      if (![s.x, s.y, s.width, s.height].every((v) => v.isFinite) ||
+          s.width <= 0 ||
+          s.height <= 0) {
+        throw StateError('发票页面尺寸无效');
+      }
+    }
     final leftPt = left * pointPerMillimeter,
         bottomPt = bottom * pointPerMillimeter;
     final usableW = width - (left + right) * pointPerMillimeter;
@@ -84,12 +93,10 @@ class InvoiceLayout {
       final cols = attachment ? 1 : columns;
       final cellW = attachment ? usableW : slotW;
       final cellH = attachment ? usableH : slotH;
-      // 同一页统一比例：所有发票按最小可用比例缩放，保持字号与票面一致。
-      var scale = double.infinity;
-      for (final s in sources) {
-        scale = math.min(scale, math.min(cellW / s.width, cellH / s.height));
-      }
-      if (!scale.isFinite || scale <= 0) scale = 1;
+      // 逐票按固定容量的槽位等比适配，同一来源不会因末页少票而放大。
+      final scales = [
+        for (final s in sources) math.min(cellW / s.width, cellH / s.height),
+      ];
       final usedRows = (sources.length + cols - 1) ~/ cols;
       final heights = <double>[];
       for (var r = 0; r < usedRows; r++) {
@@ -97,16 +104,20 @@ class InvoiceLayout {
         for (var c = 0; c < cols; c++) {
           final i = r * cols + c;
           if (i < sources.length) {
-            rowHeight = math.max(rowHeight, sources[i].height * scale);
+            rowHeight = math.max(rowHeight, sources[i].height * scales[i]);
           }
         }
         heights.add(rowHeight);
       }
-      final contentH =
-          heights.fold<double>(0, (a, b) => a + b) +
-          math.max(0, usedRows - 1) * gapPt;
-      // 内容整体在可用区域内垂直居中，余量平均分给上下两侧。
-      var cursor = bottomPt + (usableH + contentH) / 2;
+      final totalHeight = heights.fold<double>(0, (a, b) => a + b);
+      final rowGap = autoGap && !attachment && usedRows > 1
+          ? math.max(gapPt, (usableH - totalHeight) / (usedRows - 1))
+          : gapPt;
+      // 多行自动排版首行靠上、末行靠下；单行/末页单张保持靠上。
+      // 附件继续独立整页居中，不受发票排版规则影响。
+      var cursor = attachment
+          ? bottomPt + (usableH + totalHeight) / 2
+          : height - top * pointPerMillimeter;
       final startTop = cursor;
       final slots = <Map<String, Object>>[];
       for (var r = 0; r < usedRows; r++) {
@@ -115,30 +126,31 @@ class InvoiceLayout {
           final i = r * cols + c;
           if (i >= sources.length) continue;
           final s = sources[i];
-          final w = s.width * scale, h = s.height * scale;
+          final w = s.width * scales[i], h = s.height * scales[i];
           slots.add({
             'path': s.path,
             'page': s.page,
             'crop': [s.x, s.y, s.width, s.height],
             'rect': [
               leftPt + c * (slotW + gapPt) + (cellW - w) / 2,
-              rowBottom + (heights[r] - h) / 2,
+              cursor - h,
               w,
               h,
             ],
           });
         }
-        cursor = rowBottom - gapPt;
+        cursor = rowBottom - rowGap;
       }
       final lines = <List<double>>[];
       if (cutLines && !attachment && sources.length > 1) {
         // 虚线落在相邻两张票之间的空白中线上，便于对折裁剪。
         var y = startTop;
         for (var r = 0; r < usedRows - 1; r++) {
-          y -= heights[r] + gapPt / 2;
+          y -= heights[r] + rowGap / 2;
           lines.add([leftPt, y, leftPt + usableW, y]);
+          y -= rowGap / 2;
         }
-        for (var c = 1; c < cols; c++) {
+        for (var c = 1; c < math.min(cols, sources.length); c++) {
           final x = leftPt + c * (slotW + gapPt) - gapPt / 2;
           lines.add([x, bottomPt, x, bottomPt + usableH]);
         }
@@ -148,6 +160,8 @@ class InvoiceLayout {
         'height': height,
         'slots': slots,
         'lines': lines,
+        'rowGap': !attachment && usedRows > 1 ? rowGap : 0.0,
+        'attachment': attachment,
       };
     }
 
@@ -173,45 +187,13 @@ class InvoicePdf {
   static Future<List<InvoiceSourcePage>> inspect(
     String path, {
     required bool trim,
-  }) async {
-    final extension = await Isolate.run(() => validateInvoiceFile(path));
-    if (Platform.isWindows) {
-      return WindowsInvoicePdf.inspect(path, extension, trim: trim);
-    }
-    final pages = await _call<List<Object?>>('invoiceInspect', {
-      'path': path,
-      'trim': trim,
-    });
-    if (pages == null || pages.isEmpty) throw StateError('文件没有可用页');
-    return [
-      for (var i = 0; i < pages.length; i++)
-        (
-          path: path,
-          page: i + 1,
-          x: _coordinate(pages[i], 0),
-          y: _coordinate(pages[i], 1),
-          width: _coordinate(pages[i], 2),
-          height: _coordinate(pages[i], 3),
-        ),
-    ];
-  }
+  }) => NativeInvoicePdf.inspect(path, trim: trim);
 
-  static double _coordinate(Object? page, int i) =>
-      ((page as List)[i] as num).toDouble();
-
-  static Future<InvoicePreview> preview(String path, int page) async {
-    if (Platform.isWindows) return WindowsInvoicePdf.preview(path, page);
-    final r = (await _call<Map<Object?, Object?>>('invoicePreview', {
-      'path': path,
-      'page': page,
-    }))!;
-    return InvoicePreview(r['bytes'] as Uint8List, r['pages'] as int);
-  }
+  static Future<InvoicePreview> preview(String path, int page) =>
+      NativeInvoicePdf.preview(path, page);
 
   static Future<Uint8List> render(Map<String, Object> page) async =>
-      Platform.isWindows
-      ? WindowsInvoicePdf.render(page)
-      : (await _call<Uint8List>('invoiceRender', {'sheet': page}))!;
+      NativeInvoicePdf.render(page);
 
   static Future<void> save(
     InvoiceRepository repo,
@@ -229,14 +211,7 @@ class InvoicePdf {
     }
     final staged = File(invoiceOutputStage(destination));
     try {
-      if (Platform.isWindows) {
-        await staged.writeAsBytes(await WindowsInvoicePdf.compose(pages));
-      } else {
-        await _call<void>('invoiceWrite', {
-          'path': staged.path,
-          'sheets': pages,
-        });
-      }
+      await NativeInvoicePdf.write(staged.path, pages);
       await staged.rename(destination);
     } finally {
       if (await staged.exists()) await staged.delete();
@@ -248,13 +223,21 @@ class InvoicePdf {
     List<Map<String, Object>> pages,
   ) async {
     if (Platform.isWindows) {
-      await WindowsInvoicePdf.print(layout, pages);
+      await NativeInvoicePdf.serial(() async {
+        final bytes = await NativeInvoicePdf.composeForPrint(pages);
+        await Printing.layoutPdf(
+          name: '发票合并.pdf',
+          format: PdfPageFormat(layout.width, layout.height),
+          dynamicLayout: false,
+          onLayout: (_) => bytes,
+        );
+      });
       return;
     }
     final directory = await Directory.systemTemp.createTemp('space-print-');
     final path = '${directory.path}/发票合并.pdf';
     try {
-      await _call<void>('invoiceWrite', {'path': path, 'sheets': pages});
+      await NativeInvoicePdf.write(path, pages);
       await _call<void>('invoicePrint', {
         'path': path,
         'width': layout.width,
