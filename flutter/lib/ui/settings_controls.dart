@@ -20,6 +20,7 @@ class SettingsIcon extends StatelessWidget {
     'close': IconData(0xe4f6, fontFamily: 'PhosphorSettings'),
     'right': IconData(0xe13a, fontFamily: 'PhosphorSettings'),
     'folder': IconData(0xe256, fontFamily: 'PhosphorSettings'),
+    'drive': IconData(0xe256, fontFamily: 'PhosphorSettings'),
     'up': IconData(0xe4c0, fontFamily: 'PhosphorSettings'),
     'down': IconData(0xe20c, fontFamily: 'PhosphorSettings'),
     'eye': IconData(0xe220, fontFamily: 'PhosphorSettings'),
@@ -27,6 +28,8 @@ class SettingsIcon extends StatelessWidget {
     'refresh': IconData(0xe036, fontFamily: 'PhosphorSettings'),
     'external': IconData(0xe092, fontFamily: 'PhosphorSettings'),
     'trash': IconData(0xe4a6, fontFamily: 'PhosphorSettings'),
+    // 发票识别栏目沿用字体中已有的「eye」字形，不引入新字体资源。
+    'recognition': IconData(0xe220, fontFamily: 'PhosphorSettings'),
   };
   @override
   Widget build(BuildContext context) => ExcludeSemantics(

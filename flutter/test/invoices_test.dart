@@ -76,7 +76,7 @@ void main() {
 
     final db = sqlite3.open(space.path, mode: OpenMode.readOnly);
     try {
-      expect(db.userVersion, 7);
+      expect(db.userVersion, 8);
       expect(db.select('SELECT count(*) AS n FROM invoices').single['n'], 1);
       expect(db.select('PRAGMA foreign_key_check'), isEmpty);
     } finally {
@@ -182,7 +182,7 @@ PRAGMA user_version=4;
     );
     final check = sqlite3.open(space.path, mode: OpenMode.readOnly);
     try {
-      expect(check.userVersion, 7);
+      expect(check.userVersion, 8);
       expect(check.select('PRAGMA foreign_key_check'), isEmpty);
     } finally {
       check.close();

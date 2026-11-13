@@ -68,6 +68,8 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   switch (message) {
+    case SpaceDesktopChannel::kOcrReady:
+      SpaceDesktopChannel::FinishOcr(lparam);return 0;
     case WM_DWMCOLORIZATIONCOLORCHANGED:
       // Dart applies the effective appearance, including a fixed user choice.
       return 0;
@@ -81,6 +83,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
       return 0;
     }
     case WM_CLOSE:
+      if(desktop_ && desktop_->uploads_active){desktop_->RequestClose();return 0;}
       if (desktop_ && desktop_->dirty && MessageBoxW(hwnd, L"当前输入尚未保存。确定放弃并退出？", L"Space", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) != IDOK) return 0;
       break;
     case WM_FONTCHANGE:

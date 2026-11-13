@@ -41,3 +41,5 @@ add_dependencies(${BINARY_NAME} flutter_assemble)
 
 target_link_libraries(${BINARY_NAME} PRIVATE dwmapi advapi32 shell32 ole32 uuid)
 target_compile_options(${BINARY_NAME} PRIVATE /utf-8)
+
+target_link_libraries(${BINARY_NAME} PRIVATE windowsapp)

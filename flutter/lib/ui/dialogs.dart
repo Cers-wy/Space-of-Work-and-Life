@@ -61,6 +61,7 @@ Widget sheetFrame(
   required Widget body,
   required List<Widget> footer,
   required VoidCallback close,
+  List<Widget> titleActions = const [],
 }) {
   final p = Palette.of(c);
   return ClipRRect(
@@ -82,6 +83,7 @@ Widget sheetFrame(
                       style: textStyle(p, bold: true),
                     ),
                   ),
+                  ...titleActions,
                   IconButtonS.toolbar('x', '关闭$title', onPressed: close),
                 ],
               ),
@@ -878,9 +880,10 @@ class _TaskEditorState extends State<_TaskEditor> {
   );
 
   String _stamp(String value) {
-    final text = validTime(
-      value,
-    ).toUtc().add(const Duration(hours: 8)).toString();
+    final text = validTime(value)
+        .toUtc()
+        .add(const Duration(hours: 8))
+        .toString();
     return text.length >= 16 ? text.substring(0, 16) : text;
   }
 
@@ -1094,9 +1097,8 @@ class _TaskEditorState extends State<_TaskEditor> {
                           onPressed: () async {
                             final path = await DesktopHost.saveFile(a.name);
                             if (path != null) {
-                              await File(
-                                path,
-                              ).writeAsBytes(a.data, flush: true);
+                              await File(path)
+                                  .writeAsBytes(a.data, flush: true);
                             }
                           },
                         ),
@@ -1239,6 +1241,7 @@ class _FiltersState extends State<_Filters> {
                       c,
                       '看板列',
                       SpaceMultiSelect.persistent(
+                        matchFieldWidth: true,
                         values: s.boardStatuses.toSet(),
                         options: {
                           for (final status in s.state.displayStatuses)
@@ -1281,6 +1284,7 @@ class _FiltersState extends State<_Filters> {
                       c,
                       spec.$1,
                       SpaceMultiSelect(
+                        matchFieldWidth: true,
                         values: spec.$2,
                         options: spec.$3,
                         label: spec.$1,
@@ -1916,6 +1920,7 @@ Future<void> showSettings(
   BuildContext c,
   SpaceStore s, {
   ReleaseChecker? updates,
+  String initialCategory = 'all',
 }) async {
   if (s.modal) return;
   s.modal = true;
@@ -1959,7 +1964,11 @@ Future<void> showSettings(
                   },
                   child: Material(
                     type: MaterialType.transparency,
-                    child: SettingsPanel(store: s, updates: updates),
+                    child: SettingsPanel(
+                      store: s,
+                      updates: updates,
+                      initialCategory: initialCategory,
+                    ),
                   ),
                 ),
               ),

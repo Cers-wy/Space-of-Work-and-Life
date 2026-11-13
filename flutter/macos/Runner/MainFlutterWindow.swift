@@ -1,4 +1,5 @@
 import Cocoa
+import Vision
 import FlutterMacOS
 import Security
 import Quartz
@@ -15,9 +16,14 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   private var menusInstalled = false
   func windowDidBecomeKey(_ notification: Notification) { title = "Space"; addSpaceMenus() }
   static var hasUnsavedEdits = false
+  static var uploadsActive = false
   private var previewController: SpacePreview?
   func windowShouldClose(_ sender: NSWindow) -> Bool { Self.mayDiscardEdits() }
   static func mayDiscardEdits() -> Bool {
+    if uploadsActive {
+      (NSApp.windows.first(where: { $0 is MainFlutterWindow }) as? MainFlutterWindow)?.desktopChannel?.invokeMethod("requestClose", arguments: nil)
+      return false
+    }
     guard hasUnsavedEdits else { return true }
     let alert = NSAlert(); alert.messageText = "放弃未保存的更改？"; alert.informativeText = "当前输入和附件尚未保存。"; alert.addButton(withTitle: "保留编辑"); alert.addButton(withTitle: "放弃更改")
     return alert.runModal() == .alertSecondButtonReturn
@@ -58,6 +64,13 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         guard let value = a["url"] as? String, let url = URL(string: value),
               ["https", "mailto"].contains(url.scheme?.lowercased() ?? "") else { result(false); return }
         result(NSWorkspace.shared.open(url))
+      case "driveState":
+        MainFlutterWindow.uploadsActive = a["active"] as? Bool ?? false; result(nil)
+      case "finishClose":
+        MainFlutterWindow.uploadsActive = false; result(nil); NSApp.terminate(nil)
+      case "openFolder":
+        let panel = NSOpenPanel(); panel.canChooseFiles = false; panel.canChooseDirectories = true; panel.allowsMultipleSelection = false
+        panel.beginSheetModal(for: self) { response in result(response == .OK ? panel.url?.path : nil) }
       case "dirty":
         MainFlutterWindow.hasUnsavedEdits = a["dirty"] as? Bool ?? false
         result(nil)
@@ -70,6 +83,23 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         let panel = SpaceFilePanels.save(name: a["name"] as? String ?? "Space备份.sqlite",
                                          sqliteOnly: a["sqliteOnly"] as? Bool ?? false, title: a["title"] as? String)
         panel.beginSheetModal(for: self) { response in result(response == .OK ? panel.url?.path : nil) }
+      case "recognizeInvoiceImage":
+        guard let path = a["path"] as? String else { result(FlutterError(code: "ocr", message: "图片路径无效", details: nil)); return }
+        DispatchQueue.global(qos: .userInitiated).async {
+          do {
+            let request = VNRecognizeTextRequest()
+            request.recognitionLevel = .accurate
+            request.recognitionLanguages = ["zh-Hans", "en-US"]
+            request.usesLanguageCorrection = false
+            request.minimumTextHeight = 0.004
+            try VNImageRequestHandler(url: URL(fileURLWithPath: path), options: [:]).perform([request])
+            let lines = (request.results ?? []).sorted { left, right in
+              if abs(left.boundingBox.midY - right.boundingBox.midY) > 0.008 { return left.boundingBox.midY > right.boundingBox.midY }
+              return left.boundingBox.minX < right.boundingBox.minX
+            }.compactMap { $0.topCandidates(1).first?.string }
+            DispatchQueue.main.async { result(lines.joined(separator: "\n")) }
+          } catch { DispatchQueue.main.async { result(FlutterError(code: "ocr", message: "本地识别失败：\(error.localizedDescription)", details: nil)) } }
+        }
       case "invoiceInspect", "invoicePreview", "invoiceRender", "invoiceWrite", "invoicePrint":
         SpaceInvoicePDF.handle(call.method, a, result)
       case "reveal":
@@ -93,19 +123,30 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         else { result(nil) }
       case "readSecret":
         guard let id = a["id"] as? String else { result(FlutterError(code: "invalid", message: "凭据标识无效", details: nil)); return }
-        let authentication = LAContext(); authentication.interactionNotAllowed = true
-        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "com.cers.space.flutter", kSecAttrAccount as String: id, kSecReturnData as String: true, kSecMatchLimit as String: kSecMatchLimitOne, kSecUseAuthenticationContext as String: authentication]
-        var value: CFTypeRef?; let status = SecItemCopyMatching(query as CFDictionary, &value)
-        if status == errSecSuccess, let data = value as? Data { result(String(data: data, encoding: .utf8)) }
-        else if status == errSecItemNotFound { result(nil) }
-        else { result(FlutterError(code: "keychain", message: "无法读取本机钥匙串", details: nil)) }
+        // Keychain 可能等待系统认证，不能占用 AppKit/Flutter 主线程。
+        DispatchQueue.global(qos: .userInitiated).async {
+          let authentication = LAContext(); authentication.interactionNotAllowed = true
+          let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "com.cers.space.flutter", kSecAttrAccount as String: id, kSecReturnData as String: true, kSecMatchLimit as String: kSecMatchLimitOne, kSecUseAuthenticationContext as String: authentication]
+          var value: CFTypeRef?; let status = SecItemCopyMatching(query as CFDictionary, &value)
+          let text = (value as? Data).flatMap { String(data: $0, encoding: .utf8) }
+          DispatchQueue.main.async {
+            if status == errSecSuccess { result(text) }
+            else if status == errSecItemNotFound { result(nil) }
+            else { result(FlutterError(code: "keychain", message: "无法读取本机钥匙串", details: nil)) }
+          }
+        }
       case "writeSecret":
         guard let id = a["id"] as? String, let value = (a["value"] as? String)?.data(using: .utf8) else { result(FlutterError(code: "invalid", message: "凭据无效", details: nil)); return }
-        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "com.cers.space.flutter", kSecAttrAccount as String: id]
-        let update = SecItemUpdate(query as CFDictionary, [kSecValueData as String: value] as CFDictionary)
-        var status = update
-        if update == errSecItemNotFound { var add = query; add[kSecValueData as String] = value; add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly; status = SecItemAdd(add as CFDictionary, nil) }
-        if status == errSecSuccess { result(nil) } else { result(FlutterError(code: "keychain", message: "无法保存到本机钥匙串", details: nil)) }
+        DispatchQueue.global(qos: .userInitiated).async {
+          let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "com.cers.space.flutter", kSecAttrAccount as String: id]
+          let update = SecItemUpdate(query as CFDictionary, [kSecValueData as String: value] as CFDictionary)
+          var status = update
+          if update == errSecItemNotFound { var add = query; add[kSecValueData as String] = value; add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly; status = SecItemAdd(add as CFDictionary, nil) }
+          let saved = status == errSecSuccess
+          DispatchQueue.main.async {
+            if saved { result(nil) } else { result(FlutterError(code: "keychain", message: "无法保存到本机钥匙串", details: nil)) }
+          }
+        }
       default: result(FlutterMethodNotImplemented)
       }
     }

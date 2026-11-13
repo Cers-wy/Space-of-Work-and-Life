@@ -2,25 +2,46 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:flutter/foundation.dart' show mapEquals;
+import 'package:flutter/foundation.dart' show mapEquals, setEquals;
 import 'package:flutter/material.dart';
 
 import '../core/invoices.dart';
+import '../core/drive.dart';
+import '../core/invoice_recognition.dart';
 import '../core/repository.dart';
 import '../host.dart';
 import '../store.dart';
 import 'controls.dart';
-import 'dialogs.dart' show field, showProjects;
+import 'dialogs.dart' show confirm, field, showProjects, showSettings;
 import 'invoice_details.dart';
 import 'invoice_merge.dart';
+import 'file_drive.dart';
 import 'theme.dart';
+
+class InvoiceRecognitionSaveError implements Exception {
+  final InvoiceRecognition result;
+  final String reason;
+  const InvoiceRecognitionSaveError(this.result, this.reason);
+  @override
+  String toString() => '识别完成，保存失败，请重试：$reason';
+}
+
+class _RecognitionCancelled implements Exception {
+  const _RecognitionCancelled();
+  @override
+  String toString() => '发票已删除，已跳过识别';
+}
 
 class InvoiceSession extends ChangeNotifier {
   final InvoiceRepository repo;
   InvoiceSession(SpaceRepository space) : repo = InvoiceRepository(space);
 
+  /// 由工作台注入，保证自动识别实时读取设置中的「优先使用 OCR」开关。
+  bool Function()? preferOcr;
+
   InvoiceLedger? ledger;
   final selected = <String>{};
+  final recognitionFailures = <String, String>{};
   String query = '', month = '', project = '', status = '';
   bool get hasFilters =>
       query.trim().isNotEmpty ||
@@ -29,6 +50,12 @@ class InvoiceSession extends ChangeNotifier {
       status.isNotEmpty;
   bool busy = false, _disposed = false;
   String? error, notice;
+  bool batchRecognizing = false;
+  int batchProcessed = 0, batchTotal = 0, _refreshGeneration = 0;
+  String? batchNotice, batchError;
+  final _batchIds = <String>{}, _cancelledRecognition = <String>{};
+  final _manualJobs = <String, Future<InvoiceRecognition>>{};
+  String? _currentRecognition;
 
   Map<String, String> get projects => ledger?.projects ?? const {};
 
@@ -50,6 +77,7 @@ class InvoiceSession extends ChangeNotifier {
     if (terms.length == 1 && terms.single.isEmpty) return true;
     final content = [
       e.original.name,
+      i.title,
       i.number,
       i.seller,
       i.spent,
@@ -69,7 +97,10 @@ class InvoiceSession extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    ledger = await repo.load();
+    final generation = ++_refreshGeneration;
+    final loaded = await repo.load();
+    if (_disposed || generation != _refreshGeneration) return;
+    ledger = loaded;
     if (!projects.containsKey(project)) project = '';
     selected.retainAll(ledger!.entries.map((e) => e.id).toSet());
   }
@@ -91,18 +122,237 @@ class InvoiceSession extends ChangeNotifier {
       error = invoiceError(e);
     } finally {
       update(() => busy = false);
+      if (!_disposed && _recognitionQueue.isNotEmpty) {
+        unawaited(_recognizePending());
+      }
     }
   }
 
-  Future<void> load() => run(() async => null);
+  bool recognizing = false;
+  final _recognitionQueue = <String>{};
+  Future<void> _recognitionTail = Future.value();
+  Future<InvoiceRecognition> Function(InvoiceFile, {required bool preferOcr})
+  recognizeFile = InvoiceRecognizer.recognize;
+
+  /// 所有识别入口共用串行队列，防止 OCR 并发和自动识别覆盖主动识别。
+  Future<InvoiceRecognition> recognizeEntry(
+    String id, {
+    bool automatic = false,
+  }) {
+    if (!automatic) {
+      _recognitionQueue.remove(id);
+      final existing = _manualJobs[id];
+      if (existing != null) return existing;
+    }
+    final work = _recognitionTail.then((_) async {
+      if (_disposed) throw StateError('发票会话已关闭');
+      if (_cancelledRecognition.contains(id)) {
+        throw const _RecognitionCancelled();
+      }
+      _currentRecognition = id;
+      try {
+        final current = (await repo.load()).entries
+            .where((e) => e.id == id)
+            .firstOrNull;
+        if (current == null) throw const _RecognitionCancelled();
+        final result = await recognizeFile(
+          current.original,
+          preferOcr: preferOcr?.call() ?? false,
+        );
+        if (_disposed) throw StateError('发票会话已关闭');
+        if (_cancelledRecognition.contains(id)) {
+          throw const _RecognitionCancelled();
+        }
+        try {
+          await repo.applyRecognition(
+            id,
+            result.fields,
+            result.message,
+            structured: result.structured,
+            replaceExisting: !automatic,
+            expectedFields: automatic ? null : current.info.ticketFields,
+          );
+        } catch (e) {
+          if (_cancelledRecognition.contains(id)) {
+            throw const _RecognitionCancelled();
+          }
+          throw InvoiceRecognitionSaveError(result, invoiceError(e));
+        }
+        if (result.fields.isNotEmpty) recognitionFailures.remove(id);
+        return result;
+      } finally {
+        _currentRecognition = null;
+      }
+    });
+    _recognitionTail = work.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    if (!automatic) {
+      _manualJobs[id] = work;
+      void cleanup() {
+        if (!_batchIds.contains(id) && identical(_manualJobs[id], work)) {
+          _manualJobs.remove(id);
+          _cancelledRecognition.remove(id);
+        }
+      }
+
+      unawaited(
+        work.then<void>(
+          (_) => cleanup(),
+          onError: (Object _, StackTrace _) => cleanup(),
+        ),
+      );
+    }
+    return work;
+  }
+
+  /// 后台批次有独立进度，绝不占用前台 busy；筛选、勾选、编辑、导入及切页继续可用。
+  Future<void> recognizeSelected(List<String> ids) async {
+    if (batchRecognizing || _disposed || ids.isEmpty) return;
+    final batch = ids.toSet().toList();
+    final selectionAtStart = Set<String>.of(selected);
+    _batchIds.addAll(batch);
+    _recognitionQueue.removeAll(batch);
+    update(() {
+      batchRecognizing = true;
+      batchProcessed = 0;
+      batchTotal = batch.length;
+      batchNotice = '后台识别 0 / $batchTotal 张';
+      batchError = null;
+    });
+    var saved = 0, skipped = 0;
+    final retryIDs = <String>{};
+    try {
+      for (final id in batch) {
+        if (_disposed) return;
+        recognitionFailures.remove(id);
+        try {
+          final result = await recognizeEntry(id);
+          if (result.fields.isEmpty) {
+            retryIDs.add(id);
+            recognitionFailures[id] = '未识别到可用字段';
+          } else {
+            saved++;
+          }
+        } on _RecognitionCancelled {
+          skipped++;
+        } catch (e) {
+          if (_disposed) return;
+          retryIDs.add(id);
+          recognitionFailures[id] = invoiceError(e);
+        }
+        if (_disposed) return;
+        await refresh();
+        update(() => batchNotice = '后台识别 ${++batchProcessed} / $batchTotal 张');
+      }
+      retryIDs.retainAll(ledger?.entries.map((e) => e.id) ?? const <String>[]);
+      if (retryIDs.isNotEmpty) {
+        batchError =
+            '有 ${retryIDs.length} 张未完成：${retryIDs.map((id) => recognitionFailures[id]).toSet().join('；')}';
+      }
+      // 用户若在处理过程中调整了勾选，保持其当前选择。
+      if (setEquals(selected, selectionAtStart)) {
+        selected.removeAll(batch);
+        selected.addAll(retryIDs);
+      }
+      batchNotice =
+          '识别完成：$saved 张已保存，${retryIDs.length} 张未完成${skipped > 0 ? '，$skipped 张已跳过' : ''}';
+    } finally {
+      for (final id in batch) {
+        _manualJobs.remove(id);
+        _cancelledRecognition.remove(id);
+      }
+      _batchIds.removeAll(batch);
+      update(() => batchRecognizing = false);
+    }
+  }
+
+  Future<void> deleteEntry(String id) async {
+    _recognitionQueue.remove(id);
+    if (_batchIds.contains(id) ||
+        _manualJobs.containsKey(id) ||
+        _currentRecognition == id) {
+      _cancelledRecognition.add(id);
+    }
+    try {
+      await repo.delete(id);
+      selected.remove(id);
+      recognitionFailures.remove(id);
+    } catch (_) {
+      _cancelledRecognition.remove(id);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteSelected(List<String> ids) => run(() async {
+    var deleted = 0;
+    final failures = <String>[];
+    for (final id in ids) {
+      try {
+        await deleteEntry(id);
+        deleted++;
+      } catch (e) {
+        failures.add(invoiceError(e));
+      }
+    }
+    if (failures.isNotEmpty) {
+      error = '${failures.length} 张删除失败：${failures.toSet().join('；')}';
+    }
+    return '已删除 $deleted 张发票';
+  });
+  Future<void> load() async {
+    await run(() async => null);
+    for (final entry in ledger?.entries ?? <InvoiceEntry>[]) {
+      if (entry.info.recognition.isEmpty) _recognitionQueue.add(entry.id);
+    }
+    unawaited(_recognizePending());
+  }
+
+  Future<void> _recognizePending() async {
+    if (recognizing || _disposed) return;
+    recognizing = true;
+    try {
+      while (_recognitionQueue.isNotEmpty && !_disposed && !busy) {
+        final id = _recognitionQueue.first;
+        _recognitionQueue.remove(id);
+        final entry = ledger?.entries.where((e) => e.id == id).firstOrNull;
+        if (entry == null ||
+            _batchIds.contains(id) ||
+            _manualJobs.containsKey(id)) {
+          continue;
+        }
+        try {
+          await recognizeEntry(id, automatic: true);
+        } on _RecognitionCancelled {
+          continue;
+        } catch (e) {
+          // 会话已释放时不再触碰数据库，避免退出后回写识别错误状态。
+          if (_disposed) return;
+          await repo.recognitionError(id, invoiceError(e));
+        }
+        if (!_disposed) {
+          await refresh();
+          update(() {});
+        }
+      }
+    } finally {
+      recognizing = false;
+      if (!_disposed) update(() {});
+    }
+  }
 
   Future<void> import(List<String> paths) async {
     if (paths.isEmpty) return;
     await run(() async {
       final result = await repo.importFiles(paths);
       if (result.errors.isNotEmpty) error = result.errors.join('\n');
-      return '已导入 ${result.count} 张发票';
+      return '已导入 ${result.count} 张发票，正在自动识别';
     });
+    for (final entry in ledger?.entries ?? <InvoiceEntry>[]) {
+      if (entry.info.recognition.isEmpty) _recognitionQueue.add(entry.id);
+    }
+    unawaited(_recognizePending());
   }
 
   @override
@@ -152,12 +402,14 @@ class _InvoiceTitleBar extends StatelessWidget {
   final bool showTools;
   final VoidCallback? backToTools;
   final List<Widget> actions;
+  final String subTitle;
 
   const _InvoiceTitleBar({
     required this.store,
     this.showTools = false,
     this.backToTools,
     this.actions = const [],
+    this.subTitle = '发票合并',
   });
 
   @override
@@ -195,7 +447,7 @@ class _InvoiceTitleBar extends StatelessWidget {
             Expanded(
               child: Text(
                 backToTools != null
-                    ? '发票合并'
+                    ? subTitle
                     : showTools
                     ? '工具'
                     : '发票',
@@ -276,7 +528,7 @@ class _InvoiceFiltersState extends State<_InvoiceFilters> {
                 controller: search,
                 icon: 'search',
                 autofocus: true,
-                hint: '搜索票号、销方、用途或文件名',
+                hint: '搜索发票名称、销售方、票号或备注',
                 label: '搜索发票',
                 onChanged: (value) =>
                     session.update(() => session.query = value),
@@ -395,38 +647,71 @@ class _ToolsWorkspace extends StatefulWidget {
 }
 
 class _ToolsWorkspaceState extends State<_ToolsWorkspace> {
-  bool mergeOpen = false;
+  int page = 0;
+  DriveService get drive => driveFor(widget.store);
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      _InvoiceTitleBar(
+  Widget build(BuildContext context) {
+    if (page >= 2) {
+      return DrivePage(
         store: widget.store,
-        showTools: true,
-        backToTools: mergeOpen ? () => setState(() => mergeOpen = false) : null,
-      ),
-      Expanded(
-        child: TweenAnimationBuilder<double>(
-          key: ValueKey(mergeOpen),
-          tween: Tween(begin: 0, end: 1),
-          duration: MediaQuery.disableAnimationsOf(context)
-              ? Duration.zero
-              : const Duration(milliseconds: 180),
-          curve: spaceCurve,
-          builder: (context, opacity, child) =>
-              Opacity(opacity: opacity, child: child),
-          child: mergeOpen
-              ? InvoiceMergeEditor(repo: widget.session.repo)
-              : _Tools(onOpenMerge: () => setState(() => mergeOpen = true)),
+        service: drive,
+        initialUploads: page == 2,
+        titleBuilder: (actions) => _InvoiceTitleBar(
+          store: widget.store,
+          showTools: true,
+          backToTools: () => setState(() => page = 0),
+          subTitle: '文件管理',
+          actions: actions,
         ),
-      ),
-    ],
-  );
+      );
+    }
+    return Column(
+      children: [
+        _InvoiceTitleBar(
+          store: widget.store,
+          showTools: true,
+          backToTools: page == 1 ? () => setState(() => page = 0) : null,
+          subTitle: '发票合并',
+        ),
+        Expanded(
+          child: TweenAnimationBuilder<double>(
+            key: ValueKey(page),
+            tween: Tween(begin: 0, end: 1),
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
+            curve: spaceCurve,
+            builder: (context, opacity, child) =>
+                Opacity(opacity: opacity, child: child),
+            child: page == 1
+                ? InvoiceMergeEditor(repo: widget.session.repo)
+                : _Tools(
+                    store: widget.store,
+                    onOpenMerge: () => setState(() => page = 1),
+                    drive: drive,
+                    onUploads: () => setState(() => page = 2),
+                    onFiles: () => setState(() => page = 3),
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _Tools extends StatelessWidget {
+  final SpaceStore store;
   final VoidCallback onOpenMerge;
-  const _Tools({required this.onOpenMerge});
+  final DriveService drive;
+  final VoidCallback onUploads, onFiles;
+  const _Tools({
+    required this.store,
+    required this.onOpenMerge,
+    required this.drive,
+    required this.onUploads,
+    required this.onFiles,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -500,8 +785,38 @@ class _Tools extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+        SizedBox(
+          height: 208,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: DriveToolCard(
+                  service: drive,
+                  uploads: onUploads,
+                  files: onFiles,
+                  onUpload: () => chooseDriveFiles(
+                    context,
+                    drive,
+                    () =>
+                        showSettings(context, store, initialCategory: 'drive'),
+                  ),
+                  onDrop: (paths) => addDriveFiles(
+                    context,
+                    drive,
+                    paths,
+                    () =>
+                        showSettings(context, store, initialCategory: 'drive'),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(child: _FutureTool('数据处理', 'grid')),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
         for (final row in [
-          [('文件管理', 'folder'), ('数据处理', 'grid')],
           [('文本处理', 'list'), ('其他工具', 'tools')],
         ]) ...[
           Row(
@@ -741,6 +1056,45 @@ class _LedgerState extends State<_Ledger> {
                   store: widget.store,
                   actions: [
                     IconButtonS.toolbar(
+                      'scan',
+                      '识别所选发票',
+                      onPressed:
+                          selected.isEmpty ||
+                              session.busy ||
+                              session.batchRecognizing
+                          ? null
+                          : () => unawaited(
+                              session.recognizeSelected(
+                                selected.map((e) => e.id).toList(),
+                              ),
+                            ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButtonS.toolbar(
+                      'trash',
+                      '批量删除发票',
+                      danger: true,
+                      onPressed: selected.isEmpty || session.busy
+                          ? null
+                          : () async {
+                              final ids = selected.map((e) => e.id).toList();
+                              final approved = await invoiceModal(
+                                widget.store,
+                                () => confirm(
+                                  context,
+                                  '删除选中的 ${ids.length} 张发票？',
+                                  '将移除台账记录、原件和关联附件。',
+                                  '删除',
+                                  destructive: true,
+                                ),
+                              );
+                              if (approved == true) {
+                                await session.deleteSelected(ids);
+                              }
+                            },
+                    ),
+                    const SizedBox(width: 8),
+                    IconButtonS.toolbar(
                       'filter',
                       '筛选发票（⌘F）',
                       key: widget.filterAnchor,
@@ -780,7 +1134,6 @@ class _LedgerState extends State<_Ledger> {
                     IconButtonS.toolbar(
                       'upload',
                       '导入发票',
-                      primary: true,
                       onPressed: canImport ? choose : null,
                     ),
                     const SizedBox(width: 8),
@@ -806,7 +1159,10 @@ class _LedgerState extends State<_Ledger> {
                               ? const LinearProgressIndicator()
                               : null,
                         ),
-                        if (session.error case final error?)
+                        for (final error in [
+                          session.error,
+                          session.batchError,
+                        ].whereType<String>())
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             child: Row(
@@ -842,6 +1198,7 @@ class _LedgerState extends State<_Ledger> {
                             Expanded(
                               child: Text(
                                 '${items.length} 张发票 · 已选 ${selected.length} 张'
+                                '${session.batchNotice == null ? '' : ' · ${session.batchNotice}'}'
                                 '${session.notice == null ? '' : ' · ${session.notice}'}',
                                 style: textStyle(p, size: 12, color: p.muted),
                                 overflow: TextOverflow.ellipsis,
@@ -924,13 +1281,13 @@ class _LedgerState extends State<_Ledger> {
       child: LayoutBuilder(
         builder: (context, box) => Scrollbar(
           controller: horizontal,
-          thumbVisibility: box.maxWidth < 860,
+          thumbVisibility: box.maxWidth < 1140,
           notificationPredicate: (n) => n.metrics.axis == Axis.horizontal,
           child: SingleChildScrollView(
             controller: horizontal,
             scrollDirection: Axis.horizontal,
             child: SizedBox(
-              width: math.max(box.maxWidth, 860),
+              width: math.max(box.maxWidth, 1140),
               height: box.maxHeight,
               child: Column(
                 children: [
@@ -961,17 +1318,18 @@ class _LedgerState extends State<_Ledger> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: _columns([
-                            _textCell('发票 / 票号', header: true),
-                            _textCell('消费时间', header: true),
-                            _textCell('用途', header: true),
+                            _textCell('发票名称', header: true),
+                            _textCell('销售方名称', header: true),
+                            _textCell('开票日期', header: true),
+                            _textCell('项目', header: true),
                             _textCell(
                               '金额',
                               header: true,
                               align: TextAlign.right,
                             ),
+                            _textCell('消费日期', header: true),
+                            _textCell('是否报销', header: true),
                             _textCell('报销月份', header: true),
-                            _textCell('报销项目', header: true),
-                            _textCell('状态', header: true),
                           ]),
                         ),
                       ],
@@ -1029,42 +1387,39 @@ class _LedgerState extends State<_Ledger> {
                                             entry.id,
                                           ),
                                     child: _columns([
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            entry.original.name,
-                                            maxLines: info.number.isEmpty
-                                                ? 2
-                                                : 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: textStyle(p, bold: true),
-                                          ),
-                                          if (info.number.isNotEmpty) ...[
-                                            const SizedBox(height: 4),
-                                            _textCell(info.number),
-                                          ],
-                                        ],
+                                      Tooltip(
+                                        message:
+                                            session.recognitionFailures[entry
+                                                .id] ??
+                                            '',
+                                        child: _textCell(
+                                          session.recognitionFailures
+                                                  .containsKey(entry.id)
+                                              ? '识别未完成 · ${info.title.isEmpty ? entry.original.name : info.title}'
+                                              : info.title.isEmpty
+                                              ? (info.recognition.isEmpty
+                                                    ? '待识别'
+                                                    : '待核对')
+                                              : info.title,
+                                        ),
                                       ),
-                                      _textCell(info.spent),
-                                      _textCell(info.purpose),
-                                      _textCell(
-                                        info.amount,
-                                        align: TextAlign.right,
-                                      ),
-                                      _textCell(info.month),
+                                      _textCell(info.seller),
+                                      _textCell(info.issued),
                                       _textCell(
                                         session.projects[info.project] ?? '',
-                                        color: p.purple,
                                       ),
+                                      _textCell(
+                                        info.amount.isEmpty ? '—' : info.amount,
+                                        align: TextAlign.right,
+                                      ),
+                                      _textCell(info.spent),
                                       _textCell(
                                         info.reimbursed ? '已报销' : '未报销',
                                         color: info.reimbursed
                                             ? p.green
                                             : p.secondary,
                                       ),
+                                      _textCell(info.month),
                                     ]),
                                   ),
                                 ),
@@ -1085,7 +1440,7 @@ class _LedgerState extends State<_Ledger> {
   }
 
   Widget _columns(List<Widget> cells) {
-    const widths = [3, 1, 2, 1, 1, 1, 1];
+    const widths = [3, 3, 2, 2, 1, 2, 1, 1];
     return Row(
       children: [
         for (var i = 0; i < cells.length; i++) ...[

@@ -9,6 +9,15 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <thread>
+#include <algorithm>
+#include <stdexcept>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Globalization.h>
+#include <winrt/Windows.Graphics.Imaging.h>
+#include <winrt/Windows.Media.Ocr.h>
+#include <winrt/Windows.Storage.h>
+#include <winrt/Windows.Storage.Streams.h>
 
 class SpaceDesktopChannel {
  public:
@@ -19,6 +28,16 @@ class SpaceDesktopChannel {
     channel_->SetMethodCallHandler([this](const auto& call, auto result) { Handle(call, std::move(result)); });
   }
   bool dirty = false;
+  bool uploads_active = false;
+  static constexpr UINT kOcrReady = WM_APP + 80;
+  struct OcrReply { std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result; std::string text, error; };
+  static void FinishOcr(LPARAM param) {
+    std::unique_ptr<OcrReply> reply(reinterpret_cast<OcrReply*>(param));
+    if(reply->error.empty()) reply->result->Success(flutter::EncodableValue(reply->text));
+    else reply->result->Error("ocr", reply->error);
+  }
+  void RequestClose() { channel_->InvokeMethod("requestClose", std::make_unique<flutter::EncodableValue>()); }
+
   void NotifySystemAppearance() {
     channel_->InvokeMethod("systemAppearanceChanged", std::make_unique<flutter::EncodableValue>());
   }
@@ -61,6 +80,37 @@ class SpaceDesktopChannel {
       const auto url=text("url");if(url.rfind("https://",0)!=0&&url.rfind("mailto:",0)!=0){result->Success(V(false));return;}
       auto value=wide(url);auto opened=ShellExecuteW(window_,L"open",value.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
       result->Success(V(reinterpret_cast<INT_PTR>(opened)>32));return;
+    }
+    if(method=="driveState"){uploads_active=boolean("active");result->Success();return;}
+    if(method=="finishClose"){uploads_active=false;result->Success();PostMessageW(window_,WM_CLOSE,0,0);return;}
+    if(method=="openFolder"){
+      IFileOpenDialog* dialog=nullptr;std::string path;
+      if(SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&dialog)))){
+        dialog->SetOptions(FOS_PICKFOLDERS|FOS_FORCEFILESYSTEM|FOS_PATHMUSTEXIST);
+        if(SUCCEEDED(dialog->Show(window_))){IShellItem* item=nullptr;if(SUCCEEDED(dialog->GetResult(&item))){PWSTR value=nullptr;if(SUCCEEDED(item->GetDisplayName(SIGDN_FILESYSPATH,&value))){path=utf8(value);CoTaskMemFree(value);}item->Release();}}dialog->Release();
+      }if(path.empty())result->Success();else result->Success(V(path));return;
+    }
+    if(method=="recognizeInvoiceImage"){
+      const auto path=wide(text("path"));const auto window=window_;
+      auto reply=new OcrReply{std::move(result),{}, {}};
+      std::thread([path,window,reply]{
+        try{
+          winrt::init_apartment(winrt::apartment_type::multi_threaded);
+          using namespace winrt::Windows::Graphics::Imaging;
+          using namespace winrt::Windows::Media::Ocr;
+          auto engine=OcrEngine::TryCreateFromLanguage(winrt::Windows::Globalization::Language(L"zh-Hans"));
+          if(!engine)throw std::runtime_error("Windows尚未安装中文OCR语言包，请在系统语言设置中安装简体中文识别组件");
+          auto file=winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(path).get();
+          auto stream=file.OpenAsync(winrt::Windows::Storage::FileAccessMode::Read).get();
+          auto decoder=BitmapDecoder::CreateAsync(stream).get();
+          BitmapTransform transform;
+          const double scale=std::min(1.0,static_cast<double>(OcrEngine::MaxImageDimension())/std::max(decoder.PixelWidth(),decoder.PixelHeight()));
+          transform.ScaledWidth(static_cast<uint32_t>(decoder.PixelWidth()*scale));transform.ScaledHeight(static_cast<uint32_t>(decoder.PixelHeight()*scale));
+          auto bitmap=decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8,BitmapAlphaMode::Premultiplied,transform,ExifOrientationMode::RespectExifOrientation,ColorManagementMode::DoNotColorManage).get();
+          reply->text=winrt::to_string(engine.RecognizeAsync(bitmap).get().Text());
+        }catch(const winrt::hresult_error& e){reply->error=winrt::to_string(e.message());}catch(const std::exception& e){reply->error=e.what();}
+        if(!PostMessageW(window,kOcrReady,0,reinterpret_cast<LPARAM>(reply)))delete reply;
+      }).detach();return;
     }
     if(method=="openFiles"){
       IFileOpenDialog* dialog=nullptr;L files;

@@ -10,6 +10,23 @@ import 'package:pdfium_flutter/pdfium_flutter.dart' as pdfium;
 
 import 'invoices.dart';
 import 'invoice_pdf.dart';
+import 'invoice_structured.dart';
+
+/// 2026-11-12：PDF 文本层按字符盒坐标还原成词与视觉行，交给共用的
+/// 结构化发票解析器；不再把整页文本压成一行后靠正则猜左右栏。
+class InvoicePdfText {
+  final double width;
+  final List<InvoiceTextLine> lines;
+  final int characters;
+
+  const InvoicePdfText(this.width, this.lines, this.characters);
+
+  Map<String, Object?> get payload => structuredLinesPayload(
+    width,
+    lines,
+    characters: characters,
+  );
+}
 
 /// Both desktop platforms use the same PDF geometry, renderer and object import.
 /// Only native printing remains platform specific. PDF work stays off the UI
@@ -83,6 +100,137 @@ abstract final class NativeInvoicePdf {
         return InvoicePreview(image.encodePng(raster), count);
       });
     }),
+  );
+
+  static Future<String> text(String path) => _work(
+    (engine) => engine.withSource(path, (doc) {
+      final out = StringBuffer();
+      for (var i = 0; i < math.min(engine.api.FPDF_GetPageCount(doc), 8); i++) {
+        engine.withPage(doc, i, (page, width, height) {
+          final text = engine.api.FPDFText_LoadPage(page);
+          if (text == nullptr) return;
+          try {
+            final count = math.min(engine.api.FPDFText_CountChars(text), 40000);
+            final buffer = calloc<UnsignedShort>(count + 1);
+            try {
+              final length = engine.api.FPDFText_GetText(
+                text,
+                0,
+                count,
+                buffer,
+              );
+              if (length > 1) {
+                out.writeln(
+                  String.fromCharCodes(
+                    buffer.cast<Uint16>().asTypedList(length - 1),
+                  ),
+                );
+              }
+            } finally {
+              calloc.free(buffer);
+            }
+          } finally {
+            engine.api.FPDFText_ClosePage(text);
+          }
+        });
+      }
+      return out.toString();
+    }),
+  );
+
+  /// PDFium FPDFText_GetCharBox 提供逐字符坐标；y 统一换算成距页顶距离，
+  /// 与 pdf.js 原型的 normalize/mergeChars/groupLines 一致。
+  static Future<InvoicePdfText> structuredText(String path) => _work(
+    (engine) => engine.withSource(path, (doc) {
+      final pages = math.min(engine.api.FPDF_GetPageCount(doc), 8);
+      var width = 297.6;
+      var characters = 0;
+      final words = <InvoiceWord>[];
+      for (var i = 0; i < pages; i++) {
+        engine.withPage(doc, i, (page, w, h) {
+          width = w;
+          final text = engine.api.FPDFText_LoadPage(page);
+          if (text == nullptr) return;
+          try {
+            final count = math.min(engine.api.FPDFText_CountChars(text), 40000);
+            characters += count;
+            // 2026-11-12：PDFium 会按「同一行、同一字体」把相邻字符合并成
+            // 文本矩形，直接取矩形文字比逐字符猜字距可靠；此前逐字符方案在
+            // 两端对齐的数电票上会把「苏州恒力…」「208.35」拆散。
+            final rects = math.min(
+              engine.api.FPDFText_CountRects(text, 0, count),
+              4000,
+            );
+            final left = calloc<Double>();
+            final right = calloc<Double>();
+            final bottom = calloc<Double>();
+            final top = calloc<Double>();
+            final buffer = calloc<UnsignedShort>(4096);
+            try {
+              for (var r = 0; r < rects; r++) {
+                if (engine.api.FPDFText_GetRect(
+                      text,
+                      r,
+                      left,
+                      top,
+                      right,
+                      bottom,
+                    ) ==
+                    0) {
+                  continue;
+                }
+                final x0 = math.min(left.value, right.value);
+                final x1 = math.max(left.value, right.value);
+                final yTop = math.max(top.value, bottom.value);
+                final yBottom = math.min(top.value, bottom.value);
+                final length = engine.api.FPDFText_GetBoundedText(
+                  text,
+                  left.value,
+                  top.value,
+                  right.value,
+                  bottom.value,
+                  buffer,
+                  4096,
+                );
+                if (length <= 0) continue;
+                final textBuffer = StringBuffer();
+                for (var k = 0; k < length && k < 4096; k++) {
+                  final code = buffer[k];
+                  if (code == 0) break;
+                  textBuffer.writeCharCode(code);
+                }
+                final value = textBuffer.toString().trim();
+                if (value.isEmpty) continue;
+                words.add(
+                  InvoiceWord(x0, h - yTop, x1 - x0, yTop - yBottom, value),
+                );
+              }
+            } finally {
+              calloc.free(left);
+              calloc.free(right);
+              calloc.free(bottom);
+              calloc.free(top);
+              calloc.free(buffer);
+            }
+          } finally {
+            engine.api.FPDFText_ClosePage(text);
+          }
+        });
+      }
+      return InvoicePdfText(width, invoiceLines(words), characters);
+    }),
+  );
+
+  static Future<Uint8List> ocrImage(String path) => _work(
+    (engine) => engine.withSource(
+      path,
+      (doc) => engine.withPage(
+        doc,
+        0,
+        (page, width, height) =>
+            image.encodePng(engine.raster(page, width, height, 2200)),
+      ),
+    ),
   );
 
   static Future<Uint8List> render(Map<String, Object> sheet) => _work(

@@ -1,14 +1,6 @@
 name: Windows portable build
 on:
   workflow_dispatch:
-  push:
-    branches: [main, 'codex/space-2.3.1']
-    paths:
-      - 'flutter/lib/**'
-      - 'flutter/windows/**'
-      - 'flutter/assets/**'
-      - 'flutter/pubspec.*'
-      - '.github/workflows/windows-build.yml'
 permissions:
   contents: read
 jobs:
@@ -28,6 +20,9 @@ jobs:
         run: |
           flutter --version
           flutter pub get --enforce-lockfile
+          if ($LASTEXITCODE -ne 0) { throw 'Dependency restore failed' }
+          dart run tool/fetch_ocr_models.dart
+          if ($LASTEXITCODE -ne 0) { throw 'OCR model restore or SHA256 verification failed' }
           flutter build windows --release --target lib/main.dart
           if ($LASTEXITCODE -ne 0) { throw 'Windows compilation failed' }
       - name: Package complete portable directory
@@ -46,6 +41,14 @@ jobs:
           Copy-Item ($vc.FullName + '/*.dll') $stage
           if (!(Test-Path (Join-Path $stage 'Space.exe'))) { throw 'Space.exe missing' }
           if (!(Test-Path (Join-Path $stage 'pdfium.dll'))) { throw 'PDFium missing' }
+          if (!(Get-ChildItem $stage -Recurse -Filter '*onnxruntime*.dll')) { throw 'ONNX Runtime missing' }
+          if (!(Get-ChildItem $stage -Recurse -Filter '*space_ocr_math*.dll')) { throw 'OCR native helpers missing' }
+          $models = Join-Path $stage 'data/flutter_assets/assets/models/ppocrv6'
+          foreach ($tier in @('small', 'medium')) {
+            foreach ($kind in @('det', 'rec')) {
+              if (!(Test-Path (Join-Path $models "PP-OCRv6_${kind}_${tier}.onnx"))) { throw "OCR model missing: $kind/$tier" }
+            }
+          }
           New-Item -ItemType Directory artifacts | Out-Null
           $zip = Join-Path (Get-Location) "artifacts/$name.zip"
           Compress-Archive -Path $stage -DestinationPath $zip

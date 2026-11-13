@@ -2,10 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
+
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as p;
+
 import 'files.dart';
+
 import 'package:sqlite3/sqlite3.dart';
+
 import 'models.dart';
 
 /// 解包后的备份：临时目录中的数据库快照，以及其中的附件数量。
@@ -26,9 +30,8 @@ class SpaceRepository {
   Future<T> _locked<T>(Future<T> Function() work) async {
     directory.createSync(recursive: true);
     protectPath(directory.path, directory: true);
-    final lock = File(
-      '${directory.path}/.sqlite-write-lock',
-    ).openSync(mode: FileMode.append);
+    final lock = File('${directory.path}/.sqlite-write-lock')
+        .openSync(mode: FileMode.append);
     try {
       await lock.lock(FileLock.blockingExclusive);
       return await work();
@@ -56,7 +59,7 @@ class SpaceRepository {
     }
     final db = _open(path);
     try {
-      if (db.userVersion < 1 || db.userVersion > 7) {
+      if (db.userVersion < 1 || db.userVersion > 8) {
         throw StateError('不支持此 Space 数据库版本');
       }
       _upgradeInvoiceSchema(db);
@@ -69,7 +72,7 @@ class SpaceRepository {
 
   /// v5 起发票使用共用项目表；v6 补充购销方与税额；v7 记录附件摘要与大小。
   void _upgradeInvoiceSchema(Database db) {
-    if (db.userVersion >= 7 || db.userVersion < 1) return;
+    if (db.userVersion >= 8 || db.userVersion < 1) return;
     db.execute('BEGIN IMMEDIATE');
     try {
       final from = db.userVersion;
@@ -80,11 +83,26 @@ class SpaceRepository {
       }
       _addInvoiceFields(db);
       _addInvoiceFileColumns(db);
-      db.userVersion = 7;
+      _addInvoiceRecognitionColumns(db);
+      db.userVersion = 8;
       db.execute('COMMIT');
     } catch (_) {
       db.execute('ROLLBACK');
       rethrow;
+    }
+  }
+
+  void _addInvoiceRecognitionColumns(Database db) {
+    final columns = {
+      for (final row in db.select('PRAGMA table_info(invoices)'))
+        row['name'] as String,
+    };
+    for (final name in ['title', 'recognition']) {
+      if (!columns.contains(name)) {
+        db.execute(
+          "ALTER TABLE invoices ADD COLUMN $name TEXT NOT NULL DEFAULT ''",
+        );
+      }
     }
   }
 
@@ -207,7 +225,7 @@ DROP TABLE invoice_project_map;
     final db = _open(file, readOnly: true);
     try {
       final v = db.userVersion;
-      if (v < 1 || v > 7) invalid('不支持数据库格式版本 $v');
+      if (v < 1 || v > 8) invalid('不支持数据库格式版本 $v');
       if (db.select('PRAGMA quick_check').first.values.first != 'ok') {
         invalid('数据库校验失败，原文件已保留');
       }
@@ -563,8 +581,8 @@ PRAGMA user_version=1;
           final project = row['project'] as String?;
           target.execute(
             'INSERT INTO invoices(id,number,issued,seller,spent,purpose,month,'
-            'project,cents,reimbursed,buyer,seller_tax,buyer_tax,tax_cents,net_cents) '
-            'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'project,cents,reimbursed,buyer,seller_tax,buyer_tax,tax_cents,net_cents,title,recognition) '
+            'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [
               row['id'],
               row['number'] ?? '',
@@ -581,6 +599,8 @@ PRAGMA user_version=1;
               row['buyer_tax'] ?? '',
               row['tax_cents'],
               row['net_cents'],
+              row['title'] ?? '',
+              row['recognition'] ?? '',
             ],
           );
         }

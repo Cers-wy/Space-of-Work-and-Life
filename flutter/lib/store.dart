@@ -89,6 +89,9 @@ class SpaceStore extends ChangeNotifier {
       : true;
   bool get hideScrollbars => state.settings['hideScrollbars'] == 'true';
 
+  /// 2026-11-12：设置「发票识别」栏目中的开关，默认关闭（优先 PDF 文本层）。
+  bool get preferOcr => state.settings['preferOcr'] == 'true';
+
   /// 列宽使用连续比例，仅限制在 50%–100%，不再吸附档位。
   double boardWidthRatio(String status) {
     final value = double.tryParse(state.settings['boardWidth.$status'] ?? '');

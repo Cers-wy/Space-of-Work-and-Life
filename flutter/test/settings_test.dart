@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' show SemanticsAction;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -381,7 +382,7 @@ void main() {
       await t.runAsync(() => File(store.repository.path).readAsBytes()),
       original,
     );
-    await select(t, 5);
+    await select(t, 7);
     expect(find.text('新版 2.2.0 可下载'), findsOneWidget);
     expect(find.text('Cers'), findsOneWidget);
     await t.tap(find.text('GitHub 项目'));
@@ -446,7 +447,7 @@ void main() {
   });
   for (final width in [700.0, 1020.0, 1440.0]) {
     for (final dark in [false, true]) {
-      testWidgets('$width ${dark ? '深' : '浅'}色六页导航、标题栏和滚动适配', (t) async {
+      testWidgets('$width ${dark ? '深' : '浅'}色八页导航、标题栏和滚动适配', (t) async {
         await t.runAsync(
           () => store.preference('appearance', dark ? 'dark' : 'light'),
         );
@@ -456,7 +457,7 @@ void main() {
           t.getSize(find.byKey(const ValueKey('settings-titlebar'))).height,
           t.getSize(find.byKey(const ValueKey('workspace-titlebar'))).height,
         );
-        for (final i in [1, 2, 3, 4, 5, 0]) {
+        for (final i in [1, 2, 3, 4, 5, 6, 7, 0]) {
           await select(t, i);
           expect(t.takeException(), isNull);
         }
@@ -466,4 +467,32 @@ void main() {
       });
     }
   }
+
+  testWidgets('发票识别栏目：优先 OCR 默认关闭、说明文字与持久化', (t) async {
+    expect(store.preferOcr, isFalse, reason: '开关默认关闭');
+    await launch(t);
+    await openSettings(t);
+    await select(t, 5);
+    expect(find.text('优先使用 OCR'), findsOneWidget);
+    expect(find.textContaining('默认关闭'), findsOneWidget);
+    final toggle = find.byKey(const ValueKey('settings-prefer-ocr'));
+    expect(t.widget<Switch>(toggle).value, isFalse);
+    await t.tap(toggle);
+    await t.runAsync(() async {
+      final deadline = DateTime.now().add(const Duration(seconds: 5));
+      while (!store.preferOcr && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    await t.pumpAndSettle();
+    expect(store.preferOcr, isTrue);
+    expect(t.widget<Switch>(toggle).value, isTrue);
+    await select(t, 0);
+    expect(find.text('优先 OCR'), findsOneWidget);
+    final reopened = SpaceStore(SpaceRepository(dir));
+    addTearDown(reopened.dispose);
+    await t.runAsync(reopened.initialize);
+    expect(reopened.preferOcr, isTrue, reason: '偏好写入本机设置，重启保留');
+    expect(t.takeException(), isNull);
+  });
 }

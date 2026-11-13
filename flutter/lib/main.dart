@@ -1,9 +1,16 @@
+import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+
 import 'ui/benchmark.dart';
+
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+
 import 'core/repository.dart';
+import 'core/drive.dart';
+import 'ui/file_drive.dart';
 import 'core/sync_service.dart';
 import 'host.dart';
 import 'store.dart';
@@ -29,6 +36,12 @@ Future<void> main(List<String> args) async {
     }
   }
   runApp(SpaceApp(store: store));
+  unawaited(
+    driveFor(store).initialize().catchError((Object error) {
+      driveFor(store).message = driveError(error);
+      driveFor(store).changed();
+    }),
+  );
   if (const bool.fromEnvironment("SPACE_BENCHMARK")) {
     WidgetsBinding.instance.addPostFrameCallback((_) => runUiBenchmark(store));
   }
@@ -45,6 +58,51 @@ class SpaceApp extends StatefulWidget {
 class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
   final navigatorKey = GlobalKey<NavigatorState>();
   bool reducedTransparency = false, reducedMotion = false;
+  bool _askingExit = false, _exitWhenDone = false;
+  final _exitTasks = <String>{};
+  DriveService get drive => driveFor(widget.store);
+  void _driveChanged() {
+    DesktopHost.channel
+        .invokeMethod('driveState', {'active': drive.active})
+        .catchError((_) => null);
+    if (_exitWhenDone && !drive.active) {
+      _exitWhenDone = false;
+      if (drive.tasks
+          .where((t) => _exitTasks.contains(t.id))
+          .every((t) => t.status == UploadStatus.complete)) {
+        DesktopHost.channel.invokeMethod('finishClose').catchError((_) => null);
+      } else {
+        drive.message = '部分上传未完成，已取消自动退出。';
+        drive.changed();
+      }
+    }
+  }
+
+  Future<void> _requestExit() async {
+    if (_askingExit) return;
+    _askingExit = true;
+    try {
+      final context = navigatorKey.currentContext;
+      if (context == null) return;
+      final answer = await showUploadExit(
+        context,
+        drive.tasks.where((t) => t.status.active).length,
+      );
+      if (answer == 'wait') {
+        _exitTasks
+          ..clear()
+          ..addAll(drive.tasks.where((t) => t.status.active).map((t) => t.id));
+        _exitWhenDone = true;
+        _driveChanged();
+      } else if (answer == 'stop') {
+        await drive.stop();
+        await DesktopHost.channel.invokeMethod('finishClose');
+      }
+    } finally {
+      _askingExit = false;
+    }
+  }
+
   Future<void> accessibility() async {
     try {
       final values = Map<String, dynamic>.from(
@@ -64,7 +122,13 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     accessibility();
+    drive.addListener(_driveChanged);
+    _driveChanged();
     DesktopHost.channel.setMethodCallHandler((call) async {
+      if (call.method == 'requestClose') {
+        await _requestExit();
+        return;
+      }
       if (call.method == 'systemAppearanceChanged') {
         await widget.store.updateSystemAppearance();
         return;
@@ -138,6 +202,7 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    drive.removeListener(_driveChanged);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

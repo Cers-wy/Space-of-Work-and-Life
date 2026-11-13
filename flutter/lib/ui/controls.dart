@@ -53,6 +53,18 @@ class _IconPainter extends CustomPainter {
     }
 
     switch (name) {
+      case 'scan':
+        line(2, 7, 2, 2);
+        line(2, 2, 7, 2);
+        line(13, 2, 18, 2);
+        line(18, 2, 18, 7);
+        line(2, 13, 2, 18);
+        line(2, 18, 7, 18);
+        line(13, 18, 18, 18);
+        line(18, 18, 18, 13);
+        line(6, 7, 14, 7);
+        line(6, 10, 14, 10);
+        line(6, 13, 11, 13);
       case 'plus':
         line(10, 3, 10, 17);
         line(3, 10, 17, 10);
@@ -263,6 +275,8 @@ class _IconPainter extends CustomPainter {
               ? const [Offset(11, 7), Offset(14, 10), Offset(11, 13)]
               : const [Offset(14, 7), Offset(11, 10), Offset(14, 13)],
         );
+      // 网盘连接设置沿用齿轮字形，避免未登记名字落到 default 画成空方块。
+      case 'settings':
       case 'gear':
         final path = Path();
         for (var i = 0; i < 32; i++) {
@@ -301,6 +315,36 @@ class _IconPainter extends CustomPainter {
           Offset(17, 18),
           Offset(17, 11),
         ]);
+      // 2026-11-12：工具首页「打开文件网盘」此前缺字形，落到 default 只画出空方块。
+      case 'cloud':
+        c.drawPath(
+          Path()
+            ..moveTo(5, 15.5)
+            ..cubicTo(2.2, 15.5, 2, 11.2, 4.8, 10.6)
+            ..cubicTo(5, 6.8, 8.6, 5.4, 10.8, 7.6)
+            ..cubicTo(12.2, 6.2, 15.4, 7, 15.6, 10.4)
+            ..cubicTo(18.4, 10.8, 18.4, 15.5, 15.6, 15.5)
+            ..close(),
+          p,
+        );
+      // 文件网盘「刷新仓库列表」：双箭头循环，与单向的 refresh 区分。
+      case 'reload':
+        c.drawArc(
+          const Rect.fromLTWH(3, 4, 14, 12),
+          math.pi * .18,
+          math.pi * 1.2,
+          false,
+          p,
+        );
+        c.drawArc(
+          const Rect.fromLTWH(3, 4, 14, 12),
+          math.pi * 1.18,
+          math.pi * 1.2,
+          false,
+          p,
+        );
+        path(const [Offset(3, 5), Offset(3, 8.5), Offset(6.5, 9)]);
+        path(const [Offset(17, 15), Offset(17, 11.5), Offset(13.5, 11)]);
       case 'upload':
         path(const [Offset(6, 6), Offset(10, 2), Offset(14, 6)]);
         line(10, 2, 10, 13);
@@ -430,6 +474,8 @@ class _IconPainter extends CustomPainter {
           ),
           Paint()..color = const Color(0xffb8d2ff),
         );
+      // 仅作兜底占位；test/invoice_structured_test.dart 会校验所有调用名都
+      // 在上方登记，避免再出现工具首页/网盘页的「空方块图标」。
       default:
         rect(3, 3, 14, 14);
     }
@@ -445,6 +491,7 @@ class SpaceButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onPressed;
   final String? tooltip;
+  final bool showTooltipOnTap;
   final bool primary, selected, danger, subtle;
   final bool _form;
 
@@ -459,6 +506,7 @@ class SpaceButton extends StatefulWidget {
     required this.child,
     this.onPressed,
     this.tooltip,
+    this.showTooltipOnTap = false,
     this.primary = false,
     this.selected = false,
     this.soft = false,
@@ -476,6 +524,7 @@ class SpaceButton extends StatefulWidget {
     super.key,
     this.onPressed,
     this.tooltip,
+    this.showTooltipOnTap = false,
     this.primary = false,
     this.danger = false,
   }) : child = Text(label),
@@ -495,6 +544,15 @@ class SpaceButton extends StatefulWidget {
 
 class _SpaceButtonState extends State<SpaceButton> {
   bool hover = false, focus = false, pressed = false;
+  final tooltipKey = GlobalKey<TooltipState>();
+  void _handleActivate() {
+    if (widget.onPressed == null) return;
+    if (widget.showTooltipOnTap) {
+      tooltipKey.currentState?.ensureTooltipVisible();
+    }
+    widget.onPressed!();
+  }
+
   @override
   Widget build(BuildContext context) {
     final w = widget, p = Palette.of(context);
@@ -542,7 +600,7 @@ class _SpaceButtonState extends State<SpaceButton> {
       actions: {
         ActivateIntent: CallbackAction<ActivateIntent>(
           onInvoke: (_) {
-            w.onPressed?.call();
+            _handleActivate();
             return null;
           },
         ),
@@ -552,11 +610,11 @@ class _SpaceButtonState extends State<SpaceButton> {
         label: w.tooltip,
         enabled: w.onPressed != null,
         selected: w.selected,
-        onTap: w.onPressed,
+        onTap: w.onPressed == null ? null : _handleActivate,
         child: GestureDetector(
           excludeFromSemantics: true,
           behavior: HitTestBehavior.opaque,
-          onTap: w.onPressed,
+          onTap: w.onPressed == null ? null : _handleActivate,
           onTapDown: (_) => setState(() => pressed = true),
           onTapUp: (_) => setState(() => pressed = false),
           onTapCancel: () => setState(() => pressed = false),
@@ -631,7 +689,9 @@ class _SpaceButtonState extends State<SpaceButton> {
         ),
       ),
     );
-    if (w.tooltip != null) result = Tooltip(message: w.tooltip!, child: result);
+    if (w.tooltip != null) {
+      result = Tooltip(key: tooltipKey, message: w.tooltip!, child: result);
+    }
     return result;
   }
 }
@@ -676,6 +736,7 @@ class IconButtonS extends StatelessWidget {
       height: size,
       child: SpaceButton(
         tooltip: label,
+        showTooltipOnTap: _surfaceInset > 0,
         onPressed: onPressed,
         primary: primary,
         selected: selected,
@@ -1565,12 +1626,14 @@ class DateField extends StatelessWidget {
   final String value, label;
   final ValueChanged<String> onChanged;
   final bool allowsClear;
+  final bool matchFieldWidth;
   const DateField({
     super.key,
     required this.value,
     required this.onChanged,
     this.label = '截止日期',
     this.allowsClear = true,
+    this.matchFieldWidth = false,
   });
   @override
   Widget build(BuildContext c) => SpacePickerField(
@@ -1582,7 +1645,9 @@ class DateField extends StatelessWidget {
       final date = await anchoredPopup<String>(
         anchor,
         DatePopover(value: value, allowsClear: allowsClear),
-        width: 304,
+        width: matchFieldWidth
+            ? (anchor.findRenderObject() as RenderBox).size.width
+            : 304,
         height: 376,
       );
       if (anchor.mounted && date != null) onChanged(date);
@@ -1816,7 +1881,9 @@ Future<T?> anchoredPopup<T>(
         ),
       ],
     ),
-  );
+  ).whenComplete(() {
+    Tooltip.dismissAllToolTips();
+  });
 }
 
 class BoardResizeHandle extends StatefulWidget {
@@ -1925,6 +1992,7 @@ class SpaceMultiSelect extends StatelessWidget {
   final Map<String, String> options;
   final String label;
   final double? width;
+  final bool matchFieldWidth;
   final VoidCallback? onChanged;
   final Future<bool> Function(Set<String>)? saveSelection;
   const SpaceMultiSelect({
@@ -1934,6 +2002,7 @@ class SpaceMultiSelect extends StatelessWidget {
     required this.label,
     required VoidCallback this.onChanged,
     this.width,
+    this.matchFieldWidth = false,
   }) : saveSelection = null;
 
   const SpaceMultiSelect.persistent({
@@ -1943,6 +2012,7 @@ class SpaceMultiSelect extends StatelessWidget {
     required this.label,
     required Future<bool> Function(Set<String>) this.saveSelection,
     this.width,
+    this.matchFieldWidth = false,
   }) : onChanged = null;
 
   bool get persistent => saveSelection != null;
@@ -2046,7 +2116,9 @@ class SpaceMultiSelect extends StatelessWidget {
           );
         },
       ),
-      width: 240,
+      width: matchFieldWidth
+          ? (anchor.findRenderObject() as RenderBox).size.width
+          : 240,
       height: math.min(options.length * 48.0 + 52, 360),
       constrainHeight: true,
     );

@@ -1,0 +1,6 @@
+2.3.2+19 最终构建/运行复核摘要（据本轮 Flutter CLI 工具输出，不是性能报告）
+命令：flutter run -d macos --debug --no-pub --dart-define="SPACE_DATA_DIRECTORY=$HOME/Library/Application Support/Space-Background-Preview" --dart-define=SPACE_DEMO=true
+结果：Built build/macos/Build/Products/Debug/Space.app；Impeller/Metal；Syncing files 98ms；Dart VM Service 和 DevTools 可用。
+原生阻塞修复后发送 r：Reloaded 0 libraries in 68ms (compile:16ms,reload:0ms,reassemble:34ms)。
+Info.plist：CFBundleShortVersionString 2.3.2，CFBundleVersion 19。
+未制作分发包，Windows 未构建/运行，未做正式性能/资源实测。

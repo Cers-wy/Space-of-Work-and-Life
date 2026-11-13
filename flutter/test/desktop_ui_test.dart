@@ -280,12 +280,84 @@ void main() {
       }
     });
     await t.pumpAndSettle();
-    expect(find.text('发票信息已保存'), findsOneWidget);
+    // 2.3.2 起保存成功后详情自动关闭，提示进入台账会话通知。
+    expect(find.byTooltip('关闭发票详情'), findsNothing);
+    expect(session.notice, '发票信息已保存');
     final persisted = await t.runAsync(session.repo.load);
     expect(persisted!.entries.single.info.project, project.id);
-    await t.tap(find.byTooltip('关闭发票详情'));
-    await t.pumpAndSettle();
     expect(store.modal, isFalse);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('点击详情左侧空白关闭，有修改时先询问是否保存', (t) async {
+    narrowWindow(t);
+    final session = InvoiceSession(store.repository);
+    addTearDown(session.dispose);
+    final file = File('${directory.path}/空白关闭.png')
+      ..writeAsBytesSync(
+        base64Decode(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        ),
+      );
+    await t.runAsync(() => session.import([file.path]));
+    final id = session.ledger!.entries.single.id;
+    await t.pumpWidget(
+      MaterialApp(
+        theme: spaceTheme(false),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => SpaceButton(
+              onPressed: () => showInvoiceDetails(context, store, session, id),
+              child: const Text('开发票'),
+            ),
+          ),
+        ),
+      ),
+    );
+    final sheet = find.byKey(const ValueKey('invoice-details-sheet'));
+    await t.tap(find.text('开发票'));
+    await t.pumpAndSettle();
+    expect(sheet, findsOneWidget);
+    await t.tap(find.byKey(const ValueKey('invoice-details-dismiss-area')));
+    await t.pumpAndSettle();
+    expect(find.text('保存修改？'), findsNothing, reason: '无修改不应询问');
+    expect(sheet, findsNothing, reason: '没有修改时点击左侧空白直接关闭');
+    expect(store.modal, isFalse);
+
+    await t.tap(find.text('开发票'));
+    await t.pumpAndSettle();
+    final titleInput = find.descendant(
+      of: find.byKey(const ValueKey('invoice-field-发票名称')),
+      matching: find.byType(TextField),
+    );
+    await t.enterText(titleInput, '手工修改的票面名称');
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const ValueKey('invoice-details-dismiss-area')));
+    await t.pumpAndSettle();
+    expect(find.text('保存修改？'), findsOneWidget);
+    expect(find.text('不保存'), findsOneWidget);
+    expect(sheet, findsOneWidget, reason: '询问期间详情不关闭');
+    // 详情底部也有「取消」，询问弹窗里的按钮按 Dialog 范围定位。
+    Future<void> tapDialog(String label) => t.tap(
+      find.descendant(of: find.byType(Dialog), matching: find.text(label)),
+    );
+    await tapDialog('取消');
+    await t.pumpAndSettle();
+    expect(sheet, findsOneWidget, reason: '取消后继续编辑');
+    await t.tap(find.byKey(const ValueKey('invoice-details-dismiss-area')));
+    await t.pumpAndSettle();
+    expect(find.text('保存修改？'), findsOneWidget);
+    await tapDialog('不保存');
+    await t.pumpAndSettle();
+    expect(sheet, findsNothing, reason: '放弃修改后关闭详情');
+    final persisted = await t.runAsync(session.repo.load);
+    expect(
+      persisted!.entries.single.info.title,
+      isNot('手工修改的票面名称'),
+      reason: '放弃的修改不应落库',
+    );
+    // 2.3.2 自动识别的 OCR worker 有 25 秒空闲定时器，快进后收尾。
+    await t.pump(const Duration(seconds: 26));
     expect(t.takeException(), isNull);
   });
 }

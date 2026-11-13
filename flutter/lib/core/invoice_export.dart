@@ -7,13 +7,14 @@ import 'package:archive/archive.dart';
 import 'invoices.dart';
 
 enum InvoiceColumn {
-  name('文件名'),
+  name('发票名称'),
+  filename('原件文件名'),
   number('发票号码'),
   issued('开票日期'),
-  seller('销售方'),
+  seller('销售方名称'),
   amount('金额'),
-  spent('消费时间'),
-  purpose('用途'),
+  spent('消费日期'),
+  purpose('备注'),
   month('报销月份'),
   project('报销项目'),
   state('报销状态'),
@@ -23,7 +24,8 @@ enum InvoiceColumn {
   const InvoiceColumn(this.title);
 
   Object value(InvoiceEntry e, Map<String, String> projects) => switch (this) {
-    name => e.original.name,
+    name => e.info.title,
+    filename => e.original.name,
     number => e.info.number,
     issued => e.info.issued,
     seller => e.info.seller,

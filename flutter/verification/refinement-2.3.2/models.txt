@@ -1,0 +1,4 @@
+PP-OCRv6_det_small.onnx: verified
+PP-OCRv6_rec_small.onnx: verified
+PP-OCRv6_det_medium.onnx: verified
+PP-OCRv6_rec_medium.onnx: verified

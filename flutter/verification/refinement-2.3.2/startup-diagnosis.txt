@@ -1,0 +1,5 @@
+本轮新建隔离 Debug 进程的 1 秒线程栈诊断摘录；用于故障定位，不是性能测量。修复已完成。
+    758 Thread_3558255   DispatchQueue_1: com.apple.main-thread  (serial)
+    +                                                             758 closure #1 in MainFlutterWindow.awakeFromNib()  (in Space.debug.dylib) + 21980  [0x1009b9b14]  MainFlutterWindow.swift:128
+    +                                                               758 SecItemCopyMatching  (in Security) + 344  [0x19d2a0388]
+    +                                                                 758 SecItemCopyMatching_osx(__CFDictionary const*, void const**)  (in Security) + 2140  [0x19d29f524]

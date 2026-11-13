@@ -38,6 +38,7 @@ class _WorkspaceState extends State<Workspace> {
   void initState() {
     super.initState();
     invoices = InvoiceSession(s.repository);
+    invoices.preferOcr = () => s.preferOcr;
     s.searchRequested.addListener(requestSearch);
     previousNavCollapsed = s.navCollapsed;
     s.addListener(trackNavigation);

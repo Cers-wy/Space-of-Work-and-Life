@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -22,11 +23,13 @@ class InvoiceFile {
 
 class InvoiceInfo {
   final String number, issued, seller, spent, purpose, month, project;
-  final String buyer, sellerTax, buyerTax;
+  final String buyer, sellerTax, buyerTax, title, recognition;
   final int? cents, taxCents, netCents;
   final bool reimbursed;
 
   const InvoiceInfo({
+    this.title = '',
+    this.recognition = '',
     this.number = '',
     this.issued = '',
     this.seller = '',
@@ -44,10 +47,46 @@ class InvoiceInfo {
   });
 
   String get amount => cents == null ? '' : (cents! / 100).toStringAsFixed(2);
+  String get recognitionNotice {
+    try {
+      final value = jsonDecode(recognition) as Map;
+      return value['message'] as String? ?? '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// 2026-11-12：PDF/OCR 解析出的结构化票面数据（明细、合计、人员、校验），
+  /// 随 recognition 一起保存在发票记录中，供详情核对与后续扩展使用。
+  Map<String, Object?> get recognitionStructure {
+    try {
+      final value = jsonDecode(recognition) as Map;
+      final structure = value['structured'];
+      return structure is Map
+          ? Map<String, Object?>.from(structure)
+          : const <String, Object?>{};
+    } catch (_) {
+      return const <String, Object?>{};
+    }
+  }
+
   String get tax =>
       taxCents == null ? '' : (taxCents! / 100).toStringAsFixed(2);
   String get net =>
       netCents == null ? '' : (netCents! / 100).toStringAsFixed(2);
+
+  Map<String, Object?> get ticketFields => {
+    'title': title,
+    'number': number,
+    'issued': issued,
+    'seller': seller,
+    'buyer': buyer,
+    'seller_tax': sellerTax,
+    'buyer_tax': buyerTax,
+    'cents': cents,
+    'tax_cents': taxCents,
+    'net_cents': netCents,
+  };
 
   List<Object?> get values => [
     number,
@@ -64,6 +103,7 @@ class InvoiceInfo {
     buyerTax,
     taxCents,
     netCents,
+    title,
   ];
 }
 
@@ -178,6 +218,8 @@ class InvoiceRepository {
               originals[row['id']]!,
               attachments[row['id']] ?? const [],
               InvoiceInfo(
+                title: row['title'] as String? ?? '',
+                recognition: row['recognition'] as String? ?? '',
                 number: row['number'] as String,
                 issued: row['issued'] as String,
                 seller: row['seller'] as String,
@@ -250,19 +292,146 @@ class InvoiceRepository {
     }),
   );
 
-  Future<void> save(String id, InvoiceInfo info) => Isolate.run(
-    () => _database((db) {
-      final values = info.values;
-      if (info.project.isEmpty) values[6] = null;
-      db.execute(
-        '''
+  Future<void> save(String id, InvoiceInfo info, {InvoiceInfo? baseline}) =>
+      Isolate.run(
+        () => _database((db) {
+          final values = info.values;
+          if (info.project.isEmpty) values[6] = null;
+          if (baseline != null) {
+            final rows = db.select('SELECT * FROM invoices WHERE id=?', [id]);
+            if (rows.isEmpty) throw StateError('这张发票已从台账移除');
+            const columns = [
+              'number',
+              'issued',
+              'seller',
+              'spent',
+              'purpose',
+              'month',
+              'project',
+              'cents',
+              'reimbursed',
+              'buyer',
+              'seller_tax',
+              'buyer_tax',
+              'tax_cents',
+              'net_cents',
+              'title',
+            ];
+            final before = baseline.values;
+            if (baseline.project.isEmpty) before[6] = null;
+            for (var i = 0; i < values.length; i++) {
+              if (values[i] == before[i]) values[i] = rows.single[columns[i]];
+            }
+          }
+          db.execute(
+            '''
       UPDATE invoices SET number=?,issued=?,seller=?,spent=?,purpose=?,month=?,project=?,cents=?,reimbursed=?,
-        buyer=?,seller_tax=?,buyer_tax=?,tax_cents=?,net_cents=?
+        buyer=?,seller_tax=?,buyer_tax=?,tax_cents=?,net_cents=?,title=?
       WHERE id=?
     ''',
-        [...values, id],
+            [...values, id],
+          );
+          if (db.updatedRows != 1) throw StateError('这张发票已从台账移除');
+        }),
       );
-      if (db.updatedRows != 1) throw StateError('这张发票已从台账移除');
+
+  Future<void> recognitionError(String id, String message) => Isolate.run(
+    () => _database((db) {
+      db.execute(
+        'UPDATE invoices SET recognition=? WHERE id=? AND recognition=?',
+        [
+          jsonEncode({'status': 'error', 'message': message, 'automatic': {}}),
+          id,
+          '',
+        ],
+      );
+    }),
+  );
+
+  /// 导入时保护手工票面值；用户主动识别可覆盖有效票面字段。
+  /// 个人备注与报销字段始终不进入票面更新，主动识别也不推导消费日期。
+  Future<void> applyRecognition(
+    String id,
+    Map<String, Object?> fields,
+    String message, {
+    Map<String, Object?>? structured,
+    bool replaceExisting = false,
+    Map<String, Object?>? expectedFields,
+  }) => Isolate.run(
+    () => _database((db) {
+      _transaction(db, () {
+        final rows = db.select('SELECT * FROM invoices WHERE id=?', [id]);
+        if (rows.isEmpty) throw StateError('这张发票已从台账移除');
+        final row = rows.single;
+        Map<String, dynamic> previous = {};
+        Map<String, Object?> previousStructure = const {};
+        try {
+          final stored = Map<String, dynamic>.from(
+            jsonDecode(row['recognition'] as String) as Map,
+          );
+          previous = Map<String, dynamic>.from(
+            stored['automatic'] as Map? ?? const {},
+          );
+          final structure = stored['structured'];
+          if (structure is Map) {
+            previousStructure = Map<String, Object?>.from(structure);
+          }
+        } catch (_) {}
+        final automatic = <String, Object?>{...previous};
+        final updates = <String, Object?>{};
+        const allowed = {
+          'title',
+          'number',
+          'issued',
+          'seller',
+          'buyer',
+          'seller_tax',
+          'buyer_tax',
+          'cents',
+          'tax_cents',
+          'net_cents',
+        };
+        for (final item in fields.entries) {
+          if (!allowed.contains(item.key) ||
+              item.value == null ||
+              item.value == '') {
+            continue;
+          }
+          final writable = replaceExisting
+              ? expectedFields == null ||
+                    row[item.key] == expectedFields[item.key]
+              : row[item.key] == null ||
+                    row[item.key] == '' ||
+                    row[item.key] == previous[item.key];
+          if (writable) {
+            updates[item.key] = item.value;
+            automatic[item.key] = item.value;
+          }
+        }
+        if (!replaceExisting &&
+            (row['spent'] as String).isEmpty &&
+            fields['issued'] is String) {
+          updates['spent'] = fields['issued'];
+          if ((row['month'] as String).isEmpty) {
+            updates['month'] = (fields['issued'] as String).substring(0, 7);
+          }
+        }
+        updates['recognition'] = jsonEncode({
+          'status': message.isEmpty ? 'complete' : 'review',
+          'message': message,
+          'automatic': automatic,
+          // 结构化数据保留最近一次有明细的结果，避免不完整识别清空历史结构。
+          'structured':
+              structured == null ||
+                  (structured['items'] as List? ?? const []).isEmpty
+              ? previousStructure
+              : structured,
+        });
+        db.execute(
+          'UPDATE invoices SET ${updates.keys.map((k) => '$k=?').join(',')} WHERE id=?',
+          [...updates.values, id],
+        );
+      });
     }),
   );
 

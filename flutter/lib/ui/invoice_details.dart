@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../core/invoice_export.dart';
 import '../core/invoice_pdf.dart';
 import '../core/invoices.dart';
+import '../core/invoice_recognition.dart';
 import '../host.dart';
 import '../store.dart';
 import 'controls.dart';
@@ -27,64 +28,136 @@ Future<T?> invoiceModal<T>(SpaceStore store, Future<T?> Function() open) async {
   }
 }
 
+/// 2026-11-12：左侧空白点击关闭的请求由详情面板注册，面板自己判断
+/// 是否有未保存修改，避免把 dirty 状态提升到弹窗层。
+class _InvoiceDetailsDismiss {
+  Future<bool> Function()? request;
+}
+
+/// 未保存修改时的三选确认，沿用 confirm 的 PopupSurface / SpaceButton.form 风格。
+Future<String?> confirmInvoiceClose(BuildContext context) => showDialog<String>(
+  context: context,
+  builder: (c) {
+    final p = Palette.of(c);
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: SizedBox(
+        width: 420,
+        child: PopupSurface(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('保存修改？', style: textStyle(p, size: 16, bold: true)),
+              const SizedBox(height: 16),
+              Text('发票信息有尚未保存的修改，是否保存后关闭？', style: textStyle(p)),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SpaceButton.form('取消', onPressed: () => Navigator.pop(c)),
+                  const SizedBox(width: 8),
+                  SpaceButton.form(
+                    '不保存',
+                    danger: true,
+                    onPressed: () => Navigator.pop(c, 'discard'),
+                  ),
+                  const SizedBox(width: 8),
+                  SpaceButton.form(
+                    '保存',
+                    primary: true,
+                    onPressed: () => Navigator.pop(c, 'save'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  },
+);
+
 Future<void> showInvoiceDetails(
   BuildContext context,
   SpaceStore store,
   InvoiceSession session,
   String id,
-) => invoiceModal(
-  store,
-  () => showGeneralDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    barrierLabel: '发票详情',
-    barrierColor: Colors.black.withValues(alpha: .18),
-    transitionDuration: MediaQuery.disableAnimationsOf(context)
-        ? Duration.zero
-        : const Duration(milliseconds: 210),
-    transitionBuilder: (context, animation, secondary, child) =>
-        SlideTransition(
-          position: Tween(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).chain(CurveTween(curve: spaceCurve)).animate(animation),
-          child: child,
-        ),
-    pageBuilder: (context, a, b) => LayoutBuilder(
-      builder: (c, box) {
-        // 面板宽度演进：780 → 390（收窄一半）→ 520（在 390 上再增加 1/3），
-        // 窄窗口仍按可用宽度自适应。
-        const targetWidth = 520.0;
-        final inset = box.maxWidth >= 760 ? 32.0 : 16.0;
-        final width = math.min(targetWidth, box.maxWidth - inset);
-        return Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: SizedBox(
-              key: const ValueKey('invoice-details-sheet'),
-              width: width,
-              height: double.infinity,
-              child: Material(
-                type: MaterialType.transparency,
-                child: _InvoiceDetails(store: store, session: session, id: id),
-              ),
-            ),
+) {
+  final dismiss = _InvoiceDetailsDismiss();
+  return invoiceModal(
+    store,
+    () => showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: '发票详情',
+      barrierColor: Colors.black.withValues(alpha: .18),
+      transitionDuration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 210),
+      transitionBuilder: (context, animation, secondary, child) =>
+          SlideTransition(
+            position: Tween(
+              begin: const Offset(1, 0),
+              end: Offset.zero,
+            ).chain(CurveTween(curve: spaceCurve)).animate(animation),
+            child: child,
           ),
-        );
-      },
+      pageBuilder: (context, a, b) => LayoutBuilder(
+        builder: (c, box) {
+          // 面板宽度演进：780 → 390（收窄一半）→ 520（在 390 上再增加 1/3），
+          // 窄窗口仍按可用宽度自适应。
+          const targetWidth = 520.0;
+          final inset = box.maxWidth >= 760 ? 32.0 : 16.0;
+          final width = math.min(targetWidth, box.maxWidth - inset);
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 左侧空白：无修改直接关闭，有修改由面板弹出保存询问。
+              Expanded(
+                child: GestureDetector(
+                  key: const ValueKey('invoice-details-dismiss-area'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => dismiss.request?.call(),
+                  child: const SizedBox.expand(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: SizedBox(
+                  key: const ValueKey('invoice-details-sheet'),
+                  width: width,
+                  height: double.infinity,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: _InvoiceDetails(
+                      store: store,
+                      session: session,
+                      id: id,
+                      dismiss: dismiss,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     ),
-  ),
-);
+  );
+}
 
 class _InvoiceDetails extends StatefulWidget {
   final SpaceStore store;
   final InvoiceSession session;
   final String id;
+  final _InvoiceDetailsDismiss dismiss;
   const _InvoiceDetails({
     required this.store,
     required this.session,
     required this.id,
+    required this.dismiss,
   });
 
   @override
@@ -96,6 +169,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     (e) => e.id == widget.id,
   );
   late final inputs = {
+    '发票名称': TextEditingController(text: entry.info.title),
     '票号': TextEditingController(text: entry.info.number),
     '开票日期': TextEditingController(text: entry.info.issued),
     '销售方': TextEditingController(text: entry.info.seller),
@@ -106,7 +180,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     '税额': TextEditingController(text: entry.info.tax),
     '未税金额': TextEditingController(text: entry.info.net),
     '消费日期': TextEditingController(text: entry.info.spent),
-    '用途': TextEditingController(text: entry.info.purpose),
+    '备注': TextEditingController(text: entry.info.purpose),
     '报销月份': TextEditingController(text: entry.info.month),
   };
   late String project = entry.info.project;
@@ -137,7 +211,18 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
   bool get attachmentSelected => displayed.id != entry.original.id;
 
   @override
+  void initState() {
+    super.initState();
+    if (entry.info.recognitionNotice.isNotEmpty) {
+      notice = entry.info.recognitionNotice;
+    }
+    // 左侧空白、标题栏关闭按钮、Esc 走同一套「有修改则先问保存」流程。
+    widget.dismiss.request = requestClose;
+  }
+
+  @override
   void dispose() {
+    widget.dismiss.request = null;
     for (final input in inputs.values) {
       input.dispose();
     }
@@ -145,17 +230,26 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
   }
 
   Future<void> close() async {
-    if (busy) return;
-    if (!dirty ||
-        await confirm(
-          context,
-          '放弃修改？',
-          '还有尚未保存的发票信息。',
-          '放弃修改',
-          destructive: true,
-        )) {
+    await requestClose();
+  }
+
+  Future<bool> requestClose() async {
+    if (busy) return false;
+    if (!dirty) {
       if (mounted) Navigator.pop(context);
+      return true;
     }
+    final choice = await confirmInvoiceClose(context);
+    if (!mounted) return false;
+    if (choice == 'save') {
+      await save();
+      return true;
+    }
+    if (choice == 'discard') {
+      Navigator.pop(context);
+      return true;
+    }
+    return false;
   }
 
   Future<void> act(Future<void> Function() work) async {
@@ -215,6 +309,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     await session.repo.save(
       widget.id,
       InvoiceInfo(
+        title: value('发票名称'),
         number: value('票号'),
         issued: date('开票日期'),
         seller: value('销售方'),
@@ -225,15 +320,98 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
         taxCents: amountCents('税额'),
         netCents: amountCents('未税金额'),
         spent: date('消费日期'),
-        purpose: value('用途'),
+        purpose: value('备注'),
         month: date('报销月份', month: true),
         project: project,
         reimbursed: reimbursed,
       ),
+      baseline: entry.info,
     );
     await reload();
     dirty = false;
     notice = '发票信息已保存';
+    session.update(() => session.notice = notice);
+    if (mounted) Navigator.pop(context);
+  });
+
+  static const recognitionLabels = {
+    'title': '发票名称',
+    'number': '票号',
+    'issued': '开票日期',
+    'seller': '销售方',
+    'buyer': '购买方',
+    'seller_tax': '销售方税号',
+    'buyer_tax': '购买方税号',
+    'cents': '金额',
+    'tax_cents': '税额',
+    'net_cents': '未税金额',
+  };
+
+  Map<String, String> formValues(InvoiceInfo info) => {
+    '发票名称': info.title,
+    '票号': info.number,
+    '开票日期': info.issued,
+    '销售方': info.seller,
+    '销售方税号': info.sellerTax,
+    '购买方': info.buyer,
+    '购买方税号': info.buyerTax,
+    '金额': info.amount,
+    '税额': info.tax,
+    '未税金额': info.net,
+    '消费日期': info.spent,
+    '备注': info.purpose,
+    '报销月份': info.month,
+  };
+
+  void fillRecognized(InvoiceRecognition result, {bool saved = true}) {
+    final stored = formValues(entry.info);
+    for (final item in result.fields.entries) {
+      final label = recognitionLabels[item.key];
+      if (label == null || item.value == null || item.value == '') continue;
+      inputs[label]!.text = saved
+          ? stored[label]!
+          : item.value is int
+          ? ((item.value as int) / 100).toStringAsFixed(2)
+          : item.value.toString();
+    }
+    // 仅本次已落库的识别字段更新基准；未命中的手工输入保留为待保存。
+    dirty =
+        inputs.entries.any((i) => i.value.text.trim() != stored[i.key]) ||
+        project != entry.info.project ||
+        reimbursed != entry.info.reimbursed;
+  }
+
+  Future<void> recognize() => act(() async {
+    try {
+      final before = entry.info;
+      final result = await session.recognizeEntry(widget.id);
+      final baseline = formValues(before);
+      final untouched = inputs.entries
+          .where((i) => i.value.text.trim() == baseline[i.key])
+          .map((i) => i.key)
+          .toSet();
+      await reload();
+      final stored = formValues(entry.info);
+      for (final label in untouched) {
+        inputs[label]!.text = stored[label]!;
+      }
+      if (project == before.project) project = entry.info.project;
+      if (reimbursed == before.reimbursed) reimbursed = entry.info.reimbursed;
+      fillRecognized(result);
+      // 不增加常驻“已自动保存”提示条；异常/缺失信息仍在原有页脚反馈。
+      notice = result.fields.isEmpty
+          ? '未识别到可用字段，请核对原件或调整识别方式'
+          : result.message.isEmpty
+          ? null
+          : result.message;
+      session.update(() {
+        session.notice = result.fields.isEmpty ? '未识别到可用字段' : '票面信息已更新';
+        session.error = null;
+      });
+    } on InvoiceRecognitionSaveError catch (e) {
+      fillRecognized(e.result, saved: false);
+      rethrow;
+    }
   });
 
   Future<void> remove() async {
@@ -248,7 +426,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     }
     if (!mounted) return;
     await act(() async {
-      await session.repo.delete(widget.id);
+      await session.deleteEntry(widget.id);
       await session.refresh();
       session.update(() => session.notice = '已删除发票');
       if (mounted) Navigator.pop(context);
@@ -615,11 +793,37 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _heading(p, '票面信息'),
-        row([field('发票号码', input('票号')), field('开票日期', input('开票日期'))]),
+        // 2026-11-12 本轮调整：票面信息恢复两列排布，保留 2.3.2 新增的
+        // 「发票名称」与「更多票面字段」折叠区；row() 在窄窗口自动逐行排列。
+        row([field('发票名称', input('发票名称')), field('发票号码', input('票号'))]),
         gap(12),
-        row([field('销售方', input('销售方')), field('销售方社会信用代码', input('销售方税号'))]),
-        gap(12),
-        row([field('购买方', input('购买方')), field('购买方社会信用代码', input('购买方税号'))]),
+        row([field('销售方名称', input('销售方')), field('开票日期', input('开票日期'))]),
+        // 透明 Material 给 ListTile 提供直接祖先，避免被外层带底色的
+        // DecoratedBox 遮住展开时的水波纹反馈（Debug 断言）。
+        Material(
+          type: MaterialType.transparency,
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            title: Text(
+              '更多票面字段',
+              style: textStyle(p, size: 12, color: p.muted),
+            ),
+            children: [
+              row([
+                field('销售方社会信用代码', input('销售方税号')),
+                field('购买方', input('购买方')),
+              ]),
+              gap(12),
+              // 奇数个字段：宽窗口只占左半列，右列留空保持两列节奏。
+              twoColumns
+                  ? row([
+                      field('购买方社会信用代码', input('购买方税号')),
+                      const SizedBox.shrink(),
+                    ])
+                  : field('购买方社会信用代码', input('购买方税号')),
+            ],
+          ),
+        ),
         gap(12),
         _amounts(p),
         gap(16),
@@ -633,8 +837,8 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
         // 报销项目与报销月份同为半宽，右侧是标记已报销的复选框。
         row([field('报销项目', projectField()), field('是否报销', reimbursedField())]),
         gap(12),
-        // 最后一行是占满整行的用途描述。
-        row([field('用途', input('用途'))]),
+        // 最后一行是占满整行的个人备注（两行输入）。
+        row([field('备注', input('备注'))]),
       ],
     );
   }
@@ -674,6 +878,13 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
           return sheetFrame(
             context,
             title: '发票详情',
+            titleActions: [
+              IconButtonS.toolbar(
+                'scan',
+                '识别 / 重新识别',
+                onPressed: busy ? null : recognize,
+              ),
+            ],
             close: close,
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -740,24 +951,47 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     );
   }
 
-  Widget input(String key) => SpaceInput(
-    controller: inputs[key]!,
-    label: key,
-    height: 32,
-    fontSize: 12,
-    hint: key.endsWith('日期') || key.endsWith('时间')
-        ? 'YYYY-MM-DD'
-        : key.endsWith('月份')
-        ? 'YYYY-MM'
-        : '',
-    onChanged: (v) {
-      if (key == '消费日期' && monthAuto && v.length >= 7) {
-        inputs['报销月份']!.text = v.substring(0, 7);
-      }
-      if (key == '报销月份') monthAuto = false;
-      if (!dirty) setState(() => dirty = true);
-    },
-  );
+  Widget input(String key) => key == '备注'
+      ? TextField(
+          controller: inputs[key],
+          minLines: 2,
+          maxLines: 2,
+          style: textStyle(Palette.of(context), size: 12),
+          decoration: InputDecoration(
+            hintText: '填写自己的备注',
+            filled: true,
+            fillColor: Palette.of(context).hover,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onChanged: (_) {
+            if (!dirty) setState(() => dirty = true);
+          },
+        )
+      : SpaceInput(
+          controller: inputs[key]!,
+          label: key,
+          height: 32,
+          fontSize: 12,
+          hint: key.endsWith('日期') || key.endsWith('时间')
+              ? 'YYYY-MM-DD'
+              : key.endsWith('月份')
+              ? 'YYYY-MM'
+              : '',
+          onChanged: (v) {
+            if (key == '消费日期' && monthAuto && v.length >= 7) {
+              inputs['报销月份']!.text = v.substring(0, 7);
+            }
+            if (key == '报销月份') monthAuto = false;
+            if (!dirty) setState(() => dirty = true);
+          },
+        );
 }
 
 class _FilePreview extends StatefulWidget {

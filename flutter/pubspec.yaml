@@ -1,7 +1,7 @@
 name: space_flutter
 description: Space desktop workspace, matching the native baseline.
 publish_to: none
-version: 2.3.1+16
+version: 2.3.2+19
 environment:
   sdk: '>=3.13.0 <4.0.0'
 dependencies:
@@ -23,12 +23,16 @@ dependencies:
   pdf: ^3.13.1
   printing: 5.15.1
   pdfium_flutter: 0.4.1
+  space_ocr:
+    path: packages/space_ocr
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
 flutter:
   uses-material-design: true
+  assets:
+    - assets/models/ppocrv6/
   fonts:
     - family: PhosphorSettings
       fonts:

@@ -7,3 +7,8 @@ flutter/verification/screenshots/
 # Installers are published as GitHub Release assets.
 downloads/*.dmg
 downloads/*.zip
+
+# Pinned OCR weights are restored by flutter/tool/fetch_ocr_models.dart.
+flutter/assets/models/ppocrv6/*.onnx
+flutter/assets/models/ppocrv6/*.download
+flutter/packages/space_ocr/.dart_tool/

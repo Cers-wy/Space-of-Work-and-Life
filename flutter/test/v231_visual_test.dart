@@ -16,8 +16,9 @@ import 'package:space_flutter/ui/theme.dart';
 
 /// 2.3.1 界面改动的可视化验收：默认模块、分类标签常态、列宽提示线贴边、
 /// 发票列表整行选中，以及发票详情定宽 520 后「发票与附件」单入口、滚轮切换与
-/// 两列票面信息，以及报销信息的日期、项目、已报销与用途重排。
-/// 截图写入 verification/screenshots/2.3.1。
+/// 两列票面信息，以及报销信息的日期、项目、已报销与备注重排。
+/// 2026-11-12 同步 2.3.2：票面信息仍为两列，新增「发票名称」与「更多票面字段」
+/// 折叠区；个人备注改为两行输入。截图写入 verification/screenshots/2.3.2。
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final shot = GlobalKey();
@@ -74,7 +75,7 @@ void main() {
           shot.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final image = await boundary.toImage(pixelRatio: 1);
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      final out = Directory('verification/screenshots/2.3.1');
+      final out = Directory('verification/screenshots/2.3.2');
       await out.create(recursive: true);
       await File('${out.path}/$name.png')
           .writeAsBytes(data!.buffer.asUint8List());
@@ -336,30 +337,60 @@ void main() {
       expect(preview.height, greaterThanOrEqualTo(180));
       expect(field.top, greaterThan(preview.bottom), reason: '票面信息在预览下方');
 
-      // 标签在控件上方，一行两个字段。
+      // 标签在控件上方；2.3.2 票面信息仍为两列：
+      // 第一行「发票名称 | 发票号码」，第二行「销售方名称 | 开票日期」。
+      final title = find.byKey(const ValueKey('invoice-field-发票名称'));
       final number = find.byKey(const ValueKey('invoice-field-发票号码'));
+      final seller = find.byKey(const ValueKey('invoice-field-销售方名称'));
       final issued = find.byKey(const ValueKey('invoice-field-开票日期'));
-      expect(number, findsOneWidget);
-      expect(issued, findsOneWidget);
+      for (final key in [title, number, seller, issued]) {
+        expect(key, findsOneWidget);
+      }
+      final titleBox = t.getRect(title);
       final numberBox = t.getRect(number);
+      final sellerBox = t.getRect(seller);
       final issuedBox = t.getRect(issued);
-      expect(numberBox.top, issuedBox.top, reason: '两个字段同一行');
-      expect(issuedBox.left, greaterThan(numberBox.right));
-      final label = t.getRect(find.text('发票号码'));
+      expect(titleBox.top, numberBox.top, reason: '发票名称与发票号码同一行');
+      expect(numberBox.left, greaterThan(titleBox.right));
+      expect(titleBox.width, closeTo(numberBox.width, 1));
+      expect(sellerBox.top, issuedBox.top, reason: '销售方名称与开票日期同一行');
+      expect(issuedBox.left, greaterThan(sellerBox.right));
+      expect(sellerBox.top, greaterThan(titleBox.bottom), reason: '第二行在第一行下方');
+      final label = t.getRect(
+        find.descendant(of: title, matching: find.text('发票名称')),
+      );
       final input = t.getRect(
-        find.descendant(of: number, matching: find.byType(TextField)),
+        find.descendant(of: title, matching: find.byType(TextField)),
       );
       expect(label.bottom, lessThanOrEqualTo(input.top), reason: '标签在输入上方');
+
+      // 「更多票面字段」默认收起，展开后同样是两列。
+      expect(find.text('更多票面字段'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('invoice-field-购买方')),
+        findsNothing,
+        reason: '更多票面字段默认收起',
+      );
+      await t.tap(find.text('更多票面字段'));
+      await t.pumpAndSettle();
+      final sellerTax = t.getRect(
+        find.byKey(const ValueKey('invoice-field-销售方社会信用代码')),
+      );
+      final buyer = t.getRect(find.byKey(const ValueKey('invoice-field-购买方')));
+      expect(sellerTax.top, buyer.top, reason: '展开字段成对同行');
+      expect(buyer.left, greaterThan(sellerTax.right));
+      await t.tap(find.text('更多票面字段'));
+      await t.pumpAndSettle();
       await capture(t, 'invoice-details-$suffix');
 
-      // 报销信息：日期在报销项目上方，项目与「已报销」各占半行，用途独占整行。
+      // 报销信息：日期在报销项目上方，项目与「已报销」各占半行，备注独占整行。
       await t.ensureVisible(find.text('报销信息'));
       await t.pumpAndSettle();
       final month = find.byKey(const ValueKey('invoice-field-报销月份'));
       final spent = find.byKey(const ValueKey('invoice-field-消费日期'));
       final project = find.byKey(const ValueKey('invoice-field-报销项目'));
       final reimbursed = find.byKey(const ValueKey('invoice-field-是否报销'));
-      final purpose = find.byKey(const ValueKey('invoice-field-用途'));
+      final purpose = find.byKey(const ValueKey('invoice-field-备注'));
       for (final key in [month, spent, project, reimbursed, purpose]) {
         expect(key, findsOneWidget);
       }
@@ -387,11 +418,11 @@ void main() {
         greaterThan(projectBox.right),
         reason: '标记已报销的复选框在项目右侧',
       );
-      expect(purposeBox.top, greaterThan(projectBox.bottom), reason: '用途是最后一行');
+      expect(purposeBox.top, greaterThan(projectBox.bottom), reason: '备注是最后一行');
       expect(
         purposeBox.width,
         greaterThan(projectBox.width * 1.8),
-        reason: '用途占满整行',
+        reason: '备注占满整行',
       );
       final reimbursedControl = find.byKey(
         const ValueKey('invoice-reimbursed-control'),
@@ -410,9 +441,9 @@ void main() {
         matching: find.byType(TextField),
       );
       expect(
-        t.getSize(reimbursedControl).height,
         t.getSize(purposeInput).height,
-        reason: '标记已报销与其他字段控件等高',
+        greaterThan(t.getSize(reimbursedControl).height),
+        reason: '2.3.2 起个人备注是两行输入，高于 32 的紧凑复选框',
       );
       expect(
         t.widget<SpaceCheckbox>(reimbursedControl).dense,
@@ -511,6 +542,9 @@ void main() {
       reason: '1020 宽窗口仍能完整容纳 520 的详情面板',
     );
     await capture(t, 'invoice-details-compact-light');
+    // 2.3.2 自动识别的 OCR worker 有 25 秒空闲回收定时器；在 fake async 中
+    // 快进触发并关闭，避免测试结束时的 pending timer 断言（与布局无关）。
+    await t.pump(const Duration(seconds: 26));
     expect(t.takeException(), isNull);
   });
 

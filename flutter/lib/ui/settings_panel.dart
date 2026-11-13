@@ -10,12 +10,19 @@ import 'controls.dart';
 import 'dialogs.dart' show confirm, importBackup;
 import 'settings_controls.dart';
 import 'sync_settings.dart';
+import 'drive_settings.dart';
 import 'theme.dart';
 
 class SettingsPanel extends StatefulWidget {
   final SpaceStore store;
   final ReleaseChecker? updates;
-  const SettingsPanel({super.key, required this.store, this.updates});
+  final String initialCategory;
+  const SettingsPanel({
+    super.key,
+    required this.store,
+    this.updates,
+    this.initialCategory = 'all',
+  });
   @override
   State<SettingsPanel> createState() => _SettingsPanelState();
 }
@@ -36,11 +43,18 @@ class _SettingsPanelState extends State<SettingsPanel>
     ('backup', '备份与恢复', '为本机数据保留一份副本'),
     ('cloud', '云端同步', '通过 GitHub 私有仓库备份和恢复任务数据'),
     ('data', '数据管理', '管理示例内容和本机任务'),
+    // 2026-11-12：新增「发票识别」栏目，控制 PDF 文本层与 OCR 的优先级。
+    ('recognition', '发票识别', '选择票面信息的识别方式与字段写入'),
+    ('drive', '网盘设置', '维护文件管理的独立仓库连接'),
     ('info', '关于 Space', '软件信息与更新'),
   ];
   @override
   void initState() {
     super.initState();
+    final initial = categories.indexWhere(
+      (c) => c.$1 == widget.initialCategory,
+    );
+    selected = initial < 0 ? 0 : initial;
     fade = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -211,9 +225,55 @@ class _SettingsPanelState extends State<SettingsPanel>
           entry(2, '导出、导入和恢复本地备份', 'SQLite 本地备份'),
           entry(3, '通过私有仓库接续工作', ''),
           entry(4, '示例内容与任务清理', ''),
+          entry(5, 'PDF 文本层与 OCR 识别方式', s.preferOcr ? '优先 OCR' : '优先 PDF 文本层'),
+          entry(6, '文件管理的独立仓库连接', ''),
         ]),
         section('软件', [
-          entry(5, '作者、反馈与软件更新', updates.installed?.toString() ?? ''),
+          entry(7, '作者、反馈与软件更新', updates.installed?.toString() ?? ''),
+        ]),
+      ],
+    );
+  }
+
+  /// 2026-11-12：沿用「交互」栏目的 row + Switch.adaptive 规格。
+  Widget recognition() {
+    final p = Palette.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        section('识别方式', [
+          row(
+            '优先使用 OCR',
+            detail:
+                '默认关闭：电子发票 PDF 直接读取文本层，按词坐标还原购销双方与明细，字段更准确。\n'
+                '开启后先渲染页面并使用本机 OCR 模型，适合扫描件或照片；结果不完整时仍会回退到 PDF 文本层。',
+            trailing: SizedBox(
+              width: 48,
+              height: 32,
+              child: FittedBox(
+                child: Semantics(
+                  label: '优先使用 OCR',
+                  child: Switch.adaptive(
+                    key: const ValueKey('settings-prefer-ocr'),
+                    activeTrackColor: p.primary,
+                    value: s.preferOcr,
+                    onChanged: s.busy
+                        ? null
+                        : (value) => s.preference('preferOcr', '$value'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+        section('识别结果', [
+          row(
+            '识别结果写入发票字段',
+            detail:
+                '票种、号码、开票日期、购销方及税号、金额、税额与未税金额会写入对应发票字段；'
+                '明细、合计、开票人与金额校验作为结构化数据保存在该发票记录中。\n'
+                '个人备注、消费日期与报销状态始终由你自行填写，识别不会覆盖。',
+          ),
         ]),
       ],
     );
@@ -786,7 +846,9 @@ class _SettingsPanelState extends State<SettingsPanel>
                                   ),
                                 ),
                                 retained(4, management()),
-                                retained(5, about()),
+                                retained(5, recognition()),
+                                retained(6, DriveSettings(store: s)),
+                                retained(7, about()),
                                 if (s.error != null || s.notice != null) ...[
                                   const SizedBox(height: 16),
                                   Semantics(

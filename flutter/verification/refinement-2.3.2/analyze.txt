@@ -1,0 +1,7 @@
+Analyzing lib, test...
+
+warning - lib/ui/dialogs.dart:261:9 - 'clipboardConfig' is experimental and could be removed or changed at any time. - experimental_member_use
+warning - lib/ui/dialogs.dart:261:28 - 'QuillClipboardConfig' is experimental and could be removed or changed at any time. - experimental_member_use
+warning - lib/ui/dialogs.dart:262:11 - 'onClipboardPaste' is experimental and could be removed or changed at any time. - experimental_member_use
+
+3 issues found.

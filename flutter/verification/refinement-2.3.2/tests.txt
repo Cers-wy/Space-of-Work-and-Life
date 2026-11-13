@@ -1,0 +1,205 @@
+00:00 +0: loading /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/filter_hotfix_test.dart
+00:00 +0: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +1: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +2: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +3: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +4: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 001/003 首次空库及默认偏好；重新载入无内存撤销
+00:00 +5: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_recognition_test.dart: 结构化识别数据随发票记录保存，且不写入个人备注与报销状态
+00:00 +6: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 005/007 偏好独立持久化，偏好写入不替换业务恢复快照
+00:00 +7: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_recognition_test.dart: 识别保护个人字段以及用户改过的票面值，备份恢复保留票面名称
+00:00 +8: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_recognition_test.dart: 识别保护个人字段以及用户改过的票面值，备份恢复保留票面名称
+00:00 +9: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_recognition_test.dart: 识别保护个人字段以及用户改过的票面值，备份恢复保留票面名称
+00:00 +10: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 041/042 旧草稿与已删除任务不能覆盖或复活
+00:00 +11: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 047/048/050 完成、重开与同状态无重复修订
+00:00 +12: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 055/057/060/063/064 停用保留历史与原状态编辑，禁新移入
+00:00 +13: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 059/066/068 内置保护；迁移到完成；列序重开
+00:00 +14: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 069/070/071/072 项目同事务创建、等价复用和失败无孤立项目
+00:00 +15: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 项目改名、停用持久化与导出，禁止新加入；删除保留任务可撤销
+00:00 +16: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 项目改名、停用持久化与导出，禁止新加入；删除保留任务可撤销
+00:00 +17: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:00 +18: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:00 +19: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:00 +20: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:00 +21: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:00 +22: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:00 +23: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据
+00:00 +24: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 082/083/088 附件路径与10MiB/20个/20MiB边界
+00:00 +25: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 082/083/088 附件路径与10MiB/20个/20MiB边界
+00:00 +26: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/store_test.dart: 082/083/088 附件路径与10MiB/20个/20MiB边界
+00:00 +27: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:00 +28: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:00 +29: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:00 +30: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:00 +31: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:00 +32: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:01 +33: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:01 +34: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:01 +35: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:01 +36: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:01 +37: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:01 +38: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +39: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +40: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +41: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +42: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +43: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +44: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +45: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +46: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +47: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +48: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +49: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:02 +50: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +51: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +52: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +53: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +54: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +55: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +56: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:03 +57: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:04 +58: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/settings_test.dart: 自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝
+00:04 +59: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:04 +60: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:04 +61: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:04 +62: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:04 +63: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:04 +64: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:04 +65: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:04 +66: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:04 +67: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:05 +68: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:05 +69: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:05 +70: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:06 +71: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:06 +72: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:06 +73: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:06 +74: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:06 +75: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:06 +76: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:07 +77: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:07 +78: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:07 +79: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:07 +80: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:07 +81: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:07 +82: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:08 +83: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:08 +84: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:08 +85: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:08 +86: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:08 +87: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:08 +88: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:08 +89: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +90: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +91: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +92: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +93: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +94: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +95: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +96: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +97: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:09 +98: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +99: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +100: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +101: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +102: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +103: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +104: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +105: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +106: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +107: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +108: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +109: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:10 +110: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +111: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +112: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +113: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +114: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +115: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +116: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +117: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +118: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +119: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +120: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +121: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +122: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +123: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +124: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +125: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +126: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +127: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +128: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:11 +129: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:12 +130: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:12 +131: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:12 +132: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:12 +133: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:12 +134: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:12 +135: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:12 +136: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +137: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +138: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +139: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +140: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +141: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +142: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +143: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +144: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +145: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +146: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +147: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +148: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +149: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +150: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +151: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +152: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +153: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +154: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +155: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +156: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +157: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +158: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +159: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +160: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +161: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +162: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +163: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +164: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:13 +165: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:14 +166: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:14 +167: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:14 +168: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:14 +169: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:14 +170: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:14 +171: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:15 +172: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:15 +173: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:15 +174: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:15 +175: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:15 +176: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:15 +177: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:15 +178: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:16 +179: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:16 +180: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:16 +181: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:16 +182: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:16 +183: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:17 +184: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:17 +185: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:17 +186: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:17 +187: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:18 +188: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:18 +189: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:18 +190: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:18 +191: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:18 +192: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:19 +193: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:19 +194: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票列表整行选中，详情定宽 520 后单入口预览与两列票面信息
+00:19 +195: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 图文格式与上传附件保存重开，日期清除不生成伪排期
+00:19 +196: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票合并提供可视化排版、排序与一式两份
+00:19 +197: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/v231_visual_test.dart: 发票合并提供可视化排版、排序与一式两份
+00:20 +198: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 项目管理入口、改名及停用；菜单使用独立浮层
+00:20 +199: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 粘贴图像保存重开不生成附件
+00:21 +200: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 亮主题紧凑表单与下拉浮层层次
+00:21 +201: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 暗主题紧凑表单与下拉浮层层次
+00:21 +202: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/workspace_test.dart: 空标题错误显示在标题下并保留草稿
+00:21 +203: All tests passed!
