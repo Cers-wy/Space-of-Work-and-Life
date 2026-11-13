@@ -137,10 +137,11 @@ void main() {
         t.getRect(find.text(label)),
     ];
     expect(rects[0].center.dy, closeTo(rects[2].center.dy, .1));
+    // 浮层不再给整窗加压暗遮罩：看板多列玻璃同时重绘时压暗会被感知为画面闪烁。
     expect(
       t
           .widgetList<ModalBarrier>(find.byType(ModalBarrier))
-          .any((w) => (w.color?.a ?? 0) > .15),
+          .every((w) => (w.color?.a ?? 0) == 0),
       true,
     );
     await t.sendKeyEvent(LogicalKeyboardKey.escape);

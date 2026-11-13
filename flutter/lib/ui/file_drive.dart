@@ -538,9 +538,7 @@ class _DrivePageState extends State<DrivePage> with WidgetsBindingObserver {
         width: 384,
         height: 392,
         constrainHeight: true,
-        barrierColor: widget.store.dark
-            ? Colors.transparent
-            : Colors.black.withValues(alpha: .18),
+        barrierColor: Colors.transparent,
       );
     } finally {
       widget.store.modal = false;

@@ -15,6 +15,34 @@ const _invoiceUuid = Uuid();
 const invoiceFileExtensions = {'pdf', 'png', 'jpg', 'jpeg'};
 const invoiceFileLimit = 32 * 1024 * 1024;
 
+/// Only nonblank reimbursement fields are included in a batch update.
+class InvoiceReimbursementPatch {
+  final String month, project, purpose;
+  const InvoiceReimbursementPatch({
+    this.month = '',
+    this.project = '',
+    this.purpose = '',
+  });
+
+  Map<String, String> get values => {
+    if (month.trim().isNotEmpty) 'month': month.trim(),
+    if (project.trim().isNotEmpty) 'project': project.trim(),
+    if (purpose.trim().isNotEmpty) 'purpose': purpose.trim(),
+  };
+
+  void validate() {
+    final value = month.trim();
+    if (value.isEmpty) return;
+    final parsed = DateTime.tryParse('$value-01');
+    if (!RegExp(r'^\d{4}-\d{2}$').hasMatch(value) ||
+        parsed == null ||
+        parsed.year < 1 ||
+        !parsed.toIso8601String().startsWith('$value-01')) {
+      throw StateError('报销月份请输入有效的 YYYY-MM');
+    }
+  }
+}
+
 class InvoiceFile {
   final String id, name, path;
   const InvoiceFile(this.id, this.name, this.path);
@@ -334,6 +362,40 @@ class InvoiceRepository {
           if (db.updatedRows != 1) throw StateError('这张发票已从台账移除');
         }),
       );
+
+  /// One transaction and one prepared statement, without rewriting ticket fields.
+  /// IDs removed while the dialog was open are skipped and excluded from the count.
+  Future<int> updateReimbursement(
+    List<String> ids,
+    InvoiceReimbursementPatch patch,
+  ) => Isolate.run(() {
+    patch.validate();
+    final values = patch.values;
+    if (values.isEmpty || ids.isEmpty) return 0;
+    return _database(
+      (db) => _transaction(db, () {
+        if (values.containsKey('project') &&
+            db.select('SELECT 1 FROM projects WHERE id=?', [
+              values['project'],
+            ]).isEmpty) {
+          throw StateError('该报销项目已被移除，请重新选择');
+        }
+        final statement = db.prepare(
+          'UPDATE invoices SET ${values.keys.map((key) => '$key=?').join(',')} WHERE id=?',
+        );
+        var changed = 0;
+        try {
+          for (final id in ids.toSet()) {
+            statement.execute([...values.values, id]);
+            changed += db.updatedRows;
+          }
+        } finally {
+          statement.close();
+        }
+        return changed;
+      }),
+    );
+  });
 
   Future<void> recognitionError(String id, String message) => Isolate.run(
     () => _database((db) {

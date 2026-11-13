@@ -14,6 +14,7 @@ import '../store.dart';
 import 'controls.dart';
 import 'dialogs.dart' show confirm, field, showProjects, showSettings;
 import 'invoice_details.dart';
+import 'invoice_batch_update.dart';
 import 'invoice_merge.dart';
 import 'file_drive.dart';
 import 'theme.dart';
@@ -301,6 +302,21 @@ class InvoiceSession extends ChangeNotifier {
     }
     return '已删除 $deleted 张发票';
   });
+
+  Future<bool> updateReimbursement(
+    List<String> ids,
+    InvoiceReimbursementPatch patch,
+  ) async {
+    if (ids.isEmpty || patch.values.isEmpty) return false;
+    var saved = false;
+    await run(() async {
+      final count = await repo.updateReimbursement(ids, patch);
+      saved = true;
+      return count > 0 ? '已更新 $count 张发票' : '所选发票已被移除，未更新';
+    });
+    return saved;
+  }
+
   Future<void> load() async {
     await run(() async => null);
     for (final entry in ledger?.entries ?? <InvoiceEntry>[]) {
@@ -415,50 +431,65 @@ class _InvoiceTitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
+    final title = Text(
+      backToTools != null
+          ? subTitle
+          : showTools
+          ? '工具'
+          : '发票',
+      style: textStyle(p, bold: true),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
     return Column(
       children: [
-        SpaceTitleBar(
-          key: ValueKey(showTools ? 'tools-titlebar' : 'invoices-titlebar'),
-          children: [
-            IconButtonS.toolbar(
-              store.navCollapsed ? 'sidebar-open' : 'sidebar-close',
-              store.navCollapsed ? '展开导航' : '收起导航',
-              iconSize: 18,
-              onPressed: () =>
-                  store.preference('navCollapsed', '${!store.navCollapsed}'),
-            ),
-            const SizedBox(width: 8),
-            SpaceIcon(
-              showTools ? 'tools' : 'invoice',
-              size: 16,
-              color: p.muted,
-            ),
-            const SizedBox(width: 8),
-            if (backToTools != null) ...[
-              SpaceButton(
-                height: 32,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                onPressed: backToTools,
-                child: const Text('工具'),
+        LayoutBuilder(
+          builder: (context, box) => SpaceTitleBar(
+            key: ValueKey(showTools ? 'tools-titlebar' : 'invoices-titlebar'),
+            children: [
+              IconButtonS.toolbar(
+                store.navCollapsed ? 'sidebar-open' : 'sidebar-close',
+                store.navCollapsed ? '展开导航' : '收起导航',
+                iconSize: 18,
+                onPressed: () =>
+                    store.preference('navCollapsed', '${!store.navCollapsed}'),
               ),
-              SpaceIcon('right', size: 12, color: p.muted),
               const SizedBox(width: 8),
-            ],
-            Expanded(
-              child: Text(
-                backToTools != null
-                    ? subTitle
-                    : showTools
-                    ? '工具'
-                    : '发票',
-                style: textStyle(p, bold: true),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              SpaceIcon(
+                showTools ? 'tools' : 'invoice',
+                size: 16,
+                color: p.muted,
               ),
-            ),
-            ...actions,
-            ThemeToggle(dark: store.dark, onToggle: store.toggleTheme),
-          ],
+              const SizedBox(width: 8),
+              if (backToTools != null) ...[
+                SpaceButton(
+                  height: 32,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  onPressed: backToTools,
+                  child: const Text('工具'),
+                ),
+                SpaceIcon('right', size: 12, color: p.muted),
+                const SizedBox(width: 8),
+              ],
+              if (box.maxWidth >= 540 || actions.isEmpty)
+                Expanded(child: title)
+              else
+                SizedBox(width: 64, child: title),
+              if (box.maxWidth < 540 && actions.isNotEmpty)
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: actions,
+                    ),
+                  ),
+                )
+              else
+                ...actions,
+              ThemeToggle(dark: store.dark, onToggle: store.toggleTheme),
+            ],
+          ),
         ),
         Divider(height: 1, color: p.border),
       ],
@@ -477,9 +508,7 @@ Future<void> showInvoiceFilters(
     _InvoiceFilters(session: session),
     width: 384,
     height: 416,
-    barrierColor: store.dark
-        ? Colors.transparent
-        : Colors.black.withValues(alpha: .18),
+    barrierColor: Colors.transparent,
   ),
 );
 
@@ -1067,6 +1096,19 @@ class _LedgerState extends State<_Ledger> {
                               session.recognizeSelected(
                                 selected.map((e) => e.id).toList(),
                               ),
+                            ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButtonS.toolbar(
+                      'edit',
+                      '批量更新发票',
+                      onPressed: selected.isEmpty || session.busy
+                          ? null
+                          : () => showInvoiceBatchUpdate(
+                              context,
+                              widget.store,
+                              session,
+                              selected.map((e) => e.id).toList(),
                             ),
                     ),
                     const SizedBox(width: 8),

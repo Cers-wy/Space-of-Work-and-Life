@@ -6,6 +6,16 @@ import 'package:space_flutter/core/invoices.dart';
 import 'package:space_flutter/core/repository.dart';
 
 void main() {
+  test('价税合计优先于较早出现的未税金额与明细金额', () {
+    final result = parseInvoiceText(
+      '电子发票（普通发票）\n发票号码：26327000000000000123\n开票日期：2026年11月13日\n金额：100.00\n未税金额：100.00\n税额：6.00\n价税合计（小写）：¥106.00',
+    );
+    expect(result.fields['cents'], 10600);
+    expect(result.fields['net_cents'], 10000);
+    expect(result.fields['tax_cents'], 600);
+    final incomplete = parseInvoiceText('电子发票（普通发票）\n未税金额：100.00\n税额：6.00');
+    expect(incomplete.fields.containsKey('cents'), isFalse);
+  });
   test('电子发票提取票面标题、前导零和金额，不产生个人备注', () {
     final r = parseInvoiceText(
       '电子发票（普通发票）\n发票号码：00123456789012345678\n开票日期：2026年11月12日\n销售方名称：示例酒店有限公司\n价税合计（小写）￥680.00\n备注：票面示例',
@@ -93,10 +103,7 @@ void main() {
     expect(info.reimbursed, isFalse, reason: '识别不改报销状态');
     expect(info.recognitionStructure['source'], 'ocr');
     expect((info.recognitionStructure['items'] as List).length, 1);
-    expect(
-      (info.recognitionStructure['totals'] as Map)['total'],
-      '235.44',
-    );
+    expect((info.recognitionStructure['totals'] as Map)['total'], '235.44');
     // 后续不带明细的识别不会清空已保存的结构化数据。
     await repo.applyRecognition(
       entry.id,

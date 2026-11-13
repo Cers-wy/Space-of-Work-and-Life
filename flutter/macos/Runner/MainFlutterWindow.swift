@@ -46,7 +46,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
       case "menuState":
         self.updateMenuState(a); result(nil)
       case "diagnostics":
-        result(["title": self.title, "windowClass": String(describing: type(of:self)), "frameWidth":self.frame.width, "frameHeight":self.frame.height, "scale":self.backingScaleFactor, "menus":NSApp.mainMenu?.items.map(\.title) ?? []])
+        result(["title": self.title, "windowClass": String(describing: type(of:self)), "frameWidth":self.frame.width, "frameHeight":self.frame.height, "scale":self.backingScaleFactor, "menus":NSApp.mainMenu?.items.map(\.title) ?? [], "appActive":NSApp.isActive, "windowKey":self.isKeyWindow, "frontmostPid":NSWorkspace.shared.frontmostApplication?.processIdentifier ?? -1])
       case "accessibility":
         self.title = "Space"; self.addSpaceMenus()
         result(["reduceMotion": NSWorkspace.shared.accessibilityDisplayShouldReduceMotion, "reduceTransparency": NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency])

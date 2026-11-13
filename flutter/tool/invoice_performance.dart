@@ -57,7 +57,10 @@ Pointer<Void> sel(String name) {
   }
 }
 
+bool Function()? foregroundOverride;
 bool foreground() {
+  final override = foregroundOverride;
+  if (override != null) return override();
   if (!Platform.isMacOS) return probe.nativeForeground();
   final p = 'NSWorkspace'.toNativeUtf8();
   try {
@@ -284,8 +287,15 @@ Future<void> main() async {
       await Future<void>.delayed(const Duration(milliseconds: 250));
       Navigator.of(context).pop();
       await modal;
-      await waitUntil(() => element<Widget>((e) =>
-        e.widget.key == const ValueKey('invoice-details-sheet') ? e.widget : null) == null);
+      await waitUntil(
+        () =>
+            element<Widget>(
+              (e) => e.widget.key == const ValueKey('invoice-details-sheet')
+                  ? e.widget
+                  : null,
+            ) ==
+            null,
+      );
     }
 
     await measure('details-first-open-close', detail);

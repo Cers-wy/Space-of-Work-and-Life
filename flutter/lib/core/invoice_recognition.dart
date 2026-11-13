@@ -76,8 +76,10 @@ InvoiceRecognition parseInvoiceText(String source) {
 
   final total =
       match(
-        r'(?:价税合计(?:\(大写\))?[^\n0-9]{0,35}?|小写[):]?|金额)[:]?\s*[¥￥Y]?\s*(-?[0-9,]+\.[0-9]{2})(?![0-9])',
+        r'(?:价税合计(?:\(大写\))?[^\n0-9]{0,35}?|小写[):]?)[:]?\s*[¥￥Y]?\s*(-?[0-9,]+\.[0-9]{2})(?![0-9])',
       ) ??
+      // A standalone amount label is a fallback, never a substring of net/item amounts.
+      match(r'(?:^|\n)金额[:]?\s*[¥￥Y]?\s*(-?[0-9,]+\.[0-9]{2})(?![0-9])') ??
       (taxi ? match(r'[¥￥]\s*(-?[0-9,]+\.[0-9]{2})') : null);
   final cents = money(total);
   if (cents != null) fields['cents'] = cents;
@@ -152,10 +154,7 @@ abstract final class InvoiceRecognizer {
     InvoiceRecognition primary,
     InvoiceRecognition fallback,
   ) {
-    final fields = <String, Object?>{
-      ...fallback.fields,
-      ...primary.fields,
-    };
+    final fields = <String, Object?>{...fallback.fields, ...primary.fields};
     return InvoiceRecognition(
       fields,
       !_complete(fields)
@@ -179,9 +178,8 @@ abstract final class InvoiceRecognizer {
       final text = (payload['lines'] as List)
           .map((line) => (line as Map)['words'] as List)
           .map(
-            (words) => words
-                .map((word) => '${(word as Map)['text'] ?? ''}')
-                .join(' '),
+            (words) =>
+                words.map((word) => '${(word as Map)['text'] ?? ''}').join(' '),
           )
           .join('\n');
       final fallback = parseInvoiceText(text);
@@ -191,9 +189,7 @@ abstract final class InvoiceRecognizer {
       };
       return InvoiceRecognition(
         fields,
-        !_complete(fields)
-            ? '部分票面字段未能可靠提取，请核对原件。'
-            : structured.message,
+        !_complete(fields) ? '部分票面字段未能可靠提取，请核对原件。' : structured.message,
         structured: structured.structure,
       );
     });
@@ -230,10 +226,7 @@ abstract final class InvoiceRecognizer {
     final words = invoiceWordsFromOcr(result.lines);
     final tolerance = words.isEmpty
         ? 4.0
-        : math.max(
-            3.0,
-            words.map((w) => w.h).reduce(math.max) * .6,
-          );
+        : math.max(3.0, words.map((w) => w.h).reduce(math.max) * .6);
     final lines = invoiceLines(words, tolerance: tolerance);
     final width = words.isEmpty
         ? 600.0
@@ -249,9 +242,7 @@ abstract final class InvoiceRecognizer {
       };
       return InvoiceRecognition(
         fields,
-        !_complete(fields)
-            ? '部分票面字段未能可靠提取，请核对原件。'
-            : structured.message,
+        !_complete(fields) ? '部分票面字段未能可靠提取，请核对原件。' : structured.message,
         structured: structured.structure,
       );
     });

@@ -1172,9 +1172,8 @@ Future<void> showFilters(BuildContext c, SpaceStore s) async {
     width: 384,
     height: 518,
     constrainHeight: true,
-    barrierColor: s.dark
-        ? Colors.transparent
-        : Colors.black.withValues(alpha: .18),
+    // 浮层只做轻量定位，不给整窗加压暗遮罩，避免看板多列玻璃同时重绘时闪现。
+    barrierColor: Colors.transparent,
   );
 }
 
