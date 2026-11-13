@@ -1,0 +1,24 @@
+{
+  "removed": [
+    "work/space232-release",
+    "downloads/Space-2.3.1-macOS-arm64.dmg",
+    "downloads/Space-2.3.1-macOS-arm64.zip",
+    "downloads/Space-2.3.1-Windows-x64.zip"
+  ],
+  "logicalBytesRemoved": 1216073719,
+  "newAssetsVerifiedBeforeOldLocalPackagesRemoved": true,
+  "protected": [
+    "unique current source",
+    "Flutter SDK and dependency caches",
+    "current Debug and production Release application",
+    "user IDE and Workbuddy settings",
+    "business database and recovery backups",
+    "historical valid performance records",
+    "remote historical releases and manually uploaded Windows asset"
+  ],
+  "currentPackages": [
+    "Space-2.3.2-Windows-x64.zip",
+    "Space-2.3.2-macOS-universal.zip",
+    "Space-2.3.2-macOS-universal.dmg"
+  ]
+}

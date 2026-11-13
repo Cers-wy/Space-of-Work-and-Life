@@ -2,10 +2,12 @@
 
 ## 2.3.2 打包发布（2026-11-13，最新）
 
+- **已发布**：[Space v2.3.2](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.2)，发布标签对应 `9dbbad76`。macOS DMG/ZIP 与 SHA256 校验文件均已上传；远端摘要和本地一致，三个公开下载均返回 HTTP 200，公开发布页已标记 Latest。发布说明包含新增功能、使用入口、平台与验证范围。
 - 用户最新明确要求打包后一起发布，并附新增功能与使用介绍。随后明确选择 **“跳过本次性能实测，直接打包发布”**。此前独立 Release 性能窗口未取得有效前台样本，未执行测量场景，不记录为性能通过；不以历史结果或编译结果替代本轮性能实测。
 - macOS 生产入口 `lib/main.dart` 已从当前 main 重新构建，版本仍为 **2.3.2+19**。DMG/ZIP 为 universal，含 arm64 / x86_64；已核对四个模型哈希、生产入口不含性能探针、深层 ad-hoc 签名、DMG 镜像校验、挂载及 ZIP 解压。两种包均以隔离目录实际启动，建立新数据库并保持运行，日志无应用异常；未读取正式业务数据。未做 Intel 实机验证及 Apple 公证。
 - 发布包：`downloads/Space-2.3.2-macOS-universal.dmg` 与同名 `.zip`；校验见 `downloads/SHA256SUMS.txt`。Windows 沿用本机已构建的 2.3.2 便携包，实机验证仍由用户完成。本次发布附件按既定范围提供 macOS DMG/ZIP 和校验，不改动用户自行上传到历史 Release 的 Windows 资产。
 - 新增功能和介绍见 [发布说明](flutter/verification/发布说明-2.3.2.md)。构建、包检查和性能跳过记录位于 `flutter/verification/release-2.3.2/`；发布后在该目录追加远端资产核验与清理记录。下方记录为历史阶段状态。
+- 最新包公开可用并完成核验后，已清理本轮临时性能程序/输入/数据库、挂载和解压副本、打包暂存目录、重复日志与临时 API 脚本，以及本地 2.3.1 旧分发包。`downloads/` 仅保留 2.3.2 macOS DMG/ZIP、用户本轮需要的 Windows 便携包及校验；历史有效基线、验证记录和远端历史 Release 保留，用户手动上传的 Windows 资产未改动。最终清理记录见 `release-2.3.2/cleanup.json`。
 
 更新：2026-11-13。当前开发版本 **2.3.2+19**，仍使用根目录唯一 `flutter/`。用户最新授权编译两端功能，并明确需要 Windows 便携包，Windows 实机性能测试由用户完成。本轮在 `codex/space-2.3.2-build` 保存构建快照，macOS 编译生产入口，Windows 通过现有 Actions 构建；不将编译或历史测试当作本轮性能验收。macOS 正式性能、资源测试和正式发布尚未安排，当前 2.3.1 正式分发继续保留。
 

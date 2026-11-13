@@ -1,0 +1,47 @@
+{
+  "id": 443980699,
+  "url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.2",
+  "tag": "v2.3.2",
+  "target": "9dbbad7680b5285bc98a630bf4de0a996ab3df41",
+  "draft": false,
+  "assets": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 290,
+      "digest": "sha256:4d1909154ab3370b94096f3a6de16c71446b5c3ed53eb674e3085ca68b224748",
+      "browser_download_url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.2/SHA256SUMS.txt"
+    },
+    {
+      "name": "Space-2.3.2-macOS-universal.dmg",
+      "size": 185928087,
+      "digest": "sha256:0cea437da3faca18782358a9b7dc73eec6c8ec309fbb2160723d67a35ce0e369",
+      "browser_download_url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.2/Space-2.3.2-macOS-universal.dmg"
+    },
+    {
+      "name": "Space-2.3.2-macOS-universal.zip",
+      "size": 176494962,
+      "digest": "sha256:c8d92667a2f436c6644e4efa92408a4a424f62c215f798c9bca3d6ee63dd4cd5",
+      "browser_download_url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.2/Space-2.3.2-macOS-universal.zip"
+    }
+  ],
+  "downloadChecks": [
+    {
+      "name": "SHA256SUMS.txt",
+      "anonymousHttpStatus": 200,
+      "sha256MatchesLocal": true
+    },
+    {
+      "name": "Space-2.3.2-macOS-universal.dmg",
+      "anonymousHttpStatus": 200,
+      "sha256MatchesLocal": true
+    },
+    {
+      "name": "Space-2.3.2-macOS-universal.zip",
+      "anonymousHttpStatus": 200,
+      "sha256MatchesLocal": true
+    }
+  ],
+  "latestReleaseVerifiedViaPublicPage": true,
+  "publicPage": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.2",
+  "anonymousApiCheck": "Unauthenticated API/urllib attempt hit shared-IP HTTP 403 rate limit; public release page and curl downloads independently verified. No failure recorded as success."
+}
