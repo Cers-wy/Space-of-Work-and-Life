@@ -1,0 +1,13 @@
+{
+  "source": "fb693313f27a720adddabafabe4fa8a94d355d0a",
+  "branch": "2026-11-13-win优化",
+  "windows": "10.0.26300",
+  "cpu": "AMD Ryzen 7 7840HS with Radeon 780M Graphics   ",
+  "logicalProcessors": 16,
+  "memoryMiB": 28357.0,
+  "flutter": "3.47.9",
+  "dart": "3.13.7",
+  "sdkCommit": "c197ca5199e9ee5661e865596c9c07294dfab51c",
+  "formalDataAccessed": false,
+  "testStatus": "awaiting C++ installation"
+}

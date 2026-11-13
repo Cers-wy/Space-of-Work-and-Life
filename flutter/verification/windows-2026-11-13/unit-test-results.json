@@ -1,0 +1,200 @@
+[
+  {
+    "id": "UT-core_test",
+    "file": "test/core_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-desktop_ui_test",
+    "file": "test/desktop_ui_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-drive_test",
+    "file": "test/drive_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-file_drive_ui_test",
+    "file": "test/file_drive_ui_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-filter_hotfix_test",
+    "file": "test/filter_hotfix_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-invoice_batch_update_test",
+    "file": "test/invoice_batch_update_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-invoice_pdf_engine_test",
+    "file": "test/invoice_pdf_engine_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-invoice_recognition_test",
+    "file": "test/invoice_recognition_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-invoice_structured_test",
+    "file": "test/invoice_structured_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-invoices_test",
+    "file": "test/invoices_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-iteration_test",
+    "file": "test/iteration_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-performance_test",
+    "file": "test/performance_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-ppocr_selection_test",
+    "file": "test/ppocr_selection_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-refinement_test",
+    "file": "test/refinement_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-releases_test",
+    "file": "test/releases_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-schedule_update_test",
+    "file": "test/schedule_update_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-settings_corners_test",
+    "file": "test/settings_corners_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-settings_test",
+    "file": "test/settings_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-store_test",
+    "file": "test/store_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-sync_files_test",
+    "file": "test/sync_files_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-v231_visual_test",
+    "file": "test/v231_visual_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  },
+  {
+    "id": "UT-workspace_test",
+    "file": "test/workspace_test.dart",
+    "status": "pending",
+    "passed": 0,
+    "failed": 0,
+    "reason": "Awaiting C++ toolchain",
+    "source": "fb693313f27a720adddabafabe4fa8a94d355d0a"
+  }
+]

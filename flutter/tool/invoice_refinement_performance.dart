@@ -131,7 +131,9 @@ Future<(String, String)> fixture(Directory input) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!Platform.isMacOS) throw UnsupportedError('This probe targets macOS');
+  if (!Platform.isMacOS && !Platform.isWindows) {
+    throw UnsupportedError('This probe targets macOS and Windows');
+  }
   final path = Platform.environment['SPACE_FLUTTER_DATA_DIRECTORY'];
   if (path == null || !path.contains('space233'))
     throw StateError('Explicit isolated path required');
@@ -196,8 +198,9 @@ Future<void> main() async {
         'diagnostics',
       );
       lastFocus = DateTime.now();
-      nativeFocused =
-          info?['appActive'] == true && info?['frontmostPid'] == pid;
+      nativeFocused = Platform.isWindows
+          ? base.nativeForeground()
+          : info?['appActive'] == true && info?['frontmostPid'] == pid;
       focusSamples.add({
         'timeUs': lastFocus.microsecondsSinceEpoch,
         'active': nativeFocused,
