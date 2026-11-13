@@ -1,0 +1,20 @@
+2026-11-13T07:04:55.1066848Z Microsoft Windows Server 2022
+2026-11-13T07:06:59.2484309Z [36;1mif ($LASTEXITCODE -ne 0) { throw 'Dependency restore failed' }[0m
+2026-11-13T07:06:59.2484962Z [36;1mif ($LASTEXITCODE -ne 0) { throw 'OCR model restore or SHA256 verification failed' }[0m
+2026-11-13T07:06:59.2485701Z [36;1mif ($LASTEXITCODE -ne 0) { throw 'Windows compilation failed' }[0m
+2026-11-13T07:07:01.6275402Z Flutter 3.47.9 • channel stable • https://github.com/flutter/flutter.git
+2026-11-13T07:07:01.6277387Z Tools • Dart 3.13.7 • DevTools 2.60.0
+2026-11-13T07:07:52.4279190Z PP-OCRv6_det_small.onnx: downloaded and verified
+2026-11-13T07:07:53.8968936Z PP-OCRv6_rec_small.onnx: downloaded and verified
+2026-11-13T07:07:56.4734279Z PP-OCRv6_det_medium.onnx: downloaded and verified
+2026-11-13T07:07:59.1446329Z PP-OCRv6_rec_medium.onnx: downloaded and verified
+2026-11-13T07:09:44.1577643Z Building Windows application...                                   103.8s
+2026-11-13T07:09:44.1597418Z √ Built build\windows\x64\runner\Release\Space.exe
+2026-11-13T07:09:44.2549294Z [36;1mif ($null -eq $vc) { throw 'Visual C++ portable runtime missing' }[0m
+2026-11-13T07:09:44.2550163Z [36;1mif (!(Test-Path (Join-Path $stage 'Space.exe'))) { throw 'Space.exe missing' }[0m
+2026-11-13T07:09:44.2550684Z [36;1mif (!(Test-Path (Join-Path $stage 'pdfium.dll'))) { throw 'PDFium missing' }[0m
+2026-11-13T07:09:44.2551265Z [36;1mif (!(Get-ChildItem $stage -Recurse -Filter '*onnxruntime*.dll')) { throw 'ONNX Runtime missing' }[0m
+2026-11-13T07:09:44.2551971Z [36;1mif (!(Get-ChildItem $stage -Recurse -Filter '*space_ocr_math*.dll')) { throw 'OCR native helpers missing' }[0m
+2026-11-13T07:09:44.2554008Z [36;1m    if (!(Test-Path (Join-Path $models "PP-OCRv6_${kind}_${tier}.onnx"))) { throw "OCR model missing: $kind/$tier" }[0m
+2026-11-13T07:09:44.2556193Z [36;1m$hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()[0m
+2026-11-13T07:09:54.6297808Z SHA256 digest of uploaded artifact zip is 94137727c825ec003a068157de8124e43550f6553b0bed59b69322e55082b5c8

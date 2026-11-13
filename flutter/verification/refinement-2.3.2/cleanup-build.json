@@ -1,0 +1,31 @@
+{
+  "removed": [
+    "work/space232-build/Space Build Check.app",
+    "work/space232-build/startup-data",
+    "work/space232-build/swift-cache",
+    "work/space232-build/synthetic-invoice.png",
+    "work/space232-build/fixture.swift",
+    "work/space232-build/ocr-small.json",
+    "work/space232-build/ocr-medium.json",
+    "work/space232-build/ocr-small.log",
+    "work/space232-build/ocr-medium.log",
+    "work/space232-build/ocr-smoke-small.log",
+    "work/space232-build/startup.log",
+    "work/space232-build/artifact-url.txt",
+    "work/space232-build/windows-artifact.zip",
+    "work/space232-build/artifact",
+    "flutter/verification/refinement-2.3.2/ocr-smoke-small.json",
+    "work/space232-ocr-deps/models",
+    "work/space232-build"
+  ],
+  "bytesFreed": 933030429,
+  "preserved": [
+    "only current source",
+    "user IDE/Workbuddy configuration",
+    "Flutter SDK and dependency cache",
+    "current Debug and Release applications",
+    "2.3.1 verified release and baseline",
+    "2.3.2 Windows user-test package",
+    "business data and recovery backups"
+  ]
+}

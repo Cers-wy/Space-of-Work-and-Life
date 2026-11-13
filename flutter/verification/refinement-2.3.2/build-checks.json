@@ -1,0 +1,45 @@
+{
+  "version": "2.3.2+19",
+  "source": "1fe87a8d908f63d2fe778731a7a2b9368d8e8bca",
+  "productionEntry": "lib/main.dart",
+  "macos": {
+    "releaseBuild": true,
+    "architectures": [
+      "arm64",
+      "x86_64"
+    ],
+    "bundleIdentifier": "com.cers.space.flutter",
+    "version": "2.3.2",
+    "build": "19",
+    "deepSignatureVerified": true,
+    "bundledModelsHashVerified": 4,
+    "isolatedStartup": true,
+    "nativeUI": [
+      "tool card enters file manager",
+      "files and uploads tabs visible",
+      "path beside tabs",
+      "icon actions have accessibility labels",
+      "task-style filter fields visible"
+    ],
+    "performanceTested": false
+  },
+  "ocrSyntheticFunctionalSmoke": [
+    {
+      "model": "PP-OCRv6_small",
+      "confidence": 0.9901731085775133,
+      "lines": 11,
+      "numberMatched": true,
+      "totalMatched": true,
+      "text": "电子发票（普通发票）\n发票号码：26327000000000000123\n开票日期：2026年11月13日\n购买方名称：测试科技有限公司\n统一社会信用代码：91310000123456789A\n销售方名称：示例汽车服务有限公司\n统一社会信用代码：91310000987654321B\n项目名称：运输服务 数量：1 单价：100.00\n金额：100.00税率：6%  税额：6.00\n价税合计（小写）：¥106.00"
+    },
+    {
+      "model": "PP-OCRv6_medium",
+      "confidence": 0.9880584894061921,
+      "lines": 11,
+      "numberMatched": true,
+      "totalMatched": true,
+      "text": "电子发票（普通发票）\n发票号码：26327000000000000123\n开票日期：2026年11月13日\n购买方名称：测试科技有限公司\n统一社会信用代码：91310000123456789A\n销售方名称：示例汽车服务有限公司\n统一社会信用代码：91310000987654321B\n项目名称：运输服务 数量：1 单价：100.00\n金额：100.00  税率：6%  税额：6.00\n价税合计（小写）：¥106.00"
+    }
+  ],
+  "tests": "No unit tests repeated: prior +19 tests passed and application code unchanged; this round changed only build workflow and dependency notices. Unaffected modules skipped."
+}

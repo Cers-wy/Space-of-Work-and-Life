@@ -1,0 +1,18 @@
+{
+  "version": "2.3.2+19",
+  "source": "1fe87a8d908f63d2fe778731a7a2b9368d8e8bca",
+  "testedOnUserWindows": false,
+  "build": "Release x64",
+  "workflowRun": 43383147368,
+  "workflowArtifact": 14018120050,
+  "ciPackageSha256": "f371379c7377186bd64d90e7814b3a8a9b7c8e9f05b70d65537dc74e99a91c7f",
+  "sha256": "43dbd4e80b164b7b2ff4ce345c421a726fef81dc79bc3ce5511fc8d08d4c90c5",
+  "bytes": 156149737,
+  "files": 40,
+  "models": 4,
+  "peArchitecture": "AMD64",
+  "nativeDependenciesVerified": true,
+  "packageNoticeUpdate": "Included upstream ONNX Runtime license and bundled dependency notices; binary files unchanged",
+  "runtimeTested": false,
+  "performanceTested": false
+}
