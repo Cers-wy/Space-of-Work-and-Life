@@ -1,0 +1,4 @@
+Building macOS application...                                   
+Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". This will become the default behavior in a future Flutter release.
+2026-11-13 16:17:04.848 xcodebuild[34326:3887978] [MT] IDESchemeActionsInvocationRecord: Device <IDEOSXSupportCore.IDEMacPlaceholder: 0x757f906580 (Any Mac | undefined_arch)> is missing operatingSystemVersion, operatingSystemVersionWithBuildNumber.
+✓ Built build/macos/Build/Products/Release/Space.app (280.8MB)

@@ -6,11 +6,11 @@ Space 是一款面向个人的桌面工作台，将工作任务、个人计划�
 
 数据保存在本机，日常使用无需联网；需要在不同电脑之间接续计划时，可以通过云端数据同步，将自己的工作台带到另一台设备。
 
-支持 **macOS Apple Silicon** 与 **Windows 11 x64**。
+支持 **macOS** 与 **Windows 11 x64**；macOS 通用包包含 Apple Silicon 和 Intel 架构，本次实测平台为 Apple Silicon。
 
 [下载 Space](downloads/) · [macOS 使用说明](flutter/INSTALL-macOS.md) · [Windows 使用说明](flutter/INSTALL-Windows.md)
 
-当前源码版本为 **2.3.1（16）**，统一在 `main` 迭代。新版修复发票合并间距、单张靠上及二维码/印章保真，并优化已报销字段对齐。macOS已完成本轮功能与性能验证；Windows便携包已编译，实机测试与发布由用户后续完成。开发状态见 [项目交接](DEVELOPMENT_HANDOFF.md)。
+当前源码版本为 **2.3.2（19）**，统一在 `main` 迭代。新增发票识别后自动保存、后台批量识别与批量删除；文件管理与上传记录合为双标签页面，支持多条件筛选，仓库连接统一在网盘设置维护。macOS 更新包已完成构建及完整性检查；本轮按用户确认跳过正式性能实测。Windows 同版便携包已编译，实机功能与性能由用户验证。[查看新增功能与使用介绍](flutter/verification/发布说明-2.3.2.md) · [项目交接](DEVELOPMENT_HANDOFF.md)。
 
 ## 从自己的喜好出发
 

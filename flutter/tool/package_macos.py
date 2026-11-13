@@ -19,7 +19,11 @@ version = info['CFBundleShortVersionString']
 assert info['CFBundleIdentifier'] == 'com.cers.space.flutter'
 assert info['CFBundleName'] == 'Space'
 output.mkdir(parents=True, exist_ok=True)
-name = f'Space-{version}-macOS-arm64'
+architectures = subprocess.check_output(
+    ['lipo', '-archs', str(source / 'Contents/MacOS/Space')], text=True,
+).strip().split()
+architecture = 'universal' if set(architectures) == {'arm64', 'x86_64'} else architectures[0]
+name = f'Space-{version}-macOS-{architecture}'
 distribution = work / name
 assert not distribution.exists(), 'Staging directory already exists; retain and review it first'
 distribution.mkdir(parents=True)
@@ -38,6 +42,7 @@ stage.mkdir()
 subprocess.run(['ditto', str(application), str(stage / 'Space.app')], check=True)
 (stage / 'Applications').symlink_to('/Applications')
 shutil.copy2(root / 'INSTALL-macOS.md', stage / '安装说明.md')
+shutil.copy2(root / 'THIRD_PARTY_NOTICES.txt', stage / 'THIRD_PARTY_NOTICES.txt')
 image = output / (name + '.dmg')
 assert not image.exists()
 subprocess.run(['hdiutil', 'create', '-volname', f'Space {version}', '-srcfolder', str(stage), '-ov', '-format', 'UDZO', str(image)], check=True)
@@ -45,6 +50,7 @@ subprocess.run(['hdiutil', 'verify', str(image)], check=True)
 checksums = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in [archive, image]}
 (work / 'verification.json').write_text(json.dumps({
     'version': version, 'build': info['CFBundleVersion'], 'bundle_id': info['CFBundleIdentifier'],
+    'architectures': architectures,
     'checksums': checksums, 'code_signature': 'adhoc; codesign --verify --deep --strict passed',
 }, ensure_ascii=False, indent=2))
 print(json.dumps({'distribution': str(distribution), 'checksums': checksums}, ensure_ascii=False))

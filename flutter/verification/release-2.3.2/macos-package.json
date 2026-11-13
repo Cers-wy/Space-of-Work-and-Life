@@ -1,0 +1,78 @@
+{
+  "version": "2.3.2",
+  "build": "19",
+  "bundle_id": "com.cers.space.flutter",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "checksums": {
+    "Space-2.3.2-macOS-universal.zip": "c8d92667a2f436c6644e4efa92408a4a424f62c215f798c9bca3d6ee63dd4cd5",
+    "Space-2.3.2-macOS-universal.dmg": "0cea437da3faca18782358a9b7dc73eec6c8ec309fbb2160723d67a35ce0e369"
+  },
+  "code_signature": "adhoc; codesign --verify --deep --strict passed",
+  "applicationSource": "3d433a816b0a14aa78659596206647b20ae34c5c",
+  "productionEntry": "lib/main.dart",
+  "probeEntryExcluded": true,
+  "modelsHashVerified": 4,
+  "databaseIncluded": false,
+  "dmgMounted": true,
+  "zipCrcVerified": true,
+  "packageIsolatedStartup": {
+    "dmg": true,
+    "zip": true,
+    "databaseInitialized": true,
+    "visualRetested": false
+  },
+  "nativeFrameworkArchitectures": [
+    {
+      "binary": "Contents/Frameworks/FlutterMacOS.framework/Versions/A/FlutterMacOS",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "binary": "Contents/Frameworks/sqlite3.framework/Versions/A/sqlite3",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "binary": "Contents/Frameworks/space_ocr_math.framework/Versions/A/space_ocr_math",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "binary": "Contents/Frameworks/App.framework/Versions/A/App",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "binary": "Contents/Frameworks/PDFium.framework/Versions/A/PDFium",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "binary": "Contents/Frameworks/onnxruntime.1.18.1.framework/Versions/A/onnxruntime.1.18.1",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "binary": "Contents/Frameworks/pdfrx_pdfium_gate.framework/Versions/A/pdfrx_pdfium_gate",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    }
+  ]
+}

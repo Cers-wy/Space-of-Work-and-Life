@@ -1,0 +1,11 @@
+{
+  "version": "2.3.2+19",
+  "status": "skipped-by-explicit-user-instruction",
+  "validSamples": 0,
+  "reason": "The independent foreground probe could not be controlled by CUA; two attempts did not acquire foreground before the start deadline. No scenarios ran.",
+  "userInstruction": "跳过本次性能实测，直接打包发布",
+  "passed": false,
+  "formalDatabaseAccessed": false,
+  "unaffectedModulesRetested": false,
+  "historicalTests": "203 automated tests passed for unchanged +19 application code; this was not a fresh test run."
+}
