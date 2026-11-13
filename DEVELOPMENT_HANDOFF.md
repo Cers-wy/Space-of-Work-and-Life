@@ -1,5 +1,15 @@
 # Space 开发交接
 
+## 2.3.3 发布（2026-11-13，最新）
+
+- **已发布**：[Space v2.3.3](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.3)，标签指向 `094a2ac3`，已标记 Latest。附件为 `Space-2.3.3-Windows-x64.zip`（156,406,552 字节）与 `SHA256SUMS.txt`，两个公开下载均返回 HTTP 200，摘要与本机一致。
+- **本次修复与新增**：① 任务看板点击「筛选」时整窗闪一下——任务/发票/文件三个筛选浮层不再给整窗加 18% 黑色遮罩（浅色主题专属，暗色本为透明），逐帧实测整窗平均亮度由 `243.80 → 202.33` 变为 `243.80 → 242.95`，无空白帧；② 发票批量更新（报销月份/项目/备注，单事务、月份与项目校验、删除项跳过）；③ 窄窗口发票标题栏改为横向滚动操作区；④ 价税合计只在明确标签后取值，避免误取未税或明细金额。
+- **Windows**：GitHub Actions [43406561773](https://github.com/Cers-wy/Space-of-Work-and-Life/actions/runs/43406561773) 在 `094a2ac3` 编译 Release x64 并打包。本机已解压核对 `Space.exe`（PE32+ x86-64）、`pdfium.dll`、`onnxruntime.dll`、`space_ocr_math.dll`、四个 OCR 模型、VC 运行库与 `使用说明.md`，`build-info.json` 为 `2.3.3+20 / 094a2ac3`。**未做 Windows 实机功能与性能验证**，不记为 Windows 验收通过。
+- **macOS 本轮未产出包**：本机 `flutter build macos --release`（含 `--no-pub`）与 `xcodebuild -resolvePackageDependencies`、`xcodebuild ... -disableAutomaticPackageResolution` 全部失败于 `sandbox-exec: sandbox_apply: Operation not permitted`（Xcode 27.2 包解析阶段，exit 74）。未构造、未上传 macOS 资产，不得视为 macOS 已验证；macOS 当前可用包仍为 2.3.2（19）。需要 macOS 版时由用户在 VS Code 或 Xcode 侧完成一次构建后再打包上传。
+- **性能与资源**：本轮未取得有效前台样本。三轮 Profile 探针（`work/space233/performance-1..3`）所有样本 `foregroundThroughout=false` / `lifecycle=inactive`，不能作为前台流畅性证据，不记录为性能通过。探针原有断言把合成图小模型 OCR 的金额精度当硬指标（`Recognition/persistence differs`），已改为校验产品承诺——票号一致、报销月份不被识别覆盖、金额不允许写错值，并单独输出 `ocrAmountCoverage`；数据库中 8 张 PNG 的票号与月份原本均正确，仅价税合计为空。
+- **测试范围**：`filter_hotfix_test`＋`workspace_test` 31 项、`invoice_batch_update_test`＋`invoice_recognition_test` 14 项全部通过；`dart analyze lib test tool` 仅 3 条既有 Quill 警告。未受影响模块（同步、备份、合并排版、甘特/日历大数据）未执行，不作为本轮交付前置条件。记录见 [发布说明](flutter/verification/发布说明-2.3.3.md) 与 [验证记录](flutter/verification/release-2.3.3/verification.json)。
+- 分发目录已清理为 2.3.3 Windows 包 + 2.3.2 macOS 包；临时 CI 下载与解压副本、失败构建日志在收尾时删除。
+
 ## 2.3.2 打包发布（2026-11-13，最新）
 
 - **已发布**：[Space v2.3.2](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.2)，发布标签对应 `9dbbad76`。macOS DMG/ZIP 与 SHA256 校验文件均已上传；远端摘要和本地一致，三个公开下载均返回 HTTP 200，公开发布页已标记 Latest。发布说明包含新增功能、使用入口、平台与验证范围。
