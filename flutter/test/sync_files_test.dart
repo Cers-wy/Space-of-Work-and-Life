@@ -187,6 +187,8 @@ void main() {
 
     final unpacked = await repoA.unpackBackup(pack);
     try {
+      final moved = File(pack).renameSync('$pack.checked');
+      expect(moved.existsSync(), isTrue, reason: '解包完成必须立即释放备份包句柄');
       expect(unpacked.files, 1);
       final snapshot = await invoices.readSnapshot(unpacked.database);
       expect(snapshot.invoices, 1);

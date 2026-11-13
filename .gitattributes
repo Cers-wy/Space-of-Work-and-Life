@@ -1,0 +1,2 @@
+# This fixture is compared byte-for-byte with canonical portable JSON.
+/flutter/test/fixtures/09-github-portable.json text eol=lf

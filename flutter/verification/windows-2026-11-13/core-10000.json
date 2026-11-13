@@ -1,0 +1,30 @@
+{
+  "taskCount": 10000,
+  "mode": "Flutter Release AOT core probe; no UI frame timing",
+  "platform": "windows",
+  "dartVersion": "3.13.7 (stable) (Thu Oct 22 14:28:57 2026 -0700) on \"windows_x64\"",
+  "rssMiB": 126.87109375,
+  "peakRssMiB": 236.96875,
+  "databaseBytes": 4296704,
+  "query": {
+    "samples": 30,
+    "medianMs": 52.193,
+    "p95Ms": 55.29,
+    "maxMs": 56.93
+  },
+  "readValidate": {
+    "samples": 30,
+    "medianMs": 149.925,
+    "p95Ms": 153.078,
+    "maxMs": 153.708
+  },
+  "saveWithBackup": {
+    "samples": 10,
+    "medianMs": 300.867,
+    "p95Ms": 305.842,
+    "maxMs": 305.842
+  },
+  "encryptDecryptMs": 948.21,
+  "encryptedBytes": 4217361,
+  "formalDataAccessed": false
+}

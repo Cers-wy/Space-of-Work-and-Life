@@ -1,0 +1,17 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":12800,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/desktop_ui_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/desktop_ui_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1748}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":1749}
+{"test":{"id":3,"name":"窄窗口四种任务视图在概览展开及收起时都能直接切换","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":46,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/desktop_ui_test.dart"},"type":"testStart","time":1749}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3699}
+{"test":{"id":4,"name":"任务、工具和发票标题栏仅显示目标主题图标","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":86,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/desktop_ui_test.dart"},"type":"testStart","time":3699}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4162}
+{"test":{"id":5,"name":"发票台账圆形全选支持部分选中、空格和窄窗口滚动","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":135,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/desktop_ui_test.dart"},"type":"testStart","time":4162}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4518}
+{"test":{"id":6,"name":"发票编辑可用键盘选择任务项目并保存","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":222,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/desktop_ui_test.dart"},"type":"testStart","time":4519}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5030}
+{"test":{"id":7,"name":"点击详情左侧空白关闭，有修改时先询问是否保存","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":293,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/desktop_ui_test.dart"},"type":"testStart","time":5030}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5742}
+{"success":true,"type":"done","time":5779}

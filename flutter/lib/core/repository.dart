@@ -699,22 +699,27 @@ PRAGMA user_version=1;
         file.copySync(database);
         return UnpackedBackup(temp.path, database, 0);
       }
-      final archive = ZipDecoder().decodeStream(InputFileStream(source));
-      for (final entry in archive) {
-        final name = entry.name.replaceAll('\\', '/');
-        if (name != 'space.sqlite' && !name.startsWith('invoices/files/')) {
-          continue;
+      final input = InputFileStream(source);
+      try {
+        final archive = ZipDecoder().decodeStream(input);
+        for (final entry in archive) {
+          final name = entry.name.replaceAll('\\', '/');
+          if (name != 'space.sqlite' && !name.startsWith('invoices/files/')) {
+            continue;
+          }
+          if (name.split('/').contains('..')) continue;
+          final target = File(p.join(temp.path, name));
+          target.parent.createSync(recursive: true);
+          final output = OutputFileStream(target.path);
+          try {
+            entry.writeContent(output);
+          } finally {
+            output.closeSync();
+          }
+          if (name != 'space.sqlite') files++;
         }
-        if (name.split('/').contains('..')) continue;
-        final target = File(p.join(temp.path, name));
-        target.parent.createSync(recursive: true);
-        final output = OutputFileStream(target.path);
-        try {
-          entry.writeContent(output);
-        } finally {
-          output.close();
-        }
-        if (name != 'space.sqlite') files++;
+      } finally {
+        input.closeSync();
       }
       if (!File(database).existsSync()) invalid('备份包缺少数据库');
       return UnpackedBackup(temp.path, database, files);

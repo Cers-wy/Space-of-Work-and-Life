@@ -1,0 +1,148 @@
+{
+  "mode": "Windows Release background native processing",
+  "formalDataAccessed": false,
+  "frontendPerformanceMeasured": false,
+  "results": [
+    {
+      "scenario": "pdf-inspect-trim-100-0",
+      "durationMs": 276.49,
+      "cpuCorePercent": 101.72158125067814,
+      "rssBeforeMiB": 118.3515625,
+      "rssAfterMiB": 95.98046875,
+      "processPeakRssMiB": 125.0546875,
+      "result": {
+        "pages": 100
+      }
+    },
+    {
+      "scenario": "pdf-compose-100-0",
+      "durationMs": 71.828,
+      "cpuCorePercent": 87.01342095004733,
+      "rssBeforeMiB": 95.98046875,
+      "rssAfterMiB": 100.97265625,
+      "processPeakRssMiB": 125.0546875,
+      "result": {
+        "pages": 50,
+        "bytes": 37237
+      }
+    },
+    {
+      "scenario": "ocr-small-0",
+      "durationMs": 1382.571,
+      "cpuCorePercent": 169.52113128367367,
+      "rssBeforeMiB": 100.97265625,
+      "rssAfterMiB": 174.875,
+      "processPeakRssMiB": 300.42578125,
+      "result": {
+        "characters": 146,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "ocr-medium-0",
+      "durationMs": 5503.782,
+      "cpuCorePercent": 168.91793679328143,
+      "rssBeforeMiB": 174.875,
+      "rssAfterMiB": 286.859375,
+      "processPeakRssMiB": 534.1484375,
+      "result": {
+        "characters": 147,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "pdf-inspect-trim-100-1",
+      "durationMs": 359.895,
+      "cpuCorePercent": 112.88014559802164,
+      "rssBeforeMiB": 286.859375,
+      "rssAfterMiB": 286.8671875,
+      "processPeakRssMiB": 534.1484375,
+      "result": {
+        "pages": 100
+      }
+    },
+    {
+      "scenario": "pdf-compose-100-1",
+      "durationMs": 129.997,
+      "cpuCorePercent": 132.21458956745155,
+      "rssBeforeMiB": 286.859375,
+      "rssAfterMiB": 269.0859375,
+      "processPeakRssMiB": 534.1484375,
+      "result": {
+        "pages": 50,
+        "bytes": 37237
+      }
+    },
+    {
+      "scenario": "ocr-small-1",
+      "durationMs": 1144.047,
+      "cpuCorePercent": 180.28105488673106,
+      "rssBeforeMiB": 269.0859375,
+      "rssAfterMiB": 175.34765625,
+      "processPeakRssMiB": 534.1484375,
+      "result": {
+        "characters": 146,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "ocr-medium-1",
+      "durationMs": 3849.674,
+      "cpuCorePercent": 187.10999944410878,
+      "rssBeforeMiB": 175.34765625,
+      "rssAfterMiB": 284.35546875,
+      "processPeakRssMiB": 539.1953125,
+      "result": {
+        "characters": 147,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "pdf-inspect-trim-100-2",
+      "durationMs": 372.048,
+      "cpuCorePercent": 104.99317292392381,
+      "rssBeforeMiB": 284.35546875,
+      "rssAfterMiB": 284.390625,
+      "processPeakRssMiB": 539.1953125,
+      "result": {
+        "pages": 100
+      }
+    },
+    {
+      "scenario": "pdf-compose-100-2",
+      "durationMs": 118.587,
+      "cpuCorePercent": 105.40784403012135,
+      "rssBeforeMiB": 284.390625,
+      "rssAfterMiB": 266.578125,
+      "processPeakRssMiB": 539.1953125,
+      "result": {
+        "pages": 50,
+        "bytes": 37237
+      }
+    },
+    {
+      "scenario": "ocr-small-2",
+      "durationMs": 1005.009,
+      "cpuCorePercent": 178.79193121653637,
+      "rssBeforeMiB": 266.578125,
+      "rssAfterMiB": 179.34765625,
+      "processPeakRssMiB": 539.1953125,
+      "result": {
+        "characters": 146,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "ocr-medium-2",
+      "durationMs": 3690.437,
+      "cpuCorePercent": 188.83265044221048,
+      "rssBeforeMiB": 179.34765625,
+      "rssAfterMiB": 288.92578125,
+      "processPeakRssMiB": 540.02734375,
+      "result": {
+        "characters": 147,
+        "lines": 8
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":7440,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1733}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":1734}
+{"test":{"id":3,"name":"PDF 文本层按左右栏和明细列解析成发票字段与结构化数据","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":70,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart"},"type":"testStart","time":1734}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1756}
+{"test":{"id":4,"name":"名称标签、小数点分行时仍能解析购销方与明细金额","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":110,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart"},"type":"testStart","time":1756}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1759}
+{"test":{"id":5,"name":"逐字符 PDF 导出按 x 紧邻关系合并成词，并按基线聚成视觉行","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":168,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart"},"type":"testStart","time":1759}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1763}
+{"test":{"id":6,"name":"OCR 带坐标行同样解析成结构化字段并过滤低置信数字","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":184,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart"},"type":"testStart","time":1763}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1766}
+{"test":{"id":7,"name":"结构化行可序列化后在 isolate 内还原并解析","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":207,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart"},"type":"testStart","time":1766}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1770}
+{"test":{"id":8,"name":"真实 PDFium 字符盒可还原成视觉行并序列化","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":216,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart"},"type":"testStart","time":1770}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1812}
+{"test":{"id":9,"name":"源码里使用的 SpaceIcon / IconButtonS 名称都有对应字形","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":228,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_structured_test.dart"},"type":"testStart","time":1812}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1831}
+{"success":true,"type":"done","time":1856}

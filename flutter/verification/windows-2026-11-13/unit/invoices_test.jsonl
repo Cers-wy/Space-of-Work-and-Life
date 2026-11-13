@@ -1,0 +1,19 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":14116,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/invoices_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/invoices_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1772}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":6,"line":null,"column":null,"url":null},"type":"group","time":1773}
+{"test":{"id":3,"name":"台账共用任务项目，任务保存、改名及删除不会丢失发票","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":14,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoices_test.dart"},"type":"testStart","time":1774}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1956}
+{"test":{"id":4,"name":"旧报销项目迁入共用项目，原件、附件和归属完整保留","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":133,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoices_test.dart"},"type":"testStart","time":1957}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2038}
+{"test":{"id":5,"name":"A4 排版按 1–4 张分页、顶格对齐、独立附件和毫米边距","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":192,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoices_test.dart"},"type":"testStart","time":2039}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2045}
+{"test":{"id":6,"name":"双张上下均衡、单张及末页保持尺寸，手动间距不被扩大","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":264,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoices_test.dart"},"type":"testStart","time":2045}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2047}
+{"test":{"id":7,"name":"混合宽高比跨页不跳尺寸，同行顶部对齐，三行裁剪线各在间隙中点","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":306,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoices_test.dart"},"type":"testStart","time":2047}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2049}
+{"test":{"id":8,"name":"一式两份把每张票面连续排两次，每页两张同票","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":347,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoices_test.dart"},"type":"testStart","time":2049}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2051}
+{"success":true,"type":"done","time":2077}

@@ -9,5 +9,8 @@
   "dart": "3.13.7",
   "sdkCommit": "c197ca5199e9ee5661e865596c9c07294dfab51c",
   "formalDataAccessed": false,
-  "testStatus": "awaiting C++ installation"
+  "testStatus": "22 files / 211 tests passed; foreground performance pending",
+  "testedApplicationFile": "flutter/lib/core/repository.dart",
+  "testedApplicationGitBlob": "d709c3f20b6faf1757278c7b2f7cea333aca823b",
+  "testRunnerWorkaround": "Flutter 3.47.9 Windows test command: enableDartProfiling=false"
 }

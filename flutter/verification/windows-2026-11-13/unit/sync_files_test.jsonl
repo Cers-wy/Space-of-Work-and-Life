@@ -1,0 +1,15 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":8104,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/sync_files_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/sync_files_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1677}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":1678}
+{"test":{"id":3,"name":"单个附件加密包可正确解封，错误密钥与篡改都会拒绝","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":60,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/sync_files_test.dart"},"type":"testStart","time":1679}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3183}
+{"test":{"id":4,"name":"发票文件按摘要增量上传，换机恢复后台账与附件保持一致","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":87,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/sync_files_test.dart"},"type":"testStart","time":3184}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10569}
+{"test":{"id":5,"name":"本地备份包包含数据库与附件，可在新数据目录完整还原","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/sync_files_test.dart"},"type":"testStart","time":10570}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10716}
+{"test":{"id":6,"name":"旧版 SQLite 备份仍可导入，只是不含附件","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":217,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/sync_files_test.dart"},"type":"testStart","time":10716}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10753}
+{"success":true,"type":"done","time":10780}

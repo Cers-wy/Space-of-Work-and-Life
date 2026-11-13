@@ -1,0 +1,23 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":6756,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1820}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":8,"line":null,"column":null,"url":null},"type":"group","time":1823}
+{"test":{"id":3,"name":"light 1.0x 设置背景/边框四角统一裁剪","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":17,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"testStart","time":1823}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2611}
+{"test":{"id":4,"name":"light 1.25x 设置背景/边框四角统一裁剪","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":17,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"testStart","time":2612}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2876}
+{"test":{"id":5,"name":"light 1.5x 设置背景/边框四角统一裁剪","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":17,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"testStart","time":2876}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3136}
+{"test":{"id":6,"name":"light 2.0x 设置背景/边框四角统一裁剪","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":17,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"testStart","time":3136}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3472}
+{"test":{"id":7,"name":"dark 1.0x 设置背景/边框四角统一裁剪","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":17,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"testStart","time":3473}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3704}
+{"test":{"id":8,"name":"dark 1.25x 设置背景/边框四角统一裁剪","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":17,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"testStart","time":3704}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3914}
+{"test":{"id":9,"name":"dark 1.5x 设置背景/边框四角统一裁剪","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":17,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"testStart","time":3915}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4179}
+{"test":{"id":10,"name":"dark 2.0x 设置背景/边框四角统一裁剪","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":17,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_corners_test.dart"},"type":"testStart","time":4180}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4490}
+{"success":true,"type":"done","time":4521}
