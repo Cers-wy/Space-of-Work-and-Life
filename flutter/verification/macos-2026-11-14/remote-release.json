@@ -1,0 +1,41 @@
+{
+  "tag": "v2.3.4",
+  "releaseId": 444972182,
+  "sourceTagCommit": "a8f88e12e23a85f45ceff470ac28b5ffb3413503",
+  "buildSource": "6dbc3741b9daeb41a58fa7476be5c1bd29afc256",
+  "assets": [
+    {
+      "name": "Space-2.3.4-macOS-universal.dmg",
+      "id": 746085210,
+      "size": 185129223,
+      "sha256": "4f1df70c6717fd262c0fc09640150b32b4c36fabd06b2770b13312d8a17c248f",
+      "serverDigest": "sha256:4f1df70c6717fd262c0fc09640150b32b4c36fabd06b2770b13312d8a17c248f",
+      "url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.4/Space-2.3.4-macOS-universal.dmg"
+    },
+    {
+      "name": "Space-2.3.4-macOS-universal.zip",
+      "id": 746086228,
+      "size": 175958635,
+      "sha256": "0b49d0bed34944589b2410e95116501d076fa50b94253f46606355e472b4a83c",
+      "serverDigest": "sha256:0b49d0bed34944589b2410e95116501d076fa50b94253f46606355e472b4a83c",
+      "url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.4/Space-2.3.4-macOS-universal.zip"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "id": 746087088,
+      "size": 290,
+      "sha256": "4ce11f9a73222438854e37501fb7c1ab3840208434a7ef6b95cc51dfeac16cb1",
+      "serverDigest": "sha256:4ce11f9a73222438854e37501fb7c1ab3840208434a7ef6b95cc51dfeac16cb1",
+      "url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.4/SHA256SUMS.txt"
+    }
+  ],
+  "existingWindowsReleaseUnchanged": true,
+  "published": true,
+  "latest": true,
+  "verifiedUTC": "2026-11-14T03:01:30.062737+00:00",
+  "publicDownloadHTTPStatus": {
+    "Space-2.3.4-macOS-universal.dmg": "200",
+    "Space-2.3.4-macOS-universal.zip": "200",
+    "SHA256SUMS.txt": "200"
+  }
+}

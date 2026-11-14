@@ -1,0 +1,404 @@
+Building macOS application...
+Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". This will become the default behavior in a future Flutter release.
+2026-11-14 10:52:58.813 xcodebuild[47737:4780471] [MT] IDESchemeActionsInvocationRecord: Device <IDEOSXSupportCore.IDEMacPlaceholder: 0x78f98d9400 (Any Mac | undefined_arch)> is missing operatingSystemVersion, operatingSystemVersionWithBuildNumber.
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:178:59: warning: expression implicitly coerced from 'PHObjectPlaceholder?' to 'Any'
+176 |                             // Create the album
+177 |                             let albumChangeRequest = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+178 |                             albumChangeRequest.addAssets([assetRequest.placeholderForCreatedAsset] as NSArray)
+    |                                                           `- warning: expression implicitly coerced from 'PHObjectPlaceholder?' to 'Any'
+179 |
+180 |                         } else if let album = existingAlbum {
+
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:183:60: warning: expression implicitly coerced from 'PHObjectPlaceholder?' to 'Any'
+181 |                             // Add the image to the existing album
+182 |                             let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
+183 |                             albumChangeRequest?.addAssets([assetRequest.placeholderForCreatedAsset] as NSArray)
+    |                                                            `- warning: expression implicitly coerced from 'PHObjectPlaceholder?' to 'Any'
+184 |                         }
+185 |                     }
+
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:102:19: warning: immutable value 'permissionDescription' was never used; consider replacing with '_' or removing it [#NoUsage]
+100 |         let permissionKey = needsReadWritePermission ? "NSPhotoLibraryUsageDescription" : "NSPhotoLibraryAddUsageDescription"
+101 |         guard let infoPlist = Bundle.main.infoDictionary,
+102 |               let permissionDescription = infoPlist[permissionKey] as? String else {
+    |                   `- warning: immutable value 'permissionDescription' was never used; consider replacing with '_' or removing it [#NoUsage]
+103 |             completion(.failure(PigeonError(
+104 |                 code: "MACOS_INFO_PLIST_NOT_CONFIGURED",
+
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:127:37: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+125 |                 let accessLevel: PHAccessLevel = needsReadWritePermission ? .readWrite : .addOnly
+126 |
+127 |                 let currentStatus = await PHPhotoLibrary.authorizationStatus(for: accessLevel)
+    |                                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+128 |
+129 |                 guard !isAccessBlocked(status: currentStatus) else {
+
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:144:37: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+142 |             } else {
+143 |                 // For macOS 10.15 and previous versions
+144 |                 let currentStatus = await PHPhotoLibrary.authorizationStatus()
+    |                                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+145 |
+146 |                 guard !isAccessBlocked(status: currentStatus) else {
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:178:59: warning: expression implicitly coerced from 'PHObjectPlaceholder?' to 'Any'
+176 |                             // Create the album
+177 |                             let albumChangeRequest = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+178 |                             albumChangeRequest.addAssets([assetRequest.placeholderForCreatedAsset] as NSArray)
+    |                                                           `- warning: expression implicitly coerced from 'PHObjectPlaceholder?' to 'Any'
+179 |
+180 |                         } else if let album = existingAlbum {
+
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:183:60: warning: expression implicitly coerced from 'PHObjectPlaceholder?' to 'Any'
+181 |                             // Add the image to the existing album
+182 |                             let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
+183 |                             albumChangeRequest?.addAssets([assetRequest.placeholderForCreatedAsset] as NSArray)
+    |                                                            `- warning: expression implicitly coerced from 'PHObjectPlaceholder?' to 'Any'
+184 |                         }
+185 |                     }
+
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:102:19: warning: immutable value 'permissionDescription' was never used; consider replacing with '_' or removing it [#NoUsage]
+100 |         let permissionKey = needsReadWritePermission ? "NSPhotoLibraryUsageDescription" : "NSPhotoLibraryAddUsageDescription"
+101 |         guard let infoPlist = Bundle.main.infoDictionary,
+102 |               let permissionDescription = infoPlist[permissionKey] as? String else {
+    |                   `- warning: immutable value 'permissionDescription' was never used; consider replacing with '_' or removing it [#NoUsage]
+103 |             completion(.failure(PigeonError(
+104 |                 code: "MACOS_INFO_PLIST_NOT_CONFIGURED",
+
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:127:37: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+125 |                 let accessLevel: PHAccessLevel = needsReadWritePermission ? .readWrite : .addOnly
+126 |
+127 |                 let currentStatus = await PHPhotoLibrary.authorizationStatus(for: accessLevel)
+    |                                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+128 |
+129 |                 guard !isAccessBlocked(status: currentStatus) else {
+
+/Users/cers/Documents/ChatGPT/个人工作台/work/flutter-sdk-bootstrap/pub-cache/hosted/pub.dev/quill_native_bridge_macos-0.0.1/macos/quill_native_bridge_macos/Sources/quill_native_bridge_macos/QuillNativeBridgeImpl.swift:144:37: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+142 |             } else {
+143 |                 // For macOS 10.15 and previous versions
+144 |                 let currentStatus = await PHPhotoLibrary.authorizationStatus()
+    |                                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+145 |
+146 |                 guard !isAccessBlocked(status: currentStatus) else {
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+✓ Built build/macos/Build/Products/Release/Space.app (278.1MB)

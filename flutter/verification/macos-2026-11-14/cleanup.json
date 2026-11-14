@@ -1,0 +1,27 @@
+{
+  "afterPublicDownloadAndDigestVerification": true,
+  "removed": [
+    "downloads/Space-2.3.2-macOS-universal.dmg",
+    "downloads/Space-2.3.2-macOS-universal.zip",
+    "work/space233/performance-1",
+    "work/space233/performance-2",
+    "work/space233/performance-3",
+    "flutter/build/macos/Build/Products/Profile/Space.app",
+    "/tmp/space_pagination_edit.py",
+    "/tmp/space_pagination_ui.py",
+    "flutter/work/macos-20261114",
+    "work/macos-20261114"
+  ],
+  "retained": [
+    "unique Flutter source",
+    "SDK and dependency caches",
+    "latest verified macOS 2.3.4 DMG/ZIP and checksums",
+    "existing Windows 2.3.3 portable bundle and checksum",
+    "latest Debug and production Release build products",
+    "historical valid baselines and fixtures",
+    "user .workbuddy and flutter/.vscode",
+    "formal databases, credentials and recovery backups"
+  ],
+  "remoteHistoricalReleasesOrWindowsAssetsDeleted": false,
+  "gitHistoryRewritten": false
+}

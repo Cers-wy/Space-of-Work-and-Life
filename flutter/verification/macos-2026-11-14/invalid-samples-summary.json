@@ -1,0 +1,181 @@
+{
+  "allRejected": true,
+  "usedAsForegroundProof": false,
+  "directories": [
+    {
+      "temporaryDirectory": "work/space233/performance-1",
+      "rejectedSamples": [
+        {
+          "scenario": "invoice-list-scroll-1000",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-background-8-with-frontend",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "pdf-text-recognize-save",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-cold-recognize-save",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "workspace-idle-10s",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "batch-dialog-open-close-8",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "batch-update-1000-x10",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-medium-first-use",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        }
+      ]
+    },
+    {
+      "temporaryDirectory": "work/space233/performance-2",
+      "rejectedSamples": [
+        {
+          "scenario": "invoice-list-scroll-1000",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-background-8-with-frontend",
+          "foregroundThroughout": false,
+          "lifecycle": "resumed"
+        },
+        {
+          "scenario": "pdf-text-recognize-save",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-cold-recognize-save",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "workspace-idle-10s",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "batch-dialog-open-close-8",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "batch-update-1000-x10",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-medium-first-use",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        }
+      ]
+    },
+    {
+      "temporaryDirectory": "work/space233/performance-3",
+      "rejectedSamples": [
+        {
+          "scenario": "invoice-list-scroll-1000",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-background-8-with-frontend",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "pdf-text-recognize-save",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-cold-recognize-save",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "workspace-idle-10s",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "batch-dialog-open-close-8",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "batch-update-1000-x10",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        },
+        {
+          "scenario": "ocr-medium-first-use",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        }
+      ]
+    },
+    {
+      "temporaryDirectory": "work/macos-20261114/space233-valid",
+      "rejectedSamples": [
+        {
+          "scenario": "board-filter-open-close-10",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        }
+      ]
+    },
+    {
+      "temporaryDirectory": "work/macos-20261114/space233-accepted",
+      "rejectedSamples": [
+        {
+          "scenario": "post-ocr-idle-10s-1",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        }
+      ]
+    },
+    {
+      "temporaryDirectory": "work/macos-20261114/space233-baseline",
+      "rejectedSamples": [
+        {
+          "scenario": "workspace-idle-10s",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        }
+      ]
+    },
+    {
+      "temporaryDirectory": "work/macos-20261114/space233-run",
+      "rejectedSamples": [
+        {
+          "scenario": "board-filter-open-close-10",
+          "foregroundThroughout": false,
+          "lifecycle": "inactive"
+        }
+      ]
+    }
+  ]
+}

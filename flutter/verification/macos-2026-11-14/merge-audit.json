@@ -6,7 +6,6 @@
   "windowsChangedPathsIdentical": [
     ".gitattributes",
     ".gitignore",
-    "DEVELOPMENT_HANDOFF.md",
     "flutter/INSTALL-Windows.md",
     "flutter/lib/core/repository.dart",
     "flutter/test/support/file_preview.dart",
@@ -56,11 +55,13 @@
   ],
   "sharedPathsIntentionallyMergedOrVersioned": [
     "AGENTS.md",
+    "DEVELOPMENT_HANDOFF.md",
     "flutter/test/desktop_ui_test.dart",
     "flutter/test/refinement_test.dart",
     "flutter/tool/invoice_refinement_performance.dart",
     "flutter/tool/windows_installer.iss"
   ],
   "review": "repository.dart backup stream fix, Windows package script, install instructions, historical records, LF fixture settings remain identical. Shared tests retain both branches; performance probe keeps Windows foreground guard. Installer differs only in 2.3.4 version strings. AGENTS current scope updated to latest user authorization; historical Windows workflow preserved in handoff/history.",
-  "windowsRebuiltOrRetested": false
+  "windowsRebuiltOrRetested": false,
+  "auditedReleaseTag": "v2.3.4"
 }

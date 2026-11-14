@@ -1,0 +1,10 @@
+{
+  "macOS": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131",
+  "hardwareModel": "Mac17,2",
+  "cpu": "Apple M5",
+  "memoryBytes": 17179869184,
+  "Xcode": "Xcode 27.2\nBuild version 27B52",
+  "foregroundRuntimeVersionFromProbe": "3.13.7 (stable) (Thu Oct 22 14:28:57 2026 -0700) on \"macos_arm64\"",
+  "foregroundRefreshRateHz": 60,
+  "scope": "macOS affected modules only; Windows source synchronized, no new Windows build/test"
+}

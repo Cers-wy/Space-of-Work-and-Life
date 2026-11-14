@@ -10,7 +10,7 @@ Space 是一款面向个人的桌面工作台，将工作任务、个人计划�
 
 [下载 Space](downloads/) · [macOS 使用说明](flutter/INSTALL-macOS.md) · [Windows 使用说明](flutter/INSTALL-Windows.md)
 
-当前源码版本为 **2.3.2（19）**，统一在 `main` 迭代。新增发票识别后自动保存、后台批量识别与批量删除；文件管理与上传记录合为双标签页面，支持多条件筛选，仓库连接统一在网盘设置维护。macOS 更新包已完成构建及完整性检查；本轮按用户确认跳过正式性能实测。Windows 同版便携包已编译，实机功能与性能由用户验证。[查看新增功能与使用介绍](flutter/verification/发布说明-2.3.2.md) · [项目交接](DEVELOPMENT_HANDOFF.md)。
+当前源码版本为 **2.3.4（21）**。已整合 Windows 优化分支，新增发票数据库分页查询（每页 50 张）与报销月份/项目/备注批量更新；后台识别不阻塞前台操作，文件管理与上传记录合页。macOS 已完成本轮受影响功能的定向检查与有效前台性能采样，最新包与安装说明见[下载页](downloads/README.md)。Windows 同步共用源码与版本，本轮未构建新包。[新增功能与使用介绍](flutter/verification/发布说明-2.3.4.md) · [项目交接](DEVELOPMENT_HANDOFF.md)。
 
 ## 从自己的喜好出发
 

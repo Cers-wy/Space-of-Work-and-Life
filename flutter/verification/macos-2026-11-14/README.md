@@ -56,3 +56,9 @@ Windows `a811819d` 已以非快进合并提交 `81a73fe5` 整合，保留其备�
 生产入口 `lib/main.dart` 从 `6dbc3741` 构建 Release 成功，2.3.4+21，arm64+x86_64；Debug 的 UI 构建来源为 `702e9f07`，不能称为合并后新 Debug 构建。DMG 镜像校验、ZIP CRC、两种包的深层严格签名、四模型源码哈希、敏感/业务数据排除检查均通过。分别从 ZIP 解压与只读挂载 DMG 的应用，以新的独立数据目录后台实际启动，SQLite quick_check 正常，进程保持运行，随后只关闭本次实例；这个后台启动检查不是前台性能证据。
 
 包检查脚本最初错误地要求首次任务页启动就存在惰性创建的 invoices 表，已依据实际 schema 修正为检查 tasks/settings；产品源码未改，不重复构建应用。最终原始结果见 `package-checks.json`、`package.json` 与 `source.json`。Intel 实机与 Apple 公证本轮未做。Git/Release 公开核验及清理在完成后另行追加。
+
+## 公开发布与收尾
+
+main 已整合两端历史并推送，发布标签 `v2.3.4` 指向 `a8f88e12`；与生产构建 `6dbc3741` 的应用/原生/资源源码和 pubspec 无差异，后续仅文档与核验记录。Release 已公开且为 Latest，DMG / ZIP / SHA256SUMS 三个正式下载均 HTTP 200，GitHub 服务器 digest 与本地一致，见 `remote-release.json`。草稿上传响应的临时 untagged URL 已在公开后换为正式链接再核验，不把草稿链接的 404 视为公开资产失败。
+
+新版可用后才替换下载入口、校验与本地旧包。清理了旧 macOS 2.3.2 DMG/ZIP、三轮已失焦的旧合成性能目录、本轮有效记录已抽取后的临时数据/模型副本/打包挂载与解压副本、重复日志和临时脚本，以及已关闭的 Profile 实验应用。已拒绝样本的紧凑状态摘要保留在 `invalid-samples-summary.json`，不作为通过。SDK/依赖缓存、有效基线/夹具、当前 Debug/Release、Windows 现有包及远端历史资产、用户未跟踪 IDE 配置和正式数据均保留；未重写 Git 历史。清理明细见 `cleanup.json`。
