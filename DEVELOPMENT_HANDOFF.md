@@ -183,3 +183,7 @@ Windows安装Flutter3.47.9与Visual Studio C++桌面开发工具，参考 `.gith
 |验证与打包|`test/`、`tool/invoice_performance.dart`、`tool/package_macos.py`、`verification/performance-2.3.1/`|
 
 历史细节可通过Git查看，无需恢复旧检出目录或旧分支。没有完成的Windows实测与发布必须保持待办，后续不能因本文件列有安装包而自动宣称双平台正式验证完成。
+
+### Windows 自定义路径安装器（2026-11-14）
+
+用户追加 EXE 安装包需求。新增 tool/windows_installer.iss，复用已验证生产 ZIP；允许选择安装目录，安装/升级/卸载均保留个人文件。中文空格路径、38 文件哈希、程序替换及卸载保留三类配置占位文件验证通过。结果见 verification/windows-2026-11-13/installer.json；安装二进制在 downloads/，不入源码历史。应用代码未变，既有前台验收限制仍保留。
