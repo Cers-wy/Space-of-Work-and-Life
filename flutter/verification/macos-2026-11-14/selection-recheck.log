@@ -1,0 +1,4 @@
+00:00 +0: loading /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/refinement_test.dart
+00:00 +0: 后台识别不占用前台busy，保留期间保存的手工字段和用户新选择
+00:00 +1: 后台识别时台账导入导出与筛选可用，用户可继续查询
+00:01 +2: All tests passed!

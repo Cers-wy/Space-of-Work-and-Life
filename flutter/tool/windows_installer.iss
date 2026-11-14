@@ -8,7 +8,7 @@
 [Setup]
 AppId={{807BE2A8-EA8D-4D1E-B573-990091A3EB98}
 AppName=Space
-AppVersion=2.3.3
+AppVersion=2.3.4
 AppPublisher=Cers-wy
 AppPublisherURL=https://github.com/Cers-wy/Space-of-Work-and-Life
 DefaultDirName={localappdata}\Programs\Space
@@ -22,7 +22,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0.22000
 WizardStyle=modern
 OutputDir={#OutputDir}
-OutputBaseFilename=Space-2.3.3-Windows-x64-Setup
+OutputBaseFilename=Space-2.3.4-Windows-x64-Setup
 SetupIconFile=..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\Space.exe
 Compression=lzma2/fast

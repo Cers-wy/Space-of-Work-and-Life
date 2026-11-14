@@ -1,0 +1,4 @@
+00:00 +0: loading /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/sync_files_test.dart
+00:00 +0: 本地备份包包含数据库与附件，可在新数据目录完整还原
+00:00 +1: 旧版 SQLite 备份仍可导入，只是不含附件
+00:00 +2: All tests passed!
