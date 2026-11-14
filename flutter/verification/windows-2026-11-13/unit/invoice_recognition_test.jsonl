@@ -1,0 +1,21 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":5476,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1686}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":1687}
+{"test":{"id":3,"name":"价税合计优先于较早出现的未税金额与明细金额","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":9,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart"},"type":"testStart","time":1689}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1706}
+{"test":{"id":4,"name":"电子发票提取票面标题、前导零和金额，不产生个人备注","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":19,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart"},"type":"testStart","time":1707}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1709}
+{"test":{"id":5,"name":"出租车票无税额时保留空值，乘车日期和票面名称可解析","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":29,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart"},"type":"testStart","time":1710}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1711}
+{"test":{"id":6,"name":"无效日期和无法提取的金额不填默认值","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":39,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart"},"type":"testStart","time":1712}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1713}
+{"test":{"id":7,"name":"编辑备注期间完成识别，保存备注不会清空新识别字段","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":46,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart"},"type":"testStart","time":1714}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1798}
+{"test":{"id":8,"name":"结构化识别数据随发票记录保存，且不写入个人备注与报销状态","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":74,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart"},"type":"testStart","time":1798}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1843}
+{"test":{"id":9,"name":"识别保护个人字段以及用户改过的票面值，备份恢复保留票面名称","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":119,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_recognition_test.dart"},"type":"testStart","time":1843}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1920}
+{"success":true,"type":"done","time":1945}

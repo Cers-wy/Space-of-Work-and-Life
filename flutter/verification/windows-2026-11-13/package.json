@@ -1,0 +1,20 @@
+{
+  "version": "2.3.3+20",
+  "filename": "Space-2.3.3-Windows-x64-更新包.zip",
+  "sha256": "1379765463334a9f58325c65e7b8ebf936070ed949bb761c80949052b034d143",
+  "bytes": 156459739,
+  "files": 38,
+  "productionEntrypoint": "lib/main.dart",
+  "configuration": "Release x64",
+  "sourceParent": "d152ac5faae07632bb9b5240cdf3582403fc20de",
+  "applicationGitBlob": "d709c3f20b6faf1757278c7b2f7cea333aca823b",
+  "personalDataIncluded": false,
+  "allZipFilesHashVerified": true,
+  "modelHashesMatch": true,
+  "isolatedStartupTested": true,
+  "foregroundPerformanceVerified": false,
+  "startupWorkingSetMiB": 122.28,
+  "startupObservationSeconds": 8,
+  "x64PeVerified": true,
+  "startupTermination": "Test-owned process stopped after isolated startup check; graceful close not verified"
+}

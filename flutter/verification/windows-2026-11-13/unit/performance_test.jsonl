@@ -1,0 +1,11 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":2952,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/performance_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/performance_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1779}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":1780}
+{"test":{"id":3,"name":"4K预览按物理像素解码、重建复用，关闭后移除专属缓存","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":11,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/performance_test.dart"},"type":"testStart","time":1780}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2362}
+{"test":{"id":4,"name":"无效预览数据保留错误提示，图片替换后不复用旧内容","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":71,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/performance_test.dart"},"type":"testStart","time":2362}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2392}
+{"success":true,"type":"done","time":2420}

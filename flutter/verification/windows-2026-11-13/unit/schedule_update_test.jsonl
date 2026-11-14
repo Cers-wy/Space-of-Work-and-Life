@@ -1,0 +1,21 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":16632,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1828}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":1830}
+{"test":{"id":3,"name":"同条件多选OR，不同条件AND；默认筛选含排序重启恢复并清除失效引用","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":47,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart"},"type":"testStart","time":1830}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1966}
+{"test":{"id":4,"name":"内置分类改名、自定义分类引用、SQLite/便携备份持久化和重复名拒绝","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":78,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart"},"type":"testStart","time":1967}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2058}
+{"test":{"id":5,"name":"甘特当前整月、日周月刻度、年月选择和跨年左右切换，无最小窗口溢出","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":99,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart"},"type":"testStart","time":2058}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3169}
+{"test":{"id":6,"name":"甘特边缘横向滚动切换月份，普通纵向滚动不切换","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":144,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart"},"type":"testStart","time":3170}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3381}
+{"test":{"id":7,"name":"月格高度自适应，无溢出才显示剩余数…，增高可超过3项","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":173,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart"},"type":"testStart","time":3381}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3633}
+{"test":{"id":8,"name":"分类长名称在任务各视图中不会撑破布局","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":208,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart"},"type":"testStart","time":3633}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4209}
+{"test":{"id":9,"name":"筛选面板支持多选、默认保存，状态和分类同一设置界面","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":221,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/schedule_update_test.dart"},"type":"testStart","time":4209}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5421}
+{"success":true,"type":"done","time":5453}

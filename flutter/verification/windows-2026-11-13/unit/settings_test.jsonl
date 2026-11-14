@@ -1,0 +1,43 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":12632,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1827}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":18,"line":null,"column":null,"url":null},"type":"group","time":1829}
+{"test":{"id":3,"name":"SQLite重开保留凭据；本地备份含连接、云端排除；切换仓库不复用凭据","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":65,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":1829}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1940}
+{"test":{"id":4,"name":"已有连接和钥匙串凭据迁移至SQLite，不修改旧文件","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":102,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":1941}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1975}
+{"test":{"id":5,"name":"自设恢复口令随机盐加密、正确恢复、错误密钥及篡改拒绝","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":139,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":1975}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7474}
+{"test":{"id":6,"name":"双向传输、恢复前快照、配置保留；错误密钥及云端竞争阻止覆盖","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":167,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":7475}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7704}
+{"test":{"id":7,"name":"恢复确认期间业务修改阻止替换，取消不改数据","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":206,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":7705}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7756}
+{"test":{"id":8,"name":"SQLite导入拒绝JSON且原库保留；恢复保留本机连接","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":230,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":7756}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7805}
+{"test":{"id":9,"name":"仓库URL校验及.git后缀；拒绝凭据、分支链接和外部域名","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":245,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":7805}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7835}
+{"test":{"id":10,"name":"跟随系统临时切换、重复通知、系统变化、固定主题和重启","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":307,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":7835}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10499}
+{"test":{"id":11,"name":"备份文件面板取消不修改数据，关于版本与系统外部链接","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":343,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":10499}
+{"testID":11,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11438}
+{"test":{"id":12,"name":"连接编辑自动保存，切换栏目不丢失，上传仍需确认","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":398,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":11438}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13103}
+{"test":{"id":13,"name":"关闭按钮支持辅助功能激活，不依赖鼠标坐标","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":428,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":13104}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13530}
+{"test":{"id":14,"name":"700.0 浅色八页导航、标题栏和滚动适配","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":450,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":13531}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14176}
+{"test":{"id":15,"name":"700.0 深色八页导航、标题栏和滚动适配","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":450,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":14176}
+{"testID":15,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14812}
+{"test":{"id":16,"name":"1020.0 浅色八页导航、标题栏和滚动适配","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":450,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":14812}
+{"testID":16,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15411}
+{"test":{"id":17,"name":"1020.0 深色八页导航、标题栏和滚动适配","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":450,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":15411}
+{"testID":17,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15983}
+{"test":{"id":18,"name":"1440.0 浅色八页导航、标题栏和滚动适配","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":450,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":15984}
+{"testID":18,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16476}
+{"test":{"id":19,"name":"1440.0 深色八页导航、标题栏和滚动适配","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":450,"root_column":7,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":16477}
+{"testID":19,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":17062}
+{"test":{"id":20,"name":"发票识别栏目：优先 OCR 默认关闭、说明文字与持久化","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":471,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/settings_test.dart"},"type":"testStart","time":17062}
+{"testID":20,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":22450}
+{"success":true,"type":"done","time":22485}

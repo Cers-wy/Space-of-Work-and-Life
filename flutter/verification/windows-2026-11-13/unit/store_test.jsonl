@@ -1,0 +1,35 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":1328,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1677}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":14,"line":null,"column":null,"url":null},"type":"group","time":1678}
+{"test":{"id":3,"name":"001/003 首次空库及默认偏好；重新载入无内存撤销","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":23,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":1679}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1775}
+{"test":{"id":4,"name":"005/007 偏好独立持久化，偏好写入不替换业务恢复快照","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":37,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":1775}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1822}
+{"test":{"id":5,"name":"030/031/032 UTF16标题边界、trim与原子拒绝","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":50,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":1822}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1860}
+{"test":{"id":6,"name":"033/039 说明长度与日期矛盾不覆盖原任务","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":58,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":1861}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1891}
+{"test":{"id":7,"name":"041/042 旧草稿与已删除任务不能覆盖或复活","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":77,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":1892}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1934}
+{"test":{"id":8,"name":"047/048/050 完成、重开与同状态无重复修订","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":101,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":1934}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1991}
+{"test":{"id":9,"name":"055/057/060/063/064 停用保留历史与原状态编辑，禁新移入","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":116,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":1991}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2068}
+{"test":{"id":10,"name":"059/066/068 内置保护；迁移到完成；列序重开","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":137,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":2069}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2120}
+{"test":{"id":11,"name":"069/070/071/072 项目同事务创建、等价复用和失败无孤立项目","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":152,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":2121}
+{"testID":11,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2175}
+{"test":{"id":12,"name":"项目改名、停用持久化与导出，禁止新加入；删除保留任务可撤销","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":163,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":2176}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2254}
+{"test":{"id":13,"name":"011–027 查询AND、项目搜索、真实逾期和默认日期独立","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":201,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":2255}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2277}
+{"test":{"id":14,"name":"082/083/088 附件路径与10MiB/20个/20MiB边界","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":230,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":2278}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2431}
+{"test":{"id":15,"name":"快照导出拒绝活动库与别名，恢复保持业务且可撤销","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":264,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":2432}
+{"testID":15,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2488}
+{"test":{"id":16,"name":"甘特左右端不能倒置；移动按完整原始区间计算；完成无due按完成日","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":292,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/store_test.dart"},"type":"testStart","time":2488}
+{"testID":16,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2510}
+{"success":true,"type":"done","time":2542}

@@ -1,0 +1,23 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":21824,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1699}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":8,"line":null,"column":null,"url":null},"type":"group","time":1700}
+{"test":{"id":3,"name":"版本按数字比较，兼容v前缀和构建号，拒绝无效与预发布标签","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":30,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"testStart","time":1701}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1715}
+{"test":{"id":4,"name":"macos 选择最高正式版本并检查本平台包","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":41,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"testStart","time":1715}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1722}
+{"test":{"id":5,"name":"macos 缺少匹配平台包不能提供下载按钮","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":58,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"testStart","time":1722}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1724}
+{"test":{"id":6,"name":"windows 选择最高正式版本并检查本平台包","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":41,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"testStart","time":1724}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1726}
+{"test":{"id":7,"name":"windows 缺少匹配平台包不能提供下载按钮","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":58,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"testStart","time":1726}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1728}
+{"test":{"id":8,"name":"相同/较低发布显示最新版；无正式发布不误报成功","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":70,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"testStart","time":1728}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1730}
+{"test":{"id":9,"name":"异常与无效发布链接给出重试反馈","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":82,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"testStart","time":1730}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1733}
+{"test":{"id":10,"name":"重复检查合并，关闭页面后不回调已销毁状态","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":95,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/releases_test.dart"},"type":"testStart","time":1734}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1737}
+{"success":true,"type":"done","time":1761}

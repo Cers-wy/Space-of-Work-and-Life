@@ -1,0 +1,55 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":17160,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"count":1,"time":9,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1721}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":24,"line":null,"column":null,"url":null},"type":"group","time":1723}
+{"test":{"id":3,"name":"原生样本 01-json-v1.json 无损往返","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":26,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1723}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1746}
+{"test":{"id":4,"name":"原生样本 01b-json-v2.json 无损往返","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":26,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1747}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1749}
+{"test":{"id":5,"name":"原生样本 02-json-v3.json 无损往返","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":26,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1750}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1753}
+{"test":{"id":6,"name":"原生样本 03-json-v4.json 无损往返","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":26,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1753}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1755}
+{"test":{"id":7,"name":"原生样本 04-json-v5.json 无损往返","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":26,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1756}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1758}
+{"test":{"id":8,"name":"原生样本 05-json-v6.json 无损往返","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":26,"column":5,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1759}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1761}
+{"test":{"id":9,"name":"非法时间戳、NFC重复名称与V1状态字段拒绝","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":38,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1762}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1775}
+{"test":{"id":10,"name":"严格公历与北京时间跨日","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":54,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1776}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1778}
+{"test":{"id":11,"name":"默认排期只展示，拖动才写真实日期","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":63,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1778}
+{"testID":11,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1780}
+{"test":{"id":12,"name":"完成与重开时间一致","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":74,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1780}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1783}
+{"test":{"id":13,"name":"未来格式与矛盾版本拒绝","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":85,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1783}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1786}
+{"test":{"id":14,"name":"引用与重复任务拒绝","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":96,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1786}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1789}
+{"test":{"id":15,"name":"排序日期/创建/ID稳定，清除保留排序","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":104,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1789}
+{"testID":15,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1792}
+{"test":{"id":16,"name":"RTFD真实样本粗体、下划线、图片及中文往返","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":122,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1792}
+{"testID":16,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1800}
+{"test":{"id":17,"name":"GitHub portable 字节与原生指纹完全一致","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":136,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1800}
+{"testID":17,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1812}
+{"test":{"id":18,"name":"原生GitHub加密包解密，错误密钥与篡改拒绝","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":147,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1812}
+{"testID":18,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1848}
+{"test":{"id":19,"name":"GitHub加密nonce随机且内容等价","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":162,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1848}
+{"testID":19,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1868}
+{"test":{"id":20,"name":"原生SP包2001 epoch，七天过期与哈希匹配","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":172,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1868}
+{"testID":20,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1896}
+{"test":{"id":21,"name":"GitHub双边变化停止；单边变化方向正确","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":194,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1897}
+{"testID":21,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1898}
+{"test":{"id":22,"name":"GitHub配置路径和身份校验","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":217,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1899}
+{"testID":22,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1901}
+{"test":{"id":23,"name":"合并相同更新时间不同内容停止","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":231,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1901}
+{"testID":23,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1905}
+{"test":{"id":24,"name":"SQLite原生样本读写、上次快照与并发保护","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":245,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1905}
+{"testID":24,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1967}
+{"test":{"id":25,"name":"损坏数据库不被初始化覆盖","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":292,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1967}
+{"testID":25,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1971}
+{"test":{"id":26,"name":"本地SP快照独占创建，防止覆盖已有包","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":306,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/core_test.dart"},"type":"testStart","time":1971}
+{"testID":26,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1979}
+{"success":true,"type":"done","time":2004}

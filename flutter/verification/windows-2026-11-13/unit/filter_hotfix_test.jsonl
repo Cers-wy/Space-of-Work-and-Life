@@ -1,0 +1,15 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":20672,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/filter_hotfix_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/filter_hotfix_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1795}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":1798}
+{"test":{"id":3,"name":"view defaults and temporary filters are independent, reset is scoped","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":40,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/filter_hotfix_test.dart"},"type":"testStart","time":1798}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2020}
+{"test":{"id":4,"name":"legacy shared default migrates once to the active view","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":79,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/filter_hotfix_test.dart"},"type":"testStart","time":2021}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2083}
+{"test":{"id":5,"name":"category panel starts below tabs without vertical centering","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":96,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/filter_hotfix_test.dart"},"type":"testStart","time":2084}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3184}
+{"test":{"id":6,"name":"footer actions stay aligned, category gap and light backdrop","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":113,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/filter_hotfix_test.dart"},"type":"testStart","time":3185}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3577}
+{"success":true,"type":"done","time":3608}

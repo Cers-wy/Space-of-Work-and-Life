@@ -1,0 +1,21 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":20300,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1782}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":1785}
+{"test":{"id":3,"name":"空白不更新，去重后只更新选中项的非空报销字段","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":61,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart"},"type":"testStart","time":1785}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1942}
+{"test":{"id":4,"name":"无效月份或已删除项目不产生部分更新","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":108,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart"},"type":"testStart","time":1943}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2013}
+{"test":{"id":5,"name":"后台识别期间更新月份和备注，迟到识别不会覆盖","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":131,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart"},"type":"testStart","time":2013}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2101}
+{"test":{"id":6,"name":"弹窗留空禁用、无效值报错、只填月份更新且刷新列表","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":196,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart"},"type":"testStart","time":2101}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2846}
+{"test":{"id":7,"name":"暗色窄窗可取消，重新打开字段为空且数据不变","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":227,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart"},"type":"testStart","time":2846}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3061}
+{"test":{"id":8,"name":"标题栏更新按钮纯图标、无选择禁用、选中可用","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":243,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart"},"type":"testStart","time":3062}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3294}
+{"test":{"id":9,"name":"窄窗口标题栏保持图标入口且不溢出","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":281,"root_column":3,"root_url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/invoice_batch_update_test.dart"},"type":"testStart","time":3294}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3438}
+{"success":true,"type":"done","time":3469}

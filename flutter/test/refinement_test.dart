@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'support/file_preview.dart';
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
@@ -721,6 +722,7 @@ void main() {
     );
     await t.tap(find.text('打开详情'));
     await t.pumpAndSettle();
+    await settleFilePreview(t);
     final note = find.descendant(
       of: find.byKey(const ValueKey('invoice-field-备注')),
       matching: find.byType(TextField),
@@ -749,6 +751,7 @@ void main() {
     await t.pumpAndSettle();
     await t.tap(find.text('打开详情'));
     await t.pumpAndSettle();
+    await settleFilePreview(t);
     await t.runAsync(() async {
       await t.tap(scan);
       await Future<void>.delayed(const Duration(milliseconds: 150));

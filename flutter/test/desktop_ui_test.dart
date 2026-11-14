@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'support/file_preview.dart';
 import 'dart:ui' show CheckedState;
 
 import 'package:flutter/gestures.dart';
@@ -317,6 +318,7 @@ void main() {
     final sheet = find.byKey(const ValueKey('invoice-details-sheet'));
     await t.tap(find.text('开发票'));
     await t.pumpAndSettle();
+    await settleFilePreview(t);
     expect(sheet, findsOneWidget);
     await t.tap(find.byKey(const ValueKey('invoice-details-dismiss-area')));
     await t.pumpAndSettle();
@@ -326,6 +328,7 @@ void main() {
 
     await t.tap(find.text('开发票'));
     await t.pumpAndSettle();
+    await settleFilePreview(t);
     final titleInput = find.descendant(
       of: find.byKey(const ValueKey('invoice-field-发票名称')),
       matching: find.byType(TextField),

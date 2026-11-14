@@ -1,4 +1,12 @@
 # Space 开发交接
+## Windows 本地基线与修复（2026-11-14，分支中，尚未全面验收）
+
+- 从 main `fb693313` 建立 `2026-11-13-win优化`，唯一工作树，使用本机 VS Code 与项目内 Flutter 3.47.9。不要直接合入 main；macOS 用户后续提交 `新功能开发` 后按安排整合。
+- 修复备份 ZIP 输入/输出流未完整关闭造成的 Windows 文件占用；portable JSON 夹具固定 LF；组件测试等待真实预览 I/O。未修改产品 UI 布局或无关业务模块。
+- 22 个现有测试文件、211 项用例通过。Flutter/Dart Windows 测试栈采样器曾在 `ProfilerNativeStackWalker::walk` 崩溃，已用项目脚本对锁定版本的本地测试命令关闭该采样；生产构建未套用此工具链改动。不要把它写成产品崩溃已全面修复。
+- Debug、Profile、Release 编译通过；后台查询/数据库/加密、PDF 100 页与 small/medium OCR、工作线程释放已实测。前台体验与帧耗时受电脑控制工具未批准访问 Space 阻塞，第一次前台探针失焦无效；实体打印、真实网盘、长期泄漏未验收。
+- 测试计划、原始事件、环境、数值、复现和程序更新包检查见 [Windows 基线记录](flutter/verification/windows-2026-11-13/README.md)。后续只复测新增、改动和确受影响路径；明确无关且未改动模块引用有效基线，不重复测试。
+- 用户要求本地程序更新 ZIP 不包含数据库、备份、网盘连接或个人设置；生产数据仍位于 `%APPDATA%\SpaceFlutter`。二进制不入源码历史，不替用户覆盖现有安装。交付包详情见该目录 package.json。
 
 ## 2.3.3 发布（2026-11-13，最新）
 
@@ -175,3 +183,7 @@ Windows安装Flutter3.47.9与Visual Studio C++桌面开发工具，参考 `.gith
 |验证与打包|`test/`、`tool/invoice_performance.dart`、`tool/package_macos.py`、`verification/performance-2.3.1/`|
 
 历史细节可通过Git查看，无需恢复旧检出目录或旧分支。没有完成的Windows实测与发布必须保持待办，后续不能因本文件列有安装包而自动宣称双平台正式验证完成。
+
+### Windows 自定义路径安装器（2026-11-14）
+
+用户追加 EXE 安装包需求。新增 tool/windows_installer.iss，复用已验证生产 ZIP；允许选择安装目录，安装/升级/卸载均保留个人文件。中文空格路径、38 文件哈希、程序替换及卸载保留三类配置占位文件验证通过。结果见 verification/windows-2026-11-13/installer.json；安装二进制在 downloads/，不入源码历史。应用代码未变，既有前台验收限制仍保留。

@@ -11,8 +11,9 @@ double percentile(List<double> numbers, double q) {
 
 Future<void> main(List<String> args) async {
   final count = args.isEmpty ? 1000 : int.parse(args.first);
+  final outputRoot = args.length > 1 ? args[1] : 'verification/performance';
   final directory = Directory(
-    'verification/performance/isolated-$count-${DateTime.now().millisecondsSinceEpoch}',
+    '$outputRoot/isolated-$count-${DateTime.now().millisecondsSinceEpoch}',
   )..createSync(recursive: true);
   final repo = SpaceRepository(directory);
   await repo.load();
@@ -75,7 +76,9 @@ Future<void> main(List<String> args) async {
   };
   final report = {
     'taskCount': count,
-    'mode': 'Dart AOT standalone core; no UI frame timing',
+    'mode': args.length > 2
+        ? args[2]
+        : 'Dart AOT standalone core; no UI frame timing',
     'platform': Platform.operatingSystem,
     'dartVersion': Platform.version,
     'rssMiB': ProcessInfo.currentRss / 1048576,
@@ -88,7 +91,7 @@ Future<void> main(List<String> args) async {
     'encryptedBytes': packet.length,
     'formalDataAccessed': false,
   };
-  final output = File('verification/performance/core-$count.json');
+  final output = File('$outputRoot/core-$count.json');
   await output.writeAsString(
     const JsonEncoder.withIndent('  ').convert(report),
   );

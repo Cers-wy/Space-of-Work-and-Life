@@ -1,0 +1,159 @@
+{
+  "mode": "Windows Release background native processing",
+  "formalDataAccessed": false,
+  "frontendPerformanceMeasured": false,
+  "results": [
+    {
+      "scenario": "pdf-inspect-trim-100-0",
+      "durationMs": 231.762,
+      "cpuCorePercent": 107.86927969209792,
+      "rssBeforeMiB": 118.51171875,
+      "rssAfterMiB": 95.859375,
+      "processPeakRssMiB": 124.78125,
+      "result": {
+        "pages": 100
+      }
+    },
+    {
+      "scenario": "pdf-compose-100-0",
+      "durationMs": 69.254,
+      "cpuCorePercent": 112.8093684119329,
+      "rssBeforeMiB": 95.859375,
+      "rssAfterMiB": 100.9375,
+      "processPeakRssMiB": 124.78125,
+      "result": {
+        "pages": 50,
+        "bytes": 37237
+      }
+    },
+    {
+      "scenario": "ocr-small-0",
+      "durationMs": 1098.316,
+      "cpuCorePercent": 166.44799857235986,
+      "rssBeforeMiB": 100.9375,
+      "rssAfterMiB": 175.14453125,
+      "processPeakRssMiB": 301.41015625,
+      "result": {
+        "characters": 146,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "ocr-medium-0",
+      "durationMs": 4291.329,
+      "cpuCorePercent": 167.1247997997823,
+      "rssBeforeMiB": 175.14453125,
+      "rssAfterMiB": 287.33203125,
+      "processPeakRssMiB": 540.78515625,
+      "result": {
+        "characters": 147,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "pdf-inspect-trim-100-1",
+      "durationMs": 298.773,
+      "cpuCorePercent": 104.5944579998862,
+      "rssBeforeMiB": 287.33203125,
+      "rssAfterMiB": 287.37109375,
+      "processPeakRssMiB": 540.78515625,
+      "result": {
+        "pages": 100
+      }
+    },
+    {
+      "scenario": "pdf-compose-100-1",
+      "durationMs": 87.632,
+      "cpuCorePercent": 106.98146795691072,
+      "rssBeforeMiB": 287.37109375,
+      "rssAfterMiB": 269.5703125,
+      "processPeakRssMiB": 540.78515625,
+      "result": {
+        "pages": 50,
+        "bytes": 37237
+      }
+    },
+    {
+      "scenario": "ocr-small-1",
+      "durationMs": 1007.298,
+      "cpuCorePercent": 186.14153904802748,
+      "rssBeforeMiB": 269.5703125,
+      "rssAfterMiB": 177.31640625,
+      "processPeakRssMiB": 540.78515625,
+      "result": {
+        "characters": 146,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "ocr-medium-1",
+      "durationMs": 3073.087,
+      "cpuCorePercent": 189.65050452525423,
+      "rssBeforeMiB": 177.31640625,
+      "rssAfterMiB": 291.66015625,
+      "processPeakRssMiB": 541.1640625,
+      "result": {
+        "characters": 147,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "pdf-inspect-trim-100-2",
+      "durationMs": 297.566,
+      "cpuCorePercent": 99.76778260957234,
+      "rssBeforeMiB": 291.66015625,
+      "rssAfterMiB": 291.66796875,
+      "processPeakRssMiB": 541.1640625,
+      "result": {
+        "pages": 100
+      }
+    },
+    {
+      "scenario": "pdf-compose-100-2",
+      "durationMs": 93.424,
+      "cpuCorePercent": 117.07377119369755,
+      "rssBeforeMiB": 291.66796875,
+      "rssAfterMiB": 273.83984375,
+      "processPeakRssMiB": 541.1640625,
+      "result": {
+        "pages": 50,
+        "bytes": 37237
+      }
+    },
+    {
+      "scenario": "ocr-small-2",
+      "durationMs": 1022.048,
+      "cpuCorePercent": 184.98397335545883,
+      "rssBeforeMiB": 273.83984375,
+      "rssAfterMiB": 182.66796875,
+      "processPeakRssMiB": 541.1640625,
+      "result": {
+        "characters": 146,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "ocr-medium-2",
+      "durationMs": 3609.755,
+      "cpuCorePercent": 191.3218487127243,
+      "rssBeforeMiB": 182.66796875,
+      "rssAfterMiB": 292.3515625,
+      "processPeakRssMiB": 543.046875,
+      "result": {
+        "characters": 147,
+        "lines": 8
+      }
+    },
+    {
+      "scenario": "ocr-worker-close-and-idle-5s",
+      "durationMs": 5017.246,
+      "cpuCorePercent": 1.2457033201082826,
+      "rssBeforeMiB": 292.3515625,
+      "rssAfterMiB": 143.26953125,
+      "processPeakRssMiB": 543.046875,
+      "result": {
+        "workerClosed": true
+      }
+    }
+  ]
+}

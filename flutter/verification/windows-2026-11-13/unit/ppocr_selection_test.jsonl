@@ -1,0 +1,13 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":14792,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/ppocr_selection_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/ppocr_selection_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1730}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":1731}
+{"test":{"id":3,"name":"不把模糊金额当成可靠数据，仍保留清晰日期","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":7,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/ppocr_selection_test.dart"},"type":"testStart","time":1731}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1748}
+{"test":{"id":4,"name":"出租车上下排列的发票号码标签仍能关联前导零","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":30,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/ppocr_selection_test.dart"},"type":"testStart","time":1748}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1751}
+{"test":{"id":5,"name":"两档模型关键金额冲突时不自动采用其中一个","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":52,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/ppocr_selection_test.dart"},"type":"testStart","time":1751}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1753}
+{"success":true,"type":"done","time":1778}

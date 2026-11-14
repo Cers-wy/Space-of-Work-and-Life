@@ -1,0 +1,21 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":3756,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1686}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":1688}
+{"test":{"id":3,"name":"首次连接创建带空索引的独立分支，不发送空树也不修改备份分支","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":139,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart"},"type":"testStart","time":1688}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1707}
+{"test":{"id":4,"name":"分支已存在时连接只读校验，不创建新提交","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":159,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart"},"type":"testStart","time":1707}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1709}
+{"test":{"id":5,"name":"另一台电脑同时创建分支后，重新确认远端分支并连接成功","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":166,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart"},"type":"testStart","time":1709}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1711}
+{"test":{"id":6,"name":"HTTP 422 保留失败操作与服务端具体原因，并隐藏令牌","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":176,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart"},"type":"testStart","time":1711}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1742}
+{"test":{"id":7,"name":"远端并发后重新合并目录，不强推也不丢其他设备文件","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":217,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart"},"type":"testStart","time":1742}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1747}
+{"test":{"id":8,"name":"跨平台路径校验拒绝越界、Windows保留名和非法字符","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":233,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart"},"type":"testStart","time":1747}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1750}
+{"test":{"id":9,"name":"后台队列保存、跨设备列表、记录删除不删远端、刷新和远端删除","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":245,"column":3,"url":"file:///D:/Cers/Documents/Codex/Space/flutter/test/drive_test.dart"},"type":"testStart","time":1750}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":1795}
+{"success":true,"type":"done","time":1819}
