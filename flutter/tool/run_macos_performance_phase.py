@@ -22,6 +22,11 @@ while True:
     if (directory / 'result.json').exists():
         print('All phases completed')
         raise SystemExit(0)
+    if not (directory / 'waiting.json').exists():
+        if time.monotonic() > limit:
+            raise SystemExit('Probe has not reached its first phase')
+        time.sleep(.1)
+        continue
     waiting = json.loads((directory / 'waiting.json').read_text())['scenario']
     done = directory / (waiting + '.done')
     if not done.exists() or not json.loads(done.read_text())['foregroundThroughout']:

@@ -285,144 +285,145 @@ Future<void> main() async {
         }
       });
     }
-    store.openArea(SpaceArea.invoices);
-    final session = workspace.invoices as InvoiceSession;
-    await waitFor(
-      () => session.total == 1000 && !session.busy && !session.pageLoading,
-    );
-    final entries = (await session.repo.load()).entries,
-        ids = entries.map((e) => e.id).toList();
     final context = base.workspaceContext();
-    await perf.measure('invoice-list-scroll-1000', () async {
-      final scroll = perf.element<ScrollController>(
-        (e) =>
-            e.widget is ListView &&
-                (e.widget as ListView).scrollDirection == Axis.vertical
-            ? (e.widget as ListView).controller
-            : null,
-      )!;
-      for (var i = 0; i < 10; i++) {
-        await scroll.animateTo(
-          i.isEven ? scroll.position.maxScrollExtent : 0,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.linear,
-        );
-      }
-    }, extra: {'invoices': 1000, 'pageSize': InvoiceSession.pageSize});
-    final pageQueries = <double>[];
-    await perf.measure(
-      'invoice-page-query-filter-20',
-      () async {
-        for (var i = 1; i <= 20; i++) {
-          final time = Stopwatch()..start();
-          await session.goToPage(i % session.pageCount);
-          if (session.ledger!.entries.length > InvoiceSession.pageSize ||
-              session.total != 1000) {
-            throw StateError('Page was not bounded');
+    final pageQueries = <double>[], updates = <double>[], actions = <double>[];
+    var amountRecognized = 0;
+    final driveOnly = Platform.environment['SPACE_PROBE_DRIVE_ONLY'] == 'true';
+    if (!driveOnly) {
+      store.openArea(SpaceArea.invoices);
+      final session = workspace.invoices as InvoiceSession;
+      await waitFor(
+        () => session.total == 1000 && !session.busy && !session.pageLoading,
+      );
+      final entries = (await session.repo.load()).entries,
+          ids = entries.map((e) => e.id).toList();
+      await perf.measure('invoice-list-scroll-1000', () async {
+        final scroll = perf.element<ScrollController>(
+          (e) =>
+              e.widget is ListView &&
+                  (e.widget as ListView).scrollDirection == Axis.vertical
+              ? (e.widget as ListView).controller
+              : null,
+        )!;
+        for (var i = 0; i < 10; i++) {
+          await scroll.animateTo(
+            i.isEven ? scroll.position.maxScrollExtent : 0,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.linear,
+          );
+        }
+      }, extra: {'invoices': 1000, 'pageSize': InvoiceSession.pageSize});
+      await perf.measure(
+        'invoice-page-query-filter-20',
+        () async {
+          for (var i = 1; i <= 20; i++) {
+            final time = Stopwatch()..start();
+            await session.goToPage(i % session.pageCount);
+            if (session.ledger!.entries.length > InvoiceSession.pageSize ||
+                session.total != 1000) {
+              throw StateError('Page was not bounded');
+            }
+            pageQueries.add(time.elapsedMicroseconds / 1000);
+            await settle();
           }
-          pageQueries.add(time.elapsedMicroseconds / 1000);
+          session.update(() => session.query = 'ticket-9');
+          await waitFor(() => !session.pageLoading);
+          if (session.total != 111 || session.page != 0)
+            throw StateError('Cross-page filter');
+          session.update(() => session.query = '');
+          await waitFor(() => !session.pageLoading && session.total == 1000);
+        },
+        extra: {
+          'invoices': 1000,
+          'pageSize': InvoiceSession.pageSize,
+          'pageChanges': 20,
+        },
+      );
+      await perf.measure('batch-update-1000-x10', () async {
+        for (var i = 0; i < 10; i++) {
+          final t = Stopwatch()..start();
+          if (!await session.updateReimbursement(
+            ids,
+            InvoiceReimbursementPatch(
+              month: i.isEven ? '2026-11' : '2026-12',
+              project: session.projects.keys.first,
+              purpose: '批量备注$i',
+            ),
+          ))
+            throw StateError('Batch update');
+          updates.add(t.elapsedMicroseconds / 1000);
           await settle();
         }
-        session.update(() => session.query = 'ticket-9');
-        await waitFor(() => !session.pageLoading);
-        if (session.total != 111 || session.page != 0)
-          throw StateError('Cross-page filter');
-        session.update(() => session.query = '');
-        await waitFor(() => !session.pageLoading && session.total == 1000);
-      },
-      extra: {
-        'invoices': 1000,
-        'pageSize': InvoiceSession.pageSize,
-        'pageChanges': 20,
-      },
-    );
-    final updates = <double>[];
-    await perf.measure('batch-update-1000-x10', () async {
-      for (var i = 0; i < 10; i++) {
-        final t = Stopwatch()..start();
-        if (!await session.updateReimbursement(
-          ids,
-          InvoiceReimbursementPatch(
-            month: i.isEven ? '2026-11' : '2026-12',
-            project: session.projects.keys.first,
-            purpose: '批量备注$i',
-          ),
-        ))
-          throw StateError('Batch update');
-        updates.add(t.elapsedMicroseconds / 1000);
-        await settle();
+      }, extra: {'invoicesPerUpdate': 1000, 'updates': 10});
+      if (session.ledger!.entries.any(
+        (e) => e.info.month != '2026-12' || e.info.purpose != '批量备注9',
+      ))
+        throw StateError('Batch persistence');
+      await perf.measure('batch-dialog-open-close-8', () async {
+        for (var i = 0; i < 8; i++) {
+          final dialog = showInvoiceBatchUpdate(context, store, session, ids);
+          await settle(250);
+          Navigator.of(context).pop();
+          await dialog;
+          await settle(220);
+        }
+      }, extra: {'selected': 1000});
+      final pdfEntry = entries.firstWhere((e) => e.original.isPdf),
+          imageEntries = entries.where((e) => !e.original.isPdf).toList();
+      await perf.measure('pdf-recognize-save', () async {
+        await session.recognizeEntry(pdfEntry.id);
+        await session.refresh();
+        session.update(() {});
+      });
+      await perf.measure('image-recognize-save', () async {
+        await session.recognizeEntry(imageEntries.first.id);
+        await session.refresh();
+        session.update(() {});
+      });
+      await perf.measure('ocr-medium-recognize', () async {
+        final r = await LocalPpocr.recognize(source.$2, enhanced: true);
+        if (!r.text.contains('106.00')) throw StateError('Medium OCR');
+      });
+      await perf.measure('ocr-background-8-with-frontend', () async {
+        final batch = session.recognizeSelected(
+          imageEntries.map((e) => e.id).toList(),
+        );
+        for (var i = 0; i < 30; i++) {
+          if (session.busy) throw StateError('Global busy occupied');
+          final t = Stopwatch()..start();
+          session.update(() {
+            session.query = i.isEven ? 'ticket-1' : '';
+            session.selected.add(entries.last.id);
+          });
+          store.openArea(i % 3 == 0 ? SpaceArea.tools : SpaceArea.invoices);
+          WidgetsBinding.instance.scheduleFrame();
+          await SchedulerBinding.instance.endOfFrame;
+          actions.add(t.elapsedMicroseconds / 1000);
+          await Future<void>.delayed(const Duration(milliseconds: 80));
+        }
+        await batch;
+        if (session.batchError != null || session.batchProcessed != 8)
+          throw StateError('OCR batch failed');
+      }, extra: {'images': 8, 'frontendActions': 30});
+      // 用户已批量设置的报销月份必须保留；票号应一致；小模型 OCR 对合成图的价税合计
+      // 可能取不到，允许为空并单独统计，但绝不能写入错误金额。
+      for (final e in (await session.repo.load()).entries.where(
+        (e) => imageEntries.any((i) => i.id == e.id),
+      )) {
+        if (e.info.number != '26327000000000000123')
+          throw StateError('Recognition number differs: ${e.info.number}');
+        if (e.info.month != '2026-12')
+          throw StateError('Recognition overwrote month: ${e.info.month}');
+        if (e.info.cents == 10600) amountRecognized++;
+        if (e.info.cents != null && e.info.cents != 10600)
+          throw StateError('Recognition wrote wrong amount: ${e.info.cents}');
       }
-    }, extra: {'invoicesPerUpdate': 1000, 'updates': 10});
-    if (session.ledger!.entries.any(
-      (e) => e.info.month != '2026-12' || e.info.purpose != '批量备注9',
-    ))
-      throw StateError('Batch persistence');
-    await perf.measure('batch-dialog-open-close-8', () async {
-      for (var i = 0; i < 8; i++) {
-        final dialog = showInvoiceBatchUpdate(context, store, session, ids);
-        await settle(250);
-        Navigator.of(context).pop();
-        await dialog;
-        await settle(220);
+      for (var i = 1; i <= 3; i++) {
+        await perf.measure(
+          'post-ocr-idle-10s-$i',
+          () => Future<void>.delayed(const Duration(seconds: 10)),
+        );
       }
-    }, extra: {'selected': 1000});
-    final pdfEntry = entries.firstWhere((e) => e.original.isPdf),
-        imageEntries = entries.where((e) => !e.original.isPdf).toList();
-    await perf.measure('pdf-recognize-save', () async {
-      await session.recognizeEntry(pdfEntry.id);
-      await session.refresh();
-      session.update(() {});
-    });
-    await perf.measure('image-recognize-save', () async {
-      await session.recognizeEntry(imageEntries.first.id);
-      await session.refresh();
-      session.update(() {});
-    });
-    await perf.measure('ocr-medium-recognize', () async {
-      final r = await LocalPpocr.recognize(source.$2, enhanced: true);
-      if (!r.text.contains('106.00')) throw StateError('Medium OCR');
-    });
-    final actions = <double>[];
-    await perf.measure('ocr-background-8-with-frontend', () async {
-      final batch = session.recognizeSelected(
-        imageEntries.map((e) => e.id).toList(),
-      );
-      for (var i = 0; i < 30; i++) {
-        if (session.busy) throw StateError('Global busy occupied');
-        final t = Stopwatch()..start();
-        session.update(() {
-          session.query = i.isEven ? 'ticket-1' : '';
-          session.selected.add(entries.last.id);
-        });
-        store.openArea(i % 3 == 0 ? SpaceArea.tools : SpaceArea.invoices);
-        WidgetsBinding.instance.scheduleFrame();
-        await SchedulerBinding.instance.endOfFrame;
-        actions.add(t.elapsedMicroseconds / 1000);
-        await Future<void>.delayed(const Duration(milliseconds: 80));
-      }
-      await batch;
-      if (session.batchError != null || session.batchProcessed != 8)
-        throw StateError('OCR batch failed');
-    }, extra: {'images': 8, 'frontendActions': 30});
-    // 用户已批量设置的报销月份必须保留；票号应一致；小模型 OCR 对合成图的价税合计
-    // 可能取不到，允许为空并单独统计，但绝不能写入错误金额。
-    var amountRecognized = 0;
-    for (final e in (await session.repo.load()).entries.where(
-      (e) => imageEntries.any((i) => i.id == e.id),
-    )) {
-      if (e.info.number != '26327000000000000123')
-        throw StateError('Recognition number differs: ${e.info.number}');
-      if (e.info.month != '2026-12')
-        throw StateError('Recognition overwrote month: ${e.info.month}');
-      if (e.info.cents == 10600) amountRecognized++;
-      if (e.info.cents != null && e.info.cents != 10600)
-        throw StateError('Recognition wrote wrong amount: ${e.info.cents}');
-    }
-    for (var i = 1; i <= 3; i++) {
-      await perf.measure(
-        'post-ocr-idle-10s-$i',
-        () => Future<void>.delayed(const Duration(seconds: 10)),
-      );
     }
     final remote = ProbeRemote();
     for (var i = 0; i < 1000; i++) {
@@ -440,7 +441,7 @@ Future<void> main() async {
     }
     final drive =
         DriveService(
-            Directory('${out.path}/probe-drive'),
+            Directory('${out.path}/probe-drive')..createSync(recursive: true),
             apiFactory: (c, t) => ProbeApi(c, t, remote),
           )
           ..initialized = true
@@ -473,36 +474,39 @@ Future<void> main() async {
           !drivePage.loading &&
           drivePage.files.length == 1000,
     );
-    await perf.measure(
-      'drive-filter-tabs-scroll-1000',
-      () async {
-        final page = drivePage;
-        for (var i = 0; i < 15; i++) {
-          page.fileFilter.query = i.isEven ? '资料1' : '';
-          page.fileFilter.changed();
-          await settle(60);
-          final scroll = page.cloudScroll as ScrollController;
-          if (scroll.hasClients)
-            await scroll.animateTo(
-              i.isEven ? scroll.position.maxScrollExtent : 0,
-              duration: const Duration(milliseconds: 100),
-              curve: Curves.linear,
-            );
-          page.setState(() {
-            page.cloud = false;
-          });
-          await settle(60);
-          page.setState(() {
-            page.cloud = true;
-          });
-          await settle(60);
-        }
-      },
-      extra: {
-        'files': 1000,
-        'transport': 'in-memory simulated Git API; not real network throughput',
-      },
-    );
+    if (!driveOnly) {
+      await perf.measure(
+        'drive-filter-tabs-scroll-1000',
+        () async {
+          final page = drivePage;
+          for (var i = 0; i < 15; i++) {
+            page.fileFilter.query = i.isEven ? '资料1' : '';
+            page.fileFilter.changed();
+            await settle(60);
+            final scroll = page.cloudScroll as ScrollController;
+            if (scroll.hasClients)
+              await scroll.animateTo(
+                i.isEven ? scroll.position.maxScrollExtent : 0,
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.linear,
+              );
+            page.setState(() {
+              page.cloud = false;
+            });
+            await settle(60);
+            page.setState(() {
+              page.cloud = true;
+            });
+            await settle(60);
+          }
+        },
+        extra: {
+          'files': 1000,
+          'transport':
+              'in-memory simulated Git API; not real network throughput',
+        },
+      );
+    }
     drivePage.setState(() {
       drivePage.cloud = false;
     });
@@ -575,19 +579,27 @@ Future<void> main() async {
       'pid': pid,
       'windowLogicalSize': {'width': size.width, 'height': size.height},
       'formalDatabaseAccessed': false,
-      'ocrAmountCoverage': {'images': 8, 'recognized': amountRecognized},
-      'pageQueryMs': {
-        'p95': pageQueries[(pageQueries.length * .95).ceil() - 1],
-        'max': pageQueries.last,
-      },
-      'batchUpdateMs': {
-        'p95': updates[(updates.length * .95).ceil() - 1],
-        'max': updates.last,
-      },
-      'frontendActionToFrameMs': {
-        'p95': actions[(actions.length * .95).ceil() - 1],
-        'max': actions.last,
-      },
+      'ocrAmountCoverage': driveOnly
+          ? null
+          : {'images': 8, 'recognized': amountRecognized},
+      'pageQueryMs': pageQueries.isEmpty
+          ? null
+          : {
+              'p95': pageQueries[(pageQueries.length * .95).ceil() - 1],
+              'max': pageQueries.last,
+            },
+      'batchUpdateMs': updates.isEmpty
+          ? null
+          : {
+              'p95': updates[(updates.length * .95).ceil() - 1],
+              'max': updates.last,
+            },
+      'frontendActionToFrameMs': actions.isEmpty
+          ? null
+          : {
+              'p95': actions[(actions.length * .95).ceil() - 1],
+              'max': actions.last,
+            },
       'foregroundValid': perf.result.every(
         (r) => r['foregroundThroughout'] == true,
       ),
@@ -602,6 +614,8 @@ Future<void> main() async {
   } catch (e, st) {
     focusTimer.cancel();
     File('${out.path}/error.txt').writeAsStringSync('$e\n$st');
+    File('${out.path}/focus-samples.json')
+        .writeAsStringSync(jsonEncode(focusSamples));
     print('INVOICE_REFINEMENT_PROBE_ERROR $e');
   }
 }
