@@ -1,0 +1,49 @@
+00:00 +0: loading /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart
+00:00 +0: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoices_test.dart: 台账共用任务项目，任务保存、改名及删除不会丢失发票
+00:00 +1: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoices_test.dart: 台账共用任务项目，任务保存、改名及删除不会丢失发票
+00:00 +2: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoices_test.dart: 台账共用任务项目，任务保存、改名及删除不会丢失发票
+00:00 +3: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_batch_update_test.dart: 无效月份或已删除项目不产生部分更新
+00:00 +4: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 跨页多条件交集、附件/金额/项目/Unicode搜索与字面特殊字符
+00:00 +5: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoices_test.dart: 旧报销项目迁入共用项目，原件、附件和归属完整保留
+00:00 +6: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoices_test.dart: 旧报销项目迁入共用项目，原件、附件和归属完整保留
+00:00 +7: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoices_test.dart: 旧报销项目迁入共用项目，原件、附件和归属完整保留
+00:00 +8: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 批量修改离开筛选范围后刷新为正确总数，详情可独立重新读取
+00:00 +9: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 批量修改离开筛选范围后刷新为正确总数，详情可独立重新读取
+00:00 +10: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 批量修改离开筛选范围后刷新为正确总数，详情可独立重新读取
+00:00 +11: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 批量修改离开筛选范围后刷新为正确总数，详情可独立重新读取
+00:00 +12: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 批量修改离开筛选范围后刷新为正确总数，详情可独立重新读取
+00:00 +13: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_batch_update_test.dart: 弹窗留空禁用、无效值报错、只填月份更新且刷新列表
+00:00 +14: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_batch_update_test.dart: 弹窗留空禁用、无效值报错、只填月份更新且刷新列表
+00:01 +15: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 翻页按钮沿用图标/提示，窄窗口和文字缩放无溢出
+00:01 +16: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 翻页按钮沿用图标/提示，窄窗口和文字缩放无溢出
+00:01 +17: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 翻页按钮沿用图标/提示，窄窗口和文字缩放无溢出
+00:01 +18: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 翻页按钮沿用图标/提示，窄窗口和文字缩放无溢出
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+pumpAndSettle timed out
+
+When the exception was thrown, this was the stack:
+#0      WidgetTester.pumpAndSettle.<anonymous closure> (package:flutter_test/src/widget_tester.dart:717:11)
+<asynchronous suspension>
+#1      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#2      main.<anonymous closure> (file:///Users/cers/Documents/ChatGPT/%E4%B8%AA%E4%BA%BA%E5%B7%A5%E4%BD%9C%E5%8F%B0/flutter/test/invoice_pagination_test.dart:202:7)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  翻页按钮沿用图标/提示，窄窗口和文字缩放无溢出
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +18 -1: /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 翻页按钮沿用图标/提示，窄窗口和文字缩放无溢出 [E]
+  Test failed. See exception logs above.
+  The test description was: 翻页按钮沿用图标/提示，窄窗口和文字缩放无溢出
+  
+00:03 +18 -1: Some tests failed.
+
+Failing tests:
+  /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/invoice_pagination_test.dart: 翻页按钮沿用图标/提示，窄窗口和文字缩放无溢出

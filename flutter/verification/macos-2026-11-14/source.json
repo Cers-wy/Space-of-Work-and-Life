@@ -1,0 +1,11 @@
+{
+  "buildSource": "6dbc3741b9daeb41a58fa7476be5c1bd29afc256",
+  "entrypoint": "lib/main.dart",
+  "version": "2.3.4+21",
+  "appCodeDiffSinceBuild": "",
+  "debugBuildSource": "702e9f07",
+  "releaseProductionSource": "6dbc3741b9daeb41a58fa7476be5c1bd29afc256",
+  "macOSBuildAvailable": true,
+  "windowsSourceIntegrated": "a811819d",
+  "windowsNewBuildOrRealDeviceTest": false
+}

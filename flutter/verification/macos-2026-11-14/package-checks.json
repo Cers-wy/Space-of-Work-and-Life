@@ -1,0 +1,44 @@
+{
+  "buildSource": "6dbc3741",
+  "version": "2.3.4+21",
+  "productionEntrypoint": "lib/main.dart",
+  "releaseBuild": "passed",
+  "zipCRC": "passed",
+  "dmgImageChecksum": "hdiutil verify passed",
+  "packages": [
+    {
+      "package": "zip",
+      "version": "2.3.4+21",
+      "bundleId": "com.cers.space.flutter",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "deepStrictAdhocSignature": "passed",
+      "fourOcrModelsMatchSource": true,
+      "prohibitedDataFound": [],
+      "isolatedStartup": "passed, new SQLite initialized, quick_check ok, process alive after 2s",
+      "formalDataAccessed": false,
+      "startupWasBackgroundOnly": true,
+      "performanceClaimFromStartup": false
+    },
+    {
+      "package": "dmg",
+      "version": "2.3.4+21",
+      "bundleId": "com.cers.space.flutter",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "deepStrictAdhocSignature": "passed",
+      "fourOcrModelsMatchSource": true,
+      "prohibitedDataFound": [],
+      "isolatedStartup": "passed, new SQLite initialized, quick_check ok, process alive after 2s",
+      "formalDataAccessed": false,
+      "startupWasBackgroundOnly": true,
+      "performanceClaimFromStartup": false
+    }
+  ],
+  "intelHardwareTested": false,
+  "appleNotarized": false
+}

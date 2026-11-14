@@ -1,0 +1,46 @@
+00:00 +0: loading /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/refinement_test.dart
+00:00 +0: 主动识别覆盖票面并落库，不推导或修改个人报销字段
+00:00 +1: 批量识别串行执行，单张失败不回滚；批量删除仅处理指定票据与附件
+00:00 +2: 后台识别不占用前台busy，保留期间保存的手工字段和用户新选择
+00:00 +2 -1: 后台识别不占用前台busy，保留期间保存的手工字段和用户新选择 [E]
+  Expected: Set:['2a66e729-c75e-4241-9606-6b83031991a7']
+    Actual: Set:[]
+     Which: does not contain '2a66e729-c75e-4241-9606-6b83031991a7'
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/refinement_test.dart 291:5                     main.<fn>
+  
+00:00 +2 -1: 后台识别期间删除无需等待，当前项和排队项被跳过且不会恢复
+00:00 +3 -1: 后台识别时台账导入导出与筛选可用，用户可继续查询
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+pumpAndSettle timed out
+
+When the exception was thrown, this was the stack:
+#0      WidgetTester.pumpAndSettle.<anonymous closure> (package:flutter_test/src/widget_tester.dart:717:11)
+<asynchronous suspension>
+#1      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#2      main.<anonymous closure> (file:///Users/cers/Documents/ChatGPT/%E4%B8%AA%E4%BA%BA%E5%B7%A5%E4%BD%9C%E5%8F%B0/flutter/test/refinement_test.dart:412:5)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  后台识别时台账导入导出与筛选可用，用户可继续查询
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:02 +3 -2: 后台识别时台账导入导出与筛选可用，用户可继续查询 [E]
+  Test failed. See exception logs above.
+  The test description was: 后台识别时台账导入导出与筛选可用，用户可继续查询
+  
+00:02 +3 -2: 详情识别自动保存且无提示条，未保存备注保持独立状态
+00:03 +4 -2: Some tests failed.
+
+Failing tests:
+  /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/refinement_test.dart: 后台识别不占用前台busy，保留期间保存的手工字段和用户新选择
+  /Users/cers/Documents/ChatGPT/个人工作台/flutter/test/refinement_test.dart: 后台识别时台账导入导出与筛选可用，用户可继续查询
