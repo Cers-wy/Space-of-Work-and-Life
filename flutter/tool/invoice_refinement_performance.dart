@@ -216,29 +216,81 @@ Future<void> main() async {
   perf.foregroundOverride = () =>
       nativeFocused &&
       DateTime.now().difference(lastFocus).inMilliseconds < 2000;
+  final gated = Platform.environment['SPACE_PROBE_PHASED'] == 'true';
+  if (gated) {
+    final attempts = <String, int>{};
+    perf.beforeMeasure = (name) async {
+      final previous = File('${out.path}/$name.go');
+      if (previous.existsSync()) previous.deleteSync();
+      File('${out.path}/waiting.json')
+          .writeAsStringSync(jsonEncode({'scenario': name}));
+      final signal = File('${out.path}/$name.go');
+      final deadline = Stopwatch()..start();
+      while (!signal.existsSync() || !perf.foreground()) {
+        if (deadline.elapsed.inMinutes >= 10)
+          throw StateError('Foreground gate timed out: $name');
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+      await settle(800);
+      if (!perf.foreground()) throw StateError('Focus lost before $name');
+    };
+    perf.afterMeasure = (row) {
+      final name = row['scenario'] as String;
+      final attempt = attempts.update(name, (n) => n + 1, ifAbsent: () => 1);
+      final valid =
+          row['foregroundThroughout'] == true && row['lifecycle'] == 'resumed';
+      row['attempt'] = attempt;
+      if (!valid) {
+        final invalid = Directory('${out.path}/invalid-attempts')
+          ..createSync(recursive: true);
+        File('${invalid.path}/$name-$attempt.json')
+            .writeAsStringSync(jsonEncode(row));
+      }
+      File('${out.path}/$name.done').writeAsStringSync(jsonEncode(row));
+      if (!valid && attempt >= 4)
+        throw StateError('Repeated focus loss: $name');
+      return !valid;
+    };
+  }
   await settle();
   File('${out.path}/ready.json').writeAsStringSync(
     jsonEncode({'pid': pid, 'buildMode': kProfileMode ? 'Profile' : 'Release'}),
   );
   try {
     final deadline = Stopwatch()..start();
-    while (!perf.foreground() || !File('${out.path}/start').existsSync()) {
+    while ((!gated && !perf.foreground()) ||
+        !File('${out.path}/start').existsSync()) {
       if (deadline.elapsed.inMinutes >= 10)
         throw StateError('Foreground required');
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
     await settle(3000);
-    await perf.measure(
-      'workspace-idle-10s',
-      () => Future<void>.delayed(const Duration(seconds: 10)),
-      extra: {'tasks': 9},
-    );
+    if (Platform.environment['SPACE_PROBE_SKIP_BASELINE'] != 'true') {
+      await perf.measure(
+        'workspace-idle-10s',
+        () => Future<void>.delayed(const Duration(seconds: 10)),
+        extra: {'tasks': 9},
+      );
+      await store.preference('viewMode', 'board');
+      await settle(400);
+      await perf.measure('board-filter-open-close-10', () async {
+        final context = base.workspaceContext();
+        for (var i = 0; i < 10; i++) {
+          workspace.filters();
+          await settle(180);
+          if (!Navigator.of(context).canPop())
+            throw StateError('Filter did not open');
+          Navigator.of(context).pop();
+          await settle(180);
+        }
+      });
+    }
     store.openArea(SpaceArea.invoices);
     final session = workspace.invoices as InvoiceSession;
     await waitFor(
-      () => session.ledger?.entries.length == 1000 && !session.busy,
+      () => session.total == 1000 && !session.busy && !session.pageLoading,
     );
-    final entries = session.ledger!.entries,
+    final entries = (await session.repo.load()).entries,
         ids = entries.map((e) => e.id).toList();
     final context = base.workspaceContext();
     await perf.measure('invoice-list-scroll-1000', () async {
@@ -256,7 +308,34 @@ Future<void> main() async {
           curve: Curves.linear,
         );
       }
-    }, extra: {'invoices': 1000});
+    }, extra: {'invoices': 1000, 'pageSize': InvoiceSession.pageSize});
+    final pageQueries = <double>[];
+    await perf.measure(
+      'invoice-page-query-filter-20',
+      () async {
+        for (var i = 1; i <= 20; i++) {
+          final time = Stopwatch()..start();
+          await session.goToPage(i % session.pageCount);
+          if (session.ledger!.entries.length > InvoiceSession.pageSize ||
+              session.total != 1000) {
+            throw StateError('Page was not bounded');
+          }
+          pageQueries.add(time.elapsedMicroseconds / 1000);
+          await settle();
+        }
+        session.update(() => session.query = 'ticket-9');
+        await waitFor(() => !session.pageLoading);
+        if (session.total != 111 || session.page != 0)
+          throw StateError('Cross-page filter');
+        session.update(() => session.query = '');
+        await waitFor(() => !session.pageLoading && session.total == 1000);
+      },
+      extra: {
+        'invoices': 1000,
+        'pageSize': InvoiceSession.pageSize,
+        'pageChanges': 20,
+      },
+    );
     final updates = <double>[];
     await perf.measure('batch-update-1000-x10', () async {
       for (var i = 0; i < 10; i++) {
@@ -289,17 +368,17 @@ Future<void> main() async {
     }, extra: {'selected': 1000});
     final pdfEntry = entries.firstWhere((e) => e.original.isPdf),
         imageEntries = entries.where((e) => !e.original.isPdf).toList();
-    await perf.measure('pdf-text-recognize-save', () async {
+    await perf.measure('pdf-recognize-save', () async {
       await session.recognizeEntry(pdfEntry.id);
       await session.refresh();
       session.update(() {});
     });
-    await perf.measure('ocr-cold-recognize-save', () async {
+    await perf.measure('image-recognize-save', () async {
       await session.recognizeEntry(imageEntries.first.id);
       await session.refresh();
       session.update(() {});
     });
-    await perf.measure('ocr-medium-first-use', () async {
+    await perf.measure('ocr-medium-recognize', () async {
       final r = await LocalPpocr.recognize(source.$2, enhanced: true);
       if (!r.text.contains('106.00')) throw StateError('Medium OCR');
     });
@@ -339,10 +418,12 @@ Future<void> main() async {
       if (e.info.cents != null && e.info.cents != 10600)
         throw StateError('Recognition wrote wrong amount: ${e.info.cents}');
     }
-    await perf.measure(
-      'post-ocr-idle-release-30s',
-      () => Future<void>.delayed(const Duration(seconds: 30)),
-    );
+    for (var i = 1; i <= 3; i++) {
+      await perf.measure(
+        'post-ocr-idle-10s-$i',
+        () => Future<void>.delayed(const Duration(seconds: 10)),
+      );
+    }
     final remote = ProbeRemote();
     for (var i = 0; i < 1000; i++) {
       final id = 'fixture-$i';
@@ -479,11 +560,15 @@ Future<void> main() async {
     checker.dispose();
     await LocalPpocr.dispose();
     updates.sort();
+    pageQueries.sort();
     actions.sort();
     final size = MediaQuery.sizeOf(context);
+    final info = await DesktopHost.appInfo();
     final result = {
-      'version': '2.3.3+20',
-      'applicationBaseline': '9cb7f938 plus the recorded batch-update diff',
+      'version': '${info['version']}+${info['build']}',
+      'applicationBaseline':
+          Platform.environment['SPACE_PROBE_SOURCE'] ?? 'unrecorded',
+      'phasedForegroundSampling': gated,
       'buildMode': kProfileMode ? 'Profile' : 'Release',
       'platform': Platform.operatingSystem,
       'dartVersion': Platform.version,
@@ -491,6 +576,10 @@ Future<void> main() async {
       'windowLogicalSize': {'width': size.width, 'height': size.height},
       'formalDatabaseAccessed': false,
       'ocrAmountCoverage': {'images': 8, 'recognized': amountRecognized},
+      'pageQueryMs': {
+        'p95': pageQueries[(pageQueries.length * .95).ceil() - 1],
+        'max': pageQueries.last,
+      },
       'batchUpdateMs': {
         'p95': updates[(updates.length * .95).ceil() - 1],
         'max': updates.last,

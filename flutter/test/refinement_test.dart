@@ -406,7 +406,13 @@ void main() {
     await t.tap(filter);
     await t.pumpAndSettle();
     expect(find.text('筛选发票'), findsWidgets);
-    await t.enterText(find.byType(TextField), '用户继续查询');
+    await t.runAsync(() async {
+      await t.enterText(find.byType(TextField), '用户继续查询');
+      final deadline = DateTime.now().add(const Duration(seconds: 5));
+      while (s.pageLoading && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
     await t.pump();
     await t.sendKeyEvent(LogicalKeyboardKey.escape);
     await t.pumpAndSettle();

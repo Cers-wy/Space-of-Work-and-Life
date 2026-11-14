@@ -44,6 +44,18 @@ class InvoiceSession extends ChangeNotifier {
   final selected = <String>{};
   final recognitionFailures = <String, String>{};
   String query = '', month = '', project = '', status = '';
+  static const pageSize = 50;
+  int page = 0;
+  int? _total, _totalAll;
+  List<String> months = const [];
+  bool pageLoading = false;
+  int get total => _total ?? ledger?.entries.length ?? 0;
+  int get totalAll => _totalAll ?? ledger?.entries.length ?? 0;
+  int get pageCount => math.max(1, (total + pageSize - 1) ~/ pageSize);
+  InvoiceQuery get conditions =>
+      InvoiceQuery(text: query, month: month, project: project, status: status);
+  String get filterKey => [query, month, project, status].join('\u0000');
+
   bool get hasFilters =>
       query.trim().isNotEmpty ||
       month.isNotEmpty ||
@@ -60,50 +72,87 @@ class InvoiceSession extends ChangeNotifier {
 
   Map<String, String> get projects => ledger?.projects ?? const {};
 
-  List<InvoiceEntry> get filtered {
-    final terms = query.trim().toLowerCase().split(RegExp(r'\s+'));
-    return [
-      for (final entry in ledger?.entries ?? const <InvoiceEntry>[])
-        if (matches(entry, terms)) entry,
-    ];
-  }
-
-  bool matches(InvoiceEntry e, List<String> terms) {
-    final i = e.info;
-    if (month.isNotEmpty && i.month != month ||
-        project.isNotEmpty && i.project != project ||
-        status.isNotEmpty && i.reimbursed != (status == 'yes')) {
-      return false;
-    }
-    if (terms.length == 1 && terms.single.isEmpty) return true;
-    final content = [
-      e.original.name,
-      i.title,
-      i.number,
-      i.seller,
-      i.spent,
-      i.issued,
-      i.purpose,
-      i.month,
-      i.amount,
-      projects[i.project],
-      ...e.attachments.map((f) => f.name),
-    ].join(' ').toLowerCase();
-    return terms.every(content.contains);
-  }
+  List<InvoiceEntry> get filtered => ledger?.entries ?? const [];
 
   void update(VoidCallback change) {
+    final previous = filterKey;
     change();
-    if (!_disposed) notifyListeners();
+    if (_disposed) return;
+    if (previous != filterKey) {
+      page = 0;
+      unawaited(_reloadPage());
+    }
+    notifyListeners();
+  }
+
+  Future<void> _reloadPage() async {
+    if (_disposed) return;
+    final key = filterKey;
+    pageLoading = true;
+    notifyListeners();
+    try {
+      await refresh();
+    } catch (e) {
+      if (!_disposed && key == filterKey) {
+        error = invoiceError(e);
+        notifyListeners();
+      }
+    }
+    // Only the most recent request owns the loading state (see refresh).
+  }
+
+  Future<void> goToPage(int value) async {
+    if (_disposed ||
+        busy ||
+        pageLoading ||
+        value < 0 ||
+        value >= pageCount ||
+        value == page) {
+      return;
+    }
+    page = value;
+    selected.clear();
+    await _reloadPage();
   }
 
   Future<void> refresh() async {
     final generation = ++_refreshGeneration;
-    final loaded = await repo.load();
-    if (_disposed || generation != _refreshGeneration) return;
-    ledger = loaded;
-    if (!projects.containsKey(project)) project = '';
-    selected.retainAll(ledger!.entries.map((e) => e.id).toSet());
+    final filter = conditions;
+    try {
+      var loaded = await repo.loadPage(
+        query: filter,
+        page: page,
+        pageSize: pageSize,
+      );
+      if (_disposed || generation != _refreshGeneration) return;
+      if (project.isNotEmpty && !loaded.ledger.projects.containsKey(project)) {
+        project = '';
+        loaded = await repo.loadPage(
+          query: conditions,
+          page: 0,
+          pageSize: pageSize,
+        );
+        if (_disposed || generation != _refreshGeneration) return;
+      }
+      ledger = loaded.ledger;
+      page = loaded.page;
+      _total = loaded.total;
+      _totalAll = loaded.totalAll;
+      months = loaded.months;
+      // A query change must preserve choices made while background OCR runs.
+      // Explicit paging clears its page selection, but filtering merely hides it.
+      final snapshot = Set<String>.of(selected);
+      if (snapshot.isNotEmpty) {
+        final existing = await repo.existingIds(snapshot);
+        if (_disposed || generation != _refreshGeneration) return;
+        selected.removeAll(snapshot.difference(existing));
+      }
+    } finally {
+      if (!_disposed && generation == _refreshGeneration) {
+        pageLoading = false;
+        notifyListeners();
+      }
+    }
   }
 
   Future<void> run(
@@ -152,9 +201,7 @@ class InvoiceSession extends ChangeNotifier {
       }
       _currentRecognition = id;
       try {
-        final current = (await repo.load()).entries
-            .where((e) => e.id == id)
-            .firstOrNull;
+        final current = await repo.find(id);
         if (current == null) throw const _RecognitionCancelled();
         final result = await recognizeFile(
           current.original,
@@ -247,7 +294,7 @@ class InvoiceSession extends ChangeNotifier {
         await refresh();
         update(() => batchNotice = '后台识别 ${++batchProcessed} / $batchTotal 张');
       }
-      retryIDs.retainAll(ledger?.entries.map((e) => e.id) ?? const <String>[]);
+      retryIDs.retainAll(await repo.existingIds(retryIDs));
       if (retryIDs.isNotEmpty) {
         batchError =
             '有 ${retryIDs.length} 张未完成：${retryIDs.map((id) => recognitionFailures[id]).toSet().join('；')}';
@@ -319,9 +366,7 @@ class InvoiceSession extends ChangeNotifier {
 
   Future<void> load() async {
     await run(() async => null);
-    for (final entry in ledger?.entries ?? <InvoiceEntry>[]) {
-      if (entry.info.recognition.isEmpty) _recognitionQueue.add(entry.id);
-    }
+    _recognitionQueue.addAll(await repo.pendingRecognitionIds());
     unawaited(_recognizePending());
   }
 
@@ -332,10 +377,7 @@ class InvoiceSession extends ChangeNotifier {
       while (_recognitionQueue.isNotEmpty && !_disposed && !busy) {
         final id = _recognitionQueue.first;
         _recognitionQueue.remove(id);
-        final entry = ledger?.entries.where((e) => e.id == id).firstOrNull;
-        if (entry == null ||
-            _batchIds.contains(id) ||
-            _manualJobs.containsKey(id)) {
+        if (_batchIds.contains(id) || _manualJobs.containsKey(id)) {
           continue;
         }
         try {
@@ -365,9 +407,7 @@ class InvoiceSession extends ChangeNotifier {
       if (result.errors.isNotEmpty) error = result.errors.join('\n');
       return '已导入 ${result.count} 张发票，正在自动识别';
     });
-    for (final entry in ledger?.entries ?? <InvoiceEntry>[]) {
-      if (entry.info.recognition.isEmpty) _recognitionQueue.add(entry.id);
-    }
+    _recognitionQueue.addAll(await repo.pendingRecognitionIds());
     unawaited(_recognizePending());
   }
 
@@ -535,13 +575,7 @@ class _InvoiceFiltersState extends State<_InvoiceFilters> {
     listenable: session,
     builder: (context, _) {
       final p = Palette.of(context);
-      final months =
-          (session.ledger?.entries ?? const <InvoiceEntry>[])
-              .map((entry) => entry.info.month)
-              .where((month) => month.isNotEmpty)
-              .toSet()
-              .toList()
-            ..sort((a, b) => b.compareTo(a));
+      final months = session.months;
       return Glass(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -604,7 +638,7 @@ class _InvoiceFiltersState extends State<_InvoiceFilters> {
               children: [
                 Expanded(
                   child: Text(
-                    '${session.filtered.length} 张匹配发票',
+                    '${session.total} 张匹配发票',
                     style: textStyle(p, size: 12, color: p.muted),
                   ),
                 ),
@@ -1060,6 +1094,13 @@ class _LedgerState extends State<_Ledger> {
     builder: (context, _) {
       final p = Palette.of(context);
       final items = session.filtered;
+      final positionKey = '${session.filterKey}:${session.page}';
+      if (_positionKey != positionKey) {
+        _positionKey = positionKey;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && vertical.hasClients) vertical.jumpTo(0);
+        });
+      }
       final selected = items
           .where((e) => session.selected.contains(e.id))
           .toList();
@@ -1197,7 +1238,7 @@ class _LedgerState extends State<_Ledger> {
                       children: [
                         SizedBox(
                           height: 2,
-                          child: session.busy
+                          child: session.busy || session.pageLoading
                               ? const LinearProgressIndicator()
                               : null,
                         ),
@@ -1239,13 +1280,42 @@ class _LedgerState extends State<_Ledger> {
                           children: [
                             Expanded(
                               child: Text(
-                                '${items.length} 张发票 · 已选 ${selected.length} 张'
+                                '${session.total} 张发票 · 本页已选 ${selected.length} 张'
                                 '${session.batchNotice == null ? '' : ' · ${session.batchNotice}'}'
                                 '${session.notice == null ? '' : ' · ${session.notice}'}',
                                 style: textStyle(p, size: 12, color: p.muted),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            IconButtonS(
+                              'left',
+                              '上一页发票',
+                              onPressed:
+                                  session.page == 0 ||
+                                      session.busy ||
+                                      session.pageLoading
+                                  ? null
+                                  : () => session.goToPage(session.page - 1),
+                            ),
+                            Tooltip(
+                              message:
+                                  '每页 ${InvoiceSession.pageSize} 张，翻页清空本页勾选',
+                              child: Text(
+                                '${session.page + 1} / ${session.pageCount}',
+                                style: textStyle(p, size: 12, color: p.muted),
+                              ),
+                            ),
+                            IconButtonS(
+                              'right',
+                              '下一页发票',
+                              onPressed:
+                                  session.page + 1 >= session.pageCount ||
+                                      session.busy ||
+                                      session.pageLoading
+                                  ? null
+                                  : () => session.goToPage(session.page + 1),
+                            ),
+                            const SizedBox(width: 8),
                             IconButtonS(
                               'printer',
                               '合并打印',
@@ -1296,13 +1366,15 @@ class _LedgerState extends State<_Ledger> {
     },
   );
 
+  String? _positionKey;
+
   Widget _emptyLedger() {
     if (session.busy) return const InvoiceHint('invoice', '正在处理发票…');
     final ledger = session.ledger;
     if (ledger == null) {
       return const InvoiceHint('invoice', '台账尚未载入');
     }
-    if (ledger.entries.isEmpty) {
+    if (session.totalAll == 0) {
       return const InvoiceHint(
         'tray',
         '拖入发票，开始建立台账',
@@ -1343,7 +1415,7 @@ class _LedgerState extends State<_Ledger> {
                     child: Row(
                       children: [
                         SpaceCheckbox(
-                          label: '全选当前结果',
+                          label: '全选当前页',
                           value: selectedCount > 0 && !all ? null : all,
                           showLabel: false,
                           onPressed: session.busy

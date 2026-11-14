@@ -150,6 +150,30 @@ class InvoiceLedger {
   const InvoiceLedger(this.entries, this.projects);
 }
 
+/// SQL-backed list conditions, shared by macOS and Windows.
+class InvoiceQuery {
+  final String text, month, project, status;
+  const InvoiceQuery({
+    this.text = '',
+    this.month = '',
+    this.project = '',
+    this.status = '',
+  });
+}
+
+class InvoicePage {
+  final InvoiceLedger ledger;
+  final int page, total, totalAll;
+  final List<String> months;
+  const InvoicePage(
+    this.ledger,
+    this.page,
+    this.total,
+    this.totalAll,
+    this.months,
+  );
+}
+
 class InvoiceImportResult {
   final int count;
   final List<String> errors;
@@ -222,12 +246,16 @@ class InvoiceRepository {
     p.join(_files, '${row['id']}.${row['extension']}'),
   );
 
-  Future<InvoiceLedger> load() => Isolate.run(
-    () => _database((db) {
-      final originals = <String, InvoiceFile>{};
-      final attachments = <String, List<InvoiceFile>>{};
+  InvoiceLedger _readEntries(Database db, List<Row> rows) {
+    final originals = <String, InvoiceFile>{};
+    final attachments = <String, List<InvoiceFile>>{};
+    // A page loads only its own original/attachment metadata, including OCR data.
+    // Chunking also keeps explicit full exports below SQLite's parameter limit.
+    for (var offset = 0; offset < rows.length; offset += 400) {
+      final ids = rows.skip(offset).take(400).map((r) => r['id']).toList();
       for (final row in db.select(
-        'SELECT * FROM invoice_files ORDER BY rowid',
+        'SELECT * FROM invoice_files WHERE invoice IN (${List.filled(ids.length, '?').join(',')}) ORDER BY rowid',
+        ids,
       )) {
         final invoice = row['invoice'] as String;
         if (row['original'] == 1) {
@@ -236,43 +264,196 @@ class InvoiceRepository {
           (attachments[invoice] ??= []).add(_file(row));
         }
       }
-      return InvoiceLedger(
-        [
-          for (final row in db.select(
-            'SELECT * FROM invoices ORDER BY rowid DESC',
-          ))
-            InvoiceEntry(
-              row['id'] as String,
-              originals[row['id']]!,
-              attachments[row['id']] ?? const [],
-              InvoiceInfo(
-                title: row['title'] as String? ?? '',
-                recognition: row['recognition'] as String? ?? '',
-                number: row['number'] as String,
-                issued: row['issued'] as String,
-                seller: row['seller'] as String,
-                spent: row['spent'] as String,
-                purpose: row['purpose'] as String,
-                month: row['month'] as String,
-                project: row['project'] as String? ?? '',
-                cents: row['cents'] as int?,
-                reimbursed: row['reimbursed'] == 1,
-                buyer: row['buyer'] as String? ?? '',
-                sellerTax: row['seller_tax'] as String? ?? '',
-                buyerTax: row['buyer_tax'] as String? ?? '',
-                taxCents: row['tax_cents'] as int?,
-                netCents: row['net_cents'] as int?,
-              ),
+    }
+    return InvoiceLedger(
+      [
+        for (final row in rows)
+          InvoiceEntry(
+            row['id'] as String,
+            originals[row['id']]!,
+            attachments[row['id']] ?? const [],
+            InvoiceInfo(
+              title: row['title'] as String? ?? '',
+              recognition: row['recognition'] as String? ?? '',
+              number: row['number'] as String,
+              issued: row['issued'] as String,
+              seller: row['seller'] as String,
+              spent: row['spent'] as String,
+              purpose: row['purpose'] as String,
+              month: row['month'] as String,
+              project: row['project'] as String? ?? '',
+              cents: row['cents'] as int?,
+              reimbursed: row['reimbursed'] == 1,
+              buyer: row['buyer'] as String? ?? '',
+              sellerTax: row['seller_tax'] as String? ?? '',
+              buyerTax: row['buyer_tax'] as String? ?? '',
+              taxCents: row['tax_cents'] as int?,
+              netCents: row['net_cents'] as int?,
             ),
-        ],
-        {
-          for (final row in db.select(
-            'SELECT id,name FROM projects ORDER BY name',
-          ))
-            row['id'] as String: row['name'] as String,
-        },
+          ),
+      ],
+      {
+        for (final row in db.select(
+          'SELECT id,name FROM projects ORDER BY name',
+        ))
+          row['id'] as String: row['name'] as String,
+      },
+    );
+  }
+
+  Future<InvoiceLedger> load() => Isolate.run(
+    () => _database(
+      (db) => _readEntries(
+        db,
+        db.select('SELECT * FROM invoices ORDER BY rowid DESC'),
+      ),
+    ),
+  );
+
+  ({String sql, List<Object?> args}) _conditions(
+    Database db,
+    InvoiceQuery query,
+  ) {
+    final conditions = <String>[];
+    final args = <Object?>[];
+    for (final filter in {
+      'month': query.month,
+      'project': query.project,
+    }.entries) {
+      if (filter.value.isNotEmpty) {
+        conditions.add('i.${filter.key} = ?');
+        args.add(filter.value);
+      }
+    }
+    if (query.status.isNotEmpty) {
+      conditions.add('i.reimbursed = ?');
+      args.add(query.status == 'yes' ? 1 : 0);
+    }
+    final terms = query.text
+        .trim()
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((v) => v.isNotEmpty);
+    if (terms.isNotEmpty) {
+      // SQLite's built-in lower() is ASCII-only; preserve Unicode search behavior.
+      db.createFunction(
+        functionName: 'invoice_fold',
+        argumentCount: const AllowedArgumentCount(1),
+        function: (args) => (args.first as String).toLowerCase(),
+      );
+      const content =
+          "COALESCE((SELECT group_concat(name, ' ') FROM invoice_files WHERE invoice=i.id), '') || ' ' || i.title || ' ' || i.number || ' ' || i.seller || ' ' || i.spent || ' ' || i.issued || ' ' || i.purpose || ' ' || i.month || ' ' || CASE WHEN i.cents IS NULL THEN '' ELSE printf('%.2f', i.cents / 100.0) END || ' ' || COALESCE((SELECT name FROM projects WHERE id=i.project), '')";
+      for (final term in terms) {
+        conditions.add('instr(invoice_fold($content), ?) > 0');
+        args.add(term);
+      }
+    }
+    return (
+      sql: conditions.isEmpty ? '' : 'WHERE ${conditions.join(' AND ')}',
+      args: args,
+    );
+  }
+
+  Future<InvoicePage> loadPage({
+    InvoiceQuery query = const InvoiceQuery(),
+    int page = 0,
+    int pageSize = 50,
+  }) {
+    if (page < 0 || pageSize < 1 || pageSize > 200) {
+      throw ArgumentError('Invalid invoice page');
+    }
+    return Isolate.run(
+      () => _database((db) {
+        db.execute('BEGIN');
+        try {
+          final filter = _conditions(db, query);
+          final total =
+              db
+                      .select(
+                        'SELECT count(*) AS n FROM invoices i ${filter.sql}',
+                        filter.args,
+                      )
+                      .single['n']
+                  as int;
+          final actual = total == 0
+              ? 0
+              : page.clamp(0, (total - 1) ~/ pageSize);
+          final rows = db.select(
+            'SELECT i.* FROM invoices i ${filter.sql} ORDER BY i.rowid DESC LIMIT ? OFFSET ?',
+            [...filter.args, pageSize, actual * pageSize],
+          );
+          return InvoicePage(
+            _readEntries(db, rows),
+            actual,
+            total,
+            db.select('SELECT count(*) AS n FROM invoices').single['n'] as int,
+            [
+              for (final row in db.select(
+                "SELECT DISTINCT month FROM invoices WHERE month != '' ORDER BY month DESC",
+              ))
+                row['month'] as String,
+            ],
+          );
+        } finally {
+          db.execute('ROLLBACK');
+        }
+      }),
+    );
+  }
+
+  /// Full matching results are loaded only for an explicit export.
+  Future<InvoiceLedger> matching(InvoiceQuery query) => Isolate.run(
+    () => _database((db) {
+      final filter = _conditions(db, query);
+      return _readEntries(
+        db,
+        db.select(
+          'SELECT i.* FROM invoices i ${filter.sql} ORDER BY i.rowid DESC',
+          filter.args,
+        ),
       );
     }),
+  );
+
+  Future<InvoiceEntry?> find(String id) => Isolate.run(
+    () => _database(
+      (db) => _readEntries(
+        db,
+        db.select('SELECT * FROM invoices WHERE id=?', [id]),
+      ).entries.firstOrNull,
+    ),
+  );
+
+  Future<Set<String>> existingIds(Iterable<String> ids) {
+    final requested = ids.toSet().toList();
+    return Isolate.run(
+      () => _database((db) {
+        final result = <String>{};
+        for (var offset = 0; offset < requested.length; offset += 400) {
+          final chunk = requested.skip(offset).take(400).toList();
+          result.addAll(
+            db
+                .select(
+                  'SELECT id FROM invoices WHERE id IN (${List.filled(chunk.length, '?').join(',')})',
+                  chunk,
+                )
+                .map((r) => r['id'] as String),
+          );
+        }
+        return result;
+      }),
+    );
+  }
+
+  Future<List<String>> pendingRecognitionIds() => Isolate.run(
+    () => _database(
+      (db) => [
+        for (final row in db.select(
+          "SELECT id FROM invoices WHERE recognition='' ORDER BY rowid DESC",
+        ))
+          row['id'] as String,
+      ],
+    ),
   );
 
   Future<InvoiceImportResult> importFiles(

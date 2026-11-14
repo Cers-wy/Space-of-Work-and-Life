@@ -58,6 +58,8 @@ Pointer<Void> sel(String name) {
 }
 
 bool Function()? foregroundOverride;
+Future<void> Function(String)? beforeMeasure;
+bool Function(Map<String, Object?>)? afterMeasure;
 bool foreground() {
   final override = foregroundOverride;
   if (override != null) return override();
@@ -113,6 +115,7 @@ Future<void> measure(
   Future<void> Function() action, {
   Map<String, Object?> extra = const {},
 }) async {
+  await beforeMeasure?.call(name);
   final before = await probe.processSample();
   final t0 = Timeline.now;
   var peak = ProcessInfo.currentRss;
@@ -191,6 +194,10 @@ Future<void> measure(
   print(
     'PROBE $name ${row['durationMs']} ms RSS ${row['rssAfterMiB']} MiB active=$active',
   );
+  if (afterMeasure?.call(row) ?? false) {
+    result.removeLast();
+    await measure(name, action, extra: extra);
+  }
 }
 
 Future<void> main() async {

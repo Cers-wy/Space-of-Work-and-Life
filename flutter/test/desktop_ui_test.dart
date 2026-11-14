@@ -168,7 +168,7 @@ void main() {
       ),
     );
     await t.pumpAndSettle();
-    final all = find.byTooltip('全选当前结果');
+    final all = find.byTooltip('全选当前页');
     final first = find.byTooltip('选择 发票 0.pdf');
     expect(t.getSize(all), const Size(32, 32));
     expect(t.widget<Text>(find.text('金额')).textAlign, TextAlign.right);
@@ -184,7 +184,7 @@ void main() {
     expect(session.selected, {'0'});
     expect(
       t
-          .getSemantics(find.bySemanticsLabel('全选当前结果'))
+          .getSemantics(find.bySemanticsLabel('全选当前页'))
           .getSemanticsData()
           .flagsCollection
           .isChecked,

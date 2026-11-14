@@ -270,7 +270,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
   Future<void> reload() async {
     await session.refresh();
     session.update(() {});
-    entry = session.ledger!.entries.firstWhere((e) => e.id == widget.id);
+    entry = await session.repo.find(widget.id) ?? (throw StateError('发票已删除'));
     if (selectedId != null &&
         !entry.attachments.any((f) => f.id == selectedId)) {
       selectedId = null;
@@ -1092,11 +1092,12 @@ Future<void> showInvoiceExport(
   List<InvoiceEntry> filtered,
   List<InvoiceEntry> selected,
 ) async {
+  final conditions = session.conditions;
   final plan = await invoiceModal(
     store,
     () => sheet<({List<InvoiceColumn> columns, bool selected})>(
       context,
-      _ExportOptions(filtered.length, selected.length),
+      _ExportOptions(session.total, selected.length),
       width: 450,
       height: 396,
     ),
@@ -1105,7 +1106,9 @@ Future<void> showInvoiceExport(
   await session.run(() async {
     final path = await DesktopHost.saveFile('发票台账.xlsx', title: '导出发票台账');
     if (path == null) return null;
-    final rows = plan.selected ? selected : filtered;
+    final rows = plan.selected
+        ? selected
+        : (await session.repo.matching(conditions)).entries;
     await exportInvoiceSheet(
       session.repo,
       path,
