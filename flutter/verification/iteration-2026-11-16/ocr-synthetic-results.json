@@ -1,0 +1,154 @@
+[
+  {
+    "fixture": "vat.pdf",
+    "expected": {
+      "title": "电子发票（普通发票）",
+      "number": "26310000000000000123",
+      "issued": "2026-11-16",
+      "cents": 10600,
+      "buyer": "隔离采购有限公司",
+      "seller": "隔离销售有限公司",
+      "buyer_tax": "91320000TEST000001",
+      "seller_tax": "91320000TEST000002"
+    },
+    "actual": {
+      "title": "电子发票（普通发票）",
+      "number": "26310000000000000123",
+      "issued": "2026-11-16",
+      "cents": 10600,
+      "tax_cents": 600,
+      "net_cents": 10000,
+      "buyer": "隔离采购有限公司",
+      "seller": "隔离销售有限公司",
+      "seller_tax": "91320000TEST000002",
+      "buyer_tax": "91320000TEST000001"
+    },
+    "wrong": {},
+    "missing": [],
+    "message": ""
+  },
+  {
+    "fixture": "vat.png",
+    "expected": {
+      "title": "电子发票（普通发票）",
+      "number": "26310000000000000123",
+      "issued": "2026-11-16",
+      "cents": 10600,
+      "buyer": "隔离采购有限公司",
+      "seller": "隔离销售有限公司",
+      "buyer_tax": "91320000TEST000001",
+      "seller_tax": "91320000TEST000002"
+    },
+    "actual": {
+      "title": "电子发票（普通发票）",
+      "number": "26310000000000000123",
+      "issued": "2026-11-16",
+      "tax_cents": 600,
+      "net_cents": 10000,
+      "buyer": "隔离采购有限公司",
+      "seller": "隔离销售有限公司",
+      "seller_tax": "91320000TEST000002",
+      "buyer_tax": "91320000TEST000001"
+    },
+    "wrong": {},
+    "missing": [
+      "cents"
+    ],
+    "message": "部分票面字段未能可靠提取，请核对原件。"
+  },
+  {
+    "fixture": "railway.pdf",
+    "expected": {
+      "title": "电子发票（铁路电子客票）",
+      "number": "26310000000000000456",
+      "issued": "2026-11-16",
+      "cents": 17450,
+      "buyer": "隔离采购有限公司",
+      "buyer_tax": "91320000TEST000001"
+    },
+    "actual": {
+      "title": "电子发票（铁路电子客票）",
+      "number": "26310000000000000456",
+      "issued": "2026-11-16",
+      "cents": 17450,
+      "buyer": "隔离采购有限公司",
+      "buyer_tax": "91320000TEST000001"
+    },
+    "wrong": {},
+    "missing": [],
+    "message": ""
+  },
+  {
+    "fixture": "railway.png",
+    "expected": {
+      "title": "电子发票（铁路电子客票）",
+      "number": "26310000000000000456",
+      "issued": "2026-11-16",
+      "cents": 17450,
+      "buyer": "隔离采购有限公司",
+      "buyer_tax": "91320000TEST000001"
+    },
+    "actual": {
+      "title": "电子发票（铁路电子客票）",
+      "number": "26310000000000000456",
+      "issued": "2026-11-16",
+      "buyer": "隔离采购有限公司",
+      "buyer_tax": "91320000TEST000001",
+      "cents": 17450
+    },
+    "wrong": {},
+    "missing": [],
+    "message": ""
+  },
+  {
+    "fixture": "aviation.pdf",
+    "expected": {
+      "title": "电子发票（航空运输电子客票行程单）",
+      "number": "26310000000000000789",
+      "issued": "2026-11-16",
+      "cents": 95000,
+      "buyer": "隔离采购有限公司",
+      "buyer_tax": "91320000TEST000001",
+      "seller": "隔离航空有限公司"
+    },
+    "actual": {
+      "title": "电子发票（航空运输电子客票行程单）",
+      "number": "26310000000000000789",
+      "issued": "2026-11-16",
+      "cents": 95000,
+      "buyer": "隔离采购有限公司",
+      "buyer_tax": "91320000TEST000001",
+      "seller": "隔离航空有限公司",
+      "tax_cents": 4000,
+      "net_cents": 95000
+    },
+    "wrong": {},
+    "missing": [],
+    "message": ""
+  },
+  {
+    "fixture": "aviation.png",
+    "expected": {
+      "title": "电子发票（航空运输电子客票行程单）",
+      "number": "26310000000000000789",
+      "issued": "2026-11-16",
+      "cents": 95000,
+      "buyer": "隔离采购有限公司",
+      "buyer_tax": "91320000TEST000001",
+      "seller": "隔离航空有限公司"
+    },
+    "actual": {
+      "title": "电子发票（航空运输电子客票行程单）",
+      "number": "26310000000000000789",
+      "issued": "2026-11-16",
+      "buyer": "隔离采购有限公司",
+      "buyer_tax": "91320000TEST000001",
+      "seller": "隔离航空有限公司"
+    },
+    "wrong": {},
+    "missing": [
+      "cents"
+    ],
+    "message": "部分票面字段未能可靠提取，请核对原件。"
+  }
+]

@@ -107,6 +107,18 @@ void main() {
     ], width: 600);
     expect(table.fields['cents'], 95000);
   });
+  test('missing net or tax and travel totals are unassessed instead of false failures', () {
+    for (final title in ['电子发票（普通发票）', '电子发票（铁路电子客票）', '电子发票（航空运输电子客票行程单）']) {
+      final r = parseStructuredInvoice([
+        line(10, 20, title),
+        line(30, 20, '价税合计（小写）￥106.00'),
+      ], width: 600);
+      final check = (r.structure['checks'] as List).last as Map;
+      expect(check['ok'], isNull);
+      expect(check['status'], 'unassessed');
+      expect(r.message.contains('校验未通过'), isFalse);
+    }
+  });
   test(
     'pages remain independent even when attachment fields share coordinates',
     () {

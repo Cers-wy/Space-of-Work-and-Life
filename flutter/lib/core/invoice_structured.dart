@@ -184,7 +184,8 @@ List<InvoiceWord> invoiceWordsFromOcr(
     final text = (line['text'] as String? ?? '').trim();
     if (text.isEmpty) continue;
     final confidence = (line['confidence'] as num?)?.toDouble() ?? 0;
-    final numeric = RegExp(r'[¥￥]|\d+\.\d{2}|[A-Z0-9]{15,20}|^\d{8,20}$').hasMatch(text);
+    final numeric = RegExp(r'[¥￥]|\d+\.\d{2}|[A-Z0-9]{15,20}|^\d{8,20}$')
+        .hasMatch(text);
     if (confidence < (numeric ? .98 : minConfidence)) continue;
     final x = (line['x'] as num?)?.toDouble() ?? 0;
     final y = (line['y'] as num?)?.toDouble() ?? 0;
@@ -530,17 +531,26 @@ StructuredInvoice parseStructuredInvoice(
     });
   }
   final expectedTotal = numeric(amount) + numeric(taxAmount);
-  // 没有取到价税合计时不做金额一致性断言，避免把「无数据」误报成「校验失败」。
-  final totalCheck =
-      total.isEmpty || (expectedTotal - numeric(total)).abs() <= .02;
+  // Travel totals include other charges. Missing components are unassessed,
+  // rather than zero; neither case proves that a total is inconsistent.
+  final canCheckTotal =
+      !railway &&
+      !aviation &&
+      amount.isNotEmpty &&
+      taxAmount.isNotEmpty &&
+      total.isNotEmpty;
+  final bool? totalCheck = canCheckTotal
+      ? (expectedTotal - numeric(total)).abs() <= .02
+      : null;
   checks.add({
     'name': '金额 + 税额 = 价税合计',
-    'expected': expectedTotal.toStringAsFixed(2),
+    'expected': canCheckTotal ? expectedTotal.toStringAsFixed(2) : null,
     'actual': total,
     'ok': totalCheck,
+    'status': canCheckTotal ? 'checked' : 'unassessed',
   });
   final moneyConsistent =
-      checks.isEmpty || checks.every((c) => c['ok'] == true);
+      checks.isEmpty || checks.every((c) => c['ok'] != false);
 
   final structure = <String, Object?>{
     'source': source,
