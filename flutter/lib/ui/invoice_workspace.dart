@@ -12,12 +12,13 @@ import '../core/repository.dart';
 import '../host.dart';
 import '../store.dart';
 import 'controls.dart';
-import 'dialogs.dart' show confirm, field, showProjects, showSettings;
+import 'dialogs.dart' show confirm, field, showProjects;
 import 'invoice_details.dart';
 import 'invoice_batch_update.dart';
 import 'invoice_merge.dart';
 import 'file_drive.dart';
 import 'theme.dart';
+import 'tool_board.dart';
 
 class InvoiceRecognitionSaveError implements Exception {
   final InvoiceRecognition result;
@@ -711,6 +712,8 @@ class _ToolsWorkspace extends StatefulWidget {
 
 class _ToolsWorkspaceState extends State<_ToolsWorkspace> {
   int page = 0;
+  bool editingTools = false;
+  final toolBoardKey = GlobalKey<ToolBoardState>();
   DriveService get drive => driveFor(widget.store);
 
   @override
@@ -736,6 +739,26 @@ class _ToolsWorkspaceState extends State<_ToolsWorkspace> {
           showTools: true,
           backToTools: page == 1 ? () => setState(() => page = 0) : null,
           subTitle: '发票合并',
+          actions: page == 0
+              ? [
+                  IconButtonS(
+                    'plus',
+                    '添加模块',
+                    onPressed: () => toolBoardKey.currentState?.addModule(),
+                  ),
+                  IconButtonS(
+                    editingTools ? 'check' : 'edit',
+                    editingTools ? '完成布局编辑' : '编辑卡片宽高',
+                    onPressed: () =>
+                        setState(() => editingTools = !editingTools),
+                  ),
+                  IconButtonS(
+                    'eye',
+                    '恢复隐藏模块',
+                    onPressed: () => toolBoardKey.currentState?.hiddenModules(),
+                  ),
+                ]
+              : const [],
         ),
         Expanded(
           child: TweenAnimationBuilder<double>(
@@ -749,149 +772,18 @@ class _ToolsWorkspaceState extends State<_ToolsWorkspace> {
                 Opacity(opacity: opacity, child: child),
             child: page == 1
                 ? InvoiceMergeEditor(repo: widget.session.repo)
-                : _Tools(
+                : ToolBoard(
+                    key: toolBoardKey,
                     store: widget.store,
-                    onOpenMerge: () => setState(() => page = 1),
                     drive: drive,
-                    onUploads: () => setState(() => page = 2),
-                    onFiles: () => setState(() => page = 3),
+                    editing: editingTools,
+                    illustration: _PaperIllustration(),
+                    openMerge: () => setState(() => page = 1),
+                    uploads: () => setState(() => page = 2),
+                    files: () => setState(() => page = 3),
                   ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _Tools extends StatelessWidget {
-  final SpaceStore store;
-  final VoidCallback onOpenMerge;
-  final DriveService drive;
-  final VoidCallback onUploads, onFiles;
-  const _Tools({
-    required this.store,
-    required this.onOpenMerge,
-    required this.drive,
-    required this.onUploads,
-    required this.onFiles,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final p = Palette.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        SizedBox(
-          height: 312,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                flex: 7,
-                child: Glass(
-                  card: true,
-                  blur: false,
-                  padding: const EdgeInsets.all(24),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SpaceIcon('invoice', size: 25, color: p.accent),
-                            const SizedBox(height: 14),
-                            Text(
-                              '发票处理',
-                              style: textStyle(p, size: 12, color: p.muted),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '发票合并',
-                              style: textStyle(p, size: 22, bold: true),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              '自动裁去票面留白，将多张电子发票排到同一张 A4 纸上。',
-                              style: textStyle(p, color: p.secondary),
-                            ),
-                            const Spacer(),
-                            IconButtonS(
-                              'right',
-                              '打开发票合并',
-                              primary: true,
-                              onPressed: onOpenMerge,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(flex: 2, child: _PaperIllustration()),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(child: _FutureTool('文档处理', 'list')),
-                    const SizedBox(height: 12),
-                    Expanded(child: _FutureTool('图片处理', 'file')),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 208,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: DriveToolCard(
-                  service: drive,
-                  uploads: onUploads,
-                  files: onFiles,
-                  onUpload: () => chooseDriveFiles(
-                    context,
-                    drive,
-                    () =>
-                        showSettings(context, store, initialCategory: 'drive'),
-                  ),
-                  onDrop: (paths) => addDriveFiles(
-                    context,
-                    drive,
-                    paths,
-                    () =>
-                        showSettings(context, store, initialCategory: 'drive'),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(child: _FutureTool('数据处理', 'grid')),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        for (final row in [
-          [('文本处理', 'list'), ('其他工具', 'tools')],
-        ]) ...[
-          Row(
-            children: [
-              for (var i = 0; i < row.length; i++) ...[
-                if (i > 0) const SizedBox(width: 12),
-                Expanded(child: _FutureTool(row[i].$1, row[i].$2)),
-              ],
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
       ],
     );
   }
@@ -990,36 +882,6 @@ class InvoiceHint extends StatelessWidget {
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _FutureTool extends StatelessWidget {
-  final String title, icon;
-  const _FutureTool(this.title, this.icon);
-
-  @override
-  Widget build(BuildContext context) {
-    final p = Palette.of(context);
-    return Glass(
-      card: true,
-      blur: false,
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SpaceIcon(icon, size: 22, color: p.muted),
-          const SizedBox(height: 8),
-          Text(title, style: textStyle(p, bold: true)),
-          const SizedBox(height: 4),
-          Text(
-            '更多功能，敬请期待',
-            textAlign: TextAlign.center,
-            style: textStyle(p, size: 12, color: p.muted),
-          ),
-        ],
       ),
     );
   }

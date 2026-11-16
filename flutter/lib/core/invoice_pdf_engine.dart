@@ -18,14 +18,19 @@ class InvoicePdfText {
   final double width;
   final List<InvoiceTextLine> lines;
   final int characters;
+  final List<Map<String, Object?>> pages;
 
-  const InvoicePdfText(this.width, this.lines, this.characters);
+  const InvoicePdfText(
+    this.width,
+    this.lines,
+    this.characters, {
+    this.pages = const [],
+  });
 
-  Map<String, Object?> get payload => structuredLinesPayload(
-    width,
-    lines,
-    characters: characters,
-  );
+  Map<String, Object?> get payload => {
+    ...structuredLinesPayload(width, lines, characters: characters),
+    if (pages.isNotEmpty) 'pages': pages,
+  };
 }
 
 /// Both desktop platforms use the same PDF geometry, renderer and object import.
@@ -145,10 +150,12 @@ abstract final class NativeInvoicePdf {
       final pages = math.min(engine.api.FPDF_GetPageCount(doc), 8);
       var width = 297.6;
       var characters = 0;
-      final words = <InvoiceWord>[];
+      final pagePayloads = <Map<String, Object?>>[];
+      final firstWords = <InvoiceWord>[];
       for (var i = 0; i < pages; i++) {
         engine.withPage(doc, i, (page, w, h) {
-          width = w;
+          if (i == 0) width = w;
+          final words = <InvoiceWord>[];
           final text = engine.api.FPDFText_LoadPage(page);
           if (text == nullptr) return;
           try {
@@ -215,18 +222,28 @@ abstract final class NativeInvoicePdf {
           } finally {
             engine.api.FPDFText_ClosePage(text);
           }
+          if (i == 0) firstWords.addAll(words);
+          pagePayloads.add({
+            ...structuredLinesPayload(w, invoiceLines(words)),
+            'page': i,
+          });
         });
       }
-      return InvoicePdfText(width, invoiceLines(words), characters);
+      return InvoicePdfText(
+        width,
+        invoiceLines(firstWords),
+        characters,
+        pages: pagePayloads,
+      );
     }),
   );
 
-  static Future<Uint8List> ocrImage(String path) => _work(
+  static Future<Uint8List> ocrImage(String path, {int pageIndex = 0}) => _work(
     (engine) => engine.withSource(
       path,
       (doc) => engine.withPage(
         doc,
-        0,
+        pageIndex,
         (page, width, height) =>
             image.encodePng(engine.raster(page, width, height, 2200)),
       ),

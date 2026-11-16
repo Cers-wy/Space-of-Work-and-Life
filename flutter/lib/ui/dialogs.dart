@@ -14,6 +14,7 @@ import '../host.dart';
 import '../store.dart';
 import 'theme.dart';
 import 'controls.dart';
+import 'confirmation.dart';
 import 'settings_panel.dart';
 import 'image_preview.dart';
 
@@ -105,7 +106,7 @@ Future<bool> confirm(
   String action, {
   bool destructive = false,
 }) async =>
-    await showDialog<bool>(
+    await showConfirmation<bool>(
       context: context,
       builder: (c) {
         final p = Palette.of(c);
@@ -113,7 +114,7 @@ Future<bool> confirm(
           backgroundColor: Colors.transparent,
           child: SizedBox(
             width: 420,
-            child: PopupSurface(
+            child: ConfirmationSurface(
               padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -272,9 +273,7 @@ class _TaskEditorState extends State<_TaskEditor> {
 
   void changed() {
     if (mounted) setState(() {});
-    DesktopHost.channel
-        .invokeMethod("dirty", {"dirty": dirty})
-        .catchError((_) => null);
+    DesktopHost.setDirty(dirty);
   }
 
   bool get richDirty => initialDelta != rich.document.toDelta();
@@ -496,9 +495,7 @@ class _TaskEditorState extends State<_TaskEditor> {
 
   @override
   void dispose() {
-    DesktopHost.channel
-        .invokeMethod("dirty", {"dirty": false})
-        .catchError((_) => null);
+    DesktopHost.setDirty(false);
     hideProjectSuggest();
     title.removeListener(changed);
     rich.removeListener(changed);
@@ -892,9 +889,7 @@ class _TaskEditorState extends State<_TaskEditor> {
     final p = Palette.of(c);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        DesktopHost.channel
-            .invokeMethod('dirty', {'dirty': dirty})
-            .catchError((_) => null);
+        DesktopHost.setDirty(dirty);
       }
     });
     return PopScope(
@@ -1779,14 +1774,14 @@ class _StatusesState extends State<_Statuses> {
                                                 !s.state.disabledStatuses
                                                     .contains(x),
                                           );
-                                      final chosen = await showDialog<String>(
+                                      final chosen = await showConfirmation<String>(
                                         context: c,
                                         builder: (c) => StatefulBuilder(
                                           builder: (c, set) => Dialog(
                                             backgroundColor: Colors.transparent,
                                             child: SizedBox(
                                               width: 400,
-                                              child: Glass(
+                                              child: ConfirmationSurface(
                                                 padding: const EdgeInsets.all(
                                                   24,
                                                 ),

@@ -11,6 +11,7 @@ import '../core/drive_query.dart';
 import '../store.dart';
 import '../host.dart';
 import 'controls.dart';
+import 'confirmation.dart';
 import 'dialogs.dart';
 import 'theme.dart';
 
@@ -30,6 +31,8 @@ class DriveToolCard extends StatelessWidget {
   final DriveService service;
   final VoidCallback uploads, files;
   final VoidCallback? onUpload;
+  final Widget? trailing, footer, leading;
+  final String title;
   final Future<void> Function(List<String>)? onDrop;
   const DriveToolCard({
     super.key,
@@ -38,6 +41,10 @@ class DriveToolCard extends StatelessWidget {
     required this.files,
     this.onUpload,
     this.onDrop,
+    this.trailing,
+    this.leading,
+    this.footer,
+    this.title = '文件管理',
   });
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -68,13 +75,21 @@ class DriveToolCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                SpaceIcon('folder', size: 20, color: p.muted),
+                leading ?? SpaceIcon('folder', size: 20, color: p.muted),
                 const SizedBox(width: 8),
-                Text('文件管理', style: textStyle(p, bold: true)),
-                const Spacer(),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle(p, bold: true),
+                  ),
+                ),
                 IconButtonS('upload', '上传文件', onPressed: onUpload ?? uploads),
+                ?trailing,
               ],
             ),
+            ?footer,
             const SizedBox(height: 4),
             Row(
               children: [
@@ -1080,7 +1095,7 @@ class _DrivePageState extends State<DrivePage> with WidgetsBindingObserver {
 }
 
 Future<String?> showUploadExit(BuildContext context, int count) =>
-    showDialog<String>(
+    showConfirmation<String>(
       context: context,
       barrierDismissible: false,
       builder: (c) {
@@ -1089,7 +1104,7 @@ Future<String?> showUploadExit(BuildContext context, int count) =>
           backgroundColor: Colors.transparent,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
-            child: Glass(
+            child: ConfirmationSurface(
               padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

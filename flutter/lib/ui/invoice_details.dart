@@ -12,8 +12,10 @@ import '../core/invoice_recognition.dart';
 import '../host.dart';
 import '../store.dart';
 import 'controls.dart';
+import 'confirmation.dart';
 import 'dialogs.dart';
 import 'invoice_workspace.dart';
+import 'invoice_project_field.dart';
 import 'theme.dart';
 
 Future<T?> invoiceModal<T>(SpaceStore store, Future<T?> Function() open) async {
@@ -35,49 +37,50 @@ class _InvoiceDetailsDismiss {
 }
 
 /// 未保存修改时的三选确认，沿用 confirm 的 PopupSurface / SpaceButton.form 风格。
-Future<String?> confirmInvoiceClose(BuildContext context) => showDialog<String>(
-  context: context,
-  builder: (c) {
-    final p = Palette.of(c);
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: SizedBox(
-        width: 420,
-        child: PopupSurface(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('保存修改？', style: textStyle(p, size: 16, bold: true)),
-              const SizedBox(height: 16),
-              Text('发票信息有尚未保存的修改，是否保存后关闭？', style: textStyle(p)),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+Future<String?> confirmInvoiceClose(BuildContext context) =>
+    showConfirmation<String>(
+      context: context,
+      builder: (c) {
+        final p = Palette.of(c);
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: SizedBox(
+            width: 420,
+            child: ConfirmationSurface(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SpaceButton.form('取消', onPressed: () => Navigator.pop(c)),
-                  const SizedBox(width: 8),
-                  SpaceButton.form(
-                    '不保存',
-                    danger: true,
-                    onPressed: () => Navigator.pop(c, 'discard'),
-                  ),
-                  const SizedBox(width: 8),
-                  SpaceButton.form(
-                    '保存',
-                    primary: true,
-                    onPressed: () => Navigator.pop(c, 'save'),
+                  Text('保存修改？', style: textStyle(p, size: 16, bold: true)),
+                  const SizedBox(height: 16),
+                  Text('发票信息有尚未保存的修改，是否保存后关闭？', style: textStyle(p)),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SpaceButton.form('取消', onPressed: () => Navigator.pop(c)),
+                      const SizedBox(width: 8),
+                      SpaceButton.form(
+                        '不保存',
+                        danger: true,
+                        onPressed: () => Navigator.pop(c, 'discard'),
+                      ),
+                      const SizedBox(width: 8),
+                      SpaceButton.form(
+                        '保存',
+                        primary: true,
+                        onPressed: () => Navigator.pop(c, 'save'),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
-  },
-);
 
 Future<void> showInvoiceDetails(
   BuildContext context,
@@ -184,6 +187,10 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     '报销月份': TextEditingController(text: entry.info.month),
   };
   late String project = entry.info.project;
+  String projectNameFor(String id) =>
+      widget.store.state.projects.where((p) => p.id == id).firstOrNull?.name ??
+      '';
+  late String projectName = projectNameFor(project);
   late bool reimbursed = entry.info.reimbursed;
   late bool monthAuto =
       entry.info.month.isEmpty ||
@@ -306,6 +313,26 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
   }
 
   Future<void> save() => act(() async {
+    final name = projectName.trim();
+    if (name.isEmpty) {
+      project = '';
+    } else {
+      var hit = widget.store.state.projects
+          .where((p) => p.name.toLowerCase() == name.toLowerCase())
+          .firstOrNull;
+      if (hit?.disabled == true && hit!.id != entry.info.project) {
+        throw StateError('该项目已停用，请选择其他项目。');
+      }
+      if (hit == null) {
+        if (!await widget.store.saveProject(name)) {
+          throw StateError(widget.store.error ?? '项目未保存');
+        }
+        hit = widget.store.state.projects
+            .where((p) => p.name.toLowerCase() == name.toLowerCase())
+            .first;
+      }
+      project = hit.id;
+    }
     await session.repo.save(
       widget.id,
       InvoiceInfo(
@@ -377,7 +404,7 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
     // 仅本次已落库的识别字段更新基准；未命中的手工输入保留为待保存。
     dirty =
         inputs.entries.any((i) => i.value.text.trim() != stored[i.key]) ||
-        project != entry.info.project ||
+        projectName.trim() != projectNameFor(entry.info.project) ||
         reimbursed != entry.info.reimbursed;
   }
 
@@ -736,36 +763,13 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
           );
     Widget gap(double height) => SizedBox(height: height);
 
-    Widget projectField() => Row(
-      children: [
-        Expanded(
-          child: SpaceSelect(
-            value: project,
-            label: '选择报销项目',
-            options: projectChoices(widget.store.state, selected: project),
-            onChanged: (v) => setState(() {
-              project = v;
-              dirty = true;
-            }),
-          ),
-        ),
-        const SizedBox(width: 8),
-        IconButtonS(
-          'project',
-          '管理共用项目',
-          size: spaceFormControlHeight,
-          onPressed: busy
-              ? null
-              : () => act(() async {
-                  await openProjectEditor(context, widget.store);
-                  if (!mounted) return;
-                  await reload();
-                  if (!session.projects.containsKey(project)) {
-                    project = '';
-                  }
-                }),
-        ),
-      ],
+    Widget projectField() => InvoiceProjectField(
+      store: widget.store,
+      name: projectName,
+      onChanged: (name) => setState(() {
+        projectName = name;
+        dirty = true;
+      }),
     );
 
     /// 标记已报销只用圆形复选框与文字标签，不加输入框式底色描边；
@@ -797,7 +801,9 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
         // 「发票名称」与「更多票面字段」折叠区；row() 在窄窗口自动逐行排列。
         row([field('发票名称', input('发票名称')), field('发票号码', input('票号'))]),
         gap(12),
-        row([field('销售方名称', input('销售方')), field('开票日期', input('开票日期'))]),
+        field('销售方名称', input('销售方')),
+        gap(12),
+        row([field('开票日期', input('开票日期')), field('销售方社会信用代码', input('销售方税号'))]),
         // 透明 Material 给 ListTile 提供直接祖先，避免被外层带底色的
         // DecoratedBox 遮住展开时的水波纹反馈（Debug 断言）。
         Material(
@@ -810,17 +816,10 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
             ),
             children: [
               row([
-                field('销售方社会信用代码', input('销售方税号')),
-                field('购买方', input('购买方')),
+                field('购买方名称', input('购买方')),
+                field('购买方社会信用代码', input('购买方税号')),
               ]),
               gap(12),
-              // 奇数个字段：宽窗口只占左半列，右列留空保持两列节奏。
-              twoColumns
-                  ? row([
-                      field('购买方社会信用代码', input('购买方税号')),
-                      const SizedBox.shrink(),
-                    ])
-                  : field('购买方社会信用代码', input('购买方税号')),
             ],
           ),
         ),
@@ -974,23 +973,26 @@ class _InvoiceDetailsState extends State<_InvoiceDetails> {
             if (!dirty) setState(() => dirty = true);
           },
         )
-      : SpaceInput(
-          controller: inputs[key]!,
-          label: key,
-          height: 32,
-          fontSize: 12,
-          hint: key.endsWith('日期') || key.endsWith('时间')
-              ? 'YYYY-MM-DD'
-              : key.endsWith('月份')
-              ? 'YYYY-MM'
-              : '',
-          onChanged: (v) {
-            if (key == '消费日期' && monthAuto && v.length >= 7) {
-              inputs['报销月份']!.text = v.substring(0, 7);
-            }
-            if (key == '报销月份') monthAuto = false;
-            if (!dirty) setState(() => dirty = true);
-          },
+      : Tooltip(
+          message: inputs[key]!.text,
+          child: SpaceInput(
+            controller: inputs[key]!,
+            label: key,
+            height: 32,
+            fontSize: 12,
+            hint: key.endsWith('日期') || key.endsWith('时间')
+                ? 'YYYY-MM-DD'
+                : key.endsWith('月份')
+                ? 'YYYY-MM'
+                : '',
+            onChanged: (v) {
+              if (key == '消费日期' && monthAuto && v.length >= 7) {
+                inputs['报销月份']!.text = v.substring(0, 7);
+              }
+              if (key == '报销月份') monthAuto = false;
+              if (!dirty) setState(() => dirty = true);
+            },
+          ),
         );
 }
 

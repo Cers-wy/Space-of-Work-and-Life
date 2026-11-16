@@ -81,7 +81,8 @@ abstract final class LocalPpocr {
 String reliableInvoiceOcrText(PpocrResult result) {
   final lines = result.lines.where((line) {
     final text = line['text'] as String;
-    final numeric = RegExp(r'[¥￥]|\d+\.\d{2}|^\d{8,20}$').hasMatch(text);
+    final numeric = RegExp(r'[¥￥]|\d+\.\d{2}|[A-Z0-9]{15,20}|^\d{8,20}$')
+        .hasMatch(text);
     return (line['confidence'] as num) >= (numeric ? .98 : .90);
   }).toList();
   final synthetic = <String>[];

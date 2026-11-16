@@ -20,14 +20,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   private var previewController: SpacePreview?
   func windowShouldClose(_ sender: NSWindow) -> Bool { Self.mayDiscardEdits() }
   static func mayDiscardEdits() -> Bool {
-    if uploadsActive {
-      (NSApp.windows.first(where: { $0 is MainFlutterWindow }) as? MainFlutterWindow)?.desktopChannel?.invokeMethod("requestClose", arguments: nil)
-      return false
+    guard uploadsActive || hasUnsavedEdits else { return true }
+    if let window = NSApp.windows.first(where: { $0 is MainFlutterWindow }) as? MainFlutterWindow,
+       let channel = window.desktopChannel {
+      channel.invokeMethod("requestClose", arguments: ["dirty": hasUnsavedEdits])
     }
-    guard hasUnsavedEdits else { return true }
-    let alert = NSAlert(); alert.messageText = "放弃未保存的更改？"; alert.informativeText = "当前输入和附件尚未保存。"; alert.addButton(withTitle: "保留编辑"); alert.addButton(withTitle: "放弃更改")
-    return alert.runModal() == .alertSecondButtonReturn
+    // Keep the window open if the Flutter confirmation cannot be delivered.
+    return false
   }
+
   override func awakeFromNib() {
     let controller = FlutterViewController()
     contentViewController = controller
@@ -60,6 +61,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
       case "appInfo":
         result(["version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "",
                 "build": Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""])
+      case "openTool":
+        guard let target = a["target"] as? String else { result(false); return }
+        if a["web"] as? Bool == true {
+          guard let url = URL(string: target), ["http", "https"].contains(url.scheme?.lowercased() ?? ""), url.host != nil else { result(false); return }
+          result(NSWorkspace.shared.open(url))
+        } else {
+          guard target.hasPrefix("/"), FileManager.default.fileExists(atPath: target) else { result(false); return }
+          result(NSWorkspace.shared.open(URL(fileURLWithPath: target)))
+        }
       case "openExternal":
         guard let value = a["url"] as? String, let url = URL(string: value),
               ["https", "mailto"].contains(url.scheme?.lowercased() ?? "") else { result(false); return }
@@ -67,7 +77,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
       case "driveState":
         MainFlutterWindow.uploadsActive = a["active"] as? Bool ?? false; result(nil)
       case "finishClose":
-        MainFlutterWindow.uploadsActive = false; result(nil); NSApp.terminate(nil)
+        MainFlutterWindow.uploadsActive = false; MainFlutterWindow.hasUnsavedEdits = false; result(nil); NSApp.terminate(nil)
       case "openFolder":
         let panel = NSOpenPanel(); panel.canChooseFiles = false; panel.canChooseDirectories = true; panel.allowsMultipleSelection = false
         panel.beginSheetModal(for: self) { response in result(response == .OK ? panel.url?.path : nil) }

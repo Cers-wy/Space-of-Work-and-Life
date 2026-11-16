@@ -8,6 +8,7 @@ import 'ppocr.dart';
 import 'invoice_pdf_engine.dart';
 import 'invoice_structured.dart';
 import 'invoices.dart';
+import 'invoice_parties.dart';
 
 class InvoiceRecognition {
   final Map<String, Object?> fields;
@@ -21,7 +22,7 @@ class InvoiceRecognition {
 
 /// Deterministic parsing shared by both desktop platforms. Notes are deliberately absent.
 InvoiceRecognition parseInvoiceText(String source) {
-  final text = source
+  final text = normalizeInvoiceLabels(source)
       .replaceAll('：', ':')
       .replaceAll('（', '(')
       .replaceAll('）', ')');
@@ -41,25 +42,42 @@ InvoiceRecognition parseInvoiceText(String source) {
   if (title != null) {
     fields['title'] = title.replaceAll('(', '（').replaceAll(')', '）');
   }
+  final railway = compact.contains('铁路电子客票');
+  final aviation = compact.contains('航空运输电子客票行程单');
+  if (railway) fields['title'] = '电子发票（铁路电子客票）';
+  if (aviation) {
+    fields['title'] = compact.contains('电子发票')
+        ? '电子发票（航空运输电子客票行程单）'
+        : '航空运输电子客票行程单';
+  }
   final taxi = compact.contains('出租') || compact.contains('TAXI');
   final number =
       match(r'发票(?:号码|号)[:]?\s*([0-9]{8,20})(?![0-9])') ??
       match(r'^([0-9]{20})$', input: compact);
   if (number != null) fields['number'] = number;
-  final date =
-      match(
-        r'(?:开票日期|乘车日期|日期)[:]?\s*(20[0-9]{2})[年/.-]?\s*([0-9]{1,2})[月/.-]\s*([0-9]{1,2})',
-      ) ??
-      '';
-  final dateMatch = RegExp(
-    r'(?:开票日期|乘车日期|日期)[:]?\s*(20[0-9]{2})[年/.-]?\s*([0-9]{1,2})[月/.-]\s*([0-9]{1,2})',
-  ).firstMatch(compact);
-  final fallback =
-      dateMatch ??
-      RegExp(r'(20[0-9]{2})年([0-9]{1,2})月([0-9]{1,2})日').firstMatch(compact);
-  if (date.isNotEmpty || fallback != null) {
-    final m = fallback!;
-    final value = '${m[1]}-${m[2]!.padLeft(2, '0')}-${m[3]!.padLeft(2, '0')}';
+  final dateLabel = aviation
+      ? r'(?:填开日期|开票日期)'
+      : railway
+      ? '开票日期'
+      : taxi
+      ? r'(?:开票日期|乘车日期|日期)'
+      : '开票日期';
+  final standaloneDates = RegExp(r'(20[0-9]{2})年([0-9]{1,2})月([0-9]{1,2})日')
+      .allMatches(compact)
+      .toList();
+  final dateMatch =
+      RegExp(
+        '$dateLabel[:]?\\s*(20[0-9]{2})[年/.-]\\s*([0-9]{1,2})[月/.-]\\s*([0-9]{1,2})',
+      ).firstMatch(compact) ??
+      (!railway &&
+              !aviation &&
+              standaloneDates.length == 1 &&
+              (taxi || !compact.contains(RegExp(r'乘车日期|乘机日期|出发日期')))
+          ? standaloneDates.single
+          : null);
+  if (dateMatch != null) {
+    final value =
+        '${dateMatch[1]}-${dateMatch[2]!.padLeft(2, '0')}-${dateMatch[3]!.padLeft(2, '0')}';
     if (DateTime.tryParse(value)?.toIso8601String().startsWith(value) == true) {
       fields['issued'] = value;
     }
@@ -74,14 +92,20 @@ InvoiceRecognition parseInvoiceText(String source) {
         (negative ? -1 : 1);
   }
 
+  final travelTotal = railway
+      ? match(r'票价[:]?\s*[¥￥]?\s*(-?[0-9,]+\.[0-9]{2})(?![0-9])')
+      : aviation
+      ? match(r'(?:^|\n)合计[:]?\s*[¥￥]?\s*(-?[0-9,]+\.[0-9]{2})(?![0-9])')
+      : null;
   final total =
+      travelTotal ??
       match(
         r'(?:价税合计(?:\(大写\))?[^\n0-9]{0,35}?|小写[):]?)[:]?\s*[¥￥Y]?\s*(-?[0-9,]+\.[0-9]{2})(?![0-9])',
       ) ??
       // A standalone amount label is a fallback, never a substring of net/item amounts.
       match(r'(?:^|\n)金额[:]?\s*[¥￥Y]?\s*(-?[0-9,]+\.[0-9]{2})(?![0-9])') ??
       (taxi ? match(r'[¥￥]\s*(-?[0-9,]+\.[0-9]{2})') : null);
-  final cents = money(total);
+  final cents = money((railway || aviation) ? travelTotal : total);
   if (cents != null) fields['cents'] = cents;
   if (!taxi) {
     final tax = money(
@@ -93,29 +117,17 @@ InvoiceRecognition parseInvoiceText(String source) {
     if (tax != null) fields['tax_cents'] = tax;
     if (net != null) fields['net_cents'] = net;
   }
-  // Prefer explicit labels, then separate buyer/seller sections. Never use the tax authority as issuer.
-  for (final side in ['seller', 'buyer']) {
-    final label = side == 'seller' ? '销售方' : '购买方';
-    var name = match('$label(?:名称)?[:]?([^\\n:]{3,70})');
-    if (name != null && (name.contains('名称') || name.contains('统一社会'))) {
-      name = null;
+  fields.addAll(invoicePartiesFromText(compact));
+  if (aviation) {
+    final issuer = match(r'填开单位[:]?([^\n:]{2,200})');
+    if (issuer != null) {
+      fields['seller'] = issuer
+          .split(RegExp(r'填开日期|购买方|统一社会信用代码|纳税人识别号'))
+          .first;
     }
-    final section = RegExp('$label[\\s\\S]{0,180}?名称[:]?([^\\n:]{3,70})')
-        .firstMatch(compact);
-    name ??= section?.group(1);
-    if (name != null) {
-      name = name.split(RegExp(r'统一社会信用代码|纳税人识别号|地址|电话|开户行|发票号码')).first;
-      if (name.length >= 3 && !name.contains('税务局')) fields[side] = name;
-    }
-    final taxID =
-        match('$label[^\\n]{0,80}?(?:统一社会信用代码|纳税人识别号)[:]?([A-Z0-9]{15,20})') ??
-        RegExp('$label[\\s\\S]{0,180}?(?:统一社会信用代码|纳税人识别号)[:]?([A-Z0-9]{15,20})')
-            .firstMatch(compact)
-            ?.group(1);
-    if (taxID != null) fields['${side}_tax'] = taxID;
   }
   final missing = [
-    for (final key in ['title', 'number', 'issued', 'cents'])
+    for (final key in invoiceRequiredFields(fields))
       if (!fields.containsKey(key)) key,
   ];
   return InvoiceRecognition(
@@ -124,10 +136,63 @@ InvoiceRecognition parseInvoiceText(String source) {
   );
 }
 
+/// Parse each page independently. Attachments never fill another page's fields.
+InvoiceRecognition parseInvoicePages(Map<String, Object?> payload) {
+  final pages = (payload['pages'] as List? ?? [payload]).cast<Map>();
+  final candidates = <InvoiceRecognition>[];
+  for (final raw in pages) {
+    final page = Map<String, Object?>.from(raw);
+    final structured = parseStructuredPayload(page);
+    final text = (page['lines'] as List? ?? [])
+        .map(
+          (line) => ((line as Map)['words'] as List)
+              .map((word) => '${(word as Map)['text'] ?? ''}')
+              .join(' '),
+        )
+        .join('\n');
+    final fallback = parseInvoiceText(text);
+    final fields = <String, Object?>{...fallback.fields, ...structured.fields};
+    final complete = invoiceRequiredFields(fields).every(fields.containsKey);
+    candidates.add(
+      InvoiceRecognition(
+        fields,
+        !complete
+            ? '部分票面字段未能可靠提取，请核对原件。'
+            : structured.message.contains('校验')
+            ? structured.message
+            : '',
+        structured: {...structured.structure, 'page': page['page'] ?? 0},
+      ),
+    );
+  }
+  if (candidates.isEmpty) {
+    return const InvoiceRecognition({}, '未检测到 PDF 文本层，请核对原件。');
+  }
+  final chosen =
+      candidates
+          .where(
+            (r) =>
+                r.fields.containsKey('number') && r.fields.containsKey('title'),
+          )
+          .firstOrNull ??
+      candidates.first;
+  final numbers = candidates
+      .map((r) => r.fields['number'])
+      .whereType<String>()
+      .toSet();
+  return numbers.length > 1
+      ? InvoiceRecognition(
+          chosen.fields,
+          '检测到多张发票，仅识别首张票面，请拆分后分别导入并核对。',
+          structured: chosen.structured,
+        )
+      : chosen;
+}
+
 abstract final class InvoiceRecognizer {
   static const requiredKeys = ['title', 'number', 'issued', 'cents'];
   static bool _complete(Map<String, Object?> fields) =>
-      requiredKeys.every(fields.containsKey);
+      invoiceRequiredFields(fields).every(fields.containsKey);
 
   /// preferOcr 来自设置中的「优先使用 OCR」开关（默认关闭）。
   /// 默认优先 PDF 文本层：词坐标结构化解析更准，也不需要 OCR 模型；
@@ -137,29 +202,35 @@ abstract final class InvoiceRecognizer {
     bool preferOcr = false,
   }) async {
     if (!file.isPdf) return _image(file.path);
-    InvoiceRecognition? ocr;
-    if (preferOcr) {
-      ocr = await _pdfOcr(file.path);
-      if (ocr != null && ocr.message.isEmpty && _complete(ocr.fields)) {
-        return ocr;
-      }
-    }
     final pdf = await _pdfText(file.path);
     if (!preferOcr && pdf.message.isEmpty && _complete(pdf.fields)) return pdf;
-    ocr ??= await _pdfOcr(file.path);
-    return ocr == null ? pdf : _merge(pdf, ocr);
+    final ocr = await _pdfOcr(
+      file.path,
+      pageIndex: pdf.structured?['page'] as int? ?? 0,
+    );
+    if (ocr == null) return pdf;
+    return preferOcr ? _merge(ocr, pdf) : _merge(pdf, ocr);
   }
 
   static InvoiceRecognition _merge(
     InvoiceRecognition primary,
     InvoiceRecognition fallback,
   ) {
+    if (primary.fields['number'] != null &&
+        fallback.fields['number'] != null &&
+        primary.fields['number'] != fallback.fields['number']) {
+      return InvoiceRecognition(
+        primary.fields,
+        '文字层与 OCR 票号不同，已保留当前页结果，请核对原件。',
+        structured: primary.structured,
+      );
+    }
     final fields = <String, Object?>{...fallback.fields, ...primary.fields};
     return InvoiceRecognition(
       fields,
       !_complete(fields)
           ? '部分票面字段未能可靠提取，请核对原件。'
-          : primary.message.contains('校验')
+          : primary.message.contains('校验') || primary.message.contains('多张')
           ? primary.message
           : '',
       structured: primary.structured ?? fallback.structured,
@@ -173,34 +244,18 @@ abstract final class InvoiceRecognizer {
       return const InvoiceRecognition({}, '未检测到 PDF 文本层，请改用 OCR 识别。');
     }
     final payload = pdf.payload;
-    return Isolate.run(() {
-      final structured = parseStructuredPayload(payload);
-      final text = (payload['lines'] as List)
-          .map((line) => (line as Map)['words'] as List)
-          .map(
-            (words) =>
-                words.map((word) => '${(word as Map)['text'] ?? ''}').join(' '),
-          )
-          .join('\n');
-      final fallback = parseInvoiceText(text);
-      final fields = <String, Object?>{
-        ...fallback.fields,
-        ...structured.fields,
-      };
-      return InvoiceRecognition(
-        fields,
-        !_complete(fields) ? '部分票面字段未能可靠提取，请核对原件。' : structured.message,
-        structured: structured.structure,
-      );
-    });
+    return Isolate.run(() => parseInvoicePages(payload));
   }
 
-  static Future<InvoiceRecognition?> _pdfOcr(String path) async {
+  static Future<InvoiceRecognition?> _pdfOcr(
+    String path, {
+    int pageIndex = 0,
+  }) async {
     final directory = await Directory.systemTemp.createTemp(
       'space-invoice-ocr-',
     );
     try {
-      final bytes = await NativeInvoicePdf.ocrImage(path);
+      final bytes = await NativeInvoicePdf.ocrImage(path, pageIndex: pageIndex);
       final image = '${directory.path}/page.png';
       await File(image).writeAsBytes(bytes);
       return await _image(image);
@@ -255,19 +310,26 @@ InvoiceRecognition mergeInvoiceRecognition(
 ) {
   final fields = <String, Object?>{...initial.fields, ...enhanced.fields};
   final conflicts = <String>[];
-  for (final key in ['number', 'issued', 'cents', 'tax_cents', 'net_cents']) {
+  for (final key in [
+    'number',
+    'issued',
+    'cents',
+    'tax_cents',
+    'net_cents',
+    'buyer',
+    'seller',
+    'buyer_tax',
+    'seller_tax',
+  ]) {
     final a = initial.fields[key], b = enhanced.fields[key];
     if (a != null && b != null && a != b) {
       fields.remove(key);
       conflicts.add(key);
     }
   }
-  final complete = [
-    'title',
-    'number',
-    'issued',
-    'cents',
-  ].every(fields.containsKey);
+  final complete =
+      ['title', 'number', 'issued', 'cents'].every(fields.containsKey) &&
+      invoiceRequiredFields(fields).every(fields.containsKey);
   return InvoiceRecognition(
     fields,
     conflicts.isNotEmpty

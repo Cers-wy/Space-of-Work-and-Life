@@ -1,8 +1,15 @@
 import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 class DesktopHost {
+  static bool hasUnsavedEdits = false;
+  static void setDirty(bool value) {
+    hasUnsavedEdits = value;
+    channel.invokeMethod('dirty', {'dirty': value}).catchError((_) => null);
+  }
+
   static const channel = MethodChannel('com.cers.space/desktop');
   static void menuState(Map<String, dynamic> state) {
     if (Platform.isMacOS) {
@@ -55,6 +62,13 @@ class DesktopHost {
         }) ??
         false;
   }
+
+  static Future<bool> openTool(String target, {required bool web}) async =>
+      await channel.invokeMethod<bool>('openTool', {
+        'target': target,
+        'web': web,
+      }) ??
+      false;
 
   static Future<Map<String, dynamic>> appInfo() async =>
       Map<String, dynamic>.from(await channel.invokeMethod('appInfo') ?? {});

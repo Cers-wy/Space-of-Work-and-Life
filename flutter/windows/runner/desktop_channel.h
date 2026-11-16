@@ -36,7 +36,7 @@ class SpaceDesktopChannel {
     if(reply->error.empty()) reply->result->Success(flutter::EncodableValue(reply->text));
     else reply->result->Error("ocr", reply->error);
   }
-  void RequestClose() { channel_->InvokeMethod("requestClose", std::make_unique<flutter::EncodableValue>()); }
+  void RequestClose() { channel_->InvokeMethod("requestClose", std::make_unique<flutter::EncodableValue>(flutter::EncodableMap{{flutter::EncodableValue("dirty"),flutter::EncodableValue(dirty)}})); }
 
   void NotifySystemAppearance() {
     channel_->InvokeMethod("systemAppearanceChanged", std::make_unique<flutter::EncodableValue>());
@@ -76,13 +76,20 @@ class SpaceDesktopChannel {
       result->Success(V(light==0));return;
     }
     if(method=="appInfo"){result->Success(V(M{{V("version"),V(FLUTTER_VERSION)},{V("build"),V(std::to_string(FLUTTER_VERSION_BUILD))}}));return;}
+    if(method=="openTool"){
+      const auto target=text("target"); auto value=wide(target);
+      if(boolean("web")) { if(target.rfind("https://",0)!=0&&target.rfind("http://",0)!=0){result->Success(V(false));return;} }
+      else if(value.size()<3||value[1]!=L':'||GetFileAttributesW(value.c_str())==INVALID_FILE_ATTRIBUTES){result->Success(V(false));return;}
+      auto opened=ShellExecuteW(window_,L"open",value.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
+      result->Success(V(reinterpret_cast<INT_PTR>(opened)>32));return;
+    }
     if(method=="openExternal"){
       const auto url=text("url");if(url.rfind("https://",0)!=0&&url.rfind("mailto:",0)!=0){result->Success(V(false));return;}
       auto value=wide(url);auto opened=ShellExecuteW(window_,L"open",value.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
       result->Success(V(reinterpret_cast<INT_PTR>(opened)>32));return;
     }
     if(method=="driveState"){uploads_active=boolean("active");result->Success();return;}
-    if(method=="finishClose"){uploads_active=false;result->Success();PostMessageW(window_,WM_CLOSE,0,0);return;}
+    if(method=="finishClose"){uploads_active=false;dirty=false;result->Success();PostMessageW(window_,WM_CLOSE,0,0);return;}
     if(method=="openFolder"){
       IFileOpenDialog* dialog=nullptr;std::string path;
       if(SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&dialog)))){

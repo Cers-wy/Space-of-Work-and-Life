@@ -75,7 +75,12 @@ void main() {
           shot.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final image = await boundary.toImage(pixelRatio: 1);
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      final out = Directory('verification/screenshots/2.3.2');
+      final out = Directory(
+        const String.fromEnvironment(
+          'SPACE_TEST_SHOTS',
+          defaultValue: 'verification/screenshots/2.3.2',
+        ),
+      );
       await out.create(recursive: true);
       await File('${out.path}/$name.png')
           .writeAsBytes(data!.buffer.asUint8List());
@@ -353,8 +358,12 @@ void main() {
       expect(titleBox.top, numberBox.top, reason: '发票名称与发票号码同一行');
       expect(numberBox.left, greaterThan(titleBox.right));
       expect(titleBox.width, closeTo(numberBox.width, 1));
-      expect(sellerBox.top, issuedBox.top, reason: '销售方名称与开票日期同一行');
-      expect(issuedBox.left, greaterThan(sellerBox.right));
+      expect(
+        issuedBox.top,
+        greaterThan(sellerBox.bottom),
+        reason: '销售方长名称独占单行',
+      );
+      expect(sellerBox.width, greaterThan(issuedBox.width * 1.8));
       expect(sellerBox.top, greaterThan(titleBox.bottom), reason: '第二行在第一行下方');
       final label = t.getRect(
         find.descendant(of: title, matching: find.text('发票名称')),
@@ -367,7 +376,7 @@ void main() {
       // 「更多票面字段」默认收起，展开后同样是两列。
       expect(find.text('更多票面字段'), findsOneWidget);
       expect(
-        find.byKey(const ValueKey('invoice-field-购买方')),
+        find.byKey(const ValueKey('invoice-field-购买方名称')),
         findsNothing,
         reason: '更多票面字段默认收起',
       );
@@ -376,9 +385,15 @@ void main() {
       final sellerTax = t.getRect(
         find.byKey(const ValueKey('invoice-field-销售方社会信用代码')),
       );
-      final buyer = t.getRect(find.byKey(const ValueKey('invoice-field-购买方')));
-      expect(sellerTax.top, buyer.top, reason: '展开字段成对同行');
-      expect(buyer.left, greaterThan(sellerTax.right));
+      final buyer = t.getRect(
+        find.byKey(const ValueKey('invoice-field-购买方名称')),
+      );
+      expect(buyer.top, greaterThan(sellerTax.bottom), reason: '购买方保留在更多票面字段内');
+      final buyerTax = t.getRect(
+        find.byKey(const ValueKey('invoice-field-购买方社会信用代码')),
+      );
+      expect(buyer.top, buyerTax.top);
+      expect(buyerTax.left, greaterThan(buyer.right));
       await t.tap(find.text('更多票面字段'));
       await t.pumpAndSettle();
       await capture(t, 'invoice-details-$suffix');
@@ -428,7 +443,7 @@ void main() {
         const ValueKey('invoice-reimbursed-control'),
       );
       final projectControl = find.byWidgetPredicate(
-        (w) => w is SpaceSelect && w.label == '选择报销项目',
+        (w) => w is SpaceInput && w.label == '报销项目',
       );
       expect(
         t.getCenter(reimbursedControl).dy,

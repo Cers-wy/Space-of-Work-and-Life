@@ -65,12 +65,12 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
     DesktopHost.channel
         .invokeMethod('driveState', {'active': drive.active})
         .catchError((_) => null);
-    if (_exitWhenDone && !drive.active) {
+    if (_exitWhenDone && !drive.active && !_askingExit) {
       _exitWhenDone = false;
       if (drive.tasks
           .where((t) => _exitTasks.contains(t.id))
           .every((t) => t.status == UploadStatus.complete)) {
-        DesktopHost.channel.invokeMethod('finishClose').catchError((_) => null);
+        _requestExit().catchError((_) {});
       } else {
         drive.message = '部分上传未完成，已取消自动退出。';
         drive.changed();
@@ -78,12 +78,27 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _requestExit() async {
+  Future<void> _requestExit({bool dirty = false}) async {
     if (_askingExit) return;
     _askingExit = true;
     try {
       final context = navigatorKey.currentContext;
       if (context == null) return;
+      if ((dirty || DesktopHost.hasUnsavedEdits) &&
+          !await confirm(
+            context,
+            '放弃未保存的更改？',
+            '当前输入和附件尚未保存。',
+            '放弃更改并退出',
+            destructive: true,
+          )) {
+        return;
+      }
+      if (!context.mounted) return;
+      if (!drive.active) {
+        await DesktopHost.channel.invokeMethod('finishClose');
+        return;
+      }
       final answer = await showUploadExit(
         context,
         drive.tasks.where((t) => t.status.active).length,
@@ -100,6 +115,7 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
       }
     } finally {
       _askingExit = false;
+      if (_exitWhenDone && !drive.active) _driveChanged();
     }
   }
 
@@ -126,7 +142,9 @@ class _SpaceAppState extends State<SpaceApp> with WidgetsBindingObserver {
     _driveChanged();
     DesktopHost.channel.setMethodCallHandler((call) async {
       if (call.method == 'requestClose') {
-        await _requestExit();
+        await _requestExit(
+          dirty: (call.arguments is Map) && call.arguments['dirty'] == true,
+        );
         return;
       }
       if (call.method == 'systemAppearanceChanged') {

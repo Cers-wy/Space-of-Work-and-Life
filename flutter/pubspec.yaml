@@ -1,7 +1,7 @@
 name: space_flutter
 description: Space desktop workspace, matching the native baseline.
 publish_to: none
-version: 2.3.4+21
+version: 2.3.5+22
 environment:
   sdk: '>=3.13.0 <4.0.0'
 dependencies:
@@ -25,6 +25,8 @@ dependencies:
   pdfium_flutter: 0.4.1
   space_ocr:
     path: packages/space_ocr
+  flutter_svg: 2.4.0
+  xml: 7.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

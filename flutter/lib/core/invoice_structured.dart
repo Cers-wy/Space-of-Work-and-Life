@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'invoice_parties.dart';
+
 /// 2026-11-12：按 output/invoice-parser/parser.js 的本地验证原型移植。
 /// PDF 文本层与 OCR 共用「词坐标 -> 视觉行 -> 发票结构」解析，避免把整份
 /// 文本压成一行后靠正则猜测左右栏和明细列。
@@ -31,10 +33,11 @@ class InvoiceTextLine {
 /// pdf.js 那样用固定 1.5pt 判断：按字符高度估算字距（约半字）更稳，既能把
 /// 被拆开的「苏州恒力…」「208.35」拼回去，也不会跨过「名称 | 值」的栏间距。
 List<InvoiceWord> mergeInvoiceChars(List<InvoiceWord> chars) {
-  final sorted = [...chars]..sort((a, b) {
-    final byY = a.y.compareTo(b.y);
-    return byY != 0 ? byY : a.x.compareTo(b.x);
-  });
+  final sorted = [...chars]
+    ..sort((a, b) {
+      final byY = a.y.compareTo(b.y);
+      return byY != 0 ? byY : a.x.compareTo(b.x);
+    });
   final out = <List<InvoiceWord>>[];
   for (final word in sorted) {
     final group = out.isEmpty ? null : out.last;
@@ -70,10 +73,11 @@ List<InvoiceTextLine> invoiceLines(
   List<InvoiceWord> words, {
   double tolerance = 4,
 }) {
-  final sorted = [...words]..sort((a, b) {
-    final byY = a.y.compareTo(b.y);
-    return byY != 0 ? byY : a.x.compareTo(b.x);
-  });
+  final sorted = [...words]
+    ..sort((a, b) {
+      final byY = a.y.compareTo(b.y);
+      return byY != 0 ? byY : a.x.compareTo(b.x);
+    });
   final groups = <List<InvoiceWord>>[];
   for (final word in sorted) {
     final group = groups.isEmpty ? null : groups.last;
@@ -94,8 +98,7 @@ List<InvoiceTextLine> invoiceLines(
 
 const moneyCharacters = '壹贰叁肆伍陆柒捌玖拾佰仟万亿零圆元角分整正';
 
-String _cleanMoney(String value) =>
-    value.replaceAll(RegExp(r'[¥￥,，\s]'), '');
+String _cleanMoney(String value) => value.replaceAll(RegExp(r'[¥￥,，\s]'), '');
 
 bool _isNumberToken(String value) =>
     RegExp(r'^-?\d+(?:\.\d+)?%?$').hasMatch(_cleanMoney(value));
@@ -110,21 +113,56 @@ int? _moneyCents(String? value) {
       (negative ? -1 : 1);
 }
 
-String? _firstMatch(String source, String pattern, {int group = 1}) => RegExp(
-  pattern,
-  multiLine: true,
-).firstMatch(source)?.group(group)?.trim();
+String? _firstMatch(String source, String pattern, {int group = 1}) =>
+    RegExp(pattern, multiLine: true).firstMatch(source)?.group(group)?.trim();
 
 String _isoDate(String raw) {
-  final m = RegExp(
-    r'(20\d{2})[年/.-](\d{1,2})[月/.-](\d{1,2})',
-  ).firstMatch(raw);
+  final m = RegExp(r'(20\d{2})[年/.-](\d{1,2})[月/.-](\d{1,2})').firstMatch(raw);
   if (m == null) return '';
-  final value =
-      '${m[1]}-${m[2]!.padLeft(2, '0')}-${m[3]!.padLeft(2, '0')}';
+  final value = '${m[1]}-${m[2]!.padLeft(2, '0')}-${m[3]!.padLeft(2, '0')}';
   return DateTime.tryParse(value)?.toIso8601String().startsWith(value) == true
       ? value
       : '';
+}
+
+Iterable<String> invoiceRequiredFields(Map<String, Object?> fields) sync* {
+  yield* const ['title', 'number', 'issued', 'cents'];
+  final title = '${fields['title'] ?? ''}';
+  if (title.contains('增值税') || title.contains('普通发票')) {
+    yield* const ['buyer', 'seller', 'buyer_tax', 'seller_tax'];
+  } else if (title.contains('铁路电子客票')) {
+    yield* const ['buyer', 'buyer_tax'];
+  } else if (title.contains('航空运输电子客票行程单')) {
+    yield* const ['buyer', 'buyer_tax', 'seller'];
+  }
+}
+
+String? _travelLabelValue(
+  List<InvoiceTextLine> lines,
+  String label,
+  String value,
+) {
+  for (final line in lines) {
+    final inline = RegExp('$label[：:]?\\s*($value)')
+        .firstMatch(line.compact)
+        ?.group(1);
+    if (inline != null) return inline;
+    for (final word in line.words.where(
+      (w) => RegExp('^(?:$label)[：:]?\$').hasMatch(w.compact),
+    )) {
+      final candidates = [
+        for (final next in lines)
+          if (next.y > line.y && next.y - line.y <= word.h * 3)
+            ...next.words.where(
+              (v) =>
+                  (v.x - word.x).abs() < word.h * 3 &&
+                  RegExp('^(?:$value)\$').hasMatch(v.compact),
+            ),
+      ];
+      if (candidates.isNotEmpty) return candidates.first.compact;
+    }
+  }
+  return null;
 }
 
 class StructuredInvoice {
@@ -133,8 +171,7 @@ class StructuredInvoice {
   final String message;
 
   const StructuredInvoice(this.fields, this.structure, this.message);
-  bool get complete =>
-      ['title', 'number', 'issued', 'cents'].every(fields.containsKey);
+  bool get complete => invoiceRequiredFields(fields).every(fields.containsKey);
 }
 
 /// 把 OCR 的带坐标行转换为与 PDF 文本层相同的词；低置信度数字更严格。
@@ -147,9 +184,7 @@ List<InvoiceWord> invoiceWordsFromOcr(
     final text = (line['text'] as String? ?? '').trim();
     if (text.isEmpty) continue;
     final confidence = (line['confidence'] as num?)?.toDouble() ?? 0;
-    final numeric = RegExp(
-      r'[¥￥]|\d+\.\d{2}|^\d{8,20}$',
-    ).hasMatch(text);
+    final numeric = RegExp(r'[¥￥]|\d+\.\d{2}|[A-Z0-9]{15,20}|^\d{8,20}$').hasMatch(text);
     if (confidence < (numeric ? .98 : minConfidence)) continue;
     final x = (line['x'] as num?)?.toDouble() ?? 0;
     final y = (line['y'] as num?)?.toDouble() ?? 0;
@@ -162,23 +197,6 @@ List<InvoiceWord> invoiceWordsFromOcr(
     words.add(InvoiceWord(x, y, width, h, text));
   }
   return words;
-}
-
-/// 同一视觉行里按 x 的明显间隙切栏（购买方 / 销售方 / 右侧附加列）。
-/// 间隙阈值取 45pt，正常字距和标签到取值的空隙不会被切开。
-List<List<InvoiceWord>> _lineSegments(InvoiceTextLine line) {
-  final words = [...line.words]..sort((a, b) => a.x.compareTo(b.x));
-  final out = <List<InvoiceWord>>[];
-  var current = <InvoiceWord>[];
-  for (final word in words) {
-    if (current.isNotEmpty && word.x - current.last.right >= 45) {
-      out.add(current);
-      current = [];
-    }
-    current.add(word);
-  }
-  if (current.isNotEmpty) out.add(current);
-  return out;
 }
 
 /// 明细行里的「96.12」「3%」常被拆成单字符，按紧邻关系拼回数值词。
@@ -237,9 +255,7 @@ List<InvoiceTextLine> _mergePunctuationLines(List<InvoiceTextLine> lines) {
           line.words.last.x >= previous.words.first.x - 20;
       // 小数点、冒号是标在基线附近的，语义上属于它上方那一行；只并入紧邻的
       // 上一行，避免把明细的小数点并到下一行的「合计」。
-      if (previous != null &&
-          overlaps &&
-          (previous.y - line.y).abs() <= 12) {
+      if (previous != null && overlaps && (previous.y - line.y).abs() <= 12) {
         final merged = [...previous.words, ...line.words]
           ..sort((a, b) => a.x.compareTo(b.x));
         out[out.length - 1] = InvoiceTextLine(previous.y, merged);
@@ -284,106 +300,39 @@ StructuredInvoice parseStructuredInvoice(
       specialType = '旅客运输服务';
     }
   }
+  final railway = all.contains('铁路电子客票');
+  final aviation = all.contains('航空运输电子客票行程单');
+  if (railway) invoiceType = '电子发票（铁路电子客票）';
+  if (aviation) {
+    invoiceType = all.contains('电子发票') ? '电子发票（航空运输电子客票行程单）' : '航空运输电子客票行程单';
+  }
   if (invoiceType.isNotEmpty) fields['title'] = invoiceType;
 
-  final number = _firstMatch(all, r'发票号码[:：]?\s*(\d{8,20})');
+  final number = _firstMatch(all, r'发票号码[:：]?\s*(\d{8,20})(?!\d)');
   if (number != null) fields['number'] = number;
   final code = _firstMatch(all, r'发票代码[:：]?\s*(\d{10,12})');
   final date = _firstMatch(
     all,
-    r'开票日期[:：]?\s*(\d{4}年\d{1,2}月\d{1,2}日|\d{4}[-/]\d{1,2}[-/]\d{1,2})',
+    r'(?:开票日期|填开日期)[:：]?\s*(\d{4}年\d{1,2}月\d{1,2}日|\d{4}[-/]\d{1,2}[-/]\d{1,2})',
   );
   final issued = _isoDate(date ?? '');
   if (issued.isNotEmpty) fields['issued'] = issued;
 
-  var buyer = '', seller = '', buyerTax = '', sellerTax = '';
-  // 2026-11-12：数电票的购销方标签常被拆成单字、冒号另起一行，按「词」取值
-  // 不可靠。改为把同一视觉行按 x 的明显间隙切成栏，再在每栏文本里做正则。
-  final nameLabels = <(double, double)>[];
-  for (final line in lines) {
-    for (final segment in _lineSegments(line)) {
-      final text = segment.map((w) => w.compact).join();
-      if (!text.contains('名称') || text.contains('项目名称')) continue;
-      final match = RegExp(r'名称[:：]?(.+)$').firstMatch(text);
-      final value = match
-          ?.group(1)
-          ?.replaceAll(RegExp(r'[，,、;；:：\s]'), '')
-          .replaceFirst(RegExp(r'^(购|销|买|售|方|信息)+'), '');
-      if (value == null || value.isEmpty) {
-        // 少数版式把「名称：」单独画在取值上方一行，先记下位置稍后配对。
-        nameLabels.add((segment.first.x, line.y));
-        continue;
-      }
-      if (segment.first.x < mid) {
-        if (buyer.isEmpty) buyer = value;
-      } else if (seller.isEmpty) {
-        seller = value;
-      }
+  if (railway || aviation) {
+    const money = r'[¥￥]?-?[0-9,]+\.[0-9]{2}';
+    final rawTotal = _travelLabelValue(lines, railway ? '票价' : '合计', money);
+    if (rawTotal != null) total = _cleanMoney(rawTotal);
+    final rawTax = _travelLabelValue(lines, '增值税税额', money);
+    if (rawTax != null) taxAmount = _cleanMoney(rawTax);
+    final issuer = _travelLabelValue(lines, '填开单位', r'[^：:\n]{2,200}');
+    if (aviation && issuer != null) {
+      fields['seller'] = issuer.split(RegExp(r'填开日期|购买方|统一社会信用代码')).first;
     }
   }
-  if (nameLabels.isNotEmpty) {
-    for (final label in nameLabels) {
-      var bestScore = double.infinity;
-      List<InvoiceWord>? bestSegment;
-      for (var i = 0; i < lines.length; i++) {
-        final line = lines[i];
-        if ((line.y - label.$2).abs() > 16) continue;
-        for (final segment in _lineSegments(line)) {
-          final text = segment.map((w) => w.compact).join();
-          if (text.isEmpty ||
-              text.contains('名称') ||
-              text.contains('识别号') ||
-              text.contains('项目') ||
-              text.contains(RegExp(r'^[购销售买方]+$'))) {
-            continue;
-          }
-          final dx = (segment.first.x - label.$1).abs();
-          if (dx > 60) continue;
-          final score = dx + (line.y - label.$2).abs();
-          if (score < bestScore) {
-            bestScore = score;
-            bestSegment = segment;
-          }
-        }
-      }
-      if (bestSegment == null) continue;
-      final value = bestSegment
-          .map((w) => w.compact)
-          .join()
-          .replaceAll(RegExp(r'[，,、;；:：\s]'), '')
-          .replaceFirst(RegExp(r'^(购|销|买|售|方|信息)+'), '');
-      if (value.isEmpty) continue;
-      if (label.$1 < mid) {
-        if (buyer.isEmpty) buyer = value;
-      } else if (seller.isEmpty) {
-        seller = value;
-      }
-    }
-  }
-  for (final line in lines) {
-    for (final segment in _lineSegments(line)) {
-      final text = segment.map((w) => w.compact).join();
-      if (!text.contains('纳税人识别号') && !text.contains('统一社会信用代码')) {
-        continue;
-      }
-      final value =
-          RegExp(
-            r'(?:统一社会信用代码|纳税人识别号)[:：/]?([0-9A-Z]{15,20})',
-          ).firstMatch(text)?.group(1) ??
-          RegExp(r'\b([0-9A-Z]{15,20})\b').firstMatch(text)?.group(1) ??
-          '';
-      if (value.isEmpty || value == number) continue;
-      if (segment.first.x < mid) {
-        if (buyerTax.isEmpty) buyerTax = value;
-      } else if (sellerTax.isEmpty) {
-        sellerTax = value;
-      }
-    }
-  }
-  if (buyer.isNotEmpty && !buyer.contains('税务局')) fields['buyer'] = buyer;
-  if (seller.isNotEmpty && !seller.contains('税务局')) fields['seller'] = seller;
-  if (buyerTax.isNotEmpty) fields['buyer_tax'] = buyerTax;
-  if (sellerTax.isNotEmpty) fields['seller_tax'] = sellerTax;
+  fields.addAll(invoiceParties(lines, width));
+  final buyer = fields['buyer'] ?? '', seller = fields['seller'] ?? '';
+  final buyerTax = fields['buyer_tax'] ?? '',
+      sellerTax = fields['seller_tax'] ?? '';
 
   // 明细区：表头之后、合计行之前。表头里被拆开的单字列名先拼回去。
   var headIdx = -1, totalIdx = -1;
@@ -419,10 +368,7 @@ StructuredInvoice parseStructuredInvoice(
   final detail = headIdx < 0
       ? <InvoiceTextLine>[]
       : lines
-            .sublist(
-              headIdx + 1,
-              totalIdx > headIdx ? totalIdx : lines.length,
-            )
+            .sublist(headIdx + 1, totalIdx > headIdx ? totalIdx : lines.length)
             .map(_mergeNumberWords)
             .toList();
   var hasUnit = false, hasSpec = false, hasQuantity = false;
@@ -475,13 +421,11 @@ StructuredInvoice parseStructuredInvoice(
         unitPrice = _cleanMoney(before[before.length - 2].text);
       }
     }
-    final textWords = (firstNumber > 0
-        ? line.words.sublist(0, firstNumber)
-        : line.words).toList();
+    final textWords =
+        (firstNumber > 0 ? line.words.sublist(0, firstNumber) : line.words)
+            .toList();
     var unit = '';
-    if (hasUnit &&
-        textWords.isNotEmpty &&
-        textWords.last.compact.length <= 2) {
+    if (hasUnit && textWords.isNotEmpty && textWords.last.compact.length <= 2) {
       unit = textWords.removeLast().text;
     }
     final parts = textWords
@@ -510,9 +454,10 @@ StructuredInvoice parseStructuredInvoice(
   for (final line in lines) {
     if (!line.compact.startsWith('合计')) continue;
     // 小数点和数字常被拆成多个词，直接在整行文本上取两位小数最稳。
-    final figures = RegExp(
-      r'-?\d+\.\d{2}',
-    ).allMatches(line.compact).map((m) => m.group(0)!).toList();
+    final figures = RegExp(r'-?\d+\.\d{2}')
+        .allMatches(line.compact)
+        .map((m) => m.group(0)!)
+        .toList();
     if (figures.length >= 2) {
       amount = figures[0];
       taxAmount = figures[1];
@@ -523,17 +468,19 @@ StructuredInvoice parseStructuredInvoice(
     if (!line.compact.contains('价税合计')) continue;
     final words = RegExp('[$moneyCharacters]{4,}').firstMatch(line.compact);
     if (words != null) totalInWords = words.group(0)!;
-    final figures = RegExp(
-      r'-?\d+\.\d{2}',
-    ).allMatches(line.compact).map((m) => m.group(0)!).toList();
+    final figures = RegExp(r'-?\d+\.\d{2}')
+        .allMatches(line.compact)
+        .map((m) => m.group(0)!)
+        .toList();
     if (figures.isNotEmpty) total = figures.last;
     break;
   }
   if (amount.isEmpty && items.isNotEmpty) {
-    double sum(Iterable<Map<String, Object?>> source, String key) => source.fold(
-      0.0,
-      (value, item) => value + (double.tryParse('${item[key] ?? ''}') ?? 0),
-    );
+    double sum(Iterable<Map<String, Object?>> source, String key) =>
+        source.fold(
+          0.0,
+          (value, item) => value + (double.tryParse('${item[key] ?? ''}') ?? 0),
+        );
     amount = sum(items, 'amount').toStringAsFixed(2);
     taxAmount = sum(items, 'tax').toStringAsFixed(2);
   }
@@ -584,8 +531,8 @@ StructuredInvoice parseStructuredInvoice(
   }
   final expectedTotal = numeric(amount) + numeric(taxAmount);
   // 没有取到价税合计时不做金额一致性断言，避免把「无数据」误报成「校验失败」。
-  final totalCheck = total.isEmpty ||
-      (expectedTotal - numeric(total)).abs() <= .02;
+  final totalCheck =
+      total.isEmpty || (expectedTotal - numeric(total)).abs() <= .02;
   checks.add({
     'name': '金额 + 税额 = 价税合计',
     'expected': expectedTotal.toStringAsFixed(2),
@@ -614,7 +561,7 @@ StructuredInvoice parseStructuredInvoice(
     'checks': checks,
   };
   final missing = [
-    for (final key in ['title', 'number', 'issued', 'cents'])
+    for (final key in invoiceRequiredFields(fields))
       if (!fields.containsKey(key)) key,
   ];
   final message = missing.isNotEmpty
