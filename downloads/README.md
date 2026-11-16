@@ -18,7 +18,7 @@
 
 ## Windows 历史正式包
 
-两端最新共用源码版本为 2.3.4+21，已合并 `2026-11-13-win优化` 的备份句柄修复、自定义安装路径及用户数据保护逻辑，并同步新增分页。本轮仅同步源码，未构建或实机测试新的 Windows 包；昨晚验证记录见 [Windows 基线](../flutter/verification/windows-2026-11-13/README.md)，不能代替本轮分页验收。
+2.3.4 阶段两端共用源码为 2.3.4+21，已合并 `2026-11-13-win优化` 的备份句柄修复、自定义安装路径及用户数据保护逻辑，并同步新增分页。本轮仅同步源码，未构建或实机测试新的 Windows 包；昨晚验证记录见 [Windows 基线](../flutter/verification/windows-2026-11-13/README.md)，不能代替本轮分页验收。
 
 现有 [2.3.3 Windows x64 便携包](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.3/Space-2.3.3-Windows-x64.zip) 来自 `094a2ac3` / CI 43406561773，仍作为历史可用包保留，不包含本次 2.3.4 分页代码，也不是昨夜优化分支的新安装器。完整解压后运行 `Space.exe`。已有 Windows Release 资产未改动。
 

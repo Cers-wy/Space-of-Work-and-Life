@@ -5,12 +5,12 @@
 - 本轮V0.4源码已接入并同步main：67d34402（工具、发票、统一确认）、bedb07fc（金额缺项误报修复）；甘特/烟雾为先前4f7c1eee。两端同源2.3.5+22，更新包构建源bedb07fc；之后仅提交交付记录，不混用较早CI产物。
 - 本次33项新增/受影响定向检查及1项实际PDF/OCR探针（6个隔离合成样本）通过。42个预期字段中40个正确取得，普通票PNG与航空PNG金额留空；真实全票种精度未验收。缺少未税或税额不再按零制造校验失败，旅行票金额不套VAT加总断言。
 - macOS最终Debug、Release成功；DMG/ZIP校验、universal架构、deep strict签名、4模型SHA与各6秒隔离启动通过。Mac锁屏，CUA无法解锁，原生UI、前台样本及用户体验未完成。Windows最终CI 43893071490成功，产物源码/版本/PE/DLL/VC运行库/模型与ZIP CRC通过；未做Windows实机或覆盖更新验收。
-- 正在上传v2.3.5-preview.1 prerelease，提供MAC DMG/ZIP、WIN便携ZIP与SHA；本轮包作为待体验预览，不替换2.3.4 Latest正式入口。实际远端资产核验在本节后续补充。详见 flutter/verification/iteration-2026-11-16 和 发布说明-2.3.5-预览.md。
+- v2.3.5-preview.1 prerelease已公开发布，MAC DMG/ZIP、WIN便携ZIP与SHA四项资产均HTTP 200、远端SHA256摘要及字节数与本地一致，标签核对为bedb07fc；2.3.4仍为Latest正式版。链接：https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.5-preview.1 。详见 flutter/verification/iteration-2026-11-16/remote-release.json 和 发布说明-2.3.5-预览.md。已清理失效包、打包暂存、解压/挂载目录与失败测试临时目录；有效夹具/模型缓存、旧正式包、用户配置及正式数据保留。
 - 后续先收集用户同源或预览包体验；用户确认并明确安排后再进行本轮受影响路径的正式性能/资源、原生交互和实机验证。不自动扩大测试范围，不把包产出写为整轮验收。若自动化再次触发且无新反馈，应报告待体验，不重复开发或出包。
 
 以下为本次构建与历史阶段记录。
 
-## 2026-11-16 23:10 两端预览包构建（当前停止点）
+## 2026-11-16 两端预览包构建过程（历史阶段）
 
 - 源码修复提交 bedb07fc 已推送 origin/main，版本2.3.5+22；前一67d34402也已同步。金额校验缺项误报已修复为未评估，不把铁路/航空总额套用VAT加总。
 - 最终macOS Release已构建，重新制作同版本DMG/ZIP，正在做签名/模型/隔离启动校验。先前未发布的暂存包已按原SHA确认后删除，未动正式2.3.4包。

@@ -1,0 +1,41 @@
+{
+  "release": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.5-preview.1",
+  "tag": "v2.3.5-preview.1",
+  "source": "bedb07fcab8584682bb2e21fadeb585ee0125f54",
+  "prerelease": true,
+  "latestStable": "v2.3.4",
+  "assets": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 290,
+      "sha256": "ccbb8cfcee9a74c0e6b6f3c9c6a5f41ab37a7c33b294e5ca60025f642e7ab644",
+      "remoteDigestMatched": true,
+      "publicHttpStatus": 200,
+      "url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/SHA256SUMS.txt"
+    },
+    {
+      "name": "Space-2.3.5-macOS-universal.dmg",
+      "size": 186127284,
+      "sha256": "57d1ba8a23b4f068750c89716713f327a747483e6ba2a03f8bb8abdb6e2987f5",
+      "remoteDigestMatched": true,
+      "publicHttpStatus": 200,
+      "url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/Space-2.3.5-macOS-universal.dmg"
+    },
+    {
+      "name": "Space-2.3.5-macOS-universal.zip",
+      "size": 176571608,
+      "sha256": "7208c2c08b44ad31284253d0bdd59a317042d7b7b21825025e421051ee46dc78",
+      "remoteDigestMatched": true,
+      "publicHttpStatus": 200,
+      "url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/Space-2.3.5-macOS-universal.zip"
+    },
+    {
+      "name": "Space-2.3.5-Windows-x64.zip",
+      "size": 156730601,
+      "sha256": "8919d843ec56e20251433dee18e58ca85a8d571766110c09a7d8d0bbb9f9d1c7",
+      "remoteDigestMatched": true,
+      "publicHttpStatus": 200,
+      "url": "https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/Space-2.3.5-Windows-x64.zip"
+    }
+  ]
+}

@@ -37,3 +37,9 @@
 ## 尚未完成
 
 macOS 原生检查被锁屏阻塞；最终 macOS universal DMG/ZIP 已通过镜像、签名、4个模型和两包隔离启动检查（各6秒，未验证前台），见 macos-build.json / macos-packages.json。最终 Windows CI 43893071490 已成功；源码 bedb07fc / 2.3.5+22、ZIP CRC、PE32+ x86-64、必要 DLL/VC 运行库与4个模型 SHA 均核对通过，见 windows-package.json。最终 Debug 也从 bedb07fc 重新构建成功。用户同源体验确认、正式性能/资源测试、Windows 实机功能/覆盖更新验证均未完成。未改动的备份、同步、网盘传输与任务/日历业务不做无关回归。正式数据、用户 IDE 配置和缓存保持原样。
+
+## 预览交付与清理
+
+[v2.3.5-preview.1](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.5-preview.1)已公开，标签bedb07fc。MAC DMG/ZIP、WIN ZIP及SHA四个资产的远端摘要、大小与本地一致，公开下载均HTTP 200；2.3.4仍为Latest正式版，见remote-release.json。构建后只有交付记录变化，main应用源码与构建源一致。
+
+打包/解压/挂载暂存、旧实验包、不可读临时截图、重复日志及本次失败测试临时目录已清理；源码、缓存、有效OCR夹具/探针、最新两端预览包及旧正式包保留。详见cleanup.json。下一步等待用户体验及明确的正式验证安排，无新反馈时不重复开发或出包。

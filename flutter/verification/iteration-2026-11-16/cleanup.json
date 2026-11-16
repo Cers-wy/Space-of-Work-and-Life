@@ -1,0 +1,29 @@
+{
+  "time": "2026-11-16T15:25:06.510054+00:00",
+  "removed": [
+    "work/space-20261116/package",
+    "work/space-20261116/windows-artifact",
+    "work/space-20261116/release-assets",
+    "work/space-20261116/release-api.json",
+    "/var/folders/d4/f5g9bkqd3dg7qym6n86d8tn40000gn/T/space-tool-ui-1bgXdM",
+    "/var/folders/d4/f5g9bkqd3dg7qym6n86d8tn40000gn/T/space-tool-ui-UZmAMj",
+    "/var/folders/d4/f5g9bkqd3dg7qym6n86d8tn40000gn/T/space-tool-ui-JrfFZL",
+    "/var/folders/d4/f5g9bkqd3dg7qym6n86d8tn40000gn/T/space-tool-ui-y8EUje"
+  ],
+  "alsoRemovedEarlier": [
+    "obsolete pre-fix package staging and package binaries after SHA check",
+    "unreadable temporary widget screenshots",
+    "obsolete duplicate build/OCR logs"
+  ],
+  "retained": [
+    "unique source checkout",
+    "latest 2.3.5 preview DMG/ZIP/Windows ZIP and SHA",
+    "2.3.4 stable packages and previous formal Windows package",
+    "final Debug/Release builds",
+    "valid synthetic OCR fixtures, probe and model cache",
+    "SDK/dependency caches",
+    "user .workbuddy and flutter/.vscode",
+    "formal business data and recovery backups"
+  ],
+  "sourceBinaryFilesCommitted": false
+}
