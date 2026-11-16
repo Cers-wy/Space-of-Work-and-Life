@@ -1,0 +1,24 @@
+{
+  "source": "bedb07fcab8584682bb2e21fadeb585ee0125f54",
+  "version": "2.3.5+22",
+  "build": "Release x64",
+  "testedOnUserWindows": false,
+  "workflowRun": 43893071490,
+  "artifactId": 14237677442,
+  "sha256": "8919d843ec56e20251433dee18e58ca85a8d571766110c09a7d8d0bbb9f9d1c7",
+  "zipIntegrity": "CRC passed",
+  "binary": "PE32+ x86-64",
+  "requiredFiles": [
+    "pdfium.dll",
+    "onnxruntime.dll",
+    "space_ocr_math.dll",
+    "vcruntime140.dll",
+    "msvcp140.dll",
+    "使用说明.md",
+    "THIRD_PARTY_NOTICES.txt"
+  ],
+  "ocrModelHashes": "4/4 matched",
+  "unexpectedData": [],
+  "windowsDeviceTested": false,
+  "performanceTested": false
+}

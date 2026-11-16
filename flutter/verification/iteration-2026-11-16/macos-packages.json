@@ -1,0 +1,36 @@
+{
+  "source": "bedb07fcab8584682bb2e21fadeb585ee0125f54",
+  "version": "2.3.5+22",
+  "foregroundUiVerified": false,
+  "foregroundBlocker": "Mac locked; computer-use could not unlock",
+  "samples": [
+    {
+      "package": "zip",
+      "version": "2.3.5",
+      "build": "22",
+      "architectures": "x86_64 arm64",
+      "signature": "deep strict passed",
+      "ocrModelHashes": "4/4 matched",
+      "unexpectedData": [],
+      "startup": "process alive after 6s; isolated database created",
+      "isolatedDatabases": [
+        "space.sqlite"
+      ],
+      "foregroundVerified": false
+    },
+    {
+      "package": "dmg",
+      "version": "2.3.5",
+      "build": "22",
+      "architectures": "x86_64 arm64",
+      "signature": "deep strict passed",
+      "ocrModelHashes": "4/4 matched",
+      "unexpectedData": [],
+      "startup": "process alive after 6s; isolated database created",
+      "isolatedDatabases": [
+        "space.sqlite"
+      ],
+      "foregroundVerified": false
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "version": "2.3.5",
+  "build": "22",
+  "bundle_id": "com.cers.space.flutter",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "checksums": {
+    "Space-2.3.5-macOS-universal.zip": "7208c2c08b44ad31284253d0bdd59a317042d7b7b21825025e421051ee46dc78",
+    "Space-2.3.5-macOS-universal.dmg": "57d1ba8a23b4f068750c89716713f327a747483e6ba2a03f8bb8abdb6e2987f5"
+  },
+  "code_signature": "adhoc; codesign --verify --deep --strict passed",
+  "source": "bedb07fcab8584682bb2e21fadeb585ee0125f54"
+}

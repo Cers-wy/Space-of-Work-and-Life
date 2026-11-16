@@ -1,5 +1,14 @@
 # Space 下载
 
+## 2.3.5（22）功能预览 · macOS / Windows
+
+[预览发布页](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.5-preview.1) · [本轮功能与用法](../flutter/verification/发布说明-2.3.5-预览.md)
+
+- [macOS DMG](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/Space-2.3.5-macOS-universal.dmg) · [macOS ZIP](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/Space-2.3.5-macOS-universal.zip)
+- [Windows x64 便携更新包](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/Space-2.3.5-Windows-x64.zip) · [SHA256](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/SHA256SUMS.txt)
+- 同源 bedb07fc，macOS universal / Windows Release x64；两端构建与包检查已完成。macOS 两包分别隔离启动，Windows 尚未实机运行。Mac 锁屏阻塞原生交互，用户体验确认和正式性能仍待续；普通票及航空 PNG 的金额有安全留空，须核对。
+- 这是预览版，2.3.4 仍是 Latest 正式版本。旧正式包及其校验保留，预览包不包含数据库、备份或网盘配置。完整验证边界见[本轮记录](../flutter/verification/iteration-2026-11-16/README.md)。
+
 ## macOS 2.3.4（21，当前版本）
 
 - [DMG 安装包](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.4/Space-2.3.4-macOS-universal.dmg) · [ZIP 分发包](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.4/Space-2.3.4-macOS-universal.zip) · [SHA256 校验](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.4/SHA256SUMS.txt)。公开下载与远端摘要已核验。
@@ -7,7 +16,7 @@
 - 新增发票每页 50 张的数据库分页查询，以及报销月份/项目/备注批量更新。保留识别后自动保存、后台批量识别、文件与上传记录双标签、网盘设置直达；修正任务筛选浅色闪烁。千张库存滚动构建 p95 从约 107 ms 降至 3.3 ms；个别其他场景仍有低频帧耗时尖峰。
 - [新增功能与使用介绍](../flutter/verification/发布说明-2.3.4.md) · [本轮测试、性能及限制](../flutter/verification/macos-2026-11-14/README.md) · [GitHub Release](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.4)。
 
-## Windows
+## Windows 历史正式包
 
 两端最新共用源码版本为 2.3.4+21，已合并 `2026-11-13-win优化` 的备份句柄修复、自定义安装路径及用户数据保护逻辑，并同步新增分页。本轮仅同步源码，未构建或实机测试新的 Windows 包；昨晚验证记录见 [Windows 基线](../flutter/verification/windows-2026-11-13/README.md)，不能代替本轮分页验收。
 
