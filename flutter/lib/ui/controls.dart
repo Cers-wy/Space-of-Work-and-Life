@@ -53,6 +53,33 @@ class _IconPainter extends CustomPainter {
     }
 
     switch (name) {
+      case 'pin':
+        path(const [
+          Offset(7, 3),
+          Offset(14, 3),
+          Offset(13, 8),
+          Offset(16, 12),
+          Offset(5, 12),
+          Offset(8, 8),
+          Offset(7, 3),
+        ]);
+        line(10, 12, 10, 18);
+      case 'more':
+        for (final x in [4.0, 10.0, 16.0]) {
+          c.drawCircle(Offset(x, 10), 1, p..style = PaintingStyle.fill);
+        }
+      case 'eye':
+        c.drawPath(
+          Path()
+            ..moveTo(2, 10)
+            ..quadraticBezierTo(10, 0, 18, 10)
+            ..quadraticBezierTo(10, 20, 2, 10),
+          p,
+        );
+        c.drawCircle(const Offset(10, 10), 2.5, p);
+      case 'resize':
+        line(8, 17, 17, 8);
+        line(13, 17, 17, 13);
       case 'scan':
         line(2, 7, 2, 2);
         line(2, 2, 7, 2);

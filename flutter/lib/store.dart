@@ -92,6 +92,11 @@ class SpaceStore extends ChangeNotifier {
   /// 2026-11-12：设置「发票识别」栏目中的开关，默认关闭（优先 PDF 文本层）。
   bool get preferOcr => state.settings['preferOcr'] == 'true';
 
+  bool smokeForStatus(String status) =>
+      state.settings['cardSmoke.$status'] != 'false';
+  Future<void> setStatusSmoke(String status, bool enabled) =>
+      preference('cardSmoke.$status', '$enabled');
+
   /// 列宽使用连续比例，仅限制在 50%–100%，不再吸附档位。
   double boardWidthRatio(String status) {
     final value = double.tryParse(state.settings['boardWidth.$status'] ?? '');
@@ -538,6 +543,7 @@ class SpaceStore extends ChangeNotifier {
             .map((t) => t.status == status ? t.moving(target) : t)
             .toList(),
         statuses: state.statuses.where((s) => s != status).toList(),
+        settings: {...state.settings}..remove('cardSmoke.$status'),
         disabledStatuses: state.disabledStatuses
             .where((s) => s != status)
             .toList(),

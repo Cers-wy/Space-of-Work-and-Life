@@ -48,6 +48,7 @@ class _GanttViewState extends State<GanttView> {
   final horizontal = ScrollController();
   DateTime? lastMonthMove;
   double edgeDistance = 0;
+  bool get freezeInfo => s.state.settings['ganttFreezeInfo'] == 'true';
   String get mode =>
       ['day', 'week', 'month'].contains(s.state.settings['ganttMode'])
       ? s.state.settings['ganttMode']!
@@ -145,6 +146,22 @@ class _GanttViewState extends State<GanttView> {
             child: Row(
               children: [
                 const Spacer(),
+                SpaceButton(
+                  key: const ValueKey('gantt-freeze-info'),
+                  tooltip: freezeInfo ? '取消固定左侧项目信息' : '固定左侧项目信息',
+                  height: 32,
+                  padding: const EdgeInsets.all(8),
+                  selected: freezeInfo,
+                  soft: true,
+                  onPressed: () =>
+                      s.preference('ganttFreezeInfo', '${!freezeInfo}'),
+                  child: SpaceIcon(
+                    'pin',
+                    size: 16,
+                    color: freezeInfo ? p.accent : p.secondary,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Builder(
                   builder: (c) {
                     final expanded =
@@ -270,7 +287,9 @@ class _GanttViewState extends State<GanttView> {
                           children: [
                             SizedBox(
                               height: 64,
-                              child: Row(
+                              child: _GanttSplitRow(
+                                scroll: horizontal,
+                                pinned: freezeInfo,
                                 children: [
                                   SizedBox(
                                     width: 400,
@@ -388,6 +407,8 @@ class _GanttViewState extends State<GanttView> {
                                       dayWidth: dw,
                                       days: days,
                                       mode: mode,
+                                      scroll: horizontal,
+                                      pinned: freezeInfo,
                                     );
                                   }
                                   final schedules = row.tasks
@@ -419,7 +440,9 @@ class _GanttViewState extends State<GanttView> {
                                     color: p.hover.withValues(
                                       alpha: p.dark ? 0.112 : .056,
                                     ),
-                                    child: Row(
+                                    child: _GanttSplitRow(
+                                      scroll: horizontal,
+                                      pinned: freezeInfo,
                                       children: [
                                         SizedBox(
                                           width: 400,
@@ -645,6 +668,46 @@ class _GridPainter extends CustomPainter {
       o.mode != mode;
 }
 
+/// Both panes share one vertical list. Only the leading cells counter-translate
+/// horizontal scroll, so row heights, vertical positions and hit targets agree.
+class _GanttSplitRow extends StatelessWidget {
+  final ScrollController scroll;
+  final bool pinned;
+  final List<Widget> children;
+  const _GanttSplitRow({
+    required this.scroll,
+    required this.pinned,
+    required this.children,
+  });
+  @override
+  Widget build(BuildContext context) {
+    if (!pinned) return Row(children: children);
+    final p = Palette.of(context);
+    return Stack(
+      children: [
+        Row(children: [const SizedBox(width: 400), ...children.skip(1)]),
+        Positioned(
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 400,
+          child: AnimatedBuilder(
+            animation: scroll,
+            child: ColoredBox(
+              color: Color.alphaBlend(p.card, p.canvas),
+              child: children.first,
+            ),
+            builder: (context, child) => Transform.translate(
+              offset: Offset(scroll.hasClients ? scroll.offset : 0, 0),
+              child: child,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _GanttRow extends StatefulWidget {
   final SpaceTask task;
   final SpaceStore store;
@@ -652,6 +715,8 @@ class _GanttRow extends StatefulWidget {
   final double dayWidth;
   final int days;
   final String mode;
+  final ScrollController scroll;
+  final bool pinned;
   const _GanttRow({
     required this.task,
     required this.store,
@@ -659,6 +724,8 @@ class _GanttRow extends StatefulWidget {
     required this.dayWidth,
     required this.days,
     required this.mode,
+    required this.scroll,
+    required this.pinned,
   });
   @override
   State<_GanttRow> createState() => _GanttRowState();
@@ -717,7 +784,9 @@ class _GanttRowState extends State<_GanttRow> {
     final ink = GanttInk.forStatus(p, t.status);
     return SizedBox(
       height: 64,
-      child: Row(
+      child: _GanttSplitRow(
+        scroll: widget.scroll,
+        pinned: widget.pinned,
         children: [
           SizedBox(
             width: 400,

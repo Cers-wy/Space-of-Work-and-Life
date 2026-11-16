@@ -1766,6 +1766,7 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
 
   void updateClock() {
     final enabled =
+        widget.store.smokeForStatus(widget.task.status) &&
         active &&
         TickerMode.valuesOf(context).enabled &&
         !widget.preview &&
@@ -1782,6 +1783,12 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
       timer = null;
       // Keep the current glow when animation is paused.
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant TaskCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    updateClock();
   }
 
   @override
@@ -1963,6 +1970,8 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
           valueListenable: phase,
           child: RepaintBoundary(child: content),
           builder: (c, time, child) => CardFlow(
+            enabled: s.smokeForStatus(t.status),
+            seed: t.id.hashCode,
             emphasized: hovered || t.status == 'doing',
             time: time,
             child: child!,

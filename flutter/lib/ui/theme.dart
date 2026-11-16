@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 class Palette extends ThemeExtension<Palette> {
@@ -341,9 +342,8 @@ class Glass extends StatelessWidget {
             : p.panel,
       ),
       child: ColoredBox(
-        color: const Color(
-          0xffa855f7,
-        ).withValues(alpha: card ? 0 : .055 * p.darkness),
+        color: const Color(0xffa855f7)
+            .withValues(alpha: card ? 0 : .055 * p.darkness),
         child: padding == null
             ? child
             : Padding(padding: padding!, child: child),
@@ -425,6 +425,8 @@ class PopupSurface extends StatelessWidget {
 
 class CardFlow extends StatefulWidget {
   final Widget child;
+  final bool enabled;
+  final int seed;
   final bool emphasized;
   final double time;
   static int _snapshots = 0;
@@ -433,6 +435,8 @@ class CardFlow extends StatefulWidget {
   const CardFlow({
     super.key,
     required this.child,
+    this.enabled = true,
+    this.seed = 0,
     this.emphasized = false,
     this.time = 0,
   });
@@ -444,6 +448,11 @@ class _CardFlowState extends State<CardFlow> {
   _FlowSnapshot? snapshot;
   @override
   Widget build(BuildContext context) {
+    if (!widget.enabled) {
+      snapshot?.dispose();
+      snapshot = null;
+      return widget.child;
+    }
     final moving = WorkspaceMotion.activeOf(context);
     final dpr = MediaQuery.devicePixelRatioOf(context);
     if (!moving || snapshot?.dpr != dpr) {
@@ -452,11 +461,12 @@ class _CardFlowState extends State<CardFlow> {
     }
     if (moving) snapshot ??= _FlowSnapshot(dpr);
     return CustomPaint(
-      foregroundPainter: _FlowPainter(
+      painter: _FlowPainter(
         Palette.of(context),
         widget.emphasized,
         widget.time,
         snapshot,
+        widget.seed,
       ),
       child: widget.child,
     );
@@ -487,7 +497,14 @@ class _FlowPainter extends CustomPainter {
   final bool emphasized;
   final double time;
   final _FlowSnapshot? snapshot;
-  _FlowPainter(this.p, this.emphasized, this.time, [this.snapshot]);
+  final int seed;
+  _FlowPainter(
+    this.p,
+    this.emphasized,
+    this.time, [
+    this.snapshot,
+    this.seed = 0,
+  ]);
   @override
   void paint(Canvas c, Size s) {
     final frozen = snapshot;
@@ -495,7 +512,7 @@ class _FlowPainter extends CustomPainter {
       if (frozen.image == null) {
         final recorder = ui.PictureRecorder();
         final canvas = Canvas(recorder)..scale(frozen.dpr);
-        _FlowPainter(p, emphasized, time).paint(canvas, s);
+        _FlowPainter(p, emphasized, time, null, seed).paint(canvas, s);
         final picture = recorder.endRecording();
         frozen.image = picture.toImageSync(
           (s.width * frozen.dpr).ceil(),
@@ -519,16 +536,50 @@ class _FlowPainter extends CustomPainter {
     );
     c.save();
     c.clipRRect(r);
-    final x = s.width * ((math.sin(time / 4.5) + 1) / 2 - .25);
-    c.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(x, s.height - 10, s.width * .6, 12),
-        const Radius.circular(6),
-      ),
-      Paint()
-        ..color = p.accent.withValues(alpha: emphasized ? 0.6 : .35)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
-    );
+    // Several incommensurate slow waves form drifting ribbons. Per-card phases
+    // avoid a synchronized fixed route; only a few vector paths are painted.
+    final phase = (seed.abs() % 997) / 997 * math.pi * 2;
+    for (var i = 0; i < 5; i++) {
+      final q = phase + i * 1.63;
+      final cx = s.width * (.5 + .39 * math.sin(time * .071 + q));
+      final cy = s.height * (.5 + .40 * math.sin(time * .097 + q * 1.7));
+      final width = s.width * (.34 + .10 * math.sin(time * .043 + q));
+      final height = s.height * (.16 + .07 * math.cos(time * .053 + q));
+      final ribbon = Path()
+        ..moveTo(cx - width, cy + height * .45)
+        ..cubicTo(
+          cx - width * .2,
+          cy - height * 1.6,
+          cx + width * .15,
+          cy + height * 1.4,
+          cx + width,
+          cy - height * .5,
+        )
+        ..cubicTo(
+          cx + width * .12,
+          cy + height * 1.9,
+          cx - width * .12,
+          cy - height * 1.2,
+          cx - width,
+          cy + height * .45,
+        )
+        ..close();
+      c.drawPath(
+        ribbon,
+        Paint()
+          ..color = p.purple.withValues(
+            alpha: (emphasized ? .20 : .15) - i * .012,
+          )
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+      );
+      c.drawPath(
+        ribbon,
+        Paint()
+          ..color = p.purple.withValues(alpha: .065)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = .8,
+      );
+    }
     final angle = time == 0 ? 220 : time % 12 * 30;
     final shader = SweepGradient(
       transform: GradientRotation(angle * math.pi / 180),
@@ -573,6 +624,7 @@ class _FlowPainter extends CustomPainter {
       o.p.darkness != p.darkness ||
       o.time != time ||
       o.emphasized != emphasized ||
+      o.seed != seed ||
       o.snapshot != snapshot;
 }
 

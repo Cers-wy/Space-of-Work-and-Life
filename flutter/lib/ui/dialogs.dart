@@ -1726,6 +1726,19 @@ class _StatusesState extends State<_Statuses> {
                                     style: textStyle(p, bold: true),
                                   ),
                                 ),
+                                SpaceCheckbox(
+                                  key: ValueKey('status-smoke-$status'),
+                                  label: '烟雾动画',
+                                  value: s.smokeForStatus(status),
+                                  dense: true,
+                                  onPressed: s.busy
+                                      ? null
+                                      : () => s.setStatusSmoke(
+                                          status,
+                                          !s.smokeForStatus(status),
+                                        ),
+                                ),
+                                const SizedBox(width: 16),
                                 Text(
                                   '${s.state.tasks.where((t) => t.status == status).length} 项',
                                   style: textStyle(p, size: 12, color: p.muted),
