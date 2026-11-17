@@ -146,20 +146,14 @@ class _GanttViewState extends State<GanttView> {
             child: Row(
               children: [
                 const Spacer(),
-                SpaceButton(
+                IconButtonS(
+                  'pin',
+                  freezeInfo ? '取消固定左侧项目信息' : '固定左侧项目信息',
                   key: const ValueKey('gantt-freeze-info'),
-                  tooltip: freezeInfo ? '取消固定左侧项目信息' : '固定左侧项目信息',
-                  height: 32,
-                  padding: const EdgeInsets.all(8),
                   selected: freezeInfo,
                   soft: true,
                   onPressed: () =>
                       s.preference('ganttFreezeInfo', '${!freezeInfo}'),
-                  child: SpaceIcon(
-                    'pin',
-                    size: 16,
-                    color: freezeInfo ? p.accent : p.secondary,
-                  ),
                 ),
                 const SizedBox(width: 8),
                 Builder(
@@ -186,18 +180,21 @@ class _GanttViewState extends State<GanttView> {
                     );
                   },
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 SpaceSegmented(
+                  itemSize: 32,
                   options: const {'day': '日', 'week': '周', 'month': '月'},
                   value: mode,
                   label: '甘特图刻度',
                   onChanged: (v) => s.preference('ganttMode', v),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 IconButtonS('left', '上个月', onPressed: () => moveMonth(-1)),
+                const SizedBox(width: 8),
                 SizedBox(
                   width: 176,
                   child: MonthField(
+                    height: 32,
                     value: anchor,
                     onChanged: (d) {
                       setState(() => anchor = d);
@@ -205,6 +202,7 @@ class _GanttViewState extends State<GanttView> {
                     },
                   ),
                 ),
+                const SizedBox(width: 8),
                 IconButtonS('right', '下个月', onPressed: () => moveMonth(1)),
               ],
             ),
@@ -668,8 +666,9 @@ class _GridPainter extends CustomPainter {
       o.mode != mode;
 }
 
-/// Both panes share one vertical list. Only the leading cells counter-translate
-/// horizontal scroll, so row heights, vertical positions and hit targets agree.
+/// Both panes share one vertical list. Relayout the fixed cells within the
+/// scrolled row so their paint/hit bounds survive viewport culling. Clip the
+/// timeline at that boundary instead of hiding it behind an opaque flat fill.
 class _GanttSplitRow extends StatelessWidget {
   final ScrollController scroll;
   final bool pinned;
@@ -682,30 +681,38 @@ class _GanttSplitRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!pinned) return Row(children: children);
-    final p = Palette.of(context);
-    return Stack(
-      children: [
-        Row(children: [const SizedBox(width: 400), ...children.skip(1)]),
-        Positioned(
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 400,
-          child: AnimatedBuilder(
-            animation: scroll,
-            child: ColoredBox(
-              color: Color.alphaBlend(p.card, p.canvas),
+    return AnimatedBuilder(
+      animation: scroll,
+      child: Row(children: [const SizedBox(width: 400), ...children.skip(1)]),
+      builder: (context, timeline) {
+        final offset = scroll.hasClients ? scroll.offset : 0.0;
+        return Stack(
+          children: [
+            ClipRect(
+              clipper: _GanttTimelineClipper(400 + offset),
+              child: timeline,
+            ),
+            Positioned(
+              left: offset,
+              top: 0,
+              bottom: 0,
+              width: 400,
               child: children.first,
             ),
-            builder: (context, child) => Transform.translate(
-              offset: Offset(scroll.hasClients ? scroll.offset : 0, 0),
-              child: child,
-            ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
+}
+
+class _GanttTimelineClipper extends CustomClipper<Rect> {
+  final double left;
+  const _GanttTimelineClipper(this.left);
+  @override
+  Rect getClip(Size size) => Rect.fromLTRB(left, 0, size.width, size.height);
+  @override
+  bool shouldReclip(_GanttTimelineClipper old) => old.left != left;
 }
 
 class _GanttRow extends StatefulWidget {
@@ -1547,12 +1554,19 @@ class _DashedOutline extends CustomPainter {
 class MonthField extends StatelessWidget {
   final DateTime value;
   final ValueChanged<DateTime> onChanged;
-  const MonthField({super.key, required this.value, required this.onChanged});
+  final double height;
+  const MonthField({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.height = 40,
+  });
   @override
   Widget build(BuildContext c) => SpacePickerField(
     label: '选择年月',
     text: '${value.year}年${value.month}月',
     icon: 'calendar',
+    height: height,
     open: (anchor) async {
       var year = value.year;
       final result = await anchoredPopup<DateTime>(

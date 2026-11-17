@@ -181,6 +181,12 @@ class _IconPainter extends CustomPainter {
         line(2, 4, 18, 4);
         line(4, 10, 16, 10);
         line(7, 16, 13, 16);
+      case 'sliders':
+        for (final (y, x) in [(4.0, 7.0), (10.0, 13.0), (16.0, 7.0)]) {
+          line(2, y, x - 2, y);
+          line(x + 2, y, 18, y);
+          c.drawCircle(Offset(x, y), 2, p);
+        }
       case 'menu':
         for (final y in [6.0, 10.0, 14.0]) {
           line(2, y, 18, y);
@@ -895,12 +901,14 @@ class SpaceSegmented extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
   final String label;
+  final double? itemSize;
   const SpaceSegmented({
     super.key,
     required this.options,
     required this.value,
     required this.onChanged,
     required this.label,
+    this.itemSize,
   });
 
   @override
@@ -910,7 +918,7 @@ class SpaceSegmented extends StatelessWidget {
       container: true,
       label: label,
       child: Container(
-        padding: const EdgeInsets.all(2),
+        padding: EdgeInsets.all(itemSize == null ? 2 : 0),
         decoration: BoxDecoration(
           color: p.hover,
           borderRadius: BorderRadius.circular(8),
@@ -919,7 +927,8 @@ class SpaceSegmented extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             for (final e in options.entries) ...[
-              if (e.key != options.keys.first) const SizedBox(width: 2),
+              if (e.key != options.keys.first)
+                SizedBox(width: itemSize == null ? 2 : 8),
               Builder(
                 builder: (c) {
                   final selected = value == e.key;
@@ -927,20 +936,25 @@ class SpaceSegmented extends StatelessWidget {
                     button: true,
                     selected: selected,
                     label: '${e.value}刻度',
-                    child: SpaceButton(
-                      height: 28,
-                      selected: selected,
-                      soft: true,
-                      tooltip: '${e.value}刻度',
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      onPressed: () => onChanged(e.key),
-                      child: Text(
-                        e.value,
-                        style: textStyle(
-                          p,
-                          size: 12,
-                          bold: selected,
-                          color: selected ? p.accent : p.secondary,
+                    child: SizedBox(
+                      width: itemSize,
+                      child: SpaceButton(
+                        height: itemSize ?? 28,
+                        selected: selected,
+                        soft: true,
+                        tooltip: '${e.value}刻度',
+                        padding: EdgeInsets.symmetric(
+                          horizontal: itemSize == null ? 10 : 0,
+                        ),
+                        onPressed: () => onChanged(e.key),
+                        child: Text(
+                          e.value,
+                          style: textStyle(
+                            p,
+                            size: 12,
+                            bold: selected,
+                            color: selected ? p.accent : p.secondary,
+                          ),
                         ),
                       ),
                     ),
@@ -1359,6 +1373,7 @@ class SpacePickerField extends StatefulWidget {
   final String label, text;
   final String? icon;
   final double? width;
+  final double height;
   final bool active, placeholder;
   final Future<void> Function(BuildContext)? open;
 
@@ -1369,6 +1384,7 @@ class SpacePickerField extends StatefulWidget {
     required this.open,
     this.icon,
     this.width,
+    this.height = 40,
     this.active = false,
     this.placeholder = false,
   });
@@ -1416,6 +1432,7 @@ class _SpacePickerFieldState extends State<SpacePickerField> {
           value: widget.text,
           child: SpaceButton(
             tooltip: widget.label,
+            height: widget.height,
             onPressed: widget.open == null ? null : open,
             child: Row(
               children: [

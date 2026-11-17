@@ -1810,149 +1810,181 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
       child: Glass(
         card: true,
         blur: false,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 20 * scale,
-              child: Row(
+        surfaceColor: p.blend(
+          Colors.white.withValues(alpha: .38),
+          const Color(0xff242032).withValues(alpha: .36),
+        ),
+        child: ValueListenableBuilder(
+          valueListenable: phase,
+          child: RepaintBoundary(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (project != null) ...[
-                    SpaceIcon('folder', size: 12, color: p.purple),
-                    const SizedBox(width: 4),
-                  ],
-                  Expanded(
-                    child: Text(
-                      project ?? '',
-                      style: textStyle(p, size: 12, color: p.purple),
-                      maxLines: 1,
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  taskMenu(c, s, t),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Semantics(
-                button: true,
-                label: '编辑任务：${t.title}',
-                child: GestureDetector(
-                  onTap: widget.onEdit,
-                  behavior: HitTestBehavior.opaque,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  SizedBox(
+                    height: 20 * scale,
+                    child: Row(
                       children: [
-                        Text(
-                          t.title,
-                          style: textStyle(p, bold: true),
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
+                        if (project != null) ...[
+                          SpaceIcon('folder', size: 12, color: p.purple),
+                          const SizedBox(width: 4),
+                        ],
+                        Expanded(
+                          child: Text(
+                            project ?? '',
+                            style: textStyle(p, size: 12, color: p.purple),
+                            maxLines: 1,
+                            softWrap: false,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          t.description
-                              .replaceAll(RegExp(r'\s+'), ' ')
-                              .replaceAll('\uFFFC', '图片'),
-                          style: textStyle(p, size: 12, color: p.secondary),
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        taskMenu(c, s, t),
                       ],
                     ),
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            LayoutBuilder(
-              builder: (c, box) {
-                final narrow = box.maxWidth < 240;
-                final category = ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: math.min(120, box.maxWidth * .35),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: p.category(t.category).withValues(alpha: .08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: CategoryLabel(
-                      t.category,
-                      name: widget.store.state.taskCategories[t.category],
-                    ),
-                  ),
-                );
-                final priority = Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SpaceIcon('flag', size: 12, color: p.priority(t.priority)),
-                    const SizedBox(width: 4),
-                    Text(
-                      priorities[t.priority]!,
-                      style: textStyle(
-                        p,
-                        size: 12,
-                        color: p.priority(t.priority),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      label: '编辑任务：${t.title}',
+                      child: GestureDetector(
+                        onTap: widget.onEdit,
+                        behavior: HitTestBehavior.opaque,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t.title,
+                                style: textStyle(p, bold: true),
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                t.description
+                                    .replaceAll(RegExp(r'\s+'), ' ')
+                                    .replaceAll('\uFFFC', '图片'),
+                                style: textStyle(
+                                  p,
+                                  size: 12,
+                                  color: p.secondary,
+                                ),
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ],
-                );
-                final complete = IconButtonS(
-                  t.status == 'done' ? 'done' : 'circle',
-                  t.status == 'done' ? '重新开启：${t.title}' : '完成：${t.title}',
-                  size: 28,
-                  iconSize: 22,
-                  onPressed: () =>
-                      s.moveTask(t.id, t.status == 'done' ? 'todo' : 'done'),
-                );
-                return SizedBox(
-                  height: 52,
-                  child: narrow
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                category,
-                                const SizedBox(width: 8),
-                                priority,
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(child: dueLabel(c, t, s.today)),
-                                complete,
-                              ],
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            category,
-                            const SizedBox(width: 8),
-                            priority,
-                            const SizedBox(width: 8),
-                            Expanded(child: dueLabel(c, t, s.today)),
-                            const SizedBox(width: 4),
-                            complete,
-                          ],
+                  ),
+                  const SizedBox(height: 8),
+                  LayoutBuilder(
+                    builder: (c, box) {
+                      final narrow = box.maxWidth < 240;
+                      final category = ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: math.min(120, box.maxWidth * .35),
                         ),
-                );
-              },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: p
+                                .category(t.category)
+                                .withValues(alpha: .08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: CategoryLabel(
+                            t.category,
+                            name: widget.store.state.taskCategories[t.category],
+                          ),
+                        ),
+                      );
+                      final priority = Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SpaceIcon(
+                            'flag',
+                            size: 12,
+                            color: p.priority(t.priority),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            priorities[t.priority]!,
+                            style: textStyle(
+                              p,
+                              size: 12,
+                              color: p.priority(t.priority),
+                            ),
+                          ),
+                        ],
+                      );
+                      final complete = IconButtonS(
+                        t.status == 'done' ? 'done' : 'circle',
+                        t.status == 'done'
+                            ? '重新开启：${t.title}'
+                            : '完成：${t.title}',
+                        size: 28,
+                        iconSize: 22,
+                        onPressed: () => s.moveTask(
+                          t.id,
+                          t.status == 'done' ? 'todo' : 'done',
+                        ),
+                      );
+                      return SizedBox(
+                        height: 52,
+                        child: narrow
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      category,
+                                      const SizedBox(width: 8),
+                                      priority,
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(child: dueLabel(c, t, s.today)),
+                                      complete,
+                                    ],
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                children: [
+                                  category,
+                                  const SizedBox(width: 8),
+                                  priority,
+                                  const SizedBox(width: 8),
+                                  Expanded(child: dueLabel(c, t, s.today)),
+                                  const SizedBox(width: 4),
+                                  complete,
+                                ],
+                              ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
+          builder: (c, time, child) => CardFlow(
+            enabled: s.smokeForStatus(t.status),
+            seed: t.id.hashCode,
+            emphasized: hovered || t.status == 'doing',
+            time: time,
+            child: child!,
+          ),
         ),
       ),
     );
@@ -1966,17 +1998,7 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
           setState(() => hovered = false);
           updateClock();
         },
-        child: ValueListenableBuilder(
-          valueListenable: phase,
-          child: RepaintBoundary(child: content),
-          builder: (c, time, child) => CardFlow(
-            enabled: s.smokeForStatus(t.status),
-            seed: t.id.hashCode,
-            emphasized: hovered || t.status == 'doing',
-            time: time,
-            child: child!,
-          ),
-        ),
+        child: content,
       ),
     );
   }

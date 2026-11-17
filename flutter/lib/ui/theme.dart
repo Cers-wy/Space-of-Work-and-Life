@@ -313,6 +313,7 @@ class WorkspaceMotion extends InheritedWidget {
 class Glass extends StatelessWidget {
   final Widget child;
   final Widget? background;
+  final Color? surfaceColor;
   final String contour;
   final bool card, blur;
   final EdgeInsetsGeometry? padding;
@@ -320,6 +321,7 @@ class Glass extends StatelessWidget {
     super.key,
     required this.child,
     this.background,
+    this.surfaceColor,
     this.contour = '',
     this.card = false,
     this.blur = true,
@@ -337,9 +339,7 @@ class Glass extends StatelessWidget {
                 Colors.white,
                 card ? const Color(0xff1f1f1f) : const Color(0xff181818),
               )
-            : card
-            ? p.card
-            : p.panel,
+            : surfaceColor ?? (card ? p.card : p.panel),
       ),
       child: ColoredBox(
         color: const Color(0xffa855f7)
@@ -446,6 +446,22 @@ class CardFlow extends StatefulWidget {
 
 class _CardFlowState extends State<CardFlow> {
   _FlowSnapshot? snapshot;
+  ui.FragmentShader? smoke;
+  static final program = ui.FragmentProgram.fromAsset(
+    'shaders/task_smoke.frag',
+  );
+  @override
+  void initState() {
+    super.initState();
+    program.then((value) {
+      if (mounted) {
+        snapshot?.dispose();
+        snapshot = null;
+        setState(() => smoke = value.fragmentShader());
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!widget.enabled) {
@@ -467,6 +483,7 @@ class _CardFlowState extends State<CardFlow> {
         widget.time,
         snapshot,
         widget.seed,
+        smoke,
       ),
       child: widget.child,
     );
@@ -475,6 +492,7 @@ class _CardFlowState extends State<CardFlow> {
   @override
   void dispose() {
     snapshot?.dispose();
+    smoke?.dispose();
     super.dispose();
   }
 }
@@ -498,12 +516,14 @@ class _FlowPainter extends CustomPainter {
   final double time;
   final _FlowSnapshot? snapshot;
   final int seed;
+  final ui.FragmentShader? smoke;
   _FlowPainter(
     this.p,
     this.emphasized,
     this.time, [
     this.snapshot,
     this.seed = 0,
+    this.smoke,
   ]);
   @override
   void paint(Canvas c, Size s) {
@@ -512,7 +532,7 @@ class _FlowPainter extends CustomPainter {
       if (frozen.image == null) {
         final recorder = ui.PictureRecorder();
         final canvas = Canvas(recorder)..scale(frozen.dpr);
-        _FlowPainter(p, emphasized, time, null, seed).paint(canvas, s);
+        _FlowPainter(p, emphasized, time, null, seed, smoke).paint(canvas, s);
         final picture = recorder.endRecording();
         frozen.image = picture.toImageSync(
           (s.width * frozen.dpr).ceil(),
@@ -536,52 +556,19 @@ class _FlowPainter extends CustomPainter {
     );
     c.save();
     c.clipRRect(r);
-    // Several incommensurate slow waves form drifting ribbons. Per-card phases
-    // avoid a synchronized fixed route; only a few vector paths are painted.
-    final phase = (seed.abs() % 997) / 997 * math.pi * 2;
-    for (var i = 0; i < 5; i++) {
-      final q = phase + i * 1.63;
-      final cx = s.width * (.5 + .39 * math.sin(time * .071 + q));
-      final cy = s.height * (.5 + .40 * math.sin(time * .097 + q * 1.7));
-      final width = s.width * (.34 + .10 * math.sin(time * .043 + q));
-      final height = s.height * (.16 + .07 * math.cos(time * .053 + q));
-      final ribbon = Path()
-        ..moveTo(cx - width, cy + height * .45)
-        ..cubicTo(
-          cx - width * .2,
-          cy - height * 1.6,
-          cx + width * .15,
-          cy + height * 1.4,
-          cx + width,
-          cy - height * .5,
-        )
-        ..cubicTo(
-          cx + width * .12,
-          cy + height * 1.9,
-          cx - width * .12,
-          cy - height * 1.2,
-          cx - width,
-          cy + height * .45,
-        )
-        ..close();
-      c.drawPath(
-        ribbon,
-        Paint()
-          ..color = p.purple.withValues(
-            alpha: (emphasized ? .20 : .15) - i * .012,
-          )
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
-      );
-      c.drawPath(
-        ribbon,
-        Paint()
-          ..color = p.purple.withValues(alpha: .065)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = .8,
-      );
+    final shader = smoke;
+    if (shader != null) {
+      shader
+        ..setFloat(0, s.width)
+        ..setFloat(1, s.height)
+        ..setFloat(2, time)
+        ..setFloat(3, (seed.abs() % 997) / 997)
+        ..setFloat(4, p.darkness)
+        ..setFloat(5, emphasized ? 1 : 0);
+      c.drawRect(Offset.zero & s, Paint()..shader = shader);
     }
     final angle = time == 0 ? 220 : time % 12 * 30;
-    final shader = SweepGradient(
+    final rimShader = SweepGradient(
       transform: GradientRotation(angle * math.pi / 180),
       colors: [
         p.accent.withValues(alpha: .12),
@@ -603,7 +590,7 @@ class _FlowPainter extends CustomPainter {
     c.drawRRect(
       r,
       Paint()
-        ..shader = shader
+        ..shader = rimShader
         ..style = PaintingStyle.stroke
         ..strokeWidth = emphasized ? 3 : 2
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, p.dark ? 4 : 3)
@@ -612,7 +599,7 @@ class _FlowPainter extends CustomPainter {
     c.drawRRect(
       r,
       Paint()
-        ..shader = shader
+        ..shader = rimShader
         ..style = PaintingStyle.stroke
         ..strokeWidth = emphasized ? 1.5 : 1,
     );
@@ -625,6 +612,7 @@ class _FlowPainter extends CustomPainter {
       o.time != time ||
       o.emphasized != emphasized ||
       o.seed != seed ||
+      o.smoke != smoke ||
       o.snapshot != snapshot;
 }
 

@@ -741,18 +741,20 @@ class _ToolsWorkspaceState extends State<_ToolsWorkspace> {
           subTitle: '发票合并',
           actions: page == 0
               ? [
-                  IconButtonS(
+                  IconButtonS.toolbar(
                     'plus',
                     '添加模块',
                     onPressed: () => toolBoardKey.currentState?.addModule(),
                   ),
-                  IconButtonS(
-                    editingTools ? 'check' : 'edit',
+                  IconButtonS.toolbar(
+                    editingTools ? 'check' : 'sliders',
                     editingTools ? '完成布局编辑' : '编辑卡片宽高',
+                    selected: editingTools,
+                    soft: true,
                     onPressed: () =>
                         setState(() => editingTools = !editingTools),
                   ),
-                  IconButtonS(
+                  IconButtonS.toolbar(
                     'eye',
                     '恢复隐藏模块',
                     onPressed: () => toolBoardKey.currentState?.hiddenModules(),
