@@ -210,7 +210,7 @@ void main() {
     expect(info.month, isEmpty);
     expect(info.reimbursed, isTrue);
   });
-  test('批量识别串行执行，单张失败不回滚；批量删除仅处理指定票据与附件', () async {
+  test('批量识别有界并发执行，单张失败不回滚；批量删除仅处理指定票据与附件', () async {
     final s = await sample(count: 3),
         ids = s.ledger!.entries.map((e) => e.id).toList();
     var active = 0, maxActive = 0, index = 0;
@@ -223,7 +223,9 @@ void main() {
       return const InvoiceRecognition({'number': '00009999'}, '');
     };
     await s.recognizeSelected(ids.take(2).toList());
-    expect(maxActive, 1);
+    // 批量识别有界并发：两张可同时进行，但不超过并发上限。
+    expect(maxActive, greaterThan(1));
+    expect(maxActive, lessThanOrEqualTo(InvoiceSession.batchConcurrency));
     expect(s.recognitionFailures.length, 1);
     expect(s.batchNotice, contains('1 张已保存'));
     expect(s.batchError, contains('1 张未完成'));
@@ -242,6 +244,37 @@ void main() {
     expect(s.ledger!.entries.length, 2);
     expect(File(original).existsSync(), isFalse);
     expect(s.ledger!.entries.any((e) => e.id == ids.last), isTrue);
+  });
+  test('批量识别最多 10 张同时进入引擎，放行后全部完成且并发不超限', () async {
+    final s = await sample(count: 14),
+        ids = s.ledger!.entries.map((e) => e.id).toList();
+    final gate = Completer<void>();
+    var active = 0, peak = 0, tenth = 0;
+    final tenthReached = Completer<void>();
+    s.recognizeFile = (f, {required preferOcr}) async {
+      active++;
+      if (active > peak) peak = active;
+      if (active >= 10 && tenth++ == 0 && !tenthReached.isCompleted) {
+        tenthReached.complete();
+      }
+      await gate.future;
+      active--;
+      return const InvoiceRecognition({'number': '00001234'}, '');
+    };
+    final batch = s.recognizeSelected(ids);
+    // 等到至少 10 张同时进入引擎，确认并发上限在 10。
+    await tenthReached.future.timeout(const Duration(seconds: 3));
+    expect(peak, InvoiceSession.batchConcurrency);
+    expect(s.batchRecognizing, isTrue);
+    gate.complete();
+    await batch;
+    expect(peak, InvoiceSession.batchConcurrency);
+    expect(s.recognitionFailures, isEmpty);
+    expect(s.batchNotice, contains('14 张已保存'));
+    expect(
+      s.ledger!.entries.where((e) => e.info.number == '00001234').length,
+      14,
+    );
   });
   test('后台识别不占用前台busy，保留期间保存的手工字段和用户新选择', () async {
     final s = await sample(count: 2),
@@ -314,9 +347,10 @@ void main() {
     expect(s.ledger!.entries.single.id, ids.last);
     gate.complete();
     await batch;
-    expect(calls, 1);
+    // 有界并发：两张都已进入底层识别（calls≥1）；删除后全部停止写回。
+    expect(calls, greaterThanOrEqualTo(1));
     expect((await s.repo.load()).entries.single.id, ids.last);
-    expect(s.batchNotice, contains('2 张已跳过'));
+    expect(s.batchNotice, contains('张已跳过'));
     expect(s.batchError, isNull);
     expect(s.recognitionFailures, isEmpty);
   });

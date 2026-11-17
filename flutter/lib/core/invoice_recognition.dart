@@ -17,7 +17,16 @@ class InvoiceRecognition {
   /// 2026-11-12：识别出的发票结构化数据（明细、合计、人员、金额校验），
   /// 由台账写入 recognition 字段，供详情与后续核对使用。
   final Map<String, Object?>? structured;
-  const InvoiceRecognition(this.fields, this.message, {this.structured});
+
+  /// PDF 文本层元数据（仅文本层路径设置）：字符数与全文是否出现「发票」。
+  /// 用于识别非发票文档（行程单等）并决定 OCR 兜底策略。
+  final ({int characters, bool invoiceKeyword})? textLayer;
+  const InvoiceRecognition(
+    this.fields,
+    this.message, {
+    this.structured,
+    this.textLayer,
+  });
 }
 
 /// Deterministic parsing shared by both desktop platforms. Notes are deliberately absent.
@@ -195,21 +204,97 @@ abstract final class InvoiceRecognizer {
       invoiceRequiredFields(fields).every(fields.containsKey);
 
   /// preferOcr 来自设置中的「优先使用 OCR」开关（默认关闭）。
-  /// 默认优先 PDF 文本层：词坐标结构化解析更准，也不需要 OCR 模型；
-  /// 仅在字段不完整或 PDF 无文本层时才渲染页面走 OCR。
+  /// 默认优先 PDF 文本层：词坐标结构化解析更准，也不需要 OCR 模型。
+  /// 2026-11-17 起的兜底策略（与用户确认）：
+  /// - 个人购买方票面本就没有购方税号，required 规则已按组织/个人区分，
+  ///   判为完整即直接返回，不再触发 OCR；
+  /// - 文本层完整却没有票种标题、全文无「发票」字样的文档（行程单等）
+  ///   不是发票：直接退出 PDF 解析，只做一次小模型 OCR 复核；
+  /// - 其余不完整情形才保留原有 OCR 兜底（渲染 + 两轮识别）。
+  /// 同一文件重复识别走结果缓存（大小+修改时间校验），约 0.1ms 命中。
   static Future<InvoiceRecognition> recognize(
     InvoiceFile file, {
     bool preferOcr = false,
   }) async {
+    final cached = _results[file.path];
+    if (cached != null && cached.$3 == preferOcr) {
+      try {
+        final stat = await File(file.path).stat();
+        if (stat.size == cached.$1 && stat.modified == cached.$2) {
+          return cached.$4;
+        }
+      } catch (_) {}
+      _results.remove(file.path);
+    }
+    final result = await _recognize(file, preferOcr);
+    try {
+      final stat = await File(file.path).stat();
+      _results[file.path] = (stat.size, stat.modified, preferOcr, result);
+      while (_results.length > 64) {
+        _results.remove(_results.keys.first);
+      }
+    } catch (_) {}
+    return result;
+  }
+
+  /// 识别结果缓存：路径 -> (大小, 修改时间, preferOcr, 结果)。
+  static final Map<String, (int, DateTime, bool, InvoiceRecognition)>
+  _results = {};
+
+  static Future<InvoiceRecognition> _recognize(
+    InvoiceFile file,
+    bool preferOcr,
+  ) async {
     if (!file.isPdf) return _image(file.path);
     final pdf = await _pdfText(file.path);
-    if (!preferOcr && pdf.message.isEmpty && _complete(pdf.fields)) return pdf;
+    if (!preferOcr) {
+      if (pdf.message.isEmpty && _complete(pdf.fields)) return pdf;
+      final text = pdf.textLayer;
+      if (text != null &&
+          text.characters >= 120 &&
+          pdf.fields['title'] == null &&
+          !text.invoiceKeyword) {
+        return _nonInvoiceReview(pdf, file.path);
+      }
+    }
     final ocr = await _pdfOcr(
       file.path,
       pageIndex: pdf.structured?['page'] as int? ?? 0,
     );
     if (ocr == null) return pdf;
     return preferOcr ? _merge(ocr, pdf) : _merge(pdf, ocr);
+  }
+
+  /// 非发票文档（行程单等）：一次小模型 OCR 复核；仍识别不出票面字段
+  /// 即维持「不是发票」结论，不再做增强轮。
+  static Future<InvoiceRecognition> _nonInvoiceReview(
+    InvoiceRecognition pdf,
+    String path,
+  ) async {
+    final directory = await Directory.systemTemp.createTemp(
+      'space-invoice-ocr-',
+    );
+    try {
+      final bytes = await NativeInvoicePdf.ocrImage(path);
+      final image = '${directory.path}/page.png';
+      await File(image).writeAsBytes(bytes);
+      final small = await LocalPpocr.recognize(image);
+      final ocr = await _ocr(small);
+      if (ocr.fields.isEmpty) {
+        return InvoiceRecognition(
+          pdf.fields,
+          '未识别出发票票面，请核对原件。',
+          structured: pdf.structured,
+          textLayer: pdf.textLayer,
+        );
+      }
+      return _merge(pdf, ocr);
+    } catch (_) {
+      // OCR 模型或组件不可用时保留文本层结果，不让整次识别失败。
+      return pdf;
+    } finally {
+      await directory.delete(recursive: true);
+    }
   }
 
   static InvoiceRecognition _merge(
@@ -244,7 +329,34 @@ abstract final class InvoiceRecognizer {
       return const InvoiceRecognition({}, '未检测到 PDF 文本层，请改用 OCR 识别。');
     }
     final payload = pdf.payload;
-    return Isolate.run(() => parseInvoicePages(payload));
+    final recognition = await Isolate.run(() => parseInvoicePages(payload));
+    return InvoiceRecognition(
+      recognition.fields,
+      recognition.message,
+      structured: recognition.structured,
+      textLayer: (
+        characters: pdf.characters,
+        invoiceKeyword: _mentionsInvoice(payload),
+      ),
+    );
+  }
+
+  /// 文本层任何一页是否出现「发票」字样。行程单等非发票文档没有。
+  static bool _mentionsInvoice(Map<String, Object?> payload) {
+    bool pageHas(Map<Object?, Object?> page) {
+      for (final line in (page['lines'] as List? ?? const [])) {
+        for (final word in ((line as Map)['words'] as List? ?? const [])) {
+          if ('${(word as Map)['text'] ?? ''}'.contains('发票')) return true;
+        }
+      }
+      return false;
+    }
+
+    if (pageHas(payload)) return true;
+    for (final page in (payload['pages'] as List? ?? const [])) {
+      if (pageHas(page as Map)) return true;
+    }
+    return false;
   }
 
   static Future<InvoiceRecognition?> _pdfOcr(

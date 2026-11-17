@@ -100,10 +100,11 @@ void main(List<String> args) async => build(args, (input, output) async {
           '-output',
           thin,
         ]);
-        if (result.exitCode != 0)
+        if (result.exitCode != 0) {
           throw StateError(
             'Unable to select ONNX architecture: ${result.stderr}',
           );
+        }
         await File(thin).rename(lib.path);
       }
     } finally {

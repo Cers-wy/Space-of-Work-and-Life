@@ -125,15 +125,35 @@ String _isoDate(String raw) {
       : '';
 }
 
+/// 组织机构特征词。命中任一关键词、或名称超过 4 字，即按组织机构对待，
+/// 要求购方统一社会信用代码。个人购买方票面本就没有税号（2026-11-17
+/// 用户确认）：缺失留空即可，不再判为不完整、不再触发 OCR 兜底。
+final _organizationPattern = RegExp(
+  '公司|企业|集团|厂|店|中心|银行|信用社|合作社|事务所|医院|学校|大学|学院|'
+  '研究院|研究所|工作室|个体|商行|商店|超市|酒店|宾馆|饭店|经营部|营业部|'
+  '服务部|门市部|分公司|协会|商会|基金会|机关|局|所|队|站|馆|社',
+);
+
+bool _isOrganizationBuyer(String buyer) {
+  final name = buyer.replaceAll(RegExp(r'[（(]个人[）)]'), '').trim();
+  if (name.isEmpty) return false;
+  return name.length > 4 || _organizationPattern.hasMatch(name);
+}
+
 Iterable<String> invoiceRequiredFields(Map<String, Object?> fields) sync* {
   yield* const ['title', 'number', 'issued', 'cents'];
   final title = '${fields['title'] ?? ''}';
   if (title.contains('增值税') || title.contains('普通发票')) {
-    yield* const ['buyer', 'seller', 'buyer_tax', 'seller_tax'];
+    yield* const ['buyer', 'seller'];
+    if (_isOrganizationBuyer('${fields['buyer'] ?? ''}')) yield 'buyer_tax';
+    yield 'seller_tax';
   } else if (title.contains('铁路电子客票')) {
-    yield* const ['buyer', 'buyer_tax'];
+    yield 'buyer';
+    if (_isOrganizationBuyer('${fields['buyer'] ?? ''}')) yield 'buyer_tax';
   } else if (title.contains('航空运输电子客票行程单')) {
-    yield* const ['buyer', 'buyer_tax', 'seller'];
+    yield 'buyer';
+    if (_isOrganizationBuyer('${fields['buyer'] ?? ''}')) yield 'buyer_tax';
+    yield 'seller';
   }
 }
 

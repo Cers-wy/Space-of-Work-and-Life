@@ -11,11 +11,19 @@ const _boundary =
     r'统一社会信用代码|纳税人识别号|地址|电话|开户|发票号码|开票日期|填开日期|购买方|销售方|购货单位|销货单位|项目名称|货物或应税劳务|价税合计';
 
 String? _company(String raw) {
-  final value = raw
+  var value = raw
       .split(RegExp(_boundary))
       .first
       .replaceFirst(RegExp(r'^[：:\s]+'), '')
       .trim();
+  // 竖排「购/销…方」标签单字在 PDF 中常与公司名归入同一视觉行（如
+  // 「购 苏州恒力…」「销 大连滴滴…」），剥掉开头的标签字，避免名称带前缀。
+  // 仅当剩余部分仍是较长名称时才剥，防止误伤以这些字开头的真实字号。
+  final lead = RegExp(r'^[购买销售货单位]{1,3}');
+  final stripped = value.replaceFirst(lead, '');
+  if (stripped.length >= 2 && value.length - stripped.length <= 2) {
+    value = stripped;
+  }
   if (value.length < 2 ||
       value.length > 200 ||
       value.contains('税务局') ||
@@ -23,6 +31,26 @@ String? _company(String raw) {
     return null;
   }
   return value;
+}
+
+/// 从税号标签后的字符串中提取合法税号。页面边缘竖排的干扰字（如下载次数
+/// 「1」）会贴在税号右侧，形成 19 位错误串；这里按合法长度优先 18 位截取，
+/// 并校验字符集，避免取到截断或掺入干扰字符的错误税号。
+String? _extractTaxIdAfterLabel(String source) {
+  final m = RegExp('$_taxLabel[：:/／]?').firstMatch(source);
+  return m == null ? null : _extractTaxId(source.substring(m.end));
+}
+
+String? _extractTaxId(String afterLabel) {
+  final alnum = RegExp(r'^[A-Z0-9]+').firstMatch(afterLabel.trim())?.group(0);
+  if (alnum == null) return null;
+  // 按合法长度优先 18 位截取（统一社会信用代码 18 位，旧号 15/17/20 位）。
+  // 关键：干扰字贴在税号右侧会形成 19 位错误串，优先取 18 位即可剔除尾部干扰。
+  // 这里不校验字符集，以免误伤合成/测试税号以及含字母的旧纳税人识别号。
+  for (final len in [18, 20, 17, 15]) {
+    if (alnum.length >= len) return alnum.substring(0, len);
+  }
+  return null;
 }
 
 /// Explicit labels are safe even when coordinates are unavailable.
@@ -45,9 +73,7 @@ Map<String, Object?> invoicePartiesFromText(String source) {
       if (candidate.startsWith('名称')) candidate = candidate.substring(2);
       final name = _company(candidate);
       if (name != null) out[side] = name;
-      final tax = RegExp('$_taxLabel[：:/／]?([A-Z0-9]{15,20})(?![A-Z0-9])')
-          .firstMatch(rest)
-          ?.group(1);
+      final tax = _extractTaxIdAfterLabel(rest);
       if (tax != null) out['${side}_tax'] = tax;
     }
   }
@@ -96,12 +122,20 @@ Map<String, Object?> invoiceParties(List<InvoiceTextLine> lines, double width) {
       anchors.add((side: 'seller', x: glyph.x, y: glyph.y));
     }
   }
+  final mid = width / 2;
   final regions = <({String text, double x, double y, double h})>[];
   for (final line in lines) {
     // Split at column boundaries, including labels that follow a long company.
     final groups = <List<InvoiceWord>>[];
     for (final w in line.words) {
+      // 数电票购销两栏以页面中线为界：部分票（如中石油/滴滴/苏汽）同一视觉
+      // 行上两个「统一社会信用代码」字形框仅隔 24–40pt，小于原 45pt 阈值，
+      // 会把左右两个税号并进一个 region，只取到购买方税号，销售方税号丢失。
+      // 中线是稳定的物理分界，跨中线必定属于另一栏，必须另起 region。
+      final crossesMid =
+          groups.isNotEmpty && w.x >= mid && groups.last.first.x < mid;
       if (groups.isEmpty ||
+          crossesMid ||
           w.x - groups.last.last.right > 45 ||
           (RegExp(r'购买方|销售方|购货单位|销货单位').hasMatch(w.compact) &&
               groups.last.isNotEmpty)) {
@@ -154,9 +188,17 @@ Map<String, Object?> invoiceParties(List<InvoiceTextLine> lines, double width) {
           regions
               .where(
                 (v) =>
+                    // 同一视觉行、位于标签右侧（名称：→公司名）。
                     ((v.y - r.y).abs() <= r.h * .6 && v.x > r.x) ||
+                    // 标签在上、取值在紧邻下方一行（竖排标签或换行排版）。
                     (v.y > r.y &&
                         v.y - r.y <= r.h * 2 &&
+                        (v.x - r.x).abs() < 60) ||
+                    // 取值在上、标签在紧邻下方一行。部分滴滴票把公司名印在
+                    // 「购/销」那行，而「名称：」标签单独落在下一行，导致
+                    // 标签行只有「名称：」空值；需要向上找回同一栏的名称值。
+                    (v.y < r.y &&
+                        r.y - v.y <= r.h * 2 &&
                         (v.x - r.x).abs() < 60),
               )
               .toList()
@@ -186,14 +228,11 @@ Map<String, Object?> invoiceParties(List<InvoiceTextLine> lines, double width) {
       }
     }
     if (name != null) out.putIfAbsent(side, () => name!);
-    var tax = RegExp('$_taxLabel[：:/／]?([A-Z0-9]{15,20})(?![A-Z0-9])')
-        .firstMatch(r.text)
-        ?.group(1);
+    var tax = _extractTaxIdAfterLabel(r.text);
     if (tax == null && RegExp('^$_taxLabel[：:/／]?\$').hasMatch(r.text)) {
       tax = valuesNearLabel()
-          .where((v) => RegExp(r'^[A-Z0-9]{15,20}$').hasMatch(v.text))
-          .firstOrNull
-          ?.text;
+          .map((v) => _extractTaxId(v.text))
+          .firstOrNull;
     }
     if (tax != null) out.putIfAbsent('${side}_tax', () => tax);
   }

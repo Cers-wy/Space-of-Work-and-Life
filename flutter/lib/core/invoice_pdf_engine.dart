@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
@@ -48,14 +49,136 @@ abstract final class NativeInvoicePdf {
   static Future<T> _work<T>(T Function(_Engine) work) =>
       serial(() => _run(work));
 
-  static Future<T> _run<T>(T Function(_Engine) work) => Isolate.run(() {
-    // Initialization must survive short-lived worker isolates and hot restarts.
-    pdfium.PdfiumProcessGate.enable();
-    pdfium.PdfiumProcessGate.acquire();
+  // ---- 常驻 PDFium 引擎 isolate（2026-11-17 性能优化）----
+  // 此前每张发票一次 Isolate.run：spawn + 动态库解析 + 初始化检查约
+  // 1-3ms。常驻 worker 只初始化一次，单次请求只剩端口往返与原生解析。
+  // 请求仍经 serial() 链依次到达，worker 内逐个执行并按请求 acquire/
+  // release 进程门控，PDFium 互斥语义与打印插件协调完全不变。
+  static SendPort? _enginePort;
+  static ReceivePort? _replyPort;
+  static Future<SendPort>? _starting;
+  static final Map<int, Completer<Object?>> _pending = {};
+  static int _sequence = 0;
+
+  static Future<T> _run<T>(T Function(_Engine) work) async {
+    Object? failure;
+    for (var attempt = 0; attempt < 2; attempt++) {
+      final SendPort port;
+      try {
+        port = await _ensureEngine();
+      } catch (error) {
+        failure = error;
+        _resetEngine();
+        continue;
+      }
+      final sequence = _sequence++;
+      final done = Completer<Object?>();
+      _pending[sequence] = done;
+      try {
+        port.send(_Request(sequence, work, _replyPort!.sendPort));
+      } catch (error) {
+        _pending.remove(sequence);
+        failure = error;
+        _resetEngine();
+        continue;
+      }
+      try {
+        return await done.future as T;
+      } catch (error) {
+        if (_enginePort != null) rethrow;
+        // 引擎在请求执行期间退出：换新引擎重试一次。
+        failure = error;
+      } finally {
+        _pending.remove(sequence);
+      }
+    }
+    throw failure ?? StateError('PDF 引擎不可用');
+  }
+
+  static Future<SendPort> _ensureEngine() {
+    final port = _enginePort;
+    if (port != null) return Future.value(port);
+    return _starting ??= _startEngine();
+  }
+
+  static Future<SendPort> _startEngine() {
+    final starting = Completer<SendPort>();
+    final ready = ReceivePort();
+    final reply = ReceivePort();
+    final death = ReceivePort();
+    _replyPort = reply;
+    ready.listen((message) {
+      ready.close();
+      if (message is SendPort) {
+        reply.listen(_onReply);
+        _enginePort = message;
+        starting.complete(message);
+      } else {
+        _resetEngine();
+        starting.completeError(
+          StateError('PDF 引擎初始化失败：${(message as _InitFailure).message}'),
+        );
+      }
+    }, onDone: () {
+      if (!starting.isCompleted) {
+        _resetEngine();
+        starting.completeError(StateError('PDF 引擎初始化中断'));
+      }
+    });
+    Isolate.spawn(_engineMain, ready.sendPort).then(
+      (isolate) => isolate.addOnExitListener(death.sendPort),
+      onError: (Object error) {
+        ready.close();
+        if (!starting.isCompleted) {
+          _resetEngine();
+          starting.completeError(StateError('无法启动 PDF 引擎：$error'));
+        }
+      },
+    );
+    death.listen((_) {
+      _resetEngine();
+      if (!starting.isCompleted) {
+        starting.completeError(StateError('PDF 引擎已退出'));
+      }
+    });
+    return starting.future;
+  }
+
+  static void _onReply(Object? message) {
+    final reply = message as _Reply;
+    final pending = _pending.remove(reply.sequence);
+    if (pending == null) return;
+    if (reply.error != null) {
+      pending.completeError(
+        reply.error!,
+        reply.stack == null
+            ? StackTrace.empty
+            : StackTrace.fromString(reply.stack!),
+      );
+    } else {
+      pending.complete(reply.result);
+    }
+  }
+
+  static void _resetEngine() {
+    _enginePort = null;
+    _starting = null;
+    _replyPort?.close();
+    _replyPort = null;
+    for (final pending in _pending.values) {
+      if (!pending.isCompleted) {
+        pending.completeError(StateError('PDF 引擎已退出，请重试'));
+      }
+    }
+    _pending.clear();
+  }
+
+  static void _engineMain(SendPort ready) {
+    final requests = ReceivePort();
     try {
+      pdfium.PdfiumProcessGate.enable();
+      // Initialization must survive short-lived worker isolates and hot restarts.
       // Flutter tests bundle a dylib instead of linking the Darwin framework.
-      // pdfium_dart 0.4.1's test loader still looks for the old YAML manifest;
-      // Flutter 3.47 writes native_assets.json, so use its known build output.
       final api =
           Platform.isMacOS && Platform.environment.containsKey('FLUTTER_TEST')
           ? pdfium.getPdfium(
@@ -65,11 +188,28 @@ abstract final class NativeInvoicePdf {
             )
           : pdfium.pdfiumBindings;
       if (pdfium.PdfiumProcessGate.claimInit()) api.FPDF_InitLibrary();
-      return work(_Engine(api));
-    } finally {
-      pdfium.PdfiumProcessGate.release();
+      final engine = _Engine(api);
+      ready.send(requests.sendPort);
+      requests.listen((message) {
+        final request = message as _Request;
+        Object? result;
+        Object? error;
+        String? stack;
+        pdfium.PdfiumProcessGate.acquire();
+        try {
+          result = Function.apply(request.work, <Object?>[engine]);
+        } catch (e, s) {
+          error = e;
+          stack = s.toString();
+        } finally {
+          pdfium.PdfiumProcessGate.release();
+        }
+        request.reply.send(_Reply(request.sequence, result, error, stack));
+      });
+    } catch (e, s) {
+      ready.send(_InitFailure('$e\n$s'));
     }
-  });
+  }
 
   static Future<List<InvoiceSourcePage>> inspect(
     String path, {
@@ -286,6 +426,29 @@ abstract final class NativeInvoicePdf {
           return bytes.takeBytes();
         }),
       );
+}
+
+/// 主 isolate -> 引擎 isolate 的识别请求。
+final class _Request {
+  final int sequence;
+  final Function work;
+  final SendPort reply;
+  const _Request(this.sequence, this.work, this.reply);
+}
+
+/// 引擎 isolate -> 主 isolate 的应答（结果或错误+栈）。
+final class _Reply {
+  final int sequence;
+  final Object? result;
+  final Object? error;
+  final String? stack;
+  const _Reply(this.sequence, this.result, this.error, this.stack);
+}
+
+/// 引擎 isolate 初始化失败的应答。
+final class _InitFailure {
+  final String message;
+  const _InitFailure(this.message);
 }
 
 class _Engine {

@@ -69,7 +69,10 @@ class InvoiceSession extends ChangeNotifier {
   String? batchNotice, batchError;
   final _batchIds = <String>{}, _cancelledRecognition = <String>{};
   final _manualJobs = <String, Future<InvoiceRecognition>>{};
-  String? _currentRecognition;
+  /// 批量识别并发上限；PDFium 原生锁与单 OCR worker 会在底层再次串行，
+  /// 但解码外的结构化处理、队列等待与 UI 可重叠，整体吞吐明显提升。
+  static const batchConcurrency = 10;
+  final _activeRecognitions = <String>{};
 
   Map<String, String> get projects => ledger?.projects ?? const {};
 
@@ -195,44 +198,7 @@ class InvoiceSession extends ChangeNotifier {
       final existing = _manualJobs[id];
       if (existing != null) return existing;
     }
-    final work = _recognitionTail.then((_) async {
-      if (_disposed) throw StateError('发票会话已关闭');
-      if (_cancelledRecognition.contains(id)) {
-        throw const _RecognitionCancelled();
-      }
-      _currentRecognition = id;
-      try {
-        final current = await repo.find(id);
-        if (current == null) throw const _RecognitionCancelled();
-        final result = await recognizeFile(
-          current.original,
-          preferOcr: preferOcr?.call() ?? false,
-        );
-        if (_disposed) throw StateError('发票会话已关闭');
-        if (_cancelledRecognition.contains(id)) {
-          throw const _RecognitionCancelled();
-        }
-        try {
-          await repo.applyRecognition(
-            id,
-            result.fields,
-            result.message,
-            structured: result.structured,
-            replaceExisting: !automatic,
-            expectedFields: automatic ? null : current.info.ticketFields,
-          );
-        } catch (e) {
-          if (_cancelledRecognition.contains(id)) {
-            throw const _RecognitionCancelled();
-          }
-          throw InvoiceRecognitionSaveError(result, invoiceError(e));
-        }
-        if (result.fields.isNotEmpty) recognitionFailures.remove(id);
-        return result;
-      } finally {
-        _currentRecognition = null;
-      }
-    });
+    final work = _recognitionTail.then((_) => _recognizeOne(id, automatic: automatic));
     _recognitionTail = work.then<void>(
       (_) {},
       onError: (Object _, StackTrace _) {},
@@ -256,6 +222,51 @@ class InvoiceSession extends ChangeNotifier {
     return work;
   }
 
+  /// 执行单张识别的实际工作，串行入口与并发池共用。每个 await 后都复查取消，
+  /// 删除中的发票会立即停止，不回写数据库，也不继续占用后续资源。
+  Future<InvoiceRecognition> _recognizeOne(
+    String id, {
+    required bool automatic,
+  }) async {
+    if (_disposed) throw StateError('发票会话已关闭');
+    if (_cancelledRecognition.contains(id)) {
+      throw const _RecognitionCancelled();
+    }
+    _activeRecognitions.add(id);
+    try {
+      final current = await repo.find(id);
+      if (current == null || _cancelledRecognition.contains(id)) {
+        throw const _RecognitionCancelled();
+      }
+      final result = await recognizeFile(
+        current.original,
+        preferOcr: preferOcr?.call() ?? false,
+      );
+      if (_disposed || _cancelledRecognition.contains(id)) {
+        throw const _RecognitionCancelled();
+      }
+      try {
+        await repo.applyRecognition(
+          id,
+          result.fields,
+          result.message,
+          structured: result.structured,
+          replaceExisting: !automatic,
+          expectedFields: automatic ? null : current.info.ticketFields,
+        );
+      } catch (e) {
+        if (_cancelledRecognition.contains(id)) {
+          throw const _RecognitionCancelled();
+        }
+        throw InvoiceRecognitionSaveError(result, invoiceError(e));
+      }
+      if (result.fields.isNotEmpty) recognitionFailures.remove(id);
+      return result;
+    } finally {
+      _activeRecognitions.remove(id);
+    }
+  }
+
   /// 后台批次有独立进度，绝不占用前台 busy；筛选、勾选、编辑、导入及切页继续可用。
   Future<void> recognizeSelected(List<String> ids) async {
     if (batchRecognizing || _disposed || ids.isEmpty) return;
@@ -272,12 +283,18 @@ class InvoiceSession extends ChangeNotifier {
     });
     var saved = 0, skipped = 0;
     final retryIDs = <String>{};
-    try {
-      for (final id in batch) {
-        if (_disposed) return;
+    // 有界并发池：最多 batchConcurrency 张同时识别。各 worker 通过共享游标
+    // 领取任务；取消、计数与进度在单 isolate 内顺序执行，无需额外加锁。
+    var cursor = 0;
+    Future<void> worker() async {
+      while (!_disposed) {
+        if (cursor >= batch.length) return;
+        final id = batch[cursor++];
         recognitionFailures.remove(id);
+        final job = _recognizeOne(id, automatic: false);
+        _manualJobs[id] = job;
         try {
-          final result = await recognizeEntry(id);
+          final result = await job;
           if (result.fields.isEmpty) {
             retryIDs.add(id);
             recognitionFailures[id] = '未识别到可用字段';
@@ -290,11 +307,26 @@ class InvoiceSession extends ChangeNotifier {
           if (_disposed) return;
           retryIDs.add(id);
           recognitionFailures[id] = invoiceError(e);
+        } finally {
+          if (identical(_manualJobs[id], job)) _manualJobs.remove(id);
+          _cancelledRecognition.remove(id);
+          if (!_disposed) {
+            await refresh();
+            update(
+              () => batchNotice = '后台识别 ${++batchProcessed} / $batchTotal 张',
+            );
+          }
         }
-        if (_disposed) return;
-        await refresh();
-        update(() => batchNotice = '后台识别 ${++batchProcessed} / $batchTotal 张');
       }
+    }
+
+    try {
+      final workers = [
+        for (var i = 0; i < math.min(batchConcurrency, batch.length); i++)
+          worker(),
+      ];
+      await Future.wait(workers);
+      if (_disposed) return;
       retryIDs.retainAll(await repo.existingIds(retryIDs));
       if (retryIDs.isNotEmpty) {
         batchError =
@@ -321,7 +353,7 @@ class InvoiceSession extends ChangeNotifier {
     _recognitionQueue.remove(id);
     if (_batchIds.contains(id) ||
         _manualJobs.containsKey(id) ||
-        _currentRecognition == id) {
+        _activeRecognitions.contains(id)) {
       _cancelledRecognition.add(id);
     }
     try {

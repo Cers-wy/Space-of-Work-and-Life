@@ -225,6 +225,72 @@ void main() {
     expect(parsed.message, isNotEmpty, reason: '该夹具不是完整发票，应提示核对');
   });
 
+  test('购销两栏税号同行且框距很小、名称带竖排标签前缀、税号尾随干扰字时仍正确分栏', () {
+    // 复刻数电票真实 PDFium 坐标：税号字形框左右仅隔约 30pt（<45），
+    // 名称值独占一行并在前面带「购/销」竖排标签单字，右税号右侧还有
+    // 页面边缘竖排「下载次数 1」干扰字，形成 19 位错误串。
+    const width = 595.28;
+    final lines = [
+      line(20, [
+        word(200, '电子发票', y: 20, w: 180),
+        word(440, '发票号码：26327000001393615902', y: 20, w: 150),
+      ]),
+      line(40, [word(440, '开票日期：2026年08月10日', y: 40, w: 150)]),
+      line(93, [
+        word(17, '购', y: 93, w: 7),
+        word(33, '名称', y: 93, w: 8),
+        word(57, '苏州恒力智能科技有限公司', y: 93, w: 106),
+        word(302, '销', y: 93, w: 7),
+        word(318, '名称', y: 93, w: 8),
+        word(341, '江苏苏汽旅游集团有限公司', y: 93, w: 106),
+      ]),
+      line(100, [word(52, '：', y: 100, w: 2), word(337, '：', y: 100, w: 2)]),
+      line(125, [
+        word(17, '信', y: 125, w: 7),
+        word(33, '统一社会信用代码/纳税人识别号：', y: 125, w: 120),
+        word(155, '91320509MA1PBKX066', y: 125, w: 120),
+        word(302, '信', y: 125, w: 7),
+        word(318, '统一社会信用代码/纳税人识别号：', y: 125, w: 120),
+        word(439, '91320508662731929U', y: 125, w: 120),
+        word(587, '1', y: 125, w: 6), // 页面边缘竖排干扰字
+      ]),
+    ];
+    final result = parseStructuredInvoice(lines, width: width);
+    expect(result.fields['buyer'], '苏州恒力智能科技有限公司');
+    expect(result.fields['seller'], '江苏苏汽旅游集团有限公司');
+    expect(result.fields['buyer_tax'], '91320509MA1PBKX066');
+    expect(result.fields['seller_tax'], '91320508662731929U');
+  });
+
+  test('名称标签与取值分处上下两行（滴滴票排版）仍能取到购销方名称与税号', () {
+    // 滴滴票把公司名印在「购/销」那行，「名称：」标签单独落到下一行。
+    final lines = [
+      line(20, [word(200, '电子发票（普通发票）', y: 20, w: 180)]),
+      line(40, [word(440, '发票号码：26917000000051860063', y: 40, w: 150)]),
+      line(60, [word(440, '开票日期：2026年09月18日', y: 60, w: 150)]),
+      line(93, [
+        word(18, '购', y: 93, w: 7),
+        word(59, '苏州恒力智能科技有限公司', y: 93, w: 106),
+        word(302, '销', y: 93, w: 7),
+        word(343, '大连滴滴畅行科技有限公司', y: 93, w: 106),
+      ]),
+      line(98, [word(32, '名称：', y: 98, w: 20), word(316, '名称：', y: 98, w: 20)]),
+      line(122, [
+        word(18, '信', y: 122, w: 7),
+        word(32, '统一社会信用代码/纳税人识别号：', y: 122, w: 132),
+        word(172, '91320509MA1PBKX066', y: 122, w: 106),
+        word(302, '信', y: 122, w: 7),
+        word(317, '统一社会信用代码/纳税人识别号：', y: 122, w: 132),
+        word(456, '91210202MAE7BQ4G6L', y: 122, w: 106),
+      ]),
+    ];
+    final result = parseStructuredInvoice(lines, width: 595.275);
+    expect(result.fields['buyer'], '苏州恒力智能科技有限公司');
+    expect(result.fields['seller'], '大连滴滴畅行科技有限公司');
+    expect(result.fields['buyer_tax'], '91320509MA1PBKX066');
+    expect(result.fields['seller_tax'], '91210202MAE7BQ4G6L');
+  });
+
   test('源码里使用的 SpaceIcon / IconButtonS 名称都有对应字形', () {
     // 防止「cloud / reload」这类缺字形落到 default 只画一个空方块。
     final controls = File('lib/ui/controls.dart').readAsStringSync();

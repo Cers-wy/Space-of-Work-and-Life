@@ -1741,10 +1741,48 @@ class TaskCard extends StatefulWidget {
   State<TaskCard> createState() => _TaskCardState();
 }
 
+/// 基线对比开关（仅性能对比构建使用）：加
+/// `--dart-define=SPACE_LEGACY_SMOKE_CLOCK=true` 退回每卡独立 20Hz 定时器的
+/// 旧行为，用于对比共享时钟优化的收益，测量完成后移除。
+const kLegacySmokeClock = bool.fromEnvironment('SPACE_LEGACY_SMOKE_CLOCK');
+
+/// 烟雾共享时钟：所有卡片由同一个定时器驱动，避免每张卡片各自持有
+/// Timer.periodic（N 张可见烟雾卡片 = N 路 20Hz 唤醒与零散帧调度）。
+/// 共享后每拍只有一次帧调度，所有卡片在同一帧内推进。13.3Hz 的节拍对
+/// 缓慢流动的烟雾不可分辨，时间速度仍为 1.0/秒；无活跃卡片时定时器停止。
+class _SmokeClock {
+  static final _SmokeClock instance = _SmokeClock._();
+  final notifier = ValueNotifier(0.0);
+  Timer? _timer;
+  int _users = 0;
+  _SmokeClock._();
+
+  double get time => notifier.value;
+
+  void acquire() {
+    _users++;
+    _timer ??= Timer.periodic(
+      const Duration(milliseconds: 75),
+      (_) => notifier.value += .075,
+    );
+  }
+
+  void release() {
+    _users = math.max(0, _users - 1);
+    if (_users == 0) {
+      _timer?.cancel();
+      _timer = null;
+      // 暂停时保留当前光晕。
+    }
+  }
+}
+
 class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
   bool hovered = false, active = true;
   Timer? timer;
   final phase = ValueNotifier(0.0);
+  bool smokeRunning = false;
+  double frozenTime = 0;
   @override
   void initState() {
     super.initState();
@@ -1773,15 +1811,27 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
         !WorkspaceMotion.activeOf(context) &&
         !dragActive.value &&
         !MediaQuery.of(context).disableAnimations;
-    if (enabled && timer == null) {
-      timer = Timer.periodic(
-        const Duration(milliseconds: 50),
-        (_) => phase.value += .05,
-      );
-    } else if (!enabled) {
-      timer?.cancel();
-      timer = null;
-      // Keep the current glow when animation is paused.
+    if (kLegacySmokeClock) {
+      // 基线对比路径：每张卡片独立 20Hz 定时器（优化前的旧行为）。
+      if (enabled && timer == null) {
+        timer = Timer.periodic(
+          const Duration(milliseconds: 50),
+          (_) => phase.value += .05,
+        );
+      } else if (!enabled) {
+        timer?.cancel();
+        timer = null;
+        // Keep the current glow when animation is paused.
+      }
+      return;
+    }
+    if (enabled && !smokeRunning) {
+      smokeRunning = true;
+      _SmokeClock.instance.acquire();
+    } else if (!enabled && smokeRunning) {
+      smokeRunning = false;
+      frozenTime = _SmokeClock.instance.time;
+      _SmokeClock.instance.release();
     }
   }
 
@@ -1794,6 +1844,7 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
   @override
   void dispose() {
     timer?.cancel();
+    if (smokeRunning) _SmokeClock.instance.release();
     phase.dispose();
     dragActive.removeListener(updateClock);
     WidgetsBinding.instance.removeObserver(this);
@@ -1805,17 +1856,35 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
     final p = Palette.of(c), t = widget.task, s = widget.store;
     final project = s.state.projectName(t.projectID);
     final scale = MediaQuery.textScalerOf(c).scale(14) / 14;
+    // 文字浮在烟雾背景上：浅色卡加白晕、深色卡加暗晕，提升对比度。
+    final onSmoke = <Color>[
+      Colors.white.withValues(alpha: .85),
+      const Color(0xff101020).withValues(alpha: .55),
+    ];
+    TextStyle smokeText({bool bold = false, double size = 14, Color? color}) =>
+        textStyle(p, bold: bold, size: size, color: color).copyWith(
+          shadows: [
+            Shadow(
+              color: p.blend(onSmoke[0], onSmoke[1]),
+              blurRadius: 4,
+            ),
+          ],
+        );
     final content = SizedBox(
       height: 184 + math.max(0, scale - 1) * 96,
       child: Glass(
         card: true,
         blur: false,
+        // 已取消玻璃底色遮挡：整卡直接由蓝紫烟雾 shader 作为背景。
+        // 想恢复轻微遮罩，把下面两个 alpha 从 .00 调大（原值 浅 .38 / 深 .36）。
         surfaceColor: p.blend(
-          Colors.white.withValues(alpha: .38),
-          const Color(0xff242032).withValues(alpha: .36),
+          Colors.white.withValues(alpha: .00),
+          const Color(0xff242032).withValues(alpha: .00),
         ),
         child: ValueListenableBuilder(
-          valueListenable: phase,
+          valueListenable: kLegacySmokeClock
+              ? phase
+              : _SmokeClock.instance.notifier,
           child: RepaintBoundary(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1833,7 +1902,7 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
                         Expanded(
                           child: Text(
                             project ?? '',
-                            style: textStyle(p, size: 12, color: p.purple),
+                            style: smokeText(size: 12, color: p.purple),
                             maxLines: 1,
                             softWrap: false,
                             overflow: TextOverflow.ellipsis,
@@ -1858,7 +1927,13 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
                             children: [
                               Text(
                                 t.title,
-                                style: textStyle(p, bold: true),
+                                style: smokeText(
+                                  bold: true,
+                                  color: p.blend(
+                                    const Color(0xff121222),
+                                    const Color(0xffffffff),
+                                  ),
+                                ),
                                 maxLines: 1,
                                 softWrap: false,
                                 overflow: TextOverflow.ellipsis,
@@ -1868,10 +1943,12 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
                                 t.description
                                     .replaceAll(RegExp(r'\s+'), ' ')
                                     .replaceAll('\uFFFC', '图片'),
-                                style: textStyle(
-                                  p,
+                                style: smokeText(
                                   size: 12,
-                                  color: p.secondary,
+                                  color: p.blend(
+                                    const Color(0xff343248),
+                                    const Color(0xfff4f4fc),
+                                  ),
                                 ),
                                 maxLines: 1,
                                 softWrap: false,
@@ -1982,7 +2059,7 @@ class _TaskCardState extends State<TaskCard> with WidgetsBindingObserver {
             enabled: s.smokeForStatus(t.status),
             seed: t.id.hashCode,
             emphasized: hovered || t.status == 'doing',
-            time: time,
+            time: !kLegacySmokeClock && !smokeRunning ? frozenTime : time,
             child: child!,
           ),
         ),
