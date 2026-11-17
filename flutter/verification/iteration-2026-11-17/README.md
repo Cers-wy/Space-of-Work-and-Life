@@ -1,5 +1,15 @@
 # 2026-11-17 状态烟雾设置调整
 
+## 2.3.6 发布打包与核验（2026-11-17）
+
+用户确认后发布：升版 **2.3.6（无 build 号，用户明确要求；CFBundleVersion 回退为 2.3.6）**，源码三个提交（ae1d609b 应用优化 / 0e6733f5 工具与文档 / c8c007f5 版本）已推送 `origin/main`（`a842db15..c8c007f5`）。Windows 同源同步随 main 完成；Windows 构建工作流为手动触发（workflow_dispatch），本机无 gh CLI，未代触发。
+
+- 打包：`tool/package_release_macos.sh`（用户终端执行，构建生产入口 `lib/main.dart`）+ `tool/package_macos.py`（深层 ad-hoc 签名 + 严格校验 + ZIP/DMG）。
+- 产物：`downloads/Space-2.3.6-macOS-universal.zip`（168 MB，SHA256 `46e38cd9…512aed`）、`downloads/Space-2.3.6-macOS-universal.dmg`（177 MB，SHA256 `2315cd34…8d9126`）；含 `安装说明.md`、`THIRD_PARTY_NOTICES.txt`；`downloads/SHA256SUMS.txt` 已更新。
+- 核验（`work/space-release-2.3.6/package-macos/verification.json`）：version/build 均 2.3.6、bundle id `com.cers.space.flutter`、universal（x86_64+arm64）、`codesign --verify --deep --strict` 通过、hdiutil verify 通过；另做 ZIP CRC 全检 OK，抽检生产二进制无探针特征字符串（ProbePauseBanner / legacy-per-card-20hz / run_perf_probe / performance_main 均 0 处）。DMG/ZIP 挂载解压与隔离启动由用户按安装说明自行验证。
+- 未做 Intel 实机验证与 Apple 公证（与历史版本一致）。旧版（2.3.3/2.3.4/2.3.5）分发包保留在 `downloads/`，待新版上传 GitHub Release 后再清理替换。
+- Windows 包未随本轮制作：如需 2.3.6 Windows 便携包，在 GitHub Actions 手动运行 "Windows portable build" 后取 artifact。
+
 ## 性能优化：烟雾共享时钟（减少 CPU 占用）与 Release 实测
 
 用户安排对整体占用做性能测试与优化，点名任务卡片 UI。本轮改动：`lib/ui/workspace.dart` 任务卡片烟雾由每卡独立 20Hz `Timer.periodic` 改为全局共享 13.3Hz 时钟 `_SmokeClock`（引用计数，无活跃烟雾卡时定时器完全停止；烟雾时间速度仍 1.0/秒，视觉风格不变）。保留 `SPACE_LEGACY_SMOKE_CLOCK` 编译期常量作为 A/B 基线路径，正常构建下为 false、死分支被编译器裁剪，不影响生产包。
