@@ -15,6 +15,7 @@ import 'package:space_flutter/core/repository.dart';
 import 'package:space_flutter/core/richtext.dart';
 import 'package:space_flutter/store.dart';
 import 'package:space_flutter/ui/dialogs.dart';
+import 'package:space_flutter/ui/theme.dart' show CardFlow;
 import 'package:space_flutter/ui/workspace.dart';
 
 final root = GlobalKey();
@@ -63,6 +64,68 @@ class ForegroundProbe extends WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) uninterrupted = false;
+  }
+}
+
+/// True while sampling is paused because the probe window is unfocused.
+final probePaused = ValueNotifier<bool>(false);
+
+/// Pauses until the probe window regains foreground focus so every scenario
+/// is sampled in the foreground. Probe-only code, never ships in the app.
+Future<void> awaitProbeForeground() async {
+  final deadline = DateTime.now().add(const Duration(minutes: 10));
+  while (!nativeForeground()) {
+    probePaused.value = true;
+    if (DateTime.now().isAfter(deadline)) {
+      probePaused.value = false;
+      throw StateError(
+        'Measurement paused over 10 minutes waiting for foreground focus',
+      );
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+  }
+  probePaused.value = false;
+}
+
+/// Amber banner shown over the probe UI whenever sampling is paused because
+/// the window lost focus; clicking the window resumes the run automatically.
+class ProbePauseBanner extends StatelessWidget {
+  const ProbePauseBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: 0,
+      child: IgnorePointer(
+        child: ValueListenableBuilder(
+          valueListenable: probePaused,
+          builder: (_, bool paused, _) =>
+              paused
+              ? Material(
+                  color: const Color(0xe6b7791a),
+                  elevation: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 18,
+                      horizontal: 24,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      '⏸ 测量已暂停 —— 请点击本窗口使其置于最前，采样将自动继续',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ),
+    );
   }
 }
 
@@ -129,11 +192,49 @@ double _percentile(Iterable<double> values, double p) {
   return sorted.isEmpty ? 0 : sorted[((sorted.length - 1) * p).ceil()];
 }
 
+/// Measures a scenario, redoing it when focus was lost mid-sample so the
+/// recorded sample always reflects an uninterrupted foreground run (max 2
+/// retries; the pause banner guides the user back to the window).
 Future<Map<String, Object?>> measure(
   String name,
   Future<void> Function() action,
 ) async {
+  var result = await _measureOnce(name, action);
+  var attempts = 1;
+  while (!(result['foregroundThroughout'] as bool? ?? false) && attempts < 3) {
+    await awaitProbeForeground();
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    result = await _measureOnce(name, action);
+    attempts++;
+  }
+  return result;
+}
+
+Future<Map<String, Object?>> _measureOnce(
+  String name,
+  Future<void> Function() action,
+) async {
+  await awaitProbeForeground();
   timings.clear();
+  // Probe-only diagnostics: prove which smoke clock is compiled in, the
+  // window size, and how many smoke cards are actually mounted, so the A/B
+  // protocol can self-check instead of trusting build flags.
+  final view = ui.PlatformDispatcher.instance.views.first;
+  var cardFlowTotal = 0, cardFlowSmoke = 0;
+  void countFlows(Element e) {
+    if (e.widget is CardFlow) {
+      cardFlowTotal++;
+      if ((e.widget as CardFlow).enabled) cardFlowSmoke++;
+    }
+    e.visitChildren(countFlows);
+  }
+
+  (root.currentContext! as Element).visitChildren(countFlows);
+  final smokeClock = kLegacySmokeClock ? 'legacy-per-card-20hz' : 'shared-13.3hz';
+  final windowLogicalSize =
+      '${(view.physicalSize.width / view.devicePixelRatio).toStringAsFixed(0)}'
+      'x'
+      '${(view.physicalSize.height / view.devicePixelRatio).toStringAsFixed(0)}';
   final foreground = ForegroundProbe();
   WidgetsBinding.instance.addObserver(foreground);
   final before = await processSample(), timer = Stopwatch()..start();
@@ -199,6 +300,10 @@ Future<Map<String, Object?>> measure(
     }).length,
     'lifecycle': WidgetsBinding.instance.lifecycleState?.name,
     'foregroundThroughout': foreground.uninterrupted,
+    'smokeClock': smokeClock,
+    'windowLogicalSize': windowLogicalSize,
+    'cardFlowTotal': cardFlowTotal,
+    'cardFlowSmokeEnabled': cardFlowSmoke,
   };
   await File(
     '${directory.path}/$name.json',
@@ -271,7 +376,12 @@ Future<void> main() async {
   runApp(
     KeyedSubtree(
       key: root,
-      child: SpaceApp(store: store),
+      child: Stack(
+        children: [
+          SpaceApp(store: store),
+          const ProbePauseBanner(),
+        ],
+      ),
     ),
   );
   final frames = <FrameTiming>[];
@@ -282,13 +392,7 @@ Future<void> main() async {
 
   SchedulerBinding.instance.addTimingsCallback(collect);
   try {
-    final deadline = DateTime.now().add(const Duration(seconds: 90));
-    while (!nativeForeground()) {
-      if (DateTime.now().isAfter(deadline)) {
-        throw StateError('Benchmark did not receive foreground focus');
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-    }
+    await awaitProbeForeground();
     await Future<void>.delayed(const Duration(seconds: 4));
     final results = <Map<String, Object?>>[];
     results.add(
@@ -393,6 +497,7 @@ Future<void> main() async {
       'mode':
           '${Platform.operatingSystem} Release / 120 synthetic tasks / two 4K images',
       'formalDataAccessed': false,
+      'smokeClock': kLegacySmokeClock ? 'legacy-per-card-20hz' : 'shared-13.3hz',
       'frameCount': frames.length,
       'results': results,
     };

@@ -264,3 +264,7 @@ Windows安装Flutter3.47.9与Visual Studio C++桌面开发工具，参考 `.gith
 ### Windows 自定义路径安装器（2026-11-14）
 
 用户追加 EXE 安装包需求。新增 tool/windows_installer.iss，复用已验证生产 ZIP；允许选择安装目录，安装/升级/卸载均保留个人文件。中文空格路径、38 文件哈希、程序替换及卸载保留三类配置占位文件验证通过。结果见 verification/windows-2026-11-13/installer.json；安装二进制在 downloads/，不入源码历史。应用代码未变，既有前台验收限制仍保留。
+
+### macOS 烟雾时钟性能优化与实测（2026-11-17）
+
+任务卡片烟雾由每卡独立 20Hz 定时器改为全局共享 13.3Hz 时钟（`lib/ui/workspace.dart` `_SmokeClock` 引用计数，无活跃卡时定时器停止；烟雾速度不变）。保留 `SPACE_LEGACY_SMOKE_CLOCK` 编译期常量作基线对比路径，正常构建死分支被裁剪。Release 探针 A/B 实测（120 合成任务、14 场景前台全程有效、编译时钟硬校验双通过）：board-idle CPU −33%（37.9→25.3%，帧 20.6→14.6fps，rasterP95 11.68→9.01ms），image 场景 −12~−22%，交互场景 −2~−5%，空闲视图持平；内存持平。定向用例优化路径 63 项、legacy 路径 57 项通过。探针与一键对比脚本：`tool/run_perf_comparison.sh`、`tool/run_perf_probe.py`、`tool/performance_main.dart`（含失焦横幅、场景重试、时钟自校验）；数据与日志在 `work/space-perf-20261117/`（不入源码历史），正式记录见 `verification/iteration-2026-11-17/README.md`。Agent 通道构建仍受 macOS `sandbox-exec` 系统级限制，Release 构建/采样需用户终端执行脚本。本轮未打包发布、未动版本号（2.3.5+22），Windows 端经同源源码自动获得同等优化。
