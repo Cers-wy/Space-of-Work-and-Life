@@ -2,6 +2,8 @@
 
 ## 2.3.5（22）功能预览 · macOS / Windows
 
+11月17日的烟雾开关末列、内置标记与纯图标按钮调整已更新main源码，供用户在当前隔离Debug窗口验收；下方preview.1安装包不含这些调整，尚未重新出包。
+
 [预览发布页](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/tag/v2.3.5-preview.1) · [本轮功能与用法](../flutter/verification/发布说明-2.3.5-预览.md)
 
 - [macOS DMG](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/Space-2.3.5-macOS-universal.dmg) · [macOS ZIP](https://github.com/Cers-wy/Space-of-Work-and-Life/releases/download/v2.3.5-preview.1/Space-2.3.5-macOS-universal.zip)

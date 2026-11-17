@@ -1612,7 +1612,8 @@ class _StatusesState extends State<_Statuses> {
       close: () => Navigator.pop(c),
       footer: [
         const Spacer(),
-        SpaceButton.form(
+        IconButtonS(
+          'check',
           '完成',
           primary: true,
           onPressed: () => Navigator.pop(c),
@@ -1686,7 +1687,8 @@ class _StatusesState extends State<_Statuses> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  SpaceButton.form(
+                                  IconButtonS(
+                                    'plus',
                                     '新增状态',
                                     primary: true,
                                     onPressed: s.busy
@@ -1716,39 +1718,37 @@ class _StatusesState extends State<_Statuses> {
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(
-                                    statusName(status),
-                                    style: textStyle(p, bold: true),
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          statusName(status),
+                                          style: textStyle(p, bold: true),
+                                        ),
+                                      ),
+                                      if (builtins.contains(status)) ...[
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '内置',
+                                          key: ValueKey(
+                                            'status-builtin-$status',
+                                          ),
+                                          style: textStyle(
+                                            p,
+                                            size: 12,
+                                            color: p.muted,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
-                                SpaceCheckbox(
-                                  key: ValueKey('status-smoke-$status'),
-                                  label: '烟雾动画',
-                                  value: s.smokeForStatus(status),
-                                  dense: true,
-                                  onPressed: s.busy
-                                      ? null
-                                      : () => s.setStatusSmoke(
-                                          status,
-                                          !s.smokeForStatus(status),
-                                        ),
-                                ),
-                                const SizedBox(width: 16),
                                 Text(
                                   '${s.state.tasks.where((t) => t.status == status).length} 项',
                                   style: textStyle(p, size: 12, color: p.muted),
                                 ),
                                 const SizedBox(width: 12),
-                                if (builtins.contains(status))
-                                  Text(
-                                    '内置',
-                                    style: textStyle(
-                                      p,
-                                      size: 12,
-                                      color: p.muted,
-                                    ),
-                                  )
-                                else ...[
+                                if (!builtins.contains(status)) ...[
                                   IconButtonS(
                                     s.state.disabledStatuses.contains(status)
                                         ? 'play'
@@ -1761,9 +1761,9 @@ class _StatusesState extends State<_Statuses> {
                                         : () => s.toggleStatus(status),
                                   ),
                                   const SizedBox(width: 8),
-                                  SpaceButton.form(
-                                    '删除',
-                                    tooltip: '删除状态：${statusName(status)}',
+                                  IconButtonS(
+                                    'trash',
+                                    '删除状态：${statusName(status)}',
                                     danger: true,
                                     onPressed: () async {
                                       if (s.busy) return;
@@ -1829,7 +1829,8 @@ class _StatusesState extends State<_Statuses> {
                                                       mainAxisAlignment:
                                                           MainAxisAlignment.end,
                                                       children: [
-                                                        SpaceButton.form(
+                                                        IconButtonS(
+                                                          'x',
                                                           '取消',
                                                           onPressed: () =>
                                                               Navigator.pop(c),
@@ -1837,7 +1838,8 @@ class _StatusesState extends State<_Statuses> {
                                                         const SizedBox(
                                                           width: 8,
                                                         ),
-                                                        SpaceButton.form(
+                                                        IconButtonS(
+                                                          'trash',
                                                           '迁移并删除',
                                                           danger: true,
                                                           onPressed: () =>
@@ -1861,6 +1863,23 @@ class _StatusesState extends State<_Statuses> {
                                     },
                                   ),
                                 ],
+                                const SizedBox(width: 12),
+                                Tooltip(
+                                  message: '烟雾动画',
+                                  child: SpaceCheckbox(
+                                    key: ValueKey('status-smoke-$status'),
+                                    label: '烟雾动画',
+                                    showLabel: false,
+                                    value: s.smokeForStatus(status),
+                                    dense: true,
+                                    onPressed: s.busy
+                                        ? null
+                                        : () => s.setStatusSmoke(
+                                            status,
+                                            !s.smokeForStatus(status),
+                                          ),
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 8),
