@@ -1671,6 +1671,7 @@ class DateField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final bool allowsClear;
   final bool matchFieldWidth;
+  final double height;
   const DateField({
     super.key,
     required this.value,
@@ -1678,10 +1679,12 @@ class DateField extends StatelessWidget {
     this.label = '截止日期',
     this.allowsClear = true,
     this.matchFieldWidth = false,
+    this.height = 40,
   });
   @override
   Widget build(BuildContext c) => SpacePickerField(
     label: label,
+    height: height,
     text: value.isEmpty ? '未设置$label' : value,
     icon: 'calendar',
     placeholder: value.isEmpty,

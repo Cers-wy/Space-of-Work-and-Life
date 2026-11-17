@@ -35,6 +35,7 @@ class ToolBoard extends StatefulWidget {
 
 class ToolBoardState extends State<ToolBoard> {
   List<ToolModule> modules = [];
+  final boardChanges = ValueNotifier(0);
   String? error;
   bool saving = false;
   ToolModule? resizing;
@@ -49,12 +50,19 @@ class ToolBoardState extends State<ToolBoard> {
     }
   }
 
+  @override
+  void dispose() {
+    boardChanges.dispose();
+    super.dispose();
+  }
+
   Future<bool> save(List<ToolModule> next) async {
     if (saving) return false;
     setState(() {
       saving = true;
       error = null;
     });
+    boardChanges.value++;
     try {
       final ok = await widget.store.preferences(
         encodeToolBoard(next, widget.store.state.settings),
@@ -76,7 +84,10 @@ class ToolBoardState extends State<ToolBoard> {
       }
       return false;
     } finally {
-      if (mounted) setState(() => saving = false);
+      if (mounted) {
+        setState(() => saving = false);
+        boardChanges.value++;
+      }
     }
   }
 
@@ -93,34 +104,64 @@ class ToolBoardState extends State<ToolBoard> {
   Future<void> hiddenModules() async {
     await sheet<void>(
       context,
-      StatefulBuilder(
-        builder: (c, set) => sheetFrame(
+      ListenableBuilder(
+        listenable: boardChanges,
+        builder: (c, _) => sheetFrame(
           c,
           title: '隐藏的模块',
           close: () => Navigator.pop(c),
           body: ListView(
+            padding: const EdgeInsets.all(16),
             children: [
               if (!modules.any((m) => m.hidden))
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(16),
                   child: Text('没有隐藏的模块', style: textStyle(Palette.of(c))),
                 ),
-              for (final m in modules.where((m) => m.hidden))
-                ListTile(
-                  title: Text(m.name),
-                  trailing: SpaceButton.form(
-                    '恢复',
-                    onPressed: saving
-                        ? null
-                        : () async {
-                            await replace(m.copy(hidden: false));
-                            if (c.mounted) set(() {});
-                          },
-                  ),
+              for (final m in modules.where((m) => m.hidden)) ...[
+                SpaceEditorRow(
+                  children: [
+                    SizedBox(
+                      width: 32,
+                      child: Center(child: toolIcon(m.svg, 'tools', c)),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        m.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textStyle(Palette.of(c), bold: true),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButtonS(
+                      'eye',
+                      '取消隐藏：${m.name}',
+                      onPressed: saving
+                          ? null
+                          : () => replace(m.copy(hidden: false)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
+              if (error != null)
+                Text(
+                  error!,
+                  style: textStyle(Palette.of(c), color: Palette.of(c).red),
                 ),
             ],
           ),
-          footer: [],
+          footer: [
+            const Spacer(),
+            IconButtonS(
+              'check',
+              '完成',
+              primary: true,
+              onPressed: () => Navigator.pop(c),
+            ),
+          ],
         ),
       ),
       width: 440,
@@ -142,6 +183,7 @@ class ToolBoardState extends State<ToolBoard> {
                 ('add', '添加小工具'),
                 ('edit', '编辑模块与工具'),
                 ('hide', '隐藏模块'),
+                ('hidden', '恢复隐藏模块'),
                 ('delete', '删除模块'),
               ])
                 SpaceButton(
@@ -158,7 +200,7 @@ class ToolBoardState extends State<ToolBoard> {
         ),
       ),
       width: 200,
-      height: 180,
+      height: 220,
       barrierColor: Colors.transparent,
     );
     if (!mounted) return;
@@ -173,6 +215,8 @@ class ToolBoardState extends State<ToolBoard> {
         if (edited != null && mounted) await replace(edited);
       case 'hide':
         await replace(module.copy(hidden: true));
+      case 'hidden':
+        await hiddenModules();
       case 'delete':
         if (await confirm(
           context,
@@ -450,7 +494,20 @@ class ToolBoardState extends State<ToolBoard> {
                 padding: const EdgeInsets.all(24),
                 child: visible.isEmpty
                     ? Center(
-                        child: SpaceButton.form('添加模块', onPressed: addModule),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SpaceButton.form('添加模块', onPressed: addModule),
+                            if (modules.any((m) => m.hidden)) ...[
+                              const SizedBox(height: 12),
+                              SpaceTextButton(
+                                '恢复隐藏模块',
+                                icon: 'eye',
+                                onPressed: hiddenModules,
+                              ),
+                            ],
+                          ],
+                        ),
                       )
                     : SizedBox(
                         height: height,
@@ -637,6 +694,44 @@ Future<String?> chooseToolSvg() async {
   return validateToolSvg(await source.readAsString());
 }
 
+class _ToolIconControls extends StatelessWidget {
+  final String svg;
+  final VoidCallback onChoose, onRemove;
+  const _ToolIconControls({
+    required this.svg,
+    required this.onChoose,
+    required this.onRemove,
+  });
+  @override
+  Widget build(BuildContext c) => SpaceEditorRow(
+    children: [
+      SizedBox(width: 32, child: Center(child: toolIcon(svg, 'tools', c))),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('工具图标', style: textStyle(Palette.of(c), bold: true)),
+            Text(
+              svg.isEmpty ? '使用默认图标' : '已保存 SVG 图标',
+              style: textStyle(
+                Palette.of(c),
+                size: 12,
+                color: Palette.of(c).muted,
+              ),
+            ),
+          ],
+        ),
+      ),
+      IconButtonS('upload', '上传 SVG 图标', onPressed: onChoose),
+      if (svg.isNotEmpty) ...[
+        const SizedBox(width: 8),
+        IconButtonS('x', '移除图标', onPressed: onRemove),
+      ],
+    ],
+  );
+}
+
 Future<ToolLink?> editToolLink(
   BuildContext context, {
   ToolLink? initial,
@@ -655,69 +750,71 @@ Future<ToolLink?> editToolLink(
           title: initial == null ? '添加小工具' : '编辑小工具',
           close: () => Navigator.pop(c),
           body: ListView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             children: [
-              field(c, '工具名称', SpaceInput(controller: name, hint: '工具名称')),
-              const SizedBox(height: 16),
-              field(
-                c,
-                '打开方式',
-                SpaceSelect(
-                  value: kind,
-                  label: '打开方式',
-                  options: const {'web': '浏览器网页', 'local': '本地 HTML 或应用'},
-                  onChanged: (v) => set(() => kind = v),
-                ),
-              ),
-              const SizedBox(height: 16),
-              field(
-                c,
-                '工具入口',
-                SpaceInput(
-                  controller: target,
-                  hint: kind == 'web' ? 'https://' : '文件或应用完整路径',
-                ),
-              ),
-              if (kind == 'local')
-                SpaceButton.form(
-                  '选择本地入口',
-                  onPressed: () async {
-                    final path = await DesktopHost.openFile(
-                      title: '选择 HTML 或应用',
-                    );
-                    if (path != null) target.text = path;
-                  },
-                ),
-              const SizedBox(height: 16),
-              Row(
+              SpaceEditorSection(
                 children: [
-                  toolIcon(svg, 'tools', c),
-                  const SizedBox(width: 8),
-                  SpaceButton.form(
-                    '上传 SVG',
-                    onPressed: () async {
-                      try {
-                        final value = await chooseToolSvg();
-                        if (value != null && c.mounted) {
-                          set(() {
-                            svg = value;
-                            error = null;
-                          });
-                        }
-                      } catch (_) {
-                        if (c.mounted) {
-                          set(() => error = 'SVG 无效，请选择独立的矢量图标（不超过 128 KB）。');
-                        }
-                      }
-                    },
-                  ),
-                  if (svg.isNotEmpty)
-                    IconButtonS(
-                      'x',
-                      '移除图标',
-                      onPressed: () => set(() => svg = ''),
+                  field(c, '工具名称', SpaceInput(controller: name, hint: '工具名称')),
+                  const SizedBox(height: 12),
+                  field(
+                    c,
+                    '打开方式',
+                    SpaceSelect(
+                      value: kind,
+                      label: '打开方式',
+                      options: const {'web': '浏览器网页', 'local': '本地 HTML 或应用'},
+                      onChanged: (v) => set(() => kind = v),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  field(
+                    c,
+                    '工具入口',
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SpaceInput(
+                            controller: target,
+                            hint: kind == 'web' ? 'https://' : '文件或应用完整路径',
+                          ),
+                        ),
+                        if (kind == 'local') ...[
+                          const SizedBox(width: 8),
+                          IconButtonS(
+                            'folder',
+                            '选择本地入口',
+                            onPressed: () async {
+                              final path = await DesktopHost.openFile(
+                                title: '选择 HTML 或应用',
+                              );
+                              if (path != null && c.mounted) target.text = path;
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              _ToolIconControls(
+                svg: svg,
+                onChoose: () async {
+                  try {
+                    final value = await chooseToolSvg();
+                    if (value != null && c.mounted) {
+                      set(() {
+                        svg = value;
+                        error = null;
+                      });
+                    }
+                  } catch (_) {
+                    if (c.mounted) {
+                      set(() => error = 'SVG 无效，请选择独立的矢量图标（不超过 128 KB）。');
+                    }
+                  }
+                },
+                onRemove: () => set(() => svg = ''),
               ),
               if (error != null)
                 Padding(
@@ -730,10 +827,12 @@ Future<ToolLink?> editToolLink(
             ],
           ),
           footer: [
-            SpaceButton.form('取消', onPressed: () => Navigator.pop(c)),
+            const Spacer(),
+            IconButtonS('x', '取消', onPressed: () => Navigator.pop(c)),
             const SizedBox(width: 8),
-            SpaceButton.form(
-              '保存',
+            IconButtonS(
+              'check',
+              '保存小工具',
               primary: true,
               onPressed: () {
                 try {
@@ -785,72 +884,69 @@ Future<ToolModule?> editToolModule(
           title: initial == null ? '添加模块' : '编辑模块与工具',
           close: () => Navigator.pop(c),
           body: ListView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             children: [
-              field(c, '模块名称', SpaceInput(controller: name, hint: '模块名称')),
-              const SizedBox(height: 16),
-              field(c, '说明', SpaceInput(controller: description, hint: '可选')),
-              const SizedBox(height: 16),
-              if (initial == null) ...[
-                field(
-                  c,
-                  '模块类型',
-                  SpaceSelect(
-                    value: builtin,
-                    label: '模块类型',
-                    options: const {
-                      '': '自定义工具',
-                      'merge': '内置发票合并',
-                      'drive': '内置文件管理',
-                    },
-                    onChanged: (v) => set(() => builtin = v),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-              Row(
+              SpaceEditorSection(
                 children: [
-                  toolIcon(svg, 'tools', c),
-                  const SizedBox(width: 8),
-                  SpaceButton.form(
-                    '上传 SVG',
-                    onPressed: () async {
-                      try {
-                        final value = await chooseToolSvg();
-                        if (value != null && c.mounted) {
-                          set(() {
-                            svg = value;
-                            error = null;
-                          });
-                        }
-                      } catch (_) {
-                        if (c.mounted) {
-                          set(() => error = 'SVG 无效，请选择独立的矢量图标（不超过 128 KB）。');
-                        }
-                      }
-                    },
+                  field(c, '模块名称', SpaceInput(controller: name, hint: '模块名称')),
+                  const SizedBox(height: 12),
+                  field(
+                    c,
+                    '说明',
+                    SpaceInput(controller: description, hint: '可选'),
                   ),
-                  if (svg.isNotEmpty)
-                    IconButtonS(
-                      'x',
-                      '移除图标',
-                      onPressed: () => set(() => svg = ''),
+                  const SizedBox(height: 12),
+                  if (initial == null) ...[
+                    field(
+                      c,
+                      '模块类型',
+                      SpaceSelect(
+                        value: builtin,
+                        label: '模块类型',
+                        options: const {
+                          '': '自定义工具',
+                          'merge': '内置发票合并',
+                          'drive': '内置文件管理',
+                        },
+                        onChanged: (v) => set(() => builtin = v),
+                      ),
                     ),
+                    const SizedBox(height: 12),
+                  ],
+                  field(
+                    c,
+                    '卡片默认入口',
+                    SpaceSelect(
+                      value: defaultTool,
+                      label: '默认入口',
+                      options: {
+                        '': builtin.isEmpty ? '第一个小工具' : '内置功能',
+                        for (final t in tools) t.id: t.name,
+                      },
+                      onChanged: (v) => set(() => defaultTool = v),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
-              field(
-                c,
-                '卡片默认入口',
-                SpaceSelect(
-                  value: defaultTool,
-                  label: '默认入口',
-                  options: {
-                    '': builtin.isEmpty ? '第一个小工具' : '内置功能',
-                    for (final t in tools) t.id: t.name,
-                  },
-                  onChanged: (v) => set(() => defaultTool = v),
-                ),
+              _ToolIconControls(
+                svg: svg,
+                onChoose: () async {
+                  try {
+                    final value = await chooseToolSvg();
+                    if (value != null && c.mounted) {
+                      set(() {
+                        svg = value;
+                        error = null;
+                      });
+                    }
+                  } catch (_) {
+                    if (c.mounted) {
+                      set(() => error = 'SVG 无效，请选择独立的矢量图标（不超过 128 KB）。');
+                    }
+                  }
+                },
+                onRemove: () => set(() => svg = ''),
               ),
               const SizedBox(height: 16),
               Row(
@@ -871,9 +967,14 @@ Future<ToolModule?> editToolModule(
                   ),
                 ],
               ),
-              for (final t in tools)
-                Row(
+              for (final t in tools) ...[
+                SpaceEditorRow(
                   children: [
+                    SizedBox(
+                      width: 32,
+                      child: Center(child: toolIcon(t.svg, 'tools', c)),
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         t.name,
@@ -896,6 +997,7 @@ Future<ToolModule?> editToolModule(
                         }
                       },
                     ),
+                    const SizedBox(width: 8),
                     IconButtonS(
                       'trash',
                       '移除${t.name}',
@@ -917,6 +1019,8 @@ Future<ToolModule?> editToolModule(
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+              ],
               if (error != null)
                 Text(
                   error!,
@@ -925,10 +1029,12 @@ Future<ToolModule?> editToolModule(
             ],
           ),
           footer: [
-            SpaceButton.form('取消', onPressed: () => Navigator.pop(c)),
+            const Spacer(),
+            IconButtonS('x', '取消', onPressed: () => Navigator.pop(c)),
             const SizedBox(width: 8),
-            SpaceButton.form(
-              '保存',
+            IconButtonS(
+              'check',
+              '保存模块',
               primary: true,
               onPressed: () {
                 if (name.text.trim().isEmpty ||

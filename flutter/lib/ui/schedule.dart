@@ -46,6 +46,49 @@ class GanttView extends StatefulWidget {
 class _GanttViewState extends State<GanttView> {
   DateTime anchor = DateTime.utc(beijingDay().year, beijingDay().month);
   final horizontal = ScrollController();
+  late final ScrollController timelineVertical;
+  double verticalOffset = 0;
+  late final ScrollController infoVertical;
+  bool syncingVertical = false;
+  Drag? infoHorizontalDrag;
+  @override
+  void initState() {
+    super.initState();
+    void attach(ScrollPosition position) =>
+        position.correctPixels(verticalOffset);
+    infoVertical = ScrollController(keepScrollOffset: false, onAttach: attach);
+    timelineVertical = ScrollController(
+      keepScrollOffset: false,
+      onAttach: attach,
+    );
+    infoVertical.addListener(syncInfoScroll);
+    timelineVertical.addListener(syncTimelineScroll);
+  }
+
+  void syncInfoScroll() => syncVertical(infoVertical, timelineVertical);
+  void syncTimelineScroll() => syncVertical(timelineVertical, infoVertical);
+  void syncVertical(ScrollController source, ScrollController target) {
+    if (!source.hasClients) return;
+    verticalOffset = source.offset;
+    if (syncingVertical ||
+        !target.hasClients ||
+        !source.position.hasContentDimensions ||
+        !target.position.hasContentDimensions) {
+      return;
+    }
+    final offset = source.offset.clamp(
+      target.position.minScrollExtent,
+      target.position.maxScrollExtent,
+    );
+    if ((target.offset - offset).abs() < .01) return;
+    syncingVertical = true;
+    try {
+      target.jumpTo(offset);
+    } finally {
+      syncingVertical = false;
+    }
+  }
+
   DateTime? lastMonthMove;
   double edgeDistance = 0;
   bool get freezeInfo => s.state.settings['ganttFreezeInfo'] == 'true';
@@ -56,7 +99,10 @@ class _GanttViewState extends State<GanttView> {
   int get days => DateTime.utc(anchor.year, anchor.month + 1, 0).day;
   @override
   void dispose() {
+    infoHorizontalDrag?.cancel();
     horizontal.dispose();
+    infoVertical.dispose();
+    timelineVertical.dispose();
     super.dispose();
   }
 
@@ -247,6 +293,249 @@ class _GanttViewState extends State<GanttView> {
                     }
                   }
                 }
+                Widget buildPane(_GanttPane pane) => Column(
+                  children: [
+                    SizedBox(
+                      height: 64,
+                      child: _GanttSplitRow(
+                        pane: pane,
+                        children: [
+                          SizedBox(
+                            width: 400,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 184,
+                                    child: Text(
+                                      '项目 / 任务名称',
+                                      style: textStyle(
+                                        p,
+                                        size: 12,
+                                        color: p.secondary,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 64,
+                                    child: Text(
+                                      '状态',
+                                      style: textStyle(
+                                        p,
+                                        size: 12,
+                                        color: p.secondary,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '开始 / 截止日期',
+                                    style: textStyle(
+                                      p,
+                                      size: 12,
+                                      color: p.secondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          for (final h in headers())
+                            Container(
+                              width: dw * h.days,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: dayString(h.start) == s.today
+                                    ? p.hover
+                                    : null,
+                                border: Border.all(color: p.border, width: .5),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    h.title,
+                                    maxLines: 1,
+                                    style: textStyle(p, size: 12, bold: true),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    h.detail,
+                                    style: textStyle(
+                                      p,
+                                      size: 12,
+                                      color: p.muted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        key: ValueKey('gantt-rows-${pane.name}'),
+                        controller: pane == _GanttPane.info
+                            ? infoVertical
+                            : timelineVertical,
+                        itemCount: rows.length + 1,
+                        itemExtentBuilder: (i, _) => i == rows.length
+                            ? 40
+                            : rows[i].task == null
+                            ? 48
+                            : 64,
+                        itemBuilder: (c, i) {
+                          if (i == rows.length) {
+                            if (pane == _GanttPane.timeline) {
+                              return const SizedBox(height: 40);
+                            }
+                            return SpaceButton(
+                              onPressed: () => editTask(
+                                c,
+                                s,
+                                SpaceTask.create(projectID: s.query.projectID),
+                              ),
+                              child: const Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text('＋ 添加任务'),
+                              ),
+                            );
+                          }
+                          final row = rows[i];
+                          if (row.task != null) {
+                            return _GanttRow(
+                              task: row.task!,
+                              store: s,
+                              anchor: anchor,
+                              dayWidth: dw,
+                              days: days,
+                              mode: mode,
+                              pane: pane,
+                            );
+                          }
+                          final schedules = row.tasks
+                              .map(
+                                (t) =>
+                                    TaskSchedule.forTask(t, parseDay(s.today)!),
+                              )
+                              .toList();
+                          final start = schedules
+                                  .map((x) => x.start)
+                                  .reduce((a, b) => a.isBefore(b) ? a : b),
+                              end = schedules
+                                  .map((x) => x.end)
+                                  .reduce((a, b) => a.isAfter(b) ? a : b);
+                          final range = _barBounds(
+                            TaskSchedule(start, end),
+                            anchor,
+                            dw,
+                            days,
+                          );
+                          return Container(
+                            height: 48,
+                            color: p.hover.withValues(
+                              alpha: p.dark ? 0.112 : .056,
+                            ),
+                            child: _GanttSplitRow(
+                              pane: pane,
+                              children: [
+                                SizedBox(
+                                  width: 400,
+                                  child: SpaceButton(
+                                    onPressed: () => setState(() {
+                                      if (!collapsed.remove(row.group)) {
+                                        collapsed.add(row.group!);
+                                      }
+                                    }),
+                                    child: Row(
+                                      children: [
+                                        SpaceIcon(
+                                          collapsed.contains(row.group)
+                                              ? 'right'
+                                              : 'down',
+                                          size: 12,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        SpaceIcon('folder', color: p.purple),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            row.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: textStyle(p, bold: true),
+                                          ),
+                                        ),
+                                        Text(
+                                          '${row.tasks.length}',
+                                          style: textStyle(
+                                            p,
+                                            size: 12,
+                                            color: p.muted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: dw * days,
+                                  child: Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: CustomPaint(
+                                          painter: _GridPainter(
+                                            anchor,
+                                            dw,
+                                            p,
+                                            s.today,
+                                            days,
+                                            mode,
+                                          ),
+                                        ),
+                                      ),
+                                      if (range != null)
+                                        Positioned(
+                                          left: range.$1,
+                                          top: 20,
+                                          width: range.$2,
+                                          height: 8,
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              color: GanttInk.forStatus(
+                                                p,
+                                                'doing',
+                                              ).fill.withValues(alpha: .7),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+                Widget buildTimeline(_GanttPane pane) => SingleChildScrollView(
+                  key: const ValueKey('gantt-timeline'),
+                  controller: horizontal,
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: pane == _GanttPane.all
+                        ? total.toDouble()
+                        : days * dw,
+                    child: buildPane(pane),
+                  ),
+                );
                 return Listener(
                   onPointerSignal: (event) {
                     if (event is! PointerScrollEvent ||
@@ -259,14 +548,18 @@ class _GanttViewState extends State<GanttView> {
                         ? event.scrollDelta.dy
                         : 0.0;
                     final pos = horizontal.position;
-                    if (dx != 0 &&
-                        (dx < 0 && pos.pixels <= 0 ||
-                            dx > 0 && pos.pixels >= pos.maxScrollExtent)) {
-                      GestureBinding.instance.pointerSignalResolver.register(
-                        event,
-                        (_) => edgeScroll(dx),
-                      );
-                    }
+                    if (dx == 0) return;
+                    GestureBinding.instance.pointerSignalResolver.register(
+                      event,
+                      (_) {
+                        if (dx < 0 && pos.pixels <= pos.minScrollExtent ||
+                            dx > 0 && pos.pixels >= pos.maxScrollExtent) {
+                          edgeScroll(dx);
+                        } else {
+                          pos.pointerScroll(dx);
+                        }
+                      },
+                    );
                   },
                   child: NotificationListener<OverscrollNotification>(
                     onNotification: (n) {
@@ -275,272 +568,40 @@ class _GanttViewState extends State<GanttView> {
                       }
                       return false;
                     },
-                    child: SingleChildScrollView(
-                      key: const ValueKey('gantt-timeline'),
-                      controller: horizontal,
-                      scrollDirection: Axis.horizontal,
-                      child: SizedBox(
-                        width: total.toDouble(),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 64,
-                              child: _GanttSplitRow(
-                                scroll: horizontal,
-                                pinned: freezeInfo,
-                                children: [
-                                  SizedBox(
-                                    width: 400,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          SizedBox(
-                                            width: 184,
-                                            child: Text(
-                                              '项目 / 任务名称',
-                                              style: textStyle(
-                                                p,
-                                                size: 12,
-                                                color: p.secondary,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 64,
-                                            child: Text(
-                                              '状态',
-                                              style: textStyle(
-                                                p,
-                                                size: 12,
-                                                color: p.secondary,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            '开始 / 截止日期',
-                                            style: textStyle(
-                                              p,
-                                              size: 12,
-                                              color: p.secondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                    child: freezeInfo
+                        ? Row(
+                            children: [
+                              SizedBox(
+                                width: 400,
+                                child: GestureDetector(
+                                  onHorizontalDragStart: (details) {
+                                    infoHorizontalDrag = horizontal.position
+                                        .drag(
+                                          details,
+                                          () => infoHorizontalDrag = null,
+                                        );
+                                  },
+                                  onHorizontalDragUpdate: (details) =>
+                                      infoHorizontalDrag?.update(details),
+                                  onHorizontalDragEnd: (details) =>
+                                      infoHorizontalDrag?.end(details),
+                                  onHorizontalDragCancel: () =>
+                                      infoHorizontalDrag?.cancel(),
+                                  child: ClipRect(
+                                    child: ScrollConfiguration(
+                                      behavior: ScrollConfiguration.of(c)
+                                          .copyWith(scrollbars: false),
+                                      child: buildPane(_GanttPane.info),
                                     ),
                                   ),
-                                  for (final h in headers())
-                                    Container(
-                                      width: dw * h.days,
-                                      height: 64,
-                                      decoration: BoxDecoration(
-                                        color: dayString(h.start) == s.today
-                                            ? p.hover
-                                            : null,
-                                        border: Border.all(
-                                          color: p.border,
-                                          width: .5,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            h.title,
-                                            maxLines: 1,
-                                            style: textStyle(
-                                              p,
-                                              size: 12,
-                                              bold: true,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            h.detail,
-                                            style: textStyle(
-                                              p,
-                                              size: 12,
-                                              color: p.muted,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                ],
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: rows.length + 1,
-                                itemExtentBuilder: (i, _) => i == rows.length
-                                    ? 40
-                                    : rows[i].task == null
-                                    ? 48
-                                    : 64,
-                                itemBuilder: (c, i) {
-                                  if (i == rows.length) {
-                                    return SpaceButton(
-                                      onPressed: () => editTask(
-                                        c,
-                                        s,
-                                        SpaceTask.create(
-                                          projectID: s.query.projectID,
-                                        ),
-                                      ),
-                                      child: const Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text('＋ 添加任务'),
-                                      ),
-                                    );
-                                  }
-                                  final row = rows[i];
-                                  if (row.task != null) {
-                                    return _GanttRow(
-                                      task: row.task!,
-                                      store: s,
-                                      anchor: anchor,
-                                      dayWidth: dw,
-                                      days: days,
-                                      mode: mode,
-                                      scroll: horizontal,
-                                      pinned: freezeInfo,
-                                    );
-                                  }
-                                  final schedules = row.tasks
-                                      .map(
-                                        (t) => TaskSchedule.forTask(
-                                          t,
-                                          parseDay(s.today)!,
-                                        ),
-                                      )
-                                      .toList();
-                                  final start = schedules
-                                          .map((x) => x.start)
-                                          .reduce(
-                                            (a, b) => a.isBefore(b) ? a : b,
-                                          ),
-                                      end = schedules
-                                          .map((x) => x.end)
-                                          .reduce(
-                                            (a, b) => a.isAfter(b) ? a : b,
-                                          );
-                                  final range = _barBounds(
-                                    TaskSchedule(start, end),
-                                    anchor,
-                                    dw,
-                                    days,
-                                  );
-                                  return Container(
-                                    height: 48,
-                                    color: p.hover.withValues(
-                                      alpha: p.dark ? 0.112 : .056,
-                                    ),
-                                    child: _GanttSplitRow(
-                                      scroll: horizontal,
-                                      pinned: freezeInfo,
-                                      children: [
-                                        SizedBox(
-                                          width: 400,
-                                          child: SpaceButton(
-                                            onPressed: () => setState(() {
-                                              if (!collapsed.remove(
-                                                row.group,
-                                              )) {
-                                                collapsed.add(row.group!);
-                                              }
-                                            }),
-                                            child: Row(
-                                              children: [
-                                                SpaceIcon(
-                                                  collapsed.contains(row.group)
-                                                      ? 'right'
-                                                      : 'down',
-                                                  size: 12,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                SpaceIcon(
-                                                  'folder',
-                                                  color: p.purple,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Text(
-                                                    row.name,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: textStyle(
-                                                      p,
-                                                      bold: true,
-                                                    ),
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '${row.tasks.length}',
-                                                  style: textStyle(
-                                                    p,
-                                                    size: 12,
-                                                    color: p.muted,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: dw * days,
-                                          child: Stack(
-                                            children: [
-                                              Positioned.fill(
-                                                child: CustomPaint(
-                                                  painter: _GridPainter(
-                                                    anchor,
-                                                    dw,
-                                                    p,
-                                                    s.today,
-                                                    days,
-                                                    mode,
-                                                  ),
-                                                ),
-                                              ),
-                                              if (range != null)
-                                                Positioned(
-                                                  left: range.$1,
-                                                  top: 20,
-                                                  width: range.$2,
-                                                  height: 8,
-                                                  child: DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      color:
-                                                          GanttInk.forStatus(
-                                                            p,
-                                                            'doing',
-                                                          ).fill.withValues(
-                                                            alpha: .7,
-                                                          ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            4,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                              Expanded(
+                                child: buildTimeline(_GanttPane.timeline),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                            ],
+                          )
+                        : buildTimeline(_GanttPane.all),
                   ),
                 );
               },
@@ -666,53 +727,20 @@ class _GridPainter extends CustomPainter {
       o.mode != mode;
 }
 
-/// Both panes share one vertical list. Relayout the fixed cells within the
-/// scrolled row so their paint/hit bounds survive viewport culling. Clip the
-/// timeline at that boundary instead of hiding it behind an opaque flat fill.
-class _GanttSplitRow extends StatelessWidget {
-  final ScrollController scroll;
-  final bool pinned;
-  final List<Widget> children;
-  const _GanttSplitRow({
-    required this.scroll,
-    required this.pinned,
-    required this.children,
-  });
-  @override
-  Widget build(BuildContext context) {
-    if (!pinned) return Row(children: children);
-    return AnimatedBuilder(
-      animation: scroll,
-      child: Row(children: [const SizedBox(width: 400), ...children.skip(1)]),
-      builder: (context, timeline) {
-        final offset = scroll.hasClients ? scroll.offset : 0.0;
-        return Stack(
-          children: [
-            ClipRect(
-              clipper: _GanttTimelineClipper(400 + offset),
-              child: timeline,
-            ),
-            Positioned(
-              left: offset,
-              top: 0,
-              bottom: 0,
-              width: 400,
-              child: children.first,
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
+enum _GanttPane { all, info, timeline }
 
-class _GanttTimelineClipper extends CustomClipper<Rect> {
-  final double left;
-  const _GanttTimelineClipper(this.left);
+/// Fixed information lives outside the horizontal viewport. Each vertical list
+/// uses identical row extents; their controllers synchronize either scroll path.
+class _GanttSplitRow extends StatelessWidget {
+  final _GanttPane pane;
+  final List<Widget> children;
+  const _GanttSplitRow({required this.pane, required this.children});
   @override
-  Rect getClip(Size size) => Rect.fromLTRB(left, 0, size.width, size.height);
-  @override
-  bool shouldReclip(_GanttTimelineClipper old) => old.left != left;
+  Widget build(BuildContext context) => switch (pane) {
+    _GanttPane.info => children.first,
+    _GanttPane.timeline => Row(children: children.skip(1).toList()),
+    _GanttPane.all => Row(children: children),
+  };
 }
 
 class _GanttRow extends StatefulWidget {
@@ -722,8 +750,7 @@ class _GanttRow extends StatefulWidget {
   final double dayWidth;
   final int days;
   final String mode;
-  final ScrollController scroll;
-  final bool pinned;
+  final _GanttPane pane;
   const _GanttRow({
     required this.task,
     required this.store,
@@ -731,8 +758,7 @@ class _GanttRow extends StatefulWidget {
     required this.dayWidth,
     required this.days,
     required this.mode,
-    required this.scroll,
-    required this.pinned,
+    required this.pane,
   });
   @override
   State<_GanttRow> createState() => _GanttRowState();
@@ -792,8 +818,7 @@ class _GanttRowState extends State<_GanttRow> {
     return SizedBox(
       height: 64,
       child: _GanttSplitRow(
-        scroll: widget.scroll,
-        pinned: widget.pinned,
+        pane: widget.pane,
         children: [
           SizedBox(
             width: 400,
@@ -1071,6 +1096,7 @@ class _CalendarViewState extends State<CalendarView> {
                   child: DateField(
                     value: dayString(selected),
                     label: '查看日期',
+                    height: 32,
                     allowsClear: false,
                     onChanged: (v) {
                       final d = parseDay(v);
@@ -1100,6 +1126,7 @@ class _CalendarViewState extends State<CalendarView> {
                   options: const {'day': '日', 'week': '周', 'month': '月'},
                   value: s.calendarMode,
                   label: '日历刻度',
+                  itemSize: 32,
                   onChanged: (v) {
                     setState(() => anchor = selected);
                     s.preference('calendarMode', v);
